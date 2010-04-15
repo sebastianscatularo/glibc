@@ -1,7 +1,8 @@
 From: Thomas Schwinge <thomas@schwinge.name>
 Subject: [PATCH] t/__i686_defined
 
-Reporte roughly a thousand times on glibc mailing lists (with patches).
+Reported roughly a thousand times on glibc mailing lists (with different kinds
+of patches).
 
 First: <http://sources.redhat.com/ml/libc-alpha/2002-10/msg00157.html>
 
