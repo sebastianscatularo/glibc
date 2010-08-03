@@ -1,0 +1,6 @@
+2010-06-06  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* sysdeps/mach/hurd/ttyname.c (ttyname): Replace MIG_BAD_ID and
+	EOPNOTSUPP errors with ENOTTY.
+	* sysdeps/mach/hurd/ttyname_r.c (__ttyname_r): Replace MIG_BAD_ID and
+	EOPNOTSUPP errors with ENOTTY.
