@@ -13,7 +13,6 @@ t/check_native
 t/_dl_random
 t/gscope
 t/strtoul_PLT
-t/kernel-features.h_includes
 t/socket_flags
 t/socketpair_flags
 t/pipe2
@@ -25,7 +24,6 @@ t/__rtld_lock_recursive_t
 t/____longjmp_chk
 t/unwind-resume.c
 t/extern_inline
-t/unwind-resume.c
 t/ld.so_auxv
 t/grantpt
 posix/regex_internal.c/MAX_undefined
