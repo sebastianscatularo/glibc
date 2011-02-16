@@ -1,0 +1,5 @@
+2011-02-16  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* stdio-common/psiginfo.c (psiginfo): Check pinfo->si_signo against
+	SIGRTMIN and SIGRTMAX and print information in that case only when
+	SIGRTMIN is defined.
