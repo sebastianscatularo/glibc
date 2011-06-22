@@ -28,7 +28,7 @@
    open on the same file as FD is, and setting FD2's flags according to FLAGS.
    Return FD2 or -1.  */
 int
-__dup3 (int fd, int fd2, int flags)
+dup3 (int fd, int fd2, int flags)
 {
   struct hurd_fd *d;
 
@@ -137,5 +137,4 @@ __dup3 (int fd, int fd2, int flags)
 
   return fd2;
 }
-libc_hidden_def (__dup3)
-weak_alias (__dup3, dup3)
+libc_hidden_def (dup3)
