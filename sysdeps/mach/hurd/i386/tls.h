@@ -31,6 +31,8 @@
 
 # ifndef __ASSEMBLER__
 
+#include <pthread/pthread.h>
+
 /* Use i386-specific RPCs to arrange that %gs segment register prefix
    addresses the TCB in each thread.  */
 # include <mach/i386/mach_i386.h>
@@ -72,7 +74,7 @@ _hurd_tls_init (tcbhead_t *tcb, int secondcall)
 
       /* Get the first available selector.  */
       int sel = -1;
-      error_t err = __i386_set_gdt (tcb->self, &sel, desc);
+      kern_return_t err = __i386_set_gdt (tcb->self, &sel, desc);
       if (err == MIG_BAD_ID)
 	{
 	  /* Old kernel, use a per-thread LDT.  */
@@ -98,14 +100,14 @@ _hurd_tls_init (tcbhead_t *tcb, int secondcall)
       asm ("mov %%gs, %w0" : "=q" (sel) : "0" (0));
       if (__builtin_expect (sel, 0x48) & 4) /* LDT selector */
 	{
-	  error_t err = __i386_set_ldt (tcb->self, sel, &desc, 1);
+	  kern_return_t err = __i386_set_ldt (tcb->self, sel, &desc, 1);
 	  assert_perror (err);
 	  if (err)
 	    return "i386_set_ldt failed";
 	}
       else
 	{
-	  error_t err = __i386_set_gdt (tcb->self, &sel, desc);
+	  kern_return_t err = __i386_set_gdt (tcb->self, &sel, desc);
 	  assert_perror (err);
 	  if (err)
 	    return "i386_set_gdt failed";
@@ -143,7 +145,7 @@ _hurd_tls_init (tcbhead_t *tcb, int secondcall)
 #include <mach/machine/thread_status.h>
 
 /* Set up TLS in the new thread of a fork child, copying from the original.  */
-static inline error_t __attribute__ ((unused))
+static inline kern_return_t __attribute__ ((unused))
 _hurd_tls_fork (thread_t child, thread_t orig, struct i386_thread_state *state)
 {
   /* Fetch the selector set by _hurd_tls_init.  */
@@ -153,7 +155,7 @@ _hurd_tls_fork (thread_t child, thread_t orig, struct i386_thread_state *state)
     return 0;
 
   struct descriptor desc, *_desc = &desc;
-  error_t err;
+  int err;
   unsigned int count;
 
   if (__builtin_expect (sel, 0x48) & 4) /* LDT selector */
@@ -174,7 +176,7 @@ _hurd_tls_fork (thread_t child, thread_t orig, struct i386_thread_state *state)
   return err;
 }
 
-static inline error_t __attribute__ ((unused))
+static inline kern_return_t __attribute__ ((unused))
 _hurd_tls_new (thread_t child, struct i386_thread_state *state, tcbhead_t *tcb)
 {
   /* Fetch the selector set by _hurd_tls_init.  */
@@ -184,7 +186,7 @@ _hurd_tls_new (thread_t child, struct i386_thread_state *state, tcbhead_t *tcb)
     return 0;
 
   HURD_TLS_DESC_DECL (desc, tcb);
-  error_t err;
+  kern_return_t err;
 
   tcb->tcb = tcb;
   tcb->self = child;
