@@ -1,6 +1,6 @@
 /* Initialization code run first thing by the ELF startup code.  For i386/Hurd.
    Copyright (C) 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-	2005, 2007 Free Software Foundation, Inc.
+	2005, 2007, 2011 Free Software Foundation, Inc.
 
    This file is part of the GNU C Library.
 
@@ -243,8 +243,8 @@ init (int *data)
       /* Push the user code address on the top of the new stack.  It will
 	 be the return address for `init1'; we will jump there with NEWSP
 	 as the stack pointer.  */
-      *--newsp = data[-1];
-      data[-1] = (int) &switch_stacks;
+      *--newsp = __builtin_return_address (0);
+      * ((void **) __builtin_frame_address (0) + 1) = &switch_stacks;
       /* Force NEWSP into %eax and &init1 into %ecx, which are not restored
 	 by function return.  */
       asm volatile ("# a %0 c %1" : : "a" (newsp), "c" (&init1));
@@ -272,8 +272,8 @@ init (int *data)
 
       /* The argument data is just above the stack frame we will unwind by
 	 returning.  Mutate our own return address to run the code below.  */
-      usercode = data[-1];
-      data[-1] = (int) &call_init1;
+      usercode = __builtin_return_address (0);
+      * ((void **) __builtin_frame_address (0) + 1) = &call_init1;
       /* Force USERCODE into %eax and &init1 into %ecx, which are not
 	 restored by function return.  */
       asm volatile ("# a %0 c %1" : : "a" (usercode), "c" (&init1));
