@@ -23,8 +23,7 @@
 #ifdef	__ASSEMBLER__
 
 /* This macro will be defined to 1 if GCC has been configured with
-   --with-arch=i686 (onwards), causing build failures with
-   __i686.get_pc_thunk.  */
+   --with-arch=i686, causing build failures with __i686.get_pc_thunk.  */
 #if defined __i686
 #undef __i686
 #define __i686 __i686
