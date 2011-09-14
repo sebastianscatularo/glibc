@@ -1,26 +1,7 @@
 From: Thomas Schwinge <thomas@schwinge.name>
-Subject: [PATCH] Avoiding `init-first.c' miscompilations.
+Subject: Roger Whittaker
 
-Needed when (cross-)compiling with GCC 4.5.1.
+Not for upstream submission.
 
-2011-07-22  Ludovic Courtès  <ludo@gnu.org>
-
-	* sysdeps/mach/hurd/i386/init-first.c (init): Use
-	`__builtin_return_address' and `__builtin_frame_address' instead
-	of making assumptions about the location of the return address
-	relative to DATA.
-
-The patch below Was needed for when building with GCC 4.1, perhaps
-because of a compiler bug in handling `__builtin_return_address'.
-This may be unnecessary with newer GCCs.
-
-Reported at <http://savannah.gnu.org/bugs/?17647>.  Continued at
-<http://lists.gnu.org/archive/html/bug-hurd/2006-11/msg00249.html>.
-
-2007-07-22  Thomas Schwinge  <tschwinge@gnu.org>
-
-	* sysdeps/mach/hurd/i386/init-first.c: Undo parts of Roland's `r 1.43'
-	to `r 1.44' changes.
-	(_hurd_stack_setup): Take a ``void *'' argument.  Save the caller into
-	CALLER and pass that one on.
-	(init): Avoid an ugly typecast.
+Currently used by Thomas Schwinge for building cross toolchains / testing /
+development.
