@@ -1,3 +1,8 @@
 Subject: [PATCH] t/regenerate_errno.h
 
-From: Thomas Schwinge <thomas@schwinge.name>
+	* sysdeps/mach/hurd/bits/errno.h: Regenerate.
+
+---
+
+The build system will regenerate the file itself, but keeping the in-tree file
+up-to-date avoids having spurious rebuilds due to that.
