@@ -30,3 +30,4 @@ posix/regex_internal.c/MAX_undefined
 t/__i686_defined
 t/master_backports
 t/cpuclock
+t/regenerate_errno.h
