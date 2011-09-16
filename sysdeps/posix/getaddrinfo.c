@@ -600,7 +600,8 @@ gaih_inet (const char *name, const struct gaih_service *service,
 	      && ++__nss_not_use_nscd_hosts > NSS_NSCD_RETRY)
 	    __nss_not_use_nscd_hosts = 0;
 
-	  if (!__nss_not_use_nscd_hosts)
+	  if (!__nss_not_use_nscd_hosts
+	      && !__nss_database_custom[NSS_DBSIDX_hosts])
 	    {
 	      /* Try to use nscd.  */
 	      struct nscd_ai_result *air = NULL;
@@ -964,6 +965,7 @@ gaih_inet (const char *name, const struct gaih_service *service,
 		   make a copy.  */
 		if (out == canon)
 		  goto make_copy;
+		canon = out;
 	      }
 	    else
 #endif
