@@ -59,29 +59,44 @@ __init_cpu_features (void)
 
       get_common_indeces (&family, &model);
 
+      /* Intel processors prefer SSE instruction for memory/string
+	 routines if they are avaiable.  */
+      __cpu_features.feature[index_Prefer_SSE_for_memop]
+	|= bit_Prefer_SSE_for_memop;
+
       unsigned int eax = __cpu_features.cpuid[COMMON_CPUID_INDEX_1].eax;
       unsigned int extended_family = (eax >> 20) & 0xff;
       unsigned int extended_model = (eax >> 12) & 0xf0;
-      if (__cpu_features.family == 0x0f)
+      if (family == 0x0f)
 	{
 	  family += extended_family;
 	  model += extended_model;
 	}
-      else if (__cpu_features.family == 0x06)
+      else if (family == 0x06)
 	{
 	  model += extended_model;
-	  switch (__cpu_features.model)
+	  switch (model)
 	    {
+	    case 0x1c:
+	    case 0x26:
+	      /* BSF is slow on Atom.  */
+	      __cpu_features.feature[index_Slow_BSF] |= bit_Slow_BSF;
+	      break;
+
 	    case 0x1a:
 	    case 0x1e:
 	    case 0x1f:
 	    case 0x25:
+	    case 0x2c:
 	    case 0x2e:
 	    case 0x2f:
-	      /* Rep string instructions are fast on Intel Core i3, i5
-		 and i7.  */
+	      /* Rep string instructions and copy backward are fast on
+		 Intel Core i3, i5 and i7.  */
+#if index_Fast_Rep_String != index_Fast_Copy_Backward
+# error index_Fast_Rep_String != index_Fast_Copy_Backward
+#endif
 	      __cpu_features.feature[index_Fast_Rep_String]
-		|= bit_Fast_Rep_String;
+		|= bit_Fast_Rep_String | bit_Fast_Copy_Backward;
 	      break;
 	    }
 	}
