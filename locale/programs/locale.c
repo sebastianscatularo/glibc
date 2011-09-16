@@ -1,5 +1,5 @@
 /* Implementation of the locale program according to POSIX 9945-2.
-   Copyright (C) 1995-1997, 1999-2008, 2009, 2010 Free Software Foundation, Inc.
+   Copyright (C) 1995-1997, 1999-2010, 2011 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@cygnus.com>, 1995.
 
@@ -294,7 +294,7 @@ print_version (FILE *stream, struct argp_state *state)
 Copyright (C) %s Free Software Foundation, Inc.\n\
 This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
-"), "2010");
+"), "2011");
   fprintf (stream, gettext ("Written by %s.\n"), "Ulrich Drepper");
 }
 
@@ -762,6 +762,29 @@ write_charmaps (void)
   twalk (all_data, print_names);
 }
 
+/* Print a properly quoted assignment of NAME with VAL, using double
+   quotes iff DQUOTE is true.  */
+static void
+print_assignment (const char *name, const char *val, bool dquote)
+{
+  printf ("%s=", name);
+  if (dquote)
+    putchar ('"');
+  while (*val != '\0')
+    {
+      size_t segment
+	= strcspn (val, dquote ? "$`\"\\" : "~|&;<>()$`\\\"' \t\n");
+      printf ("%.*s", (int) segment, val);
+      val += segment;
+      if (*val == '\0')
+	break;
+      putchar ('\\');
+      putchar (*val++);
+    }
+  if (dquote)
+    putchar ('"');
+  putchar ('\n');
+}
 
 /* We have to show the contents of the environments determining the
    locale.  */
@@ -769,7 +792,7 @@ static void
 show_locale_vars (void)
 {
   size_t cat_no;
-  const char *lcall = getenv ("LC_ALL");
+  const char *lcall = getenv ("LC_ALL") ? : "";
   const char *lang = getenv ("LANG") ? : "";
 
   auto void get_source (const char *name);
@@ -778,15 +801,15 @@ show_locale_vars (void)
     {
       char *val = getenv (name);
 
-      if ((lcall ?: "")[0] != '\0' || val == NULL)
-	printf ("%s=\"%s\"\n", name,
-		(lcall ?: "")[0] ? lcall : (lang ?: "")[0] ? lang : "POSIX");
+      if (lcall[0] != '\0' || val == NULL)
+	print_assignment (name, lcall[0] ? lcall : lang[0] ? lang : "POSIX",
+			  true);
       else
-	printf ("%s=%s\n", name, val);
+	print_assignment (name, val, false);
     }
 
   /* LANG has to be the first value.  */
-  printf ("LANG=%s\n", lang);
+  print_assignment ("LANG", lang, false);
 
   /* Now all categories in an unspecified order.  */
   for (cat_no = 0; cat_no < NCATEGORIES; ++cat_no)
@@ -794,7 +817,7 @@ show_locale_vars (void)
       get_source (category[cat_no].name);
 
   /* The last is the LC_ALL value.  */
-  printf ("LC_ALL=%s\n", lcall ? : "");
+  print_assignment ("LC_ALL", lcall, false);
 }
 
 
