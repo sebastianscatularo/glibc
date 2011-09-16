@@ -2831,7 +2831,7 @@ static void do_check_malloc_state(mstate av)
   max_fast_bin = fastbin_index(get_max_fast ());
 
   for (i = 0; i < NFASTBINS; ++i) {
-    p = av->fastbins[i];
+    p = fastbin (av, i);
 
     /* The following test can only be performed for the main arena.
        While mallopt calls malloc_consolidate to get rid of all fast
@@ -3466,7 +3466,7 @@ static int sYSTRIm(pad, av) size_t pad; mstate av;
   top_size = chunksize(av->top);
 
   /* Release in pagesize units, keeping at least one page */
-  extra = ((top_size - pad - MINSIZE + (pagesz-1)) / pagesz - 1) * pagesz;
+  extra = (top_size - pad - MINSIZE - 1) & ~(pagesz - 1);
 
   if (extra > 0) {
 
@@ -4850,7 +4850,7 @@ _int_free(mstate av, mchunkptr p)
       }
 
     if (__builtin_expect (perturb_byte, 0))
-      free_perturb (chunk2mem(p), size - SIZE_SZ);
+      free_perturb (chunk2mem(p), size - 2 * SIZE_SZ);
 
     set_fastchunks(av);
     unsigned int idx = fastbin_index(size);
@@ -4954,7 +4954,7 @@ _int_free(mstate av, mchunkptr p)
       }
 
     if (__builtin_expect (perturb_byte, 0))
-      free_perturb (chunk2mem(p), size - SIZE_SZ);
+      free_perturb (chunk2mem(p), size - 2 * SIZE_SZ);
 
     /* consolidate backward */
     if (!prev_inuse(p)) {

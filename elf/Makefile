@@ -1,4 +1,4 @@
-# Copyright (C) 1995-2007,2008,2009,2010 Free Software Foundation, Inc.
+# Copyright (C) 1995-2007,2008,2009,2010,2011 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -28,7 +28,7 @@ routines	= $(dl-routines) dl-support dl-iteratephdr \
 # The core dynamic linking functions are in libc for the static and
 # profiled libraries.
 dl-routines	= $(addprefix dl-,load cache lookup object reloc deps \
-			          runtime error init fini debug misc \
+				  runtime error init fini debug misc \
 				  version profile conflict tls origin scope \
 				  execstack caller open close trampoline)
 all-dl-routines = $(dl-routines) $(sysdep-dl-routines)
@@ -118,7 +118,10 @@ distribute	:= rtld-Rules \
 		   ifuncmain7.c ifuncmain7pic.c ifuncmain7picstatic.c \
 		   ifuncmain7pie.c ifuncmain7static.c \
 		   tst-unique1.c tst-unique1mod1.c tst-unique1mod2.c \
-		   tst-unique2.c tst-unique2mod1.c tst-unique2mod2.c
+		   tst-unique2.c tst-unique2mod1.c tst-unique2mod2.c \
+			 tst-initordera1.c tst-initordera2.c tst-initorderb1.c \
+			 tst-initorderb2.c tst-initordera3.c tst-initordera4.c \
+			 tst-initorder.c
 
 CFLAGS-dl-runtime.c = -fexceptions -fasynchronous-unwind-tables
 CFLAGS-dl-lookup.c = -fexceptions -fasynchronous-unwind-tables
@@ -198,7 +201,8 @@ tests += loadtest restest1 preloadtest loadfail multiload origtest resolvfail \
 	 unload3 unload4 unload5 unload6 unload7 tst-global1 order2 \
 	 tst-audit1 tst-audit2 \
 	 tst-stackguard1 tst-addr1 tst-thrlock \
-	 tst-unique1 tst-unique2
+	 tst-unique1 tst-unique2 \
+	 tst-initorder
 #	 reldep9
 test-srcs = tst-pathopt
 tests-execstack-yes = tst-execstack tst-execstack-needed tst-execstack-prog
@@ -212,6 +216,10 @@ endif
 tests: $(objpfx)tst-leaks1-mem
 tlsmod17a-suffixes = 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
 tlsmod18a-suffixes = 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
+tlsmod17a-modules = $(addprefix tst-tlsmod17a, $(tlsmod17a-suffixes))
+tlsmod18a-modules = $(addprefix tst-tlsmod18a, $(tlsmod17a-suffixes))
+extra-test-objs += $(tlsmod17a-modules:=.os) $(tlsmod18a-modules:=.os)
+test-extras += tst-tlsmod17a tst-tlsmod18a
 modules-names = testobj1 testobj2 testobj3 testobj4 testobj5 testobj6 \
 		testobj1_1 failobj constload2 constload3 unloadmod \
 		dep1 dep2 dep3 dep4 vismod1 vismod2 vismod3 \
@@ -224,16 +232,14 @@ modules-names = testobj1 testobj2 testobj3 testobj4 testobj5 testobj6 \
 		neededobj5 neededobj6 firstobj globalmod1 \
 		unload2mod unload2dep ltglobmod1 ltglobmod2 pathoptobj \
 		dblloadmod1 dblloadmod2 dblloadmod3 reldepmod5 reldepmod6 \
-	        reldep6mod0 reldep6mod1 reldep6mod2 reldep6mod3 reldep6mod4 \
+		reldep6mod0 reldep6mod1 reldep6mod2 reldep6mod3 reldep6mod4 \
 		reldep7mod1 reldep7mod2 \
 		tst-tlsmod1 tst-tlsmod2 tst-tlsmod3 tst-tlsmod4 \
 		tst-tlsmod5 tst-tlsmod6 tst-tlsmod7 tst-tlsmod8 \
 		tst-tlsmod9 tst-tlsmod10 tst-tlsmod11 tst-tlsmod12 \
 		tst-tlsmod13 tst-tlsmod13a tst-tlsmod14a tst-tlsmod14b \
 		tst-tlsmod15a tst-tlsmod15b tst-tlsmod16a tst-tlsmod16b \
-		$(patsubst %,tst-tlsmod17a%,$(tlsmod17a-suffixes)) \
-		tst-tlsmod17b \
-		$(patsubst %,tst-tlsmod18a%,$(tlsmod18a-suffixes)) \
+		$(tlsmod17a-modules) tst-tlsmod17b $(tlsmod18a-modules) \
 		circlemod1 circlemod1a circlemod2 circlemod2a \
 		circlemod3 circlemod3a \
 		reldep8mod1 reldep8mod2 reldep8mod3 \
@@ -248,12 +254,17 @@ modules-names = testobj1 testobj2 testobj3 testobj4 testobj5 testobj6 \
 		unload7mod1 unload7mod2 \
 		order2mod1 order2mod2 order2mod3 order2mod4 \
 		tst-unique1mod1 tst-unique1mod2 \
-		tst-unique2mod1 tst-unique2mod2
+		tst-unique2mod1 tst-unique2mod2 \
+		tst-initordera1 tst-initorderb1 \
+		tst-initordera2 tst-initorderb2 \
+		tst-initordera3 tst-initordera4
 ifeq (yes,$(have-initfini-array))
 modules-names += tst-array2dep tst-array5dep
 endif
 ifeq (yesyes,$(have-fpie)$(build-shared))
 modules-names += tst-piemod1
+extra-test-objs += tst-pie1.o
+test-extras += tst-pie1
 endif
 ifeq (x86_64,$(config-machine))
 modules-names += tst-auditmod3a tst-auditmod3b \
@@ -270,7 +281,7 @@ test-extras += $(modules-names)
 # filtmod1.so has a special rule
 modules-names-nobuild := filtmod1
 
-ifeq (yes,$(multi-arch))
+ifneq (no,$(multi-arch))
 tests-static += ifuncmain1static ifuncmain1picstatic \
 		ifuncmain2static ifuncmain2picstatic \
 		ifuncmain4static ifuncmain4picstatic \
@@ -283,10 +294,16 @@ tests += ifuncmain1 ifuncmain1pic ifuncmain1vis ifuncmain1vispic \
 	 ifuncmain2 ifuncmain2pic ifuncmain3 ifuncmain4 \
 	 ifuncmain5 ifuncmain5pic ifuncmain5staticpic \
 	 ifuncmain7 ifuncmain7pic
+ifunc-test-modules = ifuncdep1 ifuncdep1pic ifuncdep2 ifuncdep2pic \
+		     ifuncdep5 ifuncdep5pic
+extra-test-objs += $(ifunc-test-modules:=.o)
+test-extras += $(ifunc-test-modules)
 ifeq (yes,$(have-fpie))
-tests: $(objpfx)ifuncmain1pie.out $(objpfx)ifuncmain1vispie.out \
-	$(objpfx)ifuncmain1staticpie.out $(objpfx)ifuncmain5pie.out \
-	$(objpfx)ifuncmain6pie.out $(objpfx)ifuncmain7pie.out
+ifunc-pie-tests = ifuncmain1pie ifuncmain1vispie ifuncmain1staticpie \
+		  ifuncmain5pie ifuncmain6pie ifuncmain7pie
+tests: $(patsubst %,$(objpfx)%.out, $(ifunc-pie-tests))
+extra-test-objs += $(ifunc-pie-tests:=.o)
+test-extras += $(ifunc-pie-tests)
 endif
 modules-names += ifuncmod1 ifuncmod3 ifuncmod5 ifuncmod6
 endif
@@ -521,6 +538,11 @@ $(objpfx)unload6mod2.so: $(libdl)
 $(objpfx)unload6mod3.so: $(libdl)
 $(objpfx)unload7mod1.so: $(libdl)
 $(objpfx)unload7mod2.so: $(objpfx)unload7mod1.so
+$(objpfx)tst-initordera2.so: $(objpfx)tst-initordera1.so
+$(objpfx)tst-initorderb2.so: $(objpfx)tst-initorderb1.so $(objpfx)tst-initordera2.so
+$(objpfx)tst-initordera3.so: $(objpfx)tst-initorderb2.so $(objpfx)tst-initorderb1.so
+$(objpfx)tst-initordera4.so: $(objpfx)tst-initordera3.so
+$(objpfx)tst-initorder: $(objpfx)tst-initordera4.so $(objpfx)tst-initordera1.so $(objpfx)tst-initorderb2.so
 
 LDFLAGS-tst-tlsmod5.so = -nostdlib
 LDFLAGS-tst-tlsmod6.so = -nostdlib
@@ -759,11 +781,11 @@ $(objpfx)tst-tls8.out: $(objpfx)tst-tlsmod3.so $(objpfx)tst-tlsmod4.so
 $(objpfx)tst-tls9: $(libdl)
 $(objpfx)tst-tls9.out: $(objpfx)tst-tlsmod5.so $(objpfx)tst-tlsmod6.so
 
-$(objpfx)tst-tls10: $(objpfx)tst-tlsmod8.so
+$(objpfx)tst-tls10: $(objpfx)tst-tlsmod8.so $(objpfx)tst-tlsmod7.so
 
-$(objpfx)tst-tls11: $(objpfx)tst-tlsmod10.so
+$(objpfx)tst-tls11: $(objpfx)tst-tlsmod10.so $(objpfx)tst-tlsmod9.so
 
-$(objpfx)tst-tls12: $(objpfx)tst-tlsmod12.so
+$(objpfx)tst-tls12: $(objpfx)tst-tlsmod12.so $(objpfx)tst-tlsmod11.so
 
 $(objpfx)tst-tls13: $(libdl)
 $(objpfx)tst-tls13.out: $(objpfx)tst-tlsmod13a.so
@@ -784,16 +806,16 @@ $(objpfx)tst-tls16.out: $(objpfx)tst-tlsmod16a.so $(objpfx)tst-tlsmod16b.so
 
 $(objpfx)tst-tls17: $(libdl)
 $(objpfx)tst-tls17.out: $(objpfx)tst-tlsmod17b.so
-$(patsubst %,$(objpfx)tst-tlsmod17a%.os,$(tlsmod17a-suffixes)): $(objpfx)tst-tlsmod17a%.os : tst-tlsmod17a.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ -DN=$* -DNOT_IN_libc=1 $<
-$(patsubst %,$(objpfx)tst-tlsmod17a%.so,$(tlsmod17a-suffixes)): $(objpfx)tst-tlsmod17a%.so: $(objpfx)ld.so
-$(objpfx)tst-tlsmod17b.so: $(patsubst %,$(objpfx)tst-tlsmod17a%.so,$(tlsmod17a-suffixes))
+$(patsubst %,$(objpfx)%.os,$(tlsmod17a-modules)): $(objpfx)tst-tlsmod17a%.os: tst-tlsmod17a.c
+	$(compile-command.c) -DN=$*
+$(patsubst %,$(objpfx)%.so,$(tlsmod17a-modules)): $(objpfx)tst-tlsmod17a%.so: $(objpfx)ld.so
+$(objpfx)tst-tlsmod17b.so: $(patsubst %,$(objpfx)%.so,$(tlsmod17a-modules))
 
 $(objpfx)tst-tls18: $(libdl)
-$(objpfx)tst-tls18.out: $(patsubst %,$(objpfx)tst-tlsmod18a%.so,$(tlsmod18a-suffixes))
-$(patsubst %,$(objpfx)tst-tlsmod18a%.os,$(tlsmod18a-suffixes)): $(objpfx)tst-tlsmod18a%.os : tst-tlsmod18a.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ -DN=$* -DNOT_IN_libc=1 $<
-$(patsubst %,$(objpfx)tst-tlsmod18a%.so,$(tlsmod18a-suffixes)): $(objpfx)tst-tlsmod18a%.so: $(objpfx)ld.so
+$(objpfx)tst-tls18.out: $(patsubst %,$(objpfx)%.so,$(tlsmod18a-modules))
+$(patsubst %,$(objpfx)%.os,$(tlsmod18a-modules)): $(objpfx)tst-tlsmod18a%.os : tst-tlsmod18a.c
+	$(compile-command.c) -DN=$*
+$(patsubst %,$(objpfx)%.so,$(tlsmod18a-modules)): $(objpfx)tst-tlsmod18a%.so: $(objpfx)ld.so
 
 CFLAGS-tst-align.c = $(stack-align-test-flags)
 CFLAGS-tst-align2.c = $(stack-align-test-flags)
@@ -898,9 +920,17 @@ check-textrel-CFLAGS = -O -Wall -D_XOPEN_SOURCE=600 -D_BSD_SOURCE
 $(objpfx)check-textrel: check-textrel.c
 	$(native-compile)
 
-check-execstack-CFLAGS = -O -Wall -D_XOPEN_SOURCE=600 -D_BSD_SOURCE -std=gnu99
-$(objpfx)check-execstack: check-execstack.c
+check-execstack-CFLAGS = -O -Wall -D_XOPEN_SOURCE=600 -D_BSD_SOURCE -std=gnu99 \
+			 $(objpfx:%/=-I%)
+$(objpfx)check-execstack: check-execstack.c $(objpfx)check-execstack.h
 	$(native-compile)
+$(objpfx)check-execstack.h: $(first-word $(wildcard $(sysdirs:%=%/stackinfo.h)))
+	$(make-target-directory)
+	{ echo '#include <stackinfo.h>'; echo '@@@DEFAULT_STACK_PERMS@@@'; } | \
+	$(CC) $(CFLAGS) $(CPPFLAGS) -E -x c-header - | \
+	sed -n -e 's/^@@@\(.*\)@@@/#define DEFAULT_STACK_PERMS \1/p' > $@T
+	mv -f $@T $@
+generated += check-execstack.h
 
 check-localplt-CFLAGS = -O -Wall -D_GNU_SOURCE -std=gnu99
 $(objpfx)check-localplt: check-localplt.c
@@ -909,27 +939,27 @@ $(objpfx)check-localplt: check-localplt.c
 ifeq (yes,$(build-shared))
 tests: $(objpfx)check-textrel.out $(objpfx)check-execstack.out
 
-$(objpfx)check-textrel.out: $(objpfx)check-textrel
-	$(dir $<)$(notdir $<) $(common-objpfx)libc.so \
-	  $(sort $(wildcard $(common-objpfx)*/lib*.so \
-			    $(common-objpfx)iconvdata/*.so)) > $@
+all-built-dso = $(common-objpfx)libc.so \
+		$(sort $(wildcard $(common-objpfx)*/lib*.so \
+				  $(common-objpfx)iconvdata/*.so))
+
+$(objpfx)check-textrel.out: $(objpfx)check-textrel $(all-built-dso)
+	$(dir $<)$(notdir $<) $(filter-out $<, $^) > $@
 generated += check-textrel check-textrel.out
 
-$(objpfx)check-execstack.out: $(objpfx)check-execstack
-	$(dir $<)$(notdir $<) $(common-objpfx)libc.so \
-	  $(sort $(wildcard $(common-objpfx)*/lib*.so \
-			    $(common-objpfx)iconvdata/*.so)) > $@
+$(objpfx)check-execstack.out: $(objpfx)check-execstack $(all-built-dso)
+	$(dir $<)$(notdir $<) $(filter-out $<, $^) > $@
 generated += check-execstack check-execstack.out
 
 $(objpfx)tst-dlmodcount: $(libdl)
 $(objpfx)tst-dlmodcount.out: $(test-modules)
 
 check-data := $(firstword $(wildcard \
-	        $(foreach D,$(add-ons) scripts,\
-	        	  $(patsubst %,$(..)$D/data/localplt-%.data,\
-			   	     $(abi-name) \
-			   	     $(addsuffix -$(config-os),\
-				     		 $(config-machine) \
+		$(foreach D,$(add-ons) scripts,\
+			  $(patsubst %,$(..)$D/data/localplt-%.data,\
+				     $(abi-name) \
+				     $(addsuffix -$(config-os),\
+						 $(config-machine) \
 						 $(base-machine)) \
 			   generic))))
 
@@ -941,9 +971,9 @@ endif
 
 $(objpfx)check-localplt.out: $(objpfx)check-localplt \
 			     $(common-objpfx)libc.so \
-		    	     $(common-objpfx)math/libm.so $(thread-dso) \
-		    	     $(common-objpfx)rt/librt.so \
-		    	     $(common-objpfx)dlfcn/libdl.so \
+			     $(common-objpfx)math/libm.so $(thread-dso) \
+			     $(common-objpfx)rt/librt.so \
+			     $(common-objpfx)dlfcn/libdl.so \
 			     $(common-objpfx)resolv/libresolv.so \
 			     $(common-objpfx)crypt/libcrypt.so \
 			     $(check-data)
@@ -1143,6 +1173,12 @@ $(objpfx)tst-unique1.out: $(objpfx)tst-unique1mod1.so \
 
 $(objpfx)tst-unique2: $(libdl) $(objpfx)tst-unique2mod1.so
 $(objpfx)tst-unique2.out: $(objpfx)tst-unique2mod2.so
+
+$(objpfx)tst-initorder.out: $(objpfx)tst-initorder
+	$(elf-objpfx)${rtld-installed-name} \
+	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
+	  $< > $@
+	cmp $@ tst-initorder.exp > /dev/null
 
 ifeq (yes,$(config-cflags-avx))
 CFLAGS-tst-audit4.c += -mavx
