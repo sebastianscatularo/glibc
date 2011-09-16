@@ -1,4 +1,0 @@
-2010-07-31  Samuel Thibault  <samuel.thibault@ens-lyon.org>
-
-	* hurd/hurdselect.c (_hurd_select): Round timeout up instead of down
-	when converting to ms.
