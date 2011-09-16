@@ -256,6 +256,7 @@ tests = tst-typesizes \
 	tst-sched1 \
 	tst-backtrace1 \
 	tst-oddstacklimit \
+	tst-abstime \
 	tst-vfork1 tst-vfork2 tst-vfork1x tst-vfork2x \
 	tst-getpid1 tst-getpid2 tst-getpid3 \
 	tst-initializers1 $(patsubst %,tst-initializers1-%,c89 gnu89 c99 gnu99)
@@ -299,7 +300,7 @@ modules-names = tst-atfork2mod tst-tls3mod tst-tls4moda tst-tls4modb \
 		tst-tls5modd tst-tls5mode tst-tls5modf \
 		tst-_res1mod1 tst-_res1mod2 tst-execstack-mod tst-fini1mod
 extra-test-objs += $(addsuffix .os,$(strip $(modules-names))) tst-cleanup4aux.o
-test-extras += $(modules-names)
+test-extras += $(modules-names) tst-cleanup4aux
 test-modules = $(addprefix $(objpfx),$(addsuffix .so,$(modules-names)))
 
 tst-atfork2mod.so-no-z-defs = yes
@@ -491,7 +492,8 @@ $(objpfx)tst-rwlock14: $(common-objpfx)rt/librt.so
 $(objpfx)tst-_res1mod2.so: $(objpfx)tst-_res1mod1.so
 LDFLAGS-tst-_res1mod1.so = -Wl,-soname,tst-_res1mod1.so
 LDFLAGS-tst-_res1mod2.so = -Wl,-soname,tst-_res1mod2.so
-$(objpfx)tst-_res1: $(objpfx)tst-_res1mod2.so $(shared-thread-library)
+$(objpfx)tst-_res1: $(objpfx)tst-_res1mod1.so $(objpfx)tst-_res1mod2.so \
+		    $(shared-thread-library)
 else
 $(objpfx)tst-cond11: $(common-objpfx)rt/librt.a
 $(objpfx)tst-cond19: $(common-objpfx)rt/librt.a
