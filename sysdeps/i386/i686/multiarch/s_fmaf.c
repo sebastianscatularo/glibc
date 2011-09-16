@@ -1,6 +1,6 @@
-/* Store current floating-point environment and clear exceptions.
-   Copyright (C) 1997, 1998, 1999, 2000, 2005, 2010
-   Free Software Foundation, Inc.
+/* Multiple versions of fmaf.
+   Copyright (C) 2010 Free Software Foundation, Inc.
+   Contributed by Intel Corporation.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -10,35 +10,27 @@
 
    The GNU C Library is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
    License along with the GNU C Library; if not, write to the Free
    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   02111-1307 USA. */
 
-#include <fenv.h>
-#include <fpu_control.h>
+#include <config.h>
 
-int
-feholdexcept (fenv_t *envp)
-{
-  unsigned long int temp;
+#ifdef HAVE_AVX_SUPPORT
+#include <math.h>
+#include <init-arch.h>
 
-  /* Store the environment.  */
-  _FPU_GETCW (temp);
-  envp->__fpscr = temp;
+extern float __fmaf_ia32 (float x, float y, float z) attribute_hidden;
+extern float __fmaf_fma (float x, float y, float z) attribute_hidden;
 
-  /* Clear the status flags.  */
-  temp &= ~FE_ALL_EXCEPT;
+libm_ifunc (__fmaf, HAS_FMA ? __fmaf_fma : __fmaf_ia32);
+weak_alias (__fmaf, fmaf)
 
-  /* Now set all exceptions to non-stop.  */
-  temp &= ~(FE_ALL_EXCEPT << 5);
+# define __fmaf __fmaf_ia32
+#endif
 
-  _FPU_SETCW (temp);
-
-  /* Success.  */
-  return 0;
-}
-libm_hidden_def (feholdexcept)
+#include <math/s_fmaf.c>
