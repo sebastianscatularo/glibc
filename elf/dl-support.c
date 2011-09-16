@@ -32,6 +32,7 @@
 #include <dl-procinfo.h>
 #include <unsecvars.h>
 #include <hp-timing.h>
+#include <stackinfo.h>
 
 extern char *__progname;
 char **_dl_argv = &__progname;	/* This is checked for some error messages.  */
@@ -134,8 +135,9 @@ uint64_t _dl_hwcap __attribute__ ((nocommon));
    setting _dl_hwcap nonzero below, but we do anyway.  */
 uint64_t _dl_hwcap_mask __attribute__ ((nocommon));
 
-/* Prevailing state of the stack, PF_X indicating it's executable.  */
-ElfW(Word) _dl_stack_flags = PF_R|PF_W|PF_X;
+/* Prevailing state of the stack.  Generally this includes PF_X, indicating it's
+ * executable but this isn't true for all platforms.  */
+ElfW(Word) _dl_stack_flags = DEFAULT_STACK_PERMS;
 
 /* If loading a shared object requires that we make the stack executable
    when it was not, we do it by calling this function.
@@ -263,6 +265,9 @@ _dl_non_dynamic_init (void)
   /* Initialize the data structures for the search paths for shared
      objects.  */
   _dl_init_paths (getenv ("LD_LIBRARY_PATH"));
+
+  /* Remember the last search directory added at startup.  */
+  _dl_init_all_dirs = GL(dl_all_dirs);
 
   _dl_lazy = *(getenv ("LD_BIND_NOW") ?: "") == '\0';
 
