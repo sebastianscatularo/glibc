@@ -1,2 +1,12 @@
 Subject: Backports from master.
 
+Use ``git cherry-pick -x SHA1''.
+
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
+
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
+
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
+
+Check this, and remove the ChangeLog.SHA1.
