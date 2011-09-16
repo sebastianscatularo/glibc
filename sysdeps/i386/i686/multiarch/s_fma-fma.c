@@ -1,6 +1,6 @@
-/* Store current floating-point environment and clear exceptions.
-   Copyright (C) 1997, 1998, 1999, 2000, 2005, 2010
-   Free Software Foundation, Inc.
+/* FMA version of fma.
+   Copyright (C) 2010 Free Software Foundation, Inc.
+   Contributed by Intel Corporation.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -10,35 +10,21 @@
 
    The GNU C Library is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
    License along with the GNU C Library; if not, write to the Free
    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   02111-1307 USA. */
 
-#include <fenv.h>
-#include <fpu_control.h>
+#include <config.h>
 
-int
-feholdexcept (fenv_t *envp)
+#ifdef HAVE_AVX_SUPPORT
+double
+__fma_fma (double x, double y, double z)
 {
-  unsigned long int temp;
-
-  /* Store the environment.  */
-  _FPU_GETCW (temp);
-  envp->__fpscr = temp;
-
-  /* Clear the status flags.  */
-  temp &= ~FE_ALL_EXCEPT;
-
-  /* Now set all exceptions to non-stop.  */
-  temp &= ~(FE_ALL_EXCEPT << 5);
-
-  _FPU_SETCW (temp);
-
-  /* Success.  */
-  return 0;
+  asm ("vfmadd213sd %3, %2, %0" : "=x" (x) : "0" (x), "x" (y), "xm" (z));
+  return x;
 }
-libm_hidden_def (feholdexcept)
+#endif
