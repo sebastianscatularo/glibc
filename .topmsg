@@ -1,0 +1,33 @@
+Subject: [PATCH] ELFOSABI_GNU
+
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+
+binutils started emitting ELF files with ELFOSABI_GNU due to GNU-specific
+ELF extensions. We need to accept loading such binaries on hurd-i386 too.
+
+2011-06-19  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* elf/elf.h (ELFOSABI_GNU): Define macro.
+	(ELFOSABI_LINUX): Comment that it is just an alias for ELFOSABI_GNU.
+        * sysdeps/mach/hurd/ldsodefs.h: New file, defines VALID_ELF_HEADER,
+        VALID_ELF_OSABI, VALID_ELF_ABIVERSION, MORE_ELF_HEADER_DATA, declares
+        _dl_non_dynamic_init.
+        * sysdeps/unix/sysv/linux/ldsodefs.h (VALID_ELF_OSABI,
+        VALID_ELF_ABIVERSION, MORE_ELF_HEADER_DATA): Use ELFOSABI_GNU instead of
+        ELFOSABI_LINUX.
+        * sysdeps/mach/hurd/powerpc/init-first.c (_dl_non_dynamic_init): Remove
+        declaration.
+	* sysdeps/mach/hurd/i386/init-first.c (_dl_non_dynamic_init): Likewise.
+
+---
+
+This is Debian glibc svn r4778 of patches/hurd-i386/submitted-ldsodefs.h.diff.
+
+---
+
+<http://www.bddebian.com:8888/~hurd-web/toolchain/elfosabi_gnu/>
+
+---
+
+TODO.  Can unify GNU/Linux and GNU/Hurd files and put them into sysdeps/gnu/?
+TODO.  Correct some comment strings, s%Linux%GNU.
