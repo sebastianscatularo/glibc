@@ -26,3 +26,8 @@ This is Debian glibc svn r4778 of patches/hurd-i386/submitted-ldsodefs.h.diff.
 ---
 
 <http://www.bddebian.com:8888/~hurd-web/toolchain/elfosabi_gnu/>
+
+---
+
+TODO.  Can unify GNU/Linux and GNU/Hurd files and put them into sysdeps/gnu/?
+TODO.  Correct some comment strings, s%Linux%GNU.
