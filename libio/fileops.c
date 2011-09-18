@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1995, 1997-2005, 2006, 2007, 2008, 2009
+/* Copyright (C) 1993, 1995, 1997-2005, 2006, 2007, 2008, 2009, 2011
    Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Written by Per Bothner <bothner@cygnus.com>.
@@ -160,19 +160,28 @@ int
 _IO_new_file_close_it (fp)
      _IO_FILE *fp;
 {
-  int write_status, close_status;
   if (!_IO_file_is_open (fp))
     return EOF;
 
-  if ((fp->_flags & _IO_NO_WRITES) == 0
-      && (fp->_flags & _IO_CURRENTLY_PUTTING) != 0)
+  int write_status;
+  if (_IO_in_put_mode (fp))
     write_status = _IO_do_flush (fp);
+  else if (fp->_offset != _IO_pos_BAD && fp->_IO_read_base != NULL
+	   && !_IO_in_backup (fp))
+    {
+      off64_t o = _IO_SEEKOFF (fp, 0, _IO_seek_cur, 0);
+      if (o == WEOF)
+	write_status = EOF;
+      else
+	write_status = _IO_SYSSEEK (fp, o, SEEK_SET) < 0 ? EOF : 0;
+    }
   else
     write_status = 0;
 
   INTUSE(_IO_unsave_markers) (fp);
 
-  close_status = _IO_SYSCLOSE (fp);
+  int close_status = ((fp->_flags2 & _IO_FLAGS2_NOCLOSE) == 0
+		      ? _IO_SYSCLOSE (fp) : 0);
 
   /* Free buffer. */
 #if defined _LIBC || defined _GLIBCPP_USE_WCHAR_T
@@ -290,7 +299,7 @@ _IO_new_file_fopen (fp, filename, mode, is32not64)
 #ifdef _LIBC
   last_recognized = mode;
 #endif
-  for (i = 1; i < 6; ++i)
+  for (i = 1; i < 7; ++i)
     {
       switch (*++mode)
 	{
@@ -320,11 +329,12 @@ _IO_new_file_fopen (fp, filename, mode, is32not64)
 	case 'c':
 	  fp->_flags2 |= _IO_FLAGS2_NOTCANCEL;
 	  continue;
-#ifdef O_CLOEXEC
 	case 'e':
+#ifdef O_CLOEXEC
 	  oflags |= O_CLOEXEC;
-	  continue;
 #endif
+	  fp->_flags2 |= _IO_FLAGS2_CLOEXEC;
+	  continue;
 	default:
 	  /* Ignore.  */
 	  continue;
@@ -335,6 +345,19 @@ _IO_new_file_fopen (fp, filename, mode, is32not64)
   result = _IO_file_open (fp, filename, omode|oflags, oprot, read_write,
 			  is32not64);
 
+#ifndef __ASSUME_O_CLOEXEC
+  if ((fp->_flags2 & _IO_FLAGS2_CLOEXEC) != 0 && __have_o_cloexec <= 0)
+    {
+      int fd = _IO_fileno (fp);
+      if (__have_o_cloexec == 0)
+	{
+	  int flags = __fcntl (fd, F_GETFD);
+	  __have_o_cloexec = (flags & FD_CLOEXEC) == 0 ? -1 : 1;
+	}
+      if (__have_o_cloexec < 0)
+	__fcntl (fd, F_SETFD, FD_CLOEXEC);
+    }
+#endif
 
 #ifdef _LIBC
   if (result != NULL)
@@ -507,7 +530,7 @@ new_do_write (fp, data, to_do)
   if (fp->_flags & _IO_IS_APPENDING)
     /* On a system without a proper O_APPEND implementation,
        you would need to sys_seek(0, SEEK_END) here, but is
-       is not needed nor desirable for Unix- or Posix-like systems.
+       not needed nor desirable for Unix- or Posix-like systems.
        Instead, just indicate that offset (before and after) is
        unpredictable. */
     fp->_offset = _IO_pos_BAD;
@@ -997,18 +1020,18 @@ _IO_new_file_seekoff (fp, offset, dir, mode)
       /* Adjust for read-ahead (bytes is buffer). */
       offset -= fp->_IO_read_end - fp->_IO_read_ptr;
       if (fp->_offset == _IO_pos_BAD)
-        {
-          if (mode != 0)
-            goto dumb;
-          else
-            {
-              result = _IO_SYSSEEK (fp, 0, dir);
-              if (result == EOF)
-                return result;
+	{
+	  if (mode != 0)
+	    goto dumb;
+	  else
+	    {
+	      result = _IO_SYSSEEK (fp, 0, dir);
+	      if (result == EOF)
+		return result;
 
-              fp->_offset = result;
-            }
-        }
+	      fp->_offset = result;
+	    }
+	}
       /* Make offset absolute, assuming current pointer is file_ptr(). */
       offset += fp->_offset;
       if (offset < 0)
@@ -1109,7 +1132,7 @@ resync:
   /* We need to do it since it is possible that the file offset in
      the kernel may be changed behind our back. It may happen when
      we fopen a file and then do a fork. One process may access the
-     the file and the kernel file offset will be changed. */
+     file and the kernel file offset will be changed. */
   if (fp->_offset >= 0)
     _IO_SYSSEEK (fp, fp->_offset, 0);
 
@@ -1270,7 +1293,7 @@ _IO_new_file_write (f, data, n)
 	{
 	  f->_flags |= _IO_ERR_SEEN;
 	  break;
-        }
+	}
       to_do -= count;
       data = (void *) ((char *) data + count);
     }
@@ -1358,12 +1381,12 @@ _IO_new_file_xsputn (f, data, n)
       do_write = to_do - (block_size >= 128 ? to_do % block_size : 0);
 
       if (do_write)
-        {
+	{
 	  count = new_do_write (f, s, do_write);
 	  to_do -= count;
 	  if (count < do_write)
 	    return n - to_do;
-        }
+	}
 
       /* Now write out the remainder.  Normally, this will fit in the
 	 buffer, but it's somewhat messier for line-buffered files,
