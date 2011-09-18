@@ -1,5 +1,5 @@
 /* Run time dynamic linker.
-   Copyright (C) 1995-2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   Copyright (C) 1995-2010, 2011 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -1075,6 +1075,14 @@ of this helper program; chances are you did not intend to run this program.\n\
 
       /* Now the map for the main executable is available.  */
       main_map = GL(dl_ns)[LM_ID_BASE]._ns_loaded;
+
+      if (GL(dl_rtld_map).l_info[DT_SONAME] != NULL
+	  && main_map->l_info[DT_SONAME] != NULL
+	  && strcmp ((const char *) D_PTR (&GL(dl_rtld_map), l_info[DT_STRTAB])
+		     + GL(dl_rtld_map).l_info[DT_SONAME]->d_un.d_val,
+		     (const char *) D_PTR (main_map, l_info[DT_STRTAB])
+		     + main_map->l_info[DT_SONAME]->d_un.d_val) == 0)
+	_dl_fatal_printf ("loader cannot load itself\n");
 
       phdr = main_map->l_phdr;
       phnum = main_map->l_phnum;
@@ -2179,6 +2187,10 @@ ERROR: ld.so: object '%s' cannot be loaded as audit interface: %s; ignored.\n",
      we need it in the memory handling later.  */
   GLRO(dl_initial_searchlist) = *GL(dl_ns)[LM_ID_BASE]._ns_main_searchlist;
 
+  /* Remember the last search directory added at startup, now that
+     malloc will no longer be the one from dl-minimal.c.  */
+  GLRO(dl_init_all_dirs) = GL(dl_all_dirs);
+
   if (prelinked)
     {
       if (main_map->l_info [ADDRIDX (DT_GNU_CONFLICT)] != NULL)
@@ -2298,9 +2310,8 @@ ERROR: ld.so: object '%s' cannot be loaded as audit interface: %s; ignored.\n",
 			  lossage);
     }
 
-  /* Remember the last search directory added at startup, now that
-     malloc will no longer be the one from dl-minimal.c.  */
-  GLRO(dl_init_all_dirs) = GL(dl_all_dirs);
+  /* Make sure no new search directories have been added.  */
+  assert (GLRO(dl_init_all_dirs) == GL(dl_all_dirs));
 
   if (! prelinked && rtld_multiple_ref)
     {
