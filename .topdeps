@@ -32,3 +32,4 @@ t/master_backports
 t/cpuclock
 t/regenerate_errno.h
 t/elfosabi_gnu
+t/no_hidden
