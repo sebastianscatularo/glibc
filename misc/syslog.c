@@ -50,7 +50,6 @@ static char sccsid[] = "@(#)syslog.c	8.4 (Berkeley) 3/18/94";
 #include <bits/libc-lock.h>
 #include <signal.h>
 #include <locale.h>
-#include <kernel-features.h>
 
 #if __STDC__
 #include <stdarg.h>
@@ -60,6 +59,8 @@ static char sccsid[] = "@(#)syslog.c	8.4 (Berkeley) 3/18/94";
 
 #include <libio/iolibio.h>
 #include <math_ldbl_opt.h>
+
+#include <kernel-features.h>
 
 #define ftell(s) INTUSE(_IO_ftell) (s)
 

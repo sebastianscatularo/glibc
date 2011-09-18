@@ -174,6 +174,7 @@ extern char *alloca ();
 
 #if defined _LIBC
 # include <not-cancel.h>
+# include <kernel-features.h>
 #else
 # define openat64_not_cancel_3(dfd, name, mode) openat64 (dfd, name, mode)
 # define close_not_cancel_no_status(fd) close (fd)
