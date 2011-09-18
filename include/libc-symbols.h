@@ -629,6 +629,7 @@ for linking")
 # define hidden_data_weak(name)
 # define hidden_data_def(name)
 # define hidden_data_ver(local, name)
+# define hidden_nolink(name, lib, version)
 #endif
 
 #if !defined NOT_IN_libc

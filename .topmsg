@@ -1,6 +1,24 @@
+To: libc-alpha@sourceware.org
+Cc: roland@frob.com, samuel.thibault@gnu.org
+Subject: [PATCH, Hurd] hidden_nolink macro for NO_HIDDEN case.
+
 From: Thomas Schwinge <thomas@schwinge.name>
-Subject: [PATCH] t/no_hidden
 
-<patch description>
+2011-07-18  Thomas Schwinge  <thomas@schwinge.name>
 
-Signed-off-by: Thomas Schwinge <thomas@schwinge.name>
+	* include/libc-symbols.h [NO_HIDDEN] (hidden_nolink): New macro.
+
+---
+
+Compilation error on GNU/Hurd:
+
+    i686-pc-gnu-gcc auth_none.c -c [...] -include ../include/libc-symbols.h [...]
+    auth_none.c:98:1: warning: return type defaults to 'int' [enabled by default]
+    auth_none.c:98:1: warning: function declaration isn't a prototype [-Wstrict-prototypes]
+    auth_none.c: In function 'hidden_nolink':
+    auth_none.c:102:1: error: [...]
+
+This is due to sysdeps/mach/hurd/configure.in:
+
+    dnl We need this setting because of the need for PLT calls in ld.so.
+    AC_DEFINE([NO_HIDDEN])
