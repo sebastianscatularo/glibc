@@ -76,6 +76,7 @@ distribute	:= rtld-Rules \
 		   tst-tlsmod12.c tst-tls10.h tst-alignmod.c tst-alignmod2.c \
 		   circlemod1.c circlemod1a.c circlemod2.c circlemod2a.c \
 		   circlemod3.c circlemod3a.c nodlopenmod2.c \
+		   tst-tls19mod1.c tst-tls19mod2.c tst-tls19mod3.c \
 		   tls-macros.h \
 		   reldep8mod1.c reldep8mod2.c reldep8mod3.c \
 		   nodel2mod1.c nodel2mod2.c nodel2mod3.c \
@@ -169,6 +170,28 @@ vpath %.c ../locale/programs
 endif
 endif
 
+ifeq ($(have-ksh)$(build-shared),yesyes)
+extra-objs += sotruss-lib.os sotruss-lib.so
+install-others += $(inst_auditdir)/sotruss-lib.so
+install-bin-script += sotruss
+generated += sotruss
+CPPFLAGS-sotruss-lib = -DNOT_IN_libc
+$(objpfx)sotruss-lib.so: $(objpfx)sotruss-lib.os $(common-objpfx)shlib.lds
+	$(build-module-asneeded)
+$(objpfx)sotruss-lib.so: $(common-objpfx)libc.so $(objpfx)ld.so \
+	$(common-objpfx)libc_nonshared.a
+
+$(objpfx)sotruss: sotruss.ksh $(common-objpfx)config.make
+	sed -e 's%@KSH@%$(KSH)%g' \
+	    -e 's%@VERSION@%$(version)%g' \
+	    -e 's%@TEXTDOMAINDIR@%$(msgcatdir)%g' \
+	    -e 's%@PREFIX@%$(prefix)%g' < $< > $@.new
+	chmod 555 $@.new
+	mv -f $@.new $@
+$(inst_auditdir)/sotruss-lib.so: $(objpfx)sotruss-lib.so $(+force)
+	$(do-install-program)
+endif
+
 tests = tst-tls1 tst-tls2 tst-tls9 tst-leaks1
 ifeq (yes,$(have-initfini-array))
 tests += tst-array1 tst-array2 tst-array3 tst-array4 tst-array5
@@ -194,26 +217,29 @@ tests += loadtest restest1 preloadtest loadfail multiload origtest resolvfail \
 	 restest2 next dblload dblunload reldep5 reldep6 reldep7 reldep8 \
 	 circleload1 tst-tls3 tst-tls4 tst-tls5 tst-tls6 tst-tls7 tst-tls8 \
 	 tst-tls10 tst-tls11 tst-tls12 tst-tls13 tst-tls14 tst-tls15 \
-	 tst-tls16 tst-tls17 tst-tls18 tst-tls-dlinfo \
+	 tst-tls16 tst-tls17 tst-tls18 tst-tls19 tst-tls-dlinfo \
 	 tst-align tst-align2 $(tests-execstack-$(have-z-execstack)) \
 	 tst-dlmodcount tst-dlopenrpath tst-deep1 \
 	 tst-dlmopen1 tst-dlmopen2 tst-dlmopen3 \
 	 unload3 unload4 unload5 unload6 unload7 tst-global1 order2 \
 	 tst-audit1 tst-audit2 \
 	 tst-stackguard1 tst-addr1 tst-thrlock \
-	 tst-unique1 tst-unique2 \
+	 tst-unique1 tst-unique2 tst-unique3 tst-unique4 \
 	 tst-initorder
 #	 reldep9
 test-srcs = tst-pathopt
+selinux-enabled := $(shell cat /selinux/enforce 2> /dev/null)
+ifneq ($(selinux-enabled),1)
 tests-execstack-yes = tst-execstack tst-execstack-needed tst-execstack-prog
+endif
 ifeq (x86_64,$(config-machine))
-tests += tst-audit3 tst-audit4 tst-audit5 tst-audit6 tst-audit7
+tests += tst-audit3 tst-audit4 tst-audit5
+ifeq (yes,$(config-cflags-avx))
+tests += tst-audit6 tst-audit7
 endif
 endif
-ifeq (yesyes,$(have-fpie)$(build-shared))
-tests: $(objpfx)tst-pie1.out
 endif
-tests: $(objpfx)tst-leaks1-mem
+tests: $(objpfx)tst-leaks1-mem $(objpfx)noload-mem
 tlsmod17a-suffixes = 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
 tlsmod18a-suffixes = 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
 tlsmod17a-modules = $(addprefix tst-tlsmod17a, $(tlsmod17a-suffixes))
@@ -240,6 +266,7 @@ modules-names = testobj1 testobj2 testobj3 testobj4 testobj5 testobj6 \
 		tst-tlsmod13 tst-tlsmod13a tst-tlsmod14a tst-tlsmod14b \
 		tst-tlsmod15a tst-tlsmod15b tst-tlsmod16a tst-tlsmod16b \
 		$(tlsmod17a-modules) tst-tlsmod17b $(tlsmod18a-modules) \
+		tst-tls19mod1 tst-tls19mod2 tst-tls19mod3 \
 		circlemod1 circlemod1a circlemod2 circlemod2a \
 		circlemod3 circlemod3a \
 		reldep8mod1 reldep8mod2 reldep8mod3 \
@@ -255,6 +282,8 @@ modules-names = testobj1 testobj2 testobj3 testobj4 testobj5 testobj6 \
 		order2mod1 order2mod2 order2mod3 order2mod4 \
 		tst-unique1mod1 tst-unique1mod2 \
 		tst-unique2mod1 tst-unique2mod2 \
+		tst-unique3lib tst-unique3lib2 \
+		tst-unique4lib \
 		tst-initordera1 tst-initorderb1 \
 		tst-initordera2 tst-initorderb2 \
 		tst-initordera3 tst-initordera4
@@ -263,8 +292,8 @@ modules-names += tst-array2dep tst-array5dep
 endif
 ifeq (yesyes,$(have-fpie)$(build-shared))
 modules-names += tst-piemod1
-extra-test-objs += tst-pie1.o
-test-extras += tst-pie1
+tests += tst-pie1
+tests-pie += tst-pie1
 endif
 ifeq (x86_64,$(config-machine))
 modules-names += tst-auditmod3a tst-auditmod3b \
@@ -301,9 +330,8 @@ test-extras += $(ifunc-test-modules)
 ifeq (yes,$(have-fpie))
 ifunc-pie-tests = ifuncmain1pie ifuncmain1vispie ifuncmain1staticpie \
 		  ifuncmain5pie ifuncmain6pie ifuncmain7pie
-tests: $(patsubst %,$(objpfx)%.out, $(ifunc-pie-tests))
-extra-test-objs += $(ifunc-pie-tests:=.o)
-test-extras += $(ifunc-pie-tests)
+tests += $(ifunc-pie-tests)
+tests-pie += $(ifunc-pie-tests)
 endif
 modules-names += ifuncmod1 ifuncmod3 ifuncmod5 ifuncmod6
 endif
@@ -524,6 +552,8 @@ $(objpfx)tst-tlsmod13a.so: $(objpfx)tst-tlsmod13.so
 # For tst-tls9-static, make sure the modules it dlopens have libc.so in DT_NEEDED
 $(objpfx)tst-tlsmod5.so: $(common-objpfx)libc.so
 $(objpfx)tst-tlsmod6.so: $(common-objpfx)libc.so
+$(objpfx)tst-tls19mod1.so: $(objpfx)tst-tls19mod2.so $(objpfx)tst-tls19mod3.so
+$(objpfx)tst-tls19mod3.so: $(objpfx)ld.so
 $(objpfx)reldep8mod3.so: $(objpfx)reldep8mod1.so $(objpfx)reldep8mod2.so
 $(objpfx)nodel2mod3.so: $(objpfx)nodel2mod1.so $(objpfx)nodel2mod2.so
 $(objpfx)reldep9mod2.so: $(objpfx)reldep9mod1.so
@@ -680,6 +710,10 @@ $(objpfx)noload: $(objpfx)testobj1.so $(common-objpfx)dlfcn/libdl.so
 LDFLAGS-noload = -rdynamic
 $(objpfx)noload.out: $(objpfx)testobj5.so
 
+$(objpfx)noload-mem: $(objpfx)noload.out
+	$(common-objpfx)malloc/mtrace $(objpfx)noload.mtrace > $@
+noload-ENV = MALLOC_TRACE=$(objpfx)noload.mtrace
+
 LDFLAGS-nodelete = -rdynamic
 LDFLAGS-nodelmod1.so = -Wl,--enable-new-dtags,-z,nodelete
 LDFLAGS-nodelmod4.so = -Wl,--enable-new-dtags,-z,nodelete
@@ -817,6 +851,9 @@ $(patsubst %,$(objpfx)%.os,$(tlsmod18a-modules)): $(objpfx)tst-tlsmod18a%.os : t
 	$(compile-command.c) -DN=$*
 $(patsubst %,$(objpfx)%.so,$(tlsmod18a-modules)): $(objpfx)tst-tlsmod18a%.so: $(objpfx)ld.so
 
+$(objpfx)tst-tls19: $(libdl)
+$(objpfx)tst-tls19.out: $(objpfx)tst-tls19mod1.so
+
 CFLAGS-tst-align.c = $(stack-align-test-flags)
 CFLAGS-tst-align2.c = $(stack-align-test-flags)
 CFLAGS-tst-alignmod.c = $(stack-align-test-flags)
@@ -902,19 +939,9 @@ $(objpfx)tst-array5-static.out: $(objpfx)tst-array5-static
 	$(objpfx)tst-array5-static > $@
 	cmp $@ tst-array5-static.exp > /dev/null
 
-ifeq (yesyes,$(have-fpie)$(build-shared))
 CFLAGS-tst-pie1.c += $(pie-ccflag)
 
-$(objpfx)tst-pie1.out: $(objpfx)tst-pie1
-	$(elf-objpfx)$(rtld-installed-name) \
-	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
-	  $< > $@
-
-$(objpfx)tst-pie1: $(objpfx)tst-pie1.o $(objpfx)tst-piemod1.so
-	$(+link-pie)
-
-generated += tst-pie1 tst-pie1.out tst-pie1.o
-endif
+$(objpfx)tst-pie1: $(objpfx)tst-piemod1.so
 
 check-textrel-CFLAGS = -O -Wall -D_XOPEN_SOURCE=600 -D_BSD_SOURCE
 $(objpfx)check-textrel: check-textrel.c
@@ -1077,7 +1104,6 @@ CFLAGS-ifuncmain7picstatic.c += $(pic-ccflag)
 
 LDFLAGS-ifuncmain3 = -Wl,-export-dynamic
 
-ifeq (yesyes,$(have-fpie)$(build-shared))
 CFLAGS-ifuncmain1pie.c += $(pie-ccflag)
 CFLAGS-ifuncmain1vispie.c += $(pie-ccflag)
 CFLAGS-ifuncmain1staticpie.c += $(pie-ccflag)
@@ -1085,66 +1111,11 @@ CFLAGS-ifuncmain5pie.c += $(pie-ccflag)
 CFLAGS-ifuncmain6pie.c += $(pie-ccflag)
 CFLAGS-ifuncmain7pie.c += $(pie-ccflag)
 
-$(objpfx)ifuncmain1pie.out: $(objpfx)ifuncmain1pie
-	$(elf-objpfx)$(rtld-installed-name) \
-	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
-	  $< > $@
-
-$(objpfx)ifuncmain1pie: $(objpfx)ifuncmain1pie.o $(objpfx)ifuncmod1.so
-	$(+link-pie)
-
-generated += ifuncmain1pie ifuncmain1pie.out
-
-$(objpfx)ifuncmain1staticpie.out: $(objpfx)ifuncmain1staticpie
-	$(elf-objpfx)$(rtld-installed-name) \
-	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
-	  $< > $@
-
-$(objpfx)ifuncmain1staticpie: $(objpfx)ifuncmain1staticpie.o $(objpfx)ifuncdep1pic.o
-	$(+link-pie)
-
-generated += ifuncmain1staticpie ifuncmain1staticpie.out
-
-$(objpfx)ifuncmain1vispie.out: $(objpfx)ifuncmain1vispie
-	$(elf-objpfx)$(rtld-installed-name) \
-	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
-	  $< > $@
-
-$(objpfx)ifuncmain1vispie: $(objpfx)ifuncmain1vispie.o $(objpfx)ifuncmod1.so
-	$(+link-pie)
-
-generated += ifuncmain1vispie ifuncmain1vispie.out
-
-$(objpfx)ifuncmain5pie.out: $(objpfx)ifuncmain5pie
-	$(elf-objpfx)$(rtld-installed-name) \
-	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
-	  $< > $@
-
-$(objpfx)ifuncmain5pie: $(objpfx)ifuncmain5pie.o $(objpfx)ifuncmod5.so
-	$(+link-pie)
-
-generated += ifuncmain5pie ifuncmain5pie.out
-
-$(objpfx)ifuncmain6pie.out: $(objpfx)ifuncmain6pie
-	$(elf-objpfx)$(rtld-installed-name) \
-	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
-	  $< > $@
-
-$(objpfx)ifuncmain6pie: $(objpfx)ifuncmain6pie.o $(objpfx)ifuncmod6.so
-	$(+link-pie)
-
-generated += ifuncmain6pie ifuncmain6pie.out
-
-$(objpfx)ifuncmain7pie.out: $(objpfx)ifuncmain7pie
-	$(elf-objpfx)$(rtld-installed-name) \
-	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
-	  $< > $@
-
-$(objpfx)ifuncmain7pie: $(objpfx)ifuncmain7pie.o
-	$(+link-pie)
-
-generated += ifuncmain7pie ifuncmain7pie.out
-endif
+$(objpfx)ifuncmain1pie: $(objpfx)ifuncmod1.so
+$(objpfx)ifuncmain1staticpie: $(objpfx)ifuncdep1pic.o
+$(objpfx)ifuncmain1vispie: $(objpfx)ifuncmod1.so
+$(objpfx)ifuncmain5pie: $(objpfx)ifuncmod5.so
+$(objpfx)ifuncmain6pie: $(objpfx)ifuncmod6.so
 
 $(objpfx)ifuncmain1: $(addprefix $(objpfx),ifuncmod1.so)
 $(objpfx)ifuncmain1pic: $(addprefix $(objpfx),ifuncmod1.so)
@@ -1174,6 +1145,11 @@ $(objpfx)tst-unique1.out: $(objpfx)tst-unique1mod1.so \
 $(objpfx)tst-unique2: $(libdl) $(objpfx)tst-unique2mod1.so
 $(objpfx)tst-unique2.out: $(objpfx)tst-unique2mod2.so
 
+$(objpfx)tst-unique3: $(libdl) $(objpfx)tst-unique3lib.so
+$(objpfx)tst-unique3.out: $(objpfx)tst-unique3lib2.so
+
+$(objpfx)tst-unique4: $(objpfx)tst-unique4lib.so
+
 $(objpfx)tst-initorder.out: $(objpfx)tst-initorder
 	$(elf-objpfx)${rtld-installed-name} \
 	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
@@ -1181,10 +1157,14 @@ $(objpfx)tst-initorder.out: $(objpfx)tst-initorder
 	cmp $@ tst-initorder.exp > /dev/null
 
 ifeq (yes,$(config-cflags-avx))
-CFLAGS-tst-audit4.c += -mavx
-CFLAGS-tst-auditmod4a.c += -mavx
-CFLAGS-tst-auditmod4b.c += -mavx
-CFLAGS-tst-auditmod6b.c += -mavx
-CFLAGS-tst-auditmod6c.c += -mavx
-CFLAGS-tst-auditmod7b.c += -mavx
+AVX-CFLAGS=-mavx
+ifeq (yes,$(config-cflags-novzeroupper))
+AVX-CFLAGS+=-mno-vzeroupper
+endif
+CFLAGS-tst-audit4.c += $(AVX-CFLAGS)
+CFLAGS-tst-auditmod4a.c += $(AVX-CFLAGS)
+CFLAGS-tst-auditmod4b.c += $(AVX-CFLAGS)
+CFLAGS-tst-auditmod6b.c += $(AVX-CFLAGS)
+CFLAGS-tst-auditmod6c.c += $(AVX-CFLAGS)
+CFLAGS-tst-auditmod7b.c += $(AVX-CFLAGS)
 endif
