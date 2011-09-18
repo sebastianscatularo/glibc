@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1995, 1997-2004, 2005, 2007
+/* Copyright (C) 1993, 1995, 1997-2004, 2005, 2007, 2011
    Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Written by Per Bothner <bothner@cygnus.com>.
@@ -155,7 +155,8 @@ _IO_old_file_close_it (fp)
 
   INTUSE(_IO_unsave_markers) (fp);
 
-  close_status = _IO_SYSCLOSE (fp);
+  close_status = ((fp->_flags2 & _IO_FLAGS2_NOCLOSE) == 0
+		  ? _IO_SYSCLOSE (fp) : 0);
 
   /* Free buffer. */
   INTUSE(_IO_setb) (fp, NULL, NULL, 0);
@@ -299,7 +300,7 @@ old_do_write (fp, data, to_do)
   if (fp->_flags & _IO_IS_APPENDING)
     /* On a system without a proper O_APPEND implementation,
        you would need to sys_seek(0, SEEK_END) here, but is
-       is not needed nor desirable for Unix- or Posix-like systems.
+       not needed nor desirable for Unix- or Posix-like systems.
        Instead, just indicate that offset (before and after) is
        unpredictable. */
     fp->_old_offset = _IO_pos_BAD;
@@ -654,7 +655,7 @@ resync:
   /* We need to do it since it is possible that the file offset in
      the kernel may be changed behind our back. It may happen when
      we fopen a file and then do a fork. One process may access the
-     the file and the kernel file offset will be changed. */
+     file and the kernel file offset will be changed. */
   if (fp->_old_offset >= 0)
     _IO_SYSSEEK (fp, fp->_old_offset, 0);
 
@@ -676,7 +677,7 @@ _IO_old_file_write (f, data, n)
 	{
 	  f->_flags |= _IO_ERR_SEEN;
 	  break;
-        }
+	}
       to_do -= count;
       data = (void *) ((char *) data + count);
     }
@@ -763,12 +764,12 @@ _IO_old_file_xsputn (f, data, n)
       do_write = to_do - (block_size >= 128 ? to_do % block_size : 0);
 
       if (do_write)
-        {
+	{
 	  count = old_do_write (f, s, do_write);
 	  to_do -= count;
 	  if (count < do_write)
 	    return n - to_do;
-        }
+	}
 
       /* Now write out the remainder.  Normally, this will fit in the
 	 buffer, but it's somewhat messier for line-buffered files,
