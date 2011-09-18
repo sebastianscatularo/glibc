@@ -1,4 +1,4 @@
-# Copyright (C) 1991-2003,2004,2005,2006,2007,2008,2009,2010
+# Copyright (C) 1991-2003,2004,2005,2006,2007,2008,2009,2010,2011
 #	Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
@@ -278,6 +278,12 @@ infodir = $(prefix)/info
 endif
 inst_infodir = $(install_root)$(infodir)
 
+# Where to install audit libraries.
+ifndef auditdir
+auditdir = $(libdir)/audit
+endif
+inst_auditdir = $(install_root)$(auditdir)
+
 # Where to install default configuration files.  These include the local
 # timezone specification and network data base files.
 ifndef sysconfdir
@@ -450,9 +456,9 @@ ifndef +link-pie
 	     $(addprefix $(csu-objpfx),S$(start-installed-name)) \
 	     $(+preinit) $(+prectorS) \
 	     $(filter-out $(addprefix $(csu-objpfx),start.o \
-	     S$(start-installed-name))\
-	     $(+preinit) $(link-extra-libs) \
-	     $(common-objpfx)libc% $(+postinit),$^) \
+						    S$(start-installed-name))\
+			  $(+preinit) $(link-extra-libs) \
+			  $(common-objpfx)libc% $(+postinit),$^) \
 	     $(link-extra-libs) $(link-libc) $(+postctorS) $(+postinit)
 endif
 # Command for statically linking programs with the C library.
@@ -531,7 +537,7 @@ endif
 
 # The static libraries.
 ifeq (yes,$(build-static))
-link-libc-static = $(common-objpfx)libc.a $(static-gnulib) $(common-objpfx)libc.a
+link-libc-static = -Wl,--start-group $(common-objpfx)libc.a $(static-gnulib) -Wl,--end-group
 else
 ifeq (yes,$(build-shared))
 # We can try to link the programs with lib*_pic.a...
@@ -591,10 +597,6 @@ built-program-cmd = $(patsubst %,$(run-program-prefix),\
 
 ifndef LD
 LD := ld -X
-endif
-
-ifndef	RANLIB
-RANLIB = ranlib
 endif
 
 # Extra flags to pass to GCC.

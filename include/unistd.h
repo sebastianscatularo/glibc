@@ -176,6 +176,7 @@ extern int __have_sock_cloexec;
    SOCK_CLOEXEC.  Avoid defining separate variables for all of them
    unless it is really necessary.  */
 #define __have_pipe2 __have_sock_cloexec
+#define __have_dup3 __have_sock_cloexec
 
 extern int __getlogin_r_loginuid (char *name, size_t namesize)
      attribute_hidden;

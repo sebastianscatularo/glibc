@@ -1,6 +1,6 @@
 /* Set flags signalling availability of certain operating system features.
 
-   Copyright (C) 2007, 2008 Free Software Foundation, Inc.
+   Copyright (C) 2007, 2008, 2011 Free Software Foundation, Inc.
 
    This file is part of the GNU C Library.
 
@@ -31,7 +31,7 @@
 #ifdef O_CLOEXEC
 # define __ASSUME_O_CLOEXEC	1
 #endif
-
 #define __ASSUME_SOCK_CLOEXEC	1
 #define __ASSUME_PIPE2		1
 #define __ASSUME_ACCEPT4	1
+#define __ASSUME_DUP3		1
