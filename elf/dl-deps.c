@@ -491,6 +491,10 @@ _dl_map_object_deps (struct link_map *map,
   if (errno == 0 && errno_saved != 0)
     __set_errno (errno_saved);
 
+  if (errno_reason)
+    _dl_signal_error (errno_reason == -1 ? 0 : errno_reason, objname,
+		      NULL, errstring);
+
   struct link_map **old_l_initfini = NULL;
   if (map->l_initfini != NULL && map->l_type == lt_loaded)
     {
@@ -613,61 +617,64 @@ Filters not supported with LD_TRACE_PRELINKING"));
 	map->l_searchlist.r_list[i]->l_reserved = 0;
     }
 
-  /* Now determine the order in which the initialization has to happen.  */
+  /* Sort the initializer list to take dependencies into account.  The binary
+     itself will always be initialize last.  */
   memcpy (l_initfini, map->l_searchlist.r_list,
 	  nlist * sizeof (struct link_map *));
-
-  /* We can skip looking for the binary itself which is at the front
-     of the search list.  */
-  assert (nlist > 1);
-  i = 1;
-  bool seen[nlist];
-  memset (seen, false, nlist * sizeof (seen[0]));
-  while (1)
+  if (__builtin_expect (nlist > 1, 1))
     {
-      /* Keep track of which object we looked at this round.  */
-      seen[i] = true;
-      struct link_map *thisp = l_initfini[i];
-
-      /* Find the last object in the list for which the current one is
-	 a dependency and move the current object behind the object
-	 with the dependency.  */
-      unsigned int k = nlist - 1;
-      while (k > i)
+      /* We can skip looking for the binary itself which is at the front
+	 of the search list.  */
+      i = 1;
+      bool seen[nlist];
+      memset (seen, false, nlist * sizeof (seen[0]));
+      while (1)
 	{
-	  struct link_map **runp = l_initfini[k]->l_initfini;
-	  if (runp != NULL)
-	    /* Look through the dependencies of the object.  */
-	    while (*runp != NULL)
-	      if (__builtin_expect (*runp++ == thisp, 0))
-		{
-		  /* Move the current object to the back past the last
-		     object with it as the dependency.  */
-		  memmove (&l_initfini[i], &l_initfini[i + 1],
-			   (k - i) * sizeof (l_initfini[0]));
-		  l_initfini[k] = thisp;
+	  /* Keep track of which object we looked at this round.  */
+	  seen[i] = true;
+	  struct link_map *thisp = l_initfini[i];
 
-		  if (seen[i + 1])
+	  /* Find the last object in the list for which the current one is
+	     a dependency and move the current object behind the object
+	     with the dependency.  */
+	  unsigned int k = nlist - 1;
+	  while (k > i)
+	    {
+	      struct link_map **runp = l_initfini[k]->l_initfini;
+	      if (runp != NULL)
+		/* Look through the dependencies of the object.  */
+		while (*runp != NULL)
+		  if (__builtin_expect (*runp++ == thisp, 0))
 		    {
-		      ++i;
-		      goto next_clear;
+		      /* Move the current object to the back past the last
+			 object with it as the dependency.  */
+		      memmove (&l_initfini[i], &l_initfini[i + 1],
+			       (k - i) * sizeof (l_initfini[0]));
+		      l_initfini[k] = thisp;
+
+		      if (seen[i + 1])
+			{
+			  ++i;
+			  goto next_clear;
+			}
+
+		      memmove (&seen[i], &seen[i + 1],
+			       (k - i) * sizeof (seen[0]));
+		      seen[k] = true;
+
+		      goto next;
 		    }
 
-		  memmove (&seen[i], &seen[i + 1], (k - i) * sizeof (seen[0]));
-		  seen[k] = true;
+	      --k;
+	    }
 
-		  goto next;
-		}
+	  if (++i == nlist)
+	    break;
+	next_clear:
+	  memset (&seen[i], false, (nlist - i) * sizeof (seen[0]));
 
-	  --k;
+	next:;
 	}
-
-      if (++i == nlist)
-	break;
-    next_clear:
-      memset (&seen[i], false, (nlist - i) * sizeof (seen[0]));
-
-    next:;
     }
 
   /* Terminate the list of dependencies.  */
@@ -682,9 +689,5 @@ Filters not supported with LD_TRACE_PRELINKING"));
       _dl_scope_free (old_l_reldeps);
     }
   if (old_l_initfini != NULL)
-    _dl_scope_free (old_l_initfini);
-
-  if (errno_reason)
-    _dl_signal_error (errno_reason == -1 ? 0 : errno_reason, objname,
-		      NULL, errstring);
+      map->l_orig_initfini = old_l_initfini;
 }
