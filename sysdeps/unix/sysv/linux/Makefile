@@ -12,7 +12,8 @@ CFLAGS-malloc.c += -DMORECORE_CLEARS=2
 endif
 
 ifeq ($(subdir),socket)
-sysdep_routines += internal_accept4 recvmmsg internal_recvmmsg
+sysdep_routines += internal_accept4 recvmmsg internal_recvmmsg sendmmsg \
+		   internal_sendmmsg
 endif
 
 ifeq ($(subdir),misc)
@@ -95,7 +96,7 @@ generated += syscall-list.h syscall-list.d
 endif
 
 ifeq ($(subdir),time)
-sysdep_headers += sys/timex.h
+sysdep_headers += sys/timex.h bits/timex.h
 
 sysdep_routines += ntp_gettime ntp_gettimex
 endif
@@ -147,7 +148,8 @@ sysdep_routines += xstatconv internal_statvfs internal_statvfs64 \
 endif
 
 ifeq ($(subdir),elf)
-sysdep-rtld-routines += dl-brk dl-sbrk
+sysdep-rtld-routines += dl-brk dl-sbrk dl-getcwd dl-openat64 dl-opendir \
+			dl-fxstatat64
 
 CPPFLAGS-lddlibc4 += -DNOT_IN_libc
 endif
