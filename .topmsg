@@ -1,8 +1,16 @@
+To: libc-alpha@sourceware.org
+Subject: [PATCH] #include <kernel-features.h>
+
 From: Thomas Schwinge <thomas@schwinge.name>
-Subject: [PATCH] kernel-features.h_includes
 
-Add missing <kernel-features.h> includes.
+Reliably #include <kernel-features.h> in files that are using __ASSUME_*
+macros.
 
-2009-08-03  Thomas Schwinge  <tschwinge@gnu.org>
+2011-09-19  Thomas Schwinge  <thomas@schwinge.name>
 
-	* misc/syslog.c: Include <kernel-features.h>.
+	* libio/fileops.c: Include <kernel-features.h>.
+	* libio/freopen.c: Likewise.
+	* libio/freopen64.c: Likewise.
+	* misc/syslog.c: Likewise.
+	* nscd/connections.c: Likewise.
+	* sysdeps/posix/getcwd.c: Likewise.

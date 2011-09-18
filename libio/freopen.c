@@ -35,6 +35,8 @@
 #include <shlib-compat.h>
 #include <fd_to_filename.h>
 
+#include <kernel-features.h>
+
 FILE*
 freopen (filename, mode, fp)
      const char* filename;
