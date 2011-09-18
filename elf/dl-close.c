@@ -1,5 +1,5 @@
 /* Close a shared object opened by `_dl_open'.
-   Copyright (C) 1996-2007, 2009, 2010 Free Software Foundation, Inc.
+   Copyright (C) 1996-2007, 2009, 2010, 2011 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -119,8 +119,17 @@ _dl_close_worker (struct link_map *map)
   if (map->l_direct_opencount > 0 || map->l_type != lt_loaded
       || dl_close_state != not_pending)
     {
-      if (map->l_direct_opencount == 0 && map->l_type == lt_loaded)
-	dl_close_state = rerun;
+      if (map->l_direct_opencount == 0)
+	{
+	  if (map->l_type == lt_loaded)
+	    dl_close_state = rerun;
+	  else if (map->l_type == lt_library)
+	    {
+	      struct link_map **oldp = map->l_initfini;
+	      map->l_initfini = map->l_orig_initfini;
+	      _dl_scope_free (oldp);
+	    }
+	}
 
       /* There are still references to this object.  Do nothing more.  */
       if (__builtin_expect (GLRO(dl_debug_mask) & DL_DEBUG_FILES, 0))
@@ -582,21 +591,37 @@ _dl_close_worker (struct link_map *map)
 			}
 		    }
 #elif TLS_DTV_AT_TP
-		  if ((size_t) imap->l_tls_offset == tls_free_end)
+		  if (tls_free_start == NO_TLS_OFFSET)
+		    {
+		      tls_free_start = imap->l_tls_firstbyte_offset;
+		      tls_free_end = (imap->l_tls_offset
+				      + imap->l_tls_blocksize);
+		    }
+		  else if (imap->l_tls_firstbyte_offset == tls_free_end)
 		    /* Extend the contiguous chunk being reclaimed.  */
-		    tls_free_end -= imap->l_tls_blocksize;
+		    tls_free_end = imap->l_tls_offset + imap->l_tls_blocksize;
 		  else if (imap->l_tls_offset + imap->l_tls_blocksize
 			   == tls_free_start)
 		    /* Extend the chunk backwards.  */
-		    tls_free_start = imap->l_tls_offset;
-		  else
+		    tls_free_start = imap->l_tls_firstbyte_offset;
+		  /* This isn't contiguous with the last chunk freed.
+		     One of them will be leaked unless we can free
+		     one block right away.  */
+		  else if (imap->l_tls_offset + imap->l_tls_blocksize
+			   == GL(dl_tls_static_used))
+		    GL(dl_tls_static_used) = imap->l_tls_firstbyte_offset;
+		  else if (tls_free_end == GL(dl_tls_static_used))
 		    {
-		      /* This isn't contiguous with the last chunk freed.
-			 One of them will be leaked.  */
-		      if (tls_free_end == GL(dl_tls_static_used))
-			GL(dl_tls_static_used) = tls_free_start;
-		      tls_free_start = imap->l_tls_offset;
-		      tls_free_end = tls_free_start + imap->l_tls_blocksize;
+		      GL(dl_tls_static_used) = tls_free_start;
+		      tls_free_start = imap->l_tls_firstbyte_offset;
+		      tls_free_end = imap->l_tls_offset + imap->l_tls_blocksize;
+		    }
+		  else if (tls_free_end < imap->l_tls_firstbyte_offset)
+		    {
+		      /* We pick the later block.  It has a chance to
+			 be freed.  */
+		      tls_free_start = imap->l_tls_firstbyte_offset;
+		      tls_free_end = imap->l_tls_offset + imap->l_tls_blocksize;
 		    }
 #else
 # error "Either TLS_TCB_AT_TP or TLS_DTV_AT_TP must be defined"

@@ -1,5 +1,6 @@
 /* Storage management for the chain of loaded shared objects.
-   Copyright (C) 1995-2002,2004,2006-2009,2010 Free Software Foundation, Inc.
+   Copyright (C) 1995-2002,2004,2006,2007,2008,2009,2010,2011
+	Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -60,7 +61,6 @@ internal_function
 _dl_new_object (char *realname, const char *libname, int type,
 		struct link_map *loader, int mode, Lmid_t nsid)
 {
-  struct link_map *l;
   size_t libname_len = strlen (libname) + 1;
   struct link_map *new;
   struct libname_list *newname;
@@ -112,7 +112,7 @@ _dl_new_object (char *realname, const char *libname, int type,
 
   /* new->l_global = 0;	We use calloc therefore not necessary.  */
 
-  /* Use the 'l_scope_mem' array by default for the the 'l_scope'
+  /* Use the 'l_scope_mem' array by default for the 'l_scope'
      information.  If we need more entries we will allocate a large
      array dynamically.  */
   new->l_scope = new->l_scope_mem;
