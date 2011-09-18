@@ -1,3 +1,1244 @@
+2011-06-06  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* stdlib/longlong.h: Update from GCC.  Fix smul_ppmm for S/390.
+
+2011-06-06  Roland McGrath  <roland@hack.frob.com>
+
+	[BZ #12849]
+	* manual/fdl-1.1.texi: New file, verbatim from:
+	http://www.gnu.org/licenses/old-licenses/fdl-1.1.texi
+	* manual/lgpl-2.1.texi: New file, verbatim from:
+	http://www.gnu.org/licenses/old-licenses/lgpl-2.1.texi
+	* manual/Makefile (licenses): New variable, list those new file names.
+	(texis): Use it.
+	(chapters.% top-menu.%): Include $(licenses) with $(appendices).
+
+	* manual/fdl.texi: File removed.
+	* manual/lesser.texi: File removed.
+	* manual/libc.texinfo (Copying, Documentation License):
+	Use new @include file names, put @appendix directive before @include.
+
+2011-06-04  Jakub Jelinek  <jakub@redhat.com>
+
+	[BZ #12841]
+	* rt/bits/mqueue2.h (__mq_open_2): Add __THROW.
+	(__mq_open_alias): Use __REDIRECT_NTH instead of __REDIRECT.
+	(mq_open): Add __NTH.
+
+2011-06-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* sysdeps/x86_64/multiarch/init-arch.c (__init_cpu_features):
+	Assume Intel Core i3/i5/i7 processor if AVX is available.
+
+2011-05-31  Ulrich Drepper  <drepper@gmail.com>
+
+	* sysdeps/unix/sysv/linux/dl-osinfo.h (_dl_setup_stack_chk_guard): Fix
+	typo.
+
+2011-05-31  Andreas Schwab  <schwab@redhat.com>
+
+	* nscd/nscd_getserv_r.c (nscd_getserv_r): Don't free non-malloced
+	memory.  Use alloca_account.  Fix memory leak when retrying.
+
+2011-05-31  Ulrich Drepper  <drepper@gmail.com>
+
+	* version.h (RELEASE): Bump for 2.14 release.
+	* include/features.h (__GLIBC_MINOR__): Bump to 14.
+
+	* config.make.in (RANLIB): Remove entry.
+
+2011-05-30  Ulrich Drepper  <drepper@gmail.com>
+
+	* po/Makefile (po-sed-cmd): Add ksh to extensions.
+	(libc.pot): Work around missing support for .ksh extension in xgettext.
+
+	[BZ #12684]
+	* resolv/res_send.c (__libc_res_nsend): Only go to the next name server
+	if both request failed.
+	(send_dg): In case of server errors clear resplen or *resplen2.
+
+	[BZ #12454]
+	* elf/dl-deps.c (_dl_map_object_deps): Run initializer sorting only
+	when there are multiple maps.
+	* elf/dl-fini.c (_dl_sort_fini): Check for list of one.
+	(_dl_fini): Remove test here.
+
+	* elf/rtld.c (dl_main): Don't allow the loader to load itself.
+
+2011-05-29  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12350]
+	* sysdeps/posix/getaddrinfo.c (gethosts): Restore only RES_USE_IENT6
+	bit from old_res_options.
+	(gaih_inet): Likewise.
+
+	[BZ #11099]
+	* shadow/sgetspent_r.c (LINE_PARSER): Interpret numeric field values
+	as signed.
+
+	* resolv/res_init.c (res_setoptions): Make the code more compact.
+
+	[BZ #11558]
+	* resolv/res_init.c (res_setoptions): Recognize use-vc option and
+	set RES_USEVC.
+
+	[BZ #11634]
+	* elf/Makefile (tests): Don't add tst-audit[67] without working -mavx.
+
+	* malloc/malloc.h: Mark malloc hook variables as deprecated.
+
+	[BZ #11781]
+	* malloc/malloc.h: Declare malloc hook variables as volatile.
+
+	* locale/programs/locarchive.c (add_locale_to_archive): Fix typo
+	in last patch.
+
+	[BZ #11799]
+	* sysdeps/unix/sysv/linux/bits/siginfo.h (SI_USER): Don't mention
+	raise in the comment.
+	* sysdeps/unix/sysv/linux/s390/bits/siginfo.h: Likewise.
+	* sysdeps/unix/sysv/linux/sparc/bits/siginfo.h: Likewise.
+	* sysdeps/unix/sysv/linux/ia64/bits/siginfo.h: Likewise.
+
+2011-05-28  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12811]
+	* posix/regex_internal.c (build_wcs_buffer): Don't signal we have to
+	grow the buffers more if it already has to be sufficient.
+	(build_wcs_upper_buffer): Likewise.
+	* posix/regexec.c (check_matching): Likewise.
+	(clean_state_log_if_needed): Likewise.
+	(extend_buffers): Don't enlarge buffers beyond size of the input
+	buffer.
+	Patches mostly by Emil Wojak <emil@wojak.eu>.
+	* posix/bug-regex32.c: New file.
+	* posix/Makefile (tests): Add bug-regex32.
+
+	* locale/findlocale.c (_nl_find_locale): Return right away if
+	_nl_explode_name failed.
+	* locale/programs/locarchive.c (add_locale_to_archive): Likewise.
+
+	* sysdeps/unix/sysv/linux/socketcall.h (SOCKOP_sendmmsg): Define.
+
+	* debug/xtrace.sh: Unify messages.
+	* malloc/memusage.sh: Likewise.
+
+	[BZ #12813]
+	* sysdeps/unix/sysv/linux/x86_64/init-first.c (__vdso_time): Retrieve
+	time symbol from vDSO.  Substitute with vsyscall if not available.
+	* sysdeps/unix/sysv/linux/x86_64/time.S [SHARED]: Use
+	__vdso_time.
+
+	* sysdeps/unix/sysv/linux/internal_sendmmsg.S: New file.
+	* sysdeps/unix/sysv/linux/sendmmsg.c: New file.
+	* sysdeps/unix/sysv/linux/Makefile [subdir=socket] (sysdep_routines):
+	Add sendmmsg and internal_sendmmsg.
+	* sysdeps/unix/sysv/linux/Versions [GLIBC_2.14]: Add sendmmsg.
+	* sysdeps/unix/sysv/linux/bits/socket.h: Declare sendmmsg.
+	* sysdeps/unix/sysv/linux/kernel-features.h: Define __ASSUME_SENDMMSG.
+
+	* sysdeps/unix/sysv/linux/syscalls.list: Add setns entry.
+	* sysdeps/unix/sysv/linux/bits/sched.h: Declare setns.
+	* sysdeps/unix/sysv/linux/Versions [GLIBC_2.14]: Add setns.
+
+2011-05-27  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12813]
+	* sysdeps/unix/sysv/linux/x86_64/init-first.c (__vdso_getcpu):
+	Retrieve getcpu symbol from vDSO.  Substitute with vsyscall if not
+	available.
+	* sysdeps/unix/sysv/linux/x86_64/sched_getcpu.S [SHARED]: Use
+	__vdso_getcpu.
+
+	[BZ #12814]
+	* iconvdata/Makefile (tests): Add bug-iconv9.
+	* iconvdata/bug-iconv9.c: New file.
+
+2011-05-27  Andreas Schwab  <schwab@redhat.com>
+
+	[BZ #12814]
+	* iconvdata/iso-2022-jp.c (BODY): Fix invalid variable shadowing.
+
+2011-05-25  Jakub Jelinek  <jakub@redhat.com>
+
+	* sysdeps/unix/sysv/linux/x86_64/sys/user.h
+	(struct user_regs_struct): Change intcs field back to cs.
+
+2011-05-25  Ulrich Drepper  <drepper@gmail.com>
+
+	* po/ja.po: Update from translation team.
+
+2011-05-23  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12795]
+	* sysdeps/unix/sysv/linux/bits/resource.h (RLIMIT_RTTIME): Define.
+	* sysdeps/unix/sysv/linux/sparc/bits/resource.h: Likewise.
+
+2011-05-20  Andreas Schwab  <schwab@redhat.com>
+
+	* stdlib/longlong.h: Update from GCC.
+
+2011-05-23  Andreas Schwab  <schwab@redhat.com>
+
+	* sysdeps/unix/sysv/linux/ia64/sysconf.c (HAS_CPUCLOCK): Add
+	parameter name.
+	* sysdeps/unix/sysv/linux/sysconf.c (has_cpuclock, HAS_CPUCLOCK):
+	Add parameter name.
+	(__sysconf): Pass it down.
+
+2011-05-22  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12671]
+	* nis/nss_nis/nis-alias.c (_nss_nis_getaliasbyname_r): Use malloc in
+	some situations.
+	* nscd/nscd_getserv_r.c (nscd_getserv_r): Likewise.
+	* posix/glob.c (glob_in_dir): Take additional parameter alloca_used.
+	add in in __libc_use_alloca calls.  Adjust callers.
+	(glob): Use malloc in some situations.
+
+	* elf/dl-runtime.c (_dl_profile_fixup): Also store LA_SYMB_NOPLTENTER
+	and LA_SYMB_NOPLTEXIT in flags which are passed to pltenter and
+	pltexit.
+
+2011-05-21  Ulrich Drepper  <drepper@gmail.com>
+
+	* sysdeps/unix/sysv/linux/bits/time.h: Define CLOCK_REALTIME_ALARM
+	and CLOCK_BOOTTIME_ALARM.
+
+	[BZ #12782]
+	* string/xpg-strerror.c (__xpg_strerror_r): Fill buffer even if error
+	is returned.
+
+	* string/_strerror.c (__strerror_r): Print negative errors as signed
+	numbers.
+
+	[BZ #12777]
+	* iconvdata/cp1258.c (comp_table_data): Remove entry 0x00A5 0xEC.
+	(decomp_table): Change U0385 entry to emit 0xA5 0xEC.
+	* iconvdata/CP1258.irreversible: Adjust entry 0xA8EC.
+
+	* configure.in: Fix typo in redirection and correct removal of test
+	files in two cases.
+
+	[BZ #12788]
+	* locale/setlocale.c (new_composite_name): Fix test to check for
+	identical name of all categories.
+
+	[BZ #12792]
+	* libio/filedoalloc.c (local_isatty): New function.
+	(_IO_file_doallocate): Use local_isatty.
+	* stdio-common/perror.c (perror): In case a new stream is used
+	forward the stream error.
+	* stdio-common/vfprintf.c (ARGCHECK): For read-only streams also set
+	error flag.
+
+2011-05-20  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #11869]
+	* sysdeps/posix/getaddrinfo.c (gaih_inet): Don't unconditionally use
+	alloca.
+	* include/alloca.h (extend_alloca_account): Define.
+
+	[BZ #11857]
+	* posix/regex.h: Fix comments with documentation of user-accessible
+	fields after compilation and describe correct free'ing of pattern
+	after re_compile_pattern.
+	Patch by Reuben Thomas <rrt@sc3d.org>.
+
+2011-05-18  Ryan S. Arnold  <rsa@us.ibm.com>
+
+	* sysdeps/powerpc/powerpc64/Makefile (no-special-regs): Add -mno-vsx
+	and -mno-altivec to prevent the compiler from using Altivec and/or
+	VSX instructions when the corresponding registers are not available.
+
+2011-05-19  Andreas Schwab  <schwab@redhat.com>
+
+	* grp/compat-initgroups.c (__libc_use_alloca): Don't define.
+
+2011-05-19  Ulrich Drepper  <drepper@gmail.com>
+
+	* libio/freopen.c (freopen): Use __dup2, not dup2.
+	* libio/freopen64.c (freopen64): Likewise.
+
+2011-05-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	[BZ #12775]
+	* sysdeps/x86_64/fpu/e_powl.S: Fix a typo.
+	* math/Makefile (tests): Add test-powl.
+	(CFLAGS-test-powl.c): Define.
+	* math/test-powl.c: New file.
+
+2011-05-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* fileops.c (_IO_new_file_fopen): Get fd from _IO_fileno.
+
+2011-05-17  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #11837]
+	* iconvdata/gb18030.c: Update to GB18020-2005.
+
+2011-05-16  Ulrich Drepper  <drepper@gmail.com>
+
+	* posix/regex.h (RE_SYNTAX_AWK, RE_SYNTAX_GNU_AWK,
+	RE_SYNTAX_POSIX_AWK): Update to match recent development.
+	Patch by Aharon Robbins <arnold@skeeve.com>.
+
+	[BZ #11892]
+	* stdlib/putenv.c (putenv): Don't always create copy of the variable
+	on the stack.
+
+	[BZ #11895]
+	* misc/pselect.c (__pselect): Handle timeout value errors hidden
+	through underflows.
+
+	[BZ #12766]
+	* misc/error.c (error_at_line): Ensure file_name and old_file_name
+	point to strings before performing equality test for error_one_per_line
+	mode.
+
+	[BZ #11697]
+	* login/programs/pt_chown.c (do_pt_chown): Always call chown.
+
+	[BZ #11820]
+	* sysdeps/unix/sysv/linux/x86_64/sys/user.h
+	(struct user_fpregs_struct): Avoid __uint*_t types.
+
+	[BZ #6420]
+	* malloc/mtrace.c (tr_where): Add additional parameter to point to
+	symbol info.  Use it instead of calling _dl_addr locally.
+	(lock_and_info): New function.
+	(tr_freehook): Call lock_and_info and pass symbol info as additional
+	parameter to tr_where.
+	(tr_mallochook): Likewise.
+	(tr_reallochook): Likewise.
+	(tr_memalignhook): Likewise.
+
+	* malloc/mtrace.c: Remove support for USE_MTRACE_FILE.  It is not
+	used and couldn't be at all thread-safe.
+
+2011-05-15  Ulrich Drepper  <drepper@gmail.com>
+
+	* libio/freopen.c (freopen): Don't close old file descriptor
+	before the new one is opened.  Instead dup the new file descriptor
+	to the old one after the new stream is created.
+	* libio/freopen64.c (freopen64): Likewise.
+	* libio/libio.h: Define _IO_FLAGS2_NOCLOSE and _IO_FLAGS2_CLOEXEC.
+	* libio/fileops.c (_IO_new_file_close_it): Handle new
+	_IO_FLAGS2_NOCLOSE flag.
+	(_IO_new_file_fopen): Set _IO_FLAGS2_CLOEXEC for "e" mode.
+	If _IO_file_open didn't set FD_CLOEXEC do it after the call.
+	* libio/oldfileops.c (_IO_old_file_close_it): Handle new
+	_IO_FLAGS2_NOCLOSE flag.
+	* include/unistd.h: Add hidden_proto for dup3.
+	Define __have_dup3.
+	* io/dup3.c: Define hidden symbol.
+	* sysdeps/unix/sysv/linux/kernel-features.h: Define __ASSUME_DUP3.
+
+	[BZ #7101]
+	* posix/getopt.c (_getopt_internal_r): List all ambigious possibilities
+	when an incomplete long option is used.
+	* posix/tst-getopt_long1.c: New file.
+	* posix/Makefile (tests): Add tst-getopt_long1.
+
+	[BZ #10138]
+	* scripts/config.guess: Update from autoconf-2.68.
+	* scripts/config.sub: Likewise.
+
+	[BZ #10157]
+	* sysdeps/unix/sysv/linux/sysconf.c (__sysconf): Split out CPUTIME
+	tests into ...
+	(has_cpuclock): ...this.  New function.
+	* sysdeps/unix/sysv/linux/ia64/sysconf.c: Just define HAS_CPUCLOCK
+	macro here based on has_cpuclock code.
+
+	[BZ #10149]
+	* sysdeps/unix/sysv/linux/dl-osinfo.h (_dl_setup_stack_chk_guard):
+	First byte (not low byte) is now always NUL.
+	* sysdeps/generic/dl-osinfo.h (_dl_setup_stack_chk_guard): Likewise.
+
+	* sysdeps/unix/sysv/linux/dl-osinfo.h (_dl_setup_stack_chk_guard):
+	Use non-cancelable interfaces.
+
+	[BZ #9809]
+	* locale/iso-639.def: Add entry for Sorani.
+
+	[BZ #11901]
+	* include/stdlib.h: Move include protection to the right place.
+	Define abort_msg_s.  Declare __abort_msg with it.
+	* stdlib/abort.c (__abort_msg): Adjust type.
+	* assert/assert.c (__assert_fail_base): New function.  Majority
+	of code from __assert_fail.  Allocate memory for __abort_msg with
+	mmap.
+	(__assert_fail): Now call __assert_fail_base.
+	* assert/assert-perr.c: Remove bulk of implementation.  Use
+	__assert_fail_base.
+	* include/assert.hL Declare __assert_fail_base.
+	* sysdeps/posix/libc_fatal.c: Allocate memory for __abort_msg with
+	mmap.
+	* sysdeps/unix/sysv/linux/libc_fatal.c: Likewise.
+
+2011-05-14  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #11952]
+	[BZ #12453]
+	* elf/dl-open.c (dl_open_worker): Delay calls to _dl_update_slotinfo
+	until all modules are registered in the DTV.
+	* elf/Makefile: Add rules to build and run tst-tls19.
+	* elf/tst-tls19.c: New file.
+	* elf/tst-tls19mod1.c: New file.
+	* elf/tst-tls19mod2.c: New file.
+	* elf/tst-tls19mod3.c: New file.
+	Patch mostly by Martin von Gagern <Martin.vGagern@gmx.net>.
+
+	[BZ #12083]
+	* sysdeps/pthread/aio_misc.c (__aio_init): Compute optim.aio_num
+	correctly.
+
+	[BZ #12601]
+	* iconvdata/cp932.c (BODY to UCS4): Fix incrementing inptr in case of
+	two-byte sequence errors.
+	* iconvdata/Makefile (tests): Add bug-iconv8.
+	* iconvdata/bug-iconv8.c: New file.
+
+	[BZ #12626]
+	* sysdeps/generic/elf/backtracesymsfd.c (__backtrace_symbols_fd): Move
+	buf2 definition.
+
+	* libio/fileops.c (_IO_new_file_close_it): Initialize write_status.
+
+	[BZ #12432]
+	* sysdeps/ia64/backtrace.c (struct trace_reg): Add cfa element.
+	(dummy_getcfa): New function.
+	(init): Get _Unwind_GetCFA address, use dummy if not found.
+	(backtrace_helper): In recursion check, also check whether CFA changes.
+	(__backtrace): Completely initialize arg.
+
+	* iconv/loop.c (SINGLE) [STORE_REST]: Add input bytes to bytebuf before
+	storing incomplete byte sequence in state object.  Avoid testing for
+	guaranteed too small input if we know there is enough data available.
+
+2011-05-11  Andreas Schwab  <schwab@redhat.com>
+
+	* Makeconfig (+link-pie): Indent.
+	* Rules (binaries-pie): Define if $(have-fpie) and
+	$(build-shared).
+	(binaries-shared): Also filter out $(binaries-pie).
+	($(addprefix $(objpfx),$(binaries-pie))): New rule.
+	* nscd/Makefile (others-pie): Add nscd.
+	(LDFLAGS-nscd): Set this instead of relro-LDFLAGS.
+	($(objpfx)nscd): Remove command override.
+	* login/Makefile (others-pie): Add pt_chown.
+	($(objpfx)pt_chown): Remove command override.
+	* elf/Makefile: Add PIE tests to tests and tests-pie variables and
+	remove command overrides.
+
+2011-05-13  Ulrich Drepper  <drepper@gmail.com>
+
+	* libio/tst_putwc.c: Fix error messages.
+
+	[BZ #12724]
+	* libio/fileops.c (_IO_new_file_close_it): Always flush when
+	currently writing and seek to current position when not.
+	* libio/Makefile (tests): Add bug-fclose1.
+	* libio/bug-fclose1.c: New file.
+
+2011-05-12  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12511]
+	* elf/dl-lookup.c (enter): Don't test for copy relocation here and
+	don't set DF_1_NODELETE here.
+	(do_lookup_x): When entering new entry test for copy relocation
+	and if necessary set DF_1_NODELETE flag.
+	* elf/tst-unique4.cc: New file.
+	* elf/tst-unique4.h: New file.
+	* elf/tst-unique4lib.cc: New file.
+	* elf/Makefile: Add rules to build and run tst-unique4.
+	Patch by Piotr Bury <pbury@goahead.com>.
+
+2011-05-11  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12052]
+	* sysdeps/posix/spawni.c (__spawni): Fix sched_setscheduler call.
+
+	[BZ #12625]
+	* misc/mntent_r.c (addmntent): Flush the stream after the output
+
+	[BZ #12393]
+	* elf/dl-load.c (is_trusted_path): Remove unnecessary test.
+	(is_trusted_path_normalize): Skip initial colon.  Append slash
+	to empty buffer.  Duplicate is_trusted_path code but allow
+	constructed patch to be prefix.
+	(is_dst): Allow $ORIGIN followed by /.
+	(_dl_dst_substitute): Correct clearing of check_for_trusted.
+	Correct testing of result of is_trusted_path_normalize
+	(decompose_rpath): Fix warning.
+
+2011-05-10  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #11257]
+	* grp/initgroups.c (internal_getgrouplist): When we found the service
+	list through the initgroups entry in nsswitch.conf do not always
+	continue on a successful lookup.  Don't always use the
+	__nss_group_database value if it is set.
+	* nss/nsswitch.conf (initgroups): Change action for successful db
+	lookup to continue for compatibility.
+
+2011-05-09  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #11532]
+	* iconvdata/Makefile: Add rules to build CP770, CP771, CP772, CP773,
+	and CP774 modules.
+	* iconvdata/gconv-modules: Add entries for CP770, CP771, CP772, CP773,
+	and CP774 modules.
+	* iconvdata/tst-tables.sh: Likewise.
+	* iconvdata/cp770.c: New file.
+	* iconvdata/cp771.c: New file.
+	* iconvdata/cp772.c: New file.
+	* iconvdata/cp773.c: New file.
+	* iconvdata/cp774.c: New file.
+	* iconvdata/testdata/CP770: New file.
+	* iconvdata/testdata/CP770..UTF8: New file.
+	* iconvdata/testdata/CP771: New file.
+	* iconvdata/testdata/CP771..UTF8: New file.
+	* iconvdata/testdata/CP772: New file.
+	* iconvdata/testdata/CP772..UTF8: New file.
+	* iconvdata/testdata/CP773: New file.
+	* iconvdata/testdata/CP773..UTF8: New file.
+	* iconvdata/testdata/CP774: New file.
+	* iconvdata/testdata/CP774..UTF8: New file.
+
+	* iconvdata/gen-8bit-gap-1.sh: End reading of charmap file at
+	END CHARMAP line.
+	* iconvdata/gen-8bit-gap.sh: Likewise.
+	* iconvdata/gen-8bit.sh: Likewise.
+
+	* locale/iso-639.def: Add ary entry.
+
+	[BZ #11258]
+	* locale/C-translit.h.in: Add U20A1 transliteration.
+
+	[BZ #12178]
+	* locale/iso-639.def: Add wae entry.
+	Patch by Kevin Bortis <bortis@translate-wae.ch>.
+
+	[BZ #12545]
+	* locale/programs/localedef.c (construct_output_path): Use ssize_t
+	for n.
+
+	[BZ #12711]
+	* locale/C-translit.h.in: Add entry for U20B9.
+	Patch by pravin.d.s@gmail.com.
+
+2011-05-08  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12713]
+	* sysdeps/unix/sysv/linux/getcwd.c: If getcwd syscall report
+	ENAMETOOLONG use generic getcwd.
+	* sysdeps/posix/getcwd.c: Add support to use openat.  Make usable
+	in rtld.  Use *stat64.
+	* sysdeps/unix/sysv/linux/Makefile [subdir=elf] (sysdep-rtld-routines):
+	Add dl-getcwd, dl-openat64, dl-opendir, dl-fxstatat64.
+	* sysdeps/unix/sysv/linux/dl-getcwd.c: New file.
+	* sysdeps/unix/sysv/linux/dl-openat64.c: New file.
+	* sysdeps/unix/sysv/linux/dl-opendir.c: New file.
+	* sysdeps/unix/sysv/linux/dl-fxstat64.c: New file.
+	* include/sys/stat.h: Define __fstatat, __lstat64, __fstat64, and
+	__fstatat64 macros.
+	* include/dirent.h: Add libc_hidden_proto for rewinddir.
+	* dirent/rewinddir.c: Add libc_hidden_def.
+	* sysdeps/mach/hurd/rewinddir.c: Likewise.
+	* sysdeps/unix/rewinddir.c: Likewise.  Don't do locking outside libc.
+
+	* include/dirent.h (__alloc_dir): Add flags parameter.
+	* sysdeps/unix/fdopendir.c (__fdopendir): Pass flags to __alloc_dir.
+	* sysdeps/unix/opendir.c (__opendir): Pass 0 in new parameter to
+	__alloc_dir.
+	(__alloc_dir): Take new parameter.  Don't call fcntl for invocations
+	from fdopendir if O_CLOEXEC is already set.
+
+2011-03-15  Alan Modra  <amodra@gmail.com>
+
+	* elf/dl-reloc.c (_dl_try_allocate_static_tls <TLS_DTV_AT_TP>): Handle
+	l_tls_firstbyte_offset non-zero.  Save padding offset in
+	l_tls_firstbyte_offset for later use.
+	* elf/dl-close.c (_dl_close_worker <TLS_DTV_AT_TP>): Correct code
+	freeing static tls block.
+
+2011-03-05  Jonathan Nieder  <jrnieder@gmail.com>
+
+	* sysdeps/unix/sysv/linux/sys/param.h: Fix an #ifndef __undef_ARG_MAX
+	where #ifdef was intended.  The intent is to prevent ARG_MAX from
+	being defined by the kernel headers.
+
+2011-05-07  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12734]
+	* resolv/resolv.h: Define RES_NOTLDQUERY.
+	* resolv/res_init.c (res_setoptions): Recognize no_tld_query and
+	no-tld-query and set RES_NOTLDQUERY.
+	* resolv/res_debug.c (p_option): Handle RES_NOTLDQUERY.
+	* resolv/res_query.c (__libc_res_nsearch): Backport changes from
+	modern BIND to search name as TLD unless forbidden.
+
+2011-05-07  Petr Baudis  <pasky@suse.cz>
+	    Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12393]
+	* elf/dl-load.c (fillin_rpath): Move trusted path check...
+	(is_trusted_path): ...to here.
+	(is_trusted_path_normalize): Wrapper for /../ and /./ normalization.
+	(_dl_dst_substitute): Verify expanded $ORIGIN path elements
+	using is_trusted_path_normalize() in setuid scripts.
+
+2011-05-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* sysdeps/unix/sysv/linux/sys/sysmacros.h: Add missing
+	__BEGIN/__END_DECLS.
+
+2011-05-06  Ulrich Drepper  <drepper@gmail.com>
+
+	* nss/nss_files/files-initgroups.c (_nss_files_initgroups_dyn): Return
+	NSS_STATUS_NOTFOUND if no record was found.
+
+2011-05-05  Andreas Schwab  <schwab@redhat.com>
+
+	* sunrpc/Makefile (headers): Add rpc/netdb.h.
+	(headers-not-in-tirpc): Remove rpc/netdb.h
+	* resolv/netdb.h: Revert last change.
+
+2011-05-05  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* Makeconfig (link-libc-static): Use --{start,end}-group to handle
+	circular dependency between libgcc.a and libc.a.
+
+2011-05-05  Andreas Schwab  <schwab@redhat.com>
+
+	* resolv/netdb.h: Don't include <rpc/netdb.h>.
+	* nis/Makefile: Don't install rpcsvc/*.
+	* inet/protocols/timed.h: Include <sys/types.h> and <sys/time.h>
+	instead of <rpc/types.h>.
+	(MAXHOSTNAMELEN): Define.
+
+2011-05-03  Andreas Schwab  <schwab@redhat.com>
+
+	* elf/ldconfig.c (add_dir): Don't crash on empty path.
+
+2011-04-28  Maciej Babinski  <mbabinski@google.com>
+
+	[BZ #12714]
+	* sysdeps/posix/getaddrinfo.c (gaih_inet): Don't bypass
+	gethostbyname4_r when IPv6 results are possible.
+
+2011-05-02  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12723]
+	* sysdeps/unix/sysv/linux/pathconf.c (__pathconf): Implement
+	_PC_PIPE_BUF handling.
+
+2011-04-30  Bruno Haible  <bruno@clisp.org>
+
+	[BZ #12717]
+	* conform/data/netdb.h-data (getnameinfo): Make POSIX compliant.
+	* resolv/netdb.h (getnameinfo): Change type of flags parameter
+	to 'int'.
+	* inet/getnameinfo.c (getnameinfo): Likewise.
+
+2011-04-29  Ulrich Drepper  <drepper@gmail.com>
+
+	* grp/initgroups.c (internal_getgrouplist): Prefer initgroups setting
+	to groups setting in database lookup.
+	* nss/nsswitch.conf: Add initgroups entry.
+
+2011-04-22  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12685]
+	* libio/fileops.c (_IO_new_file_fopen): Scan up to 7 bytes of the
+	mode string.
+	Patch by Eric Blake <eblake@redhat.com>.
+
+2011-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* sunrpc/Makefile (need-export-routines): Add svc_run.
+	(routines): Remove svc_run.
+	($(objpfx)thrsvc): Add $(common-objpfx)linkobj/libc.so.
+	* sunrpc/clnt_perr.c (clnt_perrno): Export.
+	* sunrpc/svc_run.c (svc_run): Likewise.
+	* sunrpc/svc_udp.c (svcudp_create): Likewise.
+
+2011-04-21  Ulrich Drepper  <drepper@gmail.com>
+
+	* nss/nss_files/files-initgroups.c (_nss_files_initgroups_dyn): Fix
+	problem in reallocation in last patch.
+
+2011-04-20  Ulrich Drepper  <drepper@gmail.com>
+
+	* sunrpc/Makefile: Move inclusion of Rules.
+
+2011-04-19  Ulrich Drepper  <drepper@gmail.com>
+
+	* nss/nss_files/files-initgroups.c: New file.
+	* nss/Makefile (libnss_files-routines): Add files-initgroups.
+	* nss/Versions (libnss_files) [GLIBC_PRIVATE]: Export
+	_nss_files_initgroups_dyn.
+
+2011-03-31  Richard Sandiford  <richard.sandiford@linaro.org>
+
+	* elf/elf.h (R_ARM_IRELATIVE): Define.
+
+2011-04-19  Ulrich Drepper  <drepper@gmail.com>
+
+	* po/ru.po: Update from translation team.
+
+2011-04-17  Ulrich Drepper  <drepper@gmail.com>
+
+	* sunrpc/Makefile ($(rpc-compat-routines.os)): Add before-compile to
+	dependencies.
+
+2011-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	[BZ #12653]
+	* sysdeps/i386/i686/multiarch/memcpy-ssse3-rep.S: Only protect
+	MEMCPY_CHK with USE_AS_BCOPY ifdef check.
+	* sysdeps/i386/i686/multiarch/memcpy-ssse3.S: Likewise.
+	* sysdeps/x86_64/multiarch/memcpy-ssse3.S: Likewise.
+	* sysdeps/x86_64/multiarch/memcpy-ssse3-back.S: Likewise.
+
+2011-03-28  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* sysdeps/powerpc/powerpc32/power4/strncmp.S: Don't read past
+	differing bytes.
+	* sysdeps/powerpc/powerpc64/power4/strncmp.S: Likewise.
+	* sysdeps/powerpc/powerpc32/power7/strncmp.S: Likewise.
+	* sysdeps/powerpc/powerpc64/power7/strncmp.S: Likewise.
+
+2011-04-17  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12420]
+	* sysdeps/unix/sysv/linux/x86_64/getcontext.S: Reload context after
+	storing it.
+	* stdlib/bug-getcontext.c: New file.
+	* stdlib/Makefile: Add rules to build and run bug-getcontext.
+
+2011-04-13  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* sysdeps/s390/s390-64/utf16-utf32-z9.c: Wrap the z9-109
+	instructions into .machine "z9-109".
+	* sysdeps/s390/s390-64/utf8-utf16-z9.c: Likewise.
+	* sysdeps/s390/s390-64/utf8-utf32-z9.c: Likewise.
+
+2011-04-11  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* sysdeps/s390/s390-32/elf/start.S (_start): Skip extra zeroes
+	between environment variables and auxiliary vector.
+
+2011-04-16  Ulrich Drepper  <drepper@gmail.com>
+
+	* Makefile: Add rules to build linkobj/libc.so.
+	* include/libc-symbols.h: Define libc_hidden_nolink.
+	* include/rpc/auth.h: Mark functions which are to be hidden.
+	* include/rpc/auth_des.h: Likewise.
+	* include/rpc/auth_unix.h: Likewise.
+	* include/rpc/clnt.h: Likewise.
+	* include/rpc/des_crypt.h: Likewise.
+	* include/rpc/key_prot.h: Likewise.
+	* include/rpc/pmap_clnt.h: Likewise.
+	* include/rpc/pmap_prot.h: Likewise.
+	* include/rpc/pmap_rmt.h: Likewise.
+	* include/rpc/rpc_msg.h: Likewise.
+	* include/rpc/svc.h: Likewise.
+	* include/rpc/svc_auth.h: Likewise.
+	* include/rpc/xdr.h: Likewise.
+	* nis/Makefile: Link all DSOs against linkobj/libc.so.
+	* nss/Makefile: Likewise.
+	* sunrpc/Makefile: Don't install headers.  Build library with normal
+	entry points.  Don't build rpcinfo.  Link RPC tests appropriately.
+	* sunrpc/auth_des.c: Hide exported symbols by default, export some
+	for the compat linking library.  Remove use of INTDEF/INTUSE.
+	* sunrpc/auth_none.c: Likewise.
+	* sunrpc/auth_unix.c: Likewise.
+	* sunrpc/authdes_prot.c: Likewise.
+	* sunrpc/authuxprot.c: Likewise.
+	* sunrpc/clnt_gen.c: Likewise.
+	* sunrpc/clnt_perr.c: Likewise.
+	* sunrpc/clnt_raw.c: Likewise.
+	* sunrpc/clnt_simp.c: Likewise.
+	* sunrpc/clnt_tcp.c: Likewise.
+	* sunrpc/clnt_udp.c: Likewise.
+	* sunrpc/clnt_unix.c: Likewise.
+	* sunrpc/des_crypt.c: Likewise.
+	* sunrpc/des_soft.c: Likewise.
+	* sunrpc/get_myaddr.c: Likewise.
+	* sunrpc/key_call.c: Likewise.
+	* sunrpc/key_prot.c: Likewise.
+	* sunrpc/netname.c: Likewise.
+	* sunrpc/pm_getmaps.c: Likewise.
+	* sunrpc/pm_getport.c: Likewise.
+	* sunrpc/pmap_clnt.c: Likewise.
+	* sunrpc/pmap_prot.c: Likewise.
+	* sunrpc/pmap_prot2.c: Likewise.
+	* sunrpc/pmap_rmt.c: Likewise.
+	* sunrpc/publickey.c: Likewise.
+	* sunrpc/rpc_cmsg.c: Likewise.
+	* sunrpc/rpc_common.c: Likewise.
+	* sunrpc/rpc_dtable.c: Likewise.
+	* sunrpc/rpc_prot.c: Likewise.
+	* sunrpc/rpc_thread.c: Likewise.
+	* sunrpc/rtime.c: Likewise.
+	* sunrpc/svc.c: Likewise.
+	* sunrpc/svc_auth.c: Likewise.
+	* sunrpc/svc_authux.c: Likewise.
+	* sunrpc/svc_raw.c: Likewise.
+	* sunrpc/svc_run.c: Likewise.
+	* sunrpc/svc_simple.c: Likewise.
+	* sunrpc/svc_tcp.c: Likewise.
+	* sunrpc/svc_udp.c: Likewise.
+	* sunrpc/svc_unix.c: Likewise.
+	* sunrpc/svcauth_des.c: Likewise.
+	* sunrpc/xcrypt.c: Likewise.
+	* sunrpc/xdr.c: Likewise.
+	* sunrpc/xdr_array.c: Likewise.
+	* sunrpc/xdr_float.c: Likewise.
+	* sunrpc/xdr_intXX_t.c: Likewise.
+	* sunrpc/xdr_mem.c: Likewise.
+	* sunrpc/xdr_rec.c: Likewise.
+	* sunrpc/xdr_ref.c: Likewise.
+	* sunrpc/xdr_sizeof.c: Likewise.
+	* sunrpc/xdr_stdio.c: Likewise.
+
+2011-04-10  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12650]
+	* sysdeps/i386/dl-tls.h: Define TLS_DTV_UNALLOCATED.
+	* sysdeps/ia64/dl-tls.h: Likewise.
+	* sysdeps/powerpc/dl-tls.h: Likewise.
+	* sysdeps/s390/dl-tls.h: Likewise.
+	* sysdeps/sh/dl-tls.h: Likewise.
+	* sysdeps/sparc/dl-tls.h: Likewise.
+	* sysdeps/x86_64/dl-tls.h: Likewise.
+	* elf/dl-tls.c: Don't define TLS_DTV_UNALLOCATED here.
+
+2011-03-14  Andreas Schwab  <schwab@redhat.com>
+
+	* elf/dl-load.c (_dl_dst_substitute): When skipping the first
+	rpath element also skip the following colon.
+	(expand_dynamic_string_token): Add is_path parameter and pass
+	down to DL_DST_REQUIRED and _dl_dst_substitute.
+	(decompose_rpath): Call expand_dynamic_string_token with
+	non-zero is_path.  Ignore empty rpaths.
+	(_dl_map_object_from_fd): Call expand_dynamic_string_token
+	with zero is_path.
+
+2011-04-08  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/sync_file_range.c:
+	Make cancelable.
+
+2011-04-09  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12655]
+	* sysdeps/unix/sysv/linux/sys/syscall.h: Fix comment.
+	Patch by Filipe David Manana <fdmanana@apache.org>.
+
+2011-04-07  Andreas Schwab  <schwab@redhat.com>
+
+	* sysdeps/unix/sysv/linux/x86_64/____longjmp_chk.S (CALL_FAIL):
+	Maintain aligned stack.
+	(CHECK_RSP): Remove unused macro.
+
+2011-04-03  Ulrich Drepper  <drepper@gmail.com>
+
+	* sysdeps/x86_64/cacheinfo.c (intel_02_known): Fix typo in table.
+	* sysdeps/unix/sysv/linux/i386/sysconf.c (intel_02_known): Likewise.
+
+2011-04-02  Ulrich Drepper  <drepper@gmail.com>
+
+	* sysdeps/unix/sysv/linux/bits/time.h (CLOCK_BOOTTIME): Define.
+
+	* include/features.h: Mention __USE_XOPEN2K8 in comment.
+
+2011-03-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	[BZ #12518]
+	* sysdeps/x86_64/Versions: Add memcpy to GLIBC_2.14.
+	* sysdeps/x86_64/memcpy.S: Provide GLIBC_2_14 memcpy.
+	* sysdeps/x86_64/memmove.c: New file.
+	* sysdeps/x86_64/multiarch/memcpy.S: Include <shlib-compat.h>.
+	(memcpy): Renamed to ...
+	(__new_memcpy): This.
+	(memcpy): Provide GLIBC_2_14 memcpy.
+	* sysdeps/x86_64/multiarch/memmove.c: Include <shlib-compat.h>.
+	(memcpy): Provide GLIBC_2_2_5 memcpy.
+
+2011-04-01  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12631]
+	* wcsmbs/wchar.h: Make wcpcpy and wcpncpy visible for __USE_XOPEN2K8.
+
+2011-03-30  Andreas Schwab  <schwab@redhat.com>
+
+	* misc/syncfs.c: New file.
+	* misc/Makefile (routines): Add syncfs.
+	* posix/unistd.h: Declare syncfs.
+	* sysdeps/unix/syscalls.list: Add syncfs.
+
+2011-04-01  Andreas Schwab  <schwab@redhat.com>
+
+	* sysdeps/unix/sysv/linux/Versions: Rename open_by_handle to
+	open_by_handle_at.
+	* sysdeps/unix/sysv/linux/i386/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/ia64/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/s390/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/sh/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/sparc/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/syscalls.list: Likewise.
+	* sysdeps/unix/sysv/linux/x86_64/bits/fcntl.h: Likewise.
+
+2011-04-01  Ulrich Drepper  <drepper@gmail.com>
+
+	* sysdeps/unix/sysv/linux/i386/bits/fcntl.h: Define O_PATH.
+	* sysdeps/unix/sysv/linux/ia64/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/powerpc/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/s390/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/sh/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/sparc/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/x86_64/bits/fcntl.h: Likewise.
+
+	* io/Makefile: Compile fallocate.c, fallocate64.c, and
+	sync_file_range.c with -fexceptions.
+	* sysdeps/unix/sysv/linux/fallocate.c: Make cancelable.
+	* sysdeps/unix/sysv/linux/fallocate64.c: Likewise.
+	* sysdeps/unix/sysv/linux/i386/fallocate.c: Likewise.
+	* sysdeps/unix/sysv/linux/i386/fallocate64.c: Likewise.
+	* sysdeps/unix/sysv/linux/wordsize-64/fallocate.c: Likewise.
+	* sysdeps/unix/sysv/linux/sync_file_range.c: Likewise.
+	* sysdeps/unix/sysv/linux/wordsize-64/syscalls.list: Mark
+	sync_file_range as cancellation point
+	* sysdeps/unix/sysv/linux/i386/sync_file_range.c: New file.  This is
+	now a wrapper around __call_sync_file_range with cancellation handling.
+	* sysdeps/unix/sysv/linux/i386/sync_file_range.S: Renamed to ...
+	* sysdeps/unix/sysv/linux/i386/call_sync_file_range.S: ...this.  Change
+	function name to __call_sync_file_range.
+	* sysdeps/unix/sysv/linux/i386/Makefile [subdir=io] (sysdep_routines):
+	Add call_sync_file_range.
+
+2011-04-01  Andreas Schwab  <schwab@redhat.com>
+
+	* sysdeps/unix/sysv/linux/Makefile (sysdep_headers): Add
+	bits/timex.h.
+
+2011-04-01  Ulrich Drepper  <drepper@gmail.com>
+
+	* iconv/iconv.h: Fix typo in comment.
+	* io/fcntl.h: Likewise.
+	* libio/stdio.h: Likewise.
+	* posix/spawn.h: Likewise.
+	* posix/unistd.h: Likewise.
+	* stdlib/stdlib.h: Likewise.
+	* time/time.h: Likewise.
+	* wcsmbs/wchar.h: Likewise.
+
+	* sysdeps/unix/sysv/linux/Versions [GLIBC_2.14] (name_to_handle_at,
+	open_by_handle): Add.
+	* sysdeps/unix/sysv/linux/i386/bits/fcntl.h: Define struct file_handle
+	and MAX_HANDLE_SZ.  Declare name_to_handle_at and open_by_handle.
+	Augment a few comments.
+	* sysdeps/unix/sysv/linux/ia64/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/s390/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/sh/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/sparc/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/x86_64/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/syscalls.list: Add name_to_handle_at and
+	open_by_handle.
+
+	* io/fcntl.h (AT_EMPTY_PATH): Define.
+
+2011-03-30  Ulrich Drepper  <drepper@gmail.com>
+
+	* sysdeps/unix/sysv/linux/syscalls.list: Add clock_adjtime.
+	* sysdeps/unix/sysv/linux/bits/time.h: New file.
+	* sysdeps/unix/sysv/linux/sys/timex.h: Move struct timex definition
+	to...
+	* sysdeps/unix/sysv/linux/bits/timex.h: ...here.  New file.
+	* Versions.def: Add GLIBC_2.14.
+	* sysdeps/unix/sysv/linux/Versions [GLIBC_2.14] (clock_adjtime):
+	Export.
+
+2011-03-22  Ulrich Drepper  <drepper@gmail.com>
+
+	* sysdeps/unix/sysv/linux/i386/sysconf.c (intel_check_word): Increment
+	round counter.
+	* sysdeps/x86_64/cacheinfo.c (intel_check_word): Likewise.
+
+2011-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	[BZ #12597]
+	* string/test-strncmp.c (do_page_test): New function.
+	(check2): Likewise.
+	(test_main): Call check2.
+	* sysdeps/x86_64/multiarch/strcmp.S: Properly cross page boundary.
+
+2011-03-20  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12587]
+	* sysdeps/unix/sysv/linux/i386/sysconf.c (intel_check_word):
+	Handle cache information in CPU leaf 4.
+	* sysdeps/x86_64/cacheinfo.c (intel_check_word): Likewise.
+
+2011-03-18  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12583]
+	* posix/fnmatch.c (fnmatch): Check size of pattern in wide
+	character representation.
+	Partly based on a patch by Tomas Hoger <thoger@redhat.com>.
+
+2011-03-16  Ryan S. Arnold  <rsa@us.ibm.com>
+
+	* sysdeps/powerpc/powerpc32/power6/fpu/s_isnanf.S (isnanf): Fix
+	END(__isnan) to END(__isnanf) to match function entry point/label
+	EALIGN(__isnanf,...).
+
+2011-03-10  Jakub Jelinek  <jakub@redhat.com>
+
+	* wcsmbs/wchar.h (wmemcmp): Remove __restrict qualifiers.
+
+2011-03-10  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12510]
+	* elf/dl-lookup.c (do_lookup_x): For copy relocations of unique objects
+	copy from the symbol referenced in the relocation to initialize the
+	used variable.
+	Patch by Piotr Bury <pbury@goahead.com>.
+	* elf/Makefile: Add rules to build and tst-unique3.
+	* include/bits/dlfcn.h: Remove _dl_mcount_wrapper_check declaration.
+	* elf/tst-unique3.cc: New file.
+	* elf/tst-unique3.h: New file.
+	* elf/tst-unique3lib.cc: New file.
+	* elf/tst-unique3lib2.cc: New file.
+
+	* elf/Makefile: Don't run tst-execstack* tests of SELinux is enabled.
+
+2011-03-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* sysdeps/sparc/sparc64/elf/configure.in (libc_cv_sparc64_tls): Add
+	$LDFLAGS and -nostdlib -nostartfiles to linking step.  Change main
+	to _start.
+
+2011-03-06  Ulrich Drepper  <drepper@gmail.com>
+
+	* elf/dl-load.c (_dl_map_object): If we are looking for the first
+	to-be-loaded object along a path to loader is ld.so.
+
+2011-03-02  Harsha Jagasia  <harsha.jagasia@amd.com>
+	    Ulrich Drepper  <drepper@gmail.com>
+
+	* sysdeps/x86_64/memset.S: After aligning destination, code
+	branches to different locations depending on the value of
+	misalignment, when multiarch is enabled. Fix this.
+
+2011-03-02  Harsha Jagasia  <harsha.jagasia@amd.com>
+
+	* sysdeps/x86_64/cacheinfo.c (init_cacheinfo):
+	Set _x86_64_preferred_memory_instruction for AMD processsors.
+	* sysdeps/x86_64/multiarch/init-arch.c (__init_cpu_features):
+	Set bit_Prefer_SSE_for_memop for AMD processors.
+
+2011-03-04  Ulrich Drepper  <drepper@gmail.com>
+
+	* libio/fmemopen.c (fmemopen): Optimize a bit.
+
+2011-03-03  Andreas Schwab  <schwab@redhat.com>
+
+	* libio/fmemopen.c (fmemopen): Don't read past end of buffer.
+
+2011-03-03  Roland McGrath  <roland@redhat.com>
+
+	* setjmp/bits/setjmp2.h: Canonicalize comment formatting.
+
+2011-02-28  Aurelien Jarno  <aurelien@aurel32.net>
+
+	* sysdeps/sparc/sparc64/multiarch/memset.S(__bzero): Call
+	__bzero_ultra1 instead of __memset_ultra1.
+
+2011-02-23  Andreas Schwab  <schwab@redhat.com>
+	    Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12509]
+	* include/link.h (struct link_map): Add l_orig_initfini.
+	* elf/dl-load.c (_dl_map_object_from_fd): Free realname before
+	returning unsuccessfully.
+	* elf/dl-close.c (_dl_close_worker): If this is the last explicit
+	close of a file loaded at startup, restore the original l_initfini
+	list.
+	* elf/dl-deps.c (_dl_map_object_deps): Don't free old l_initfini
+	list, store the pointer.
+	* elf/Makefile ($(objpfx)noload-mem): New rule.
+	(noload-ENV): Define.
+	(tests): Add $(objpfx)noload-mem.
+	* elf/noload.c: Include <memcheck.h>.
+	(main): Call mtrace.  Close all opened handles.
+
+2011-02-17  Andreas Schwab  <schwab@redhat.com>
+
+	[BZ #12454]
+	* elf/dl-deps.c (_dl_map_object_deps): Signal error early when
+	dependencies are missing.
+
+2011-02-22  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	Fix __if_freereq crash: Unlike the generic version which uses free,
+	Hurd needs munmap.
+	* sysdeps/mach/hurd/ifreq.h: New file.
+
+2011-01-27  Petr Baudis  <pasky@suse.cz>
+	    Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ 12445]#
+	* stdio-common/vfprintf.c (vfprintf): Pass correct newlen
+	to extend_alloca().
+	* stdio-common/bug23.c: New file.
+	* stdio-common/Makefile (tests): Add bug23.
+
+2010-09-28  Andreas Schwab  <schwab@redhat.com>
+	    Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12489]
+	* elf/rtld.c (dl_main): Move setting of GLRO(dl_init_all_dirs)
+	before performing relro protection.  At old place add assertion
+	to make sure nothing changed.
+
+2011-02-17  Nathan Sidwell  <nathan@codesourcery.com>
+	    Glauber de Oliveira Costa  <glommer@gmail.com>
+
+	* elf/elf.h: Add new ARM TLS relocs.
+
+2011-02-16  Ryan S. Arnold  <rsa@us.ibm.com>
+
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/sysdep.h:
+	(INTERNAL_VSYSCALL_NCS INTERNAL_SYSCALL_NCS): Remove erroneous (int)
+	cast from r3.
+	* sysdeps/wordsize-64/Makefile: New file.  Add tst-writev to
+	'tests' variable.
+	* sysdeps/wordsize-64/tst-writev.c: New file.
+
+2011-02-15  Ryan S. Arnold  <rsa@us.ibm.com>
+
+	* sysdeps/powerpc/powerpc64/power7/Makefile: New file which adds
+	-mno-vsx to the CFLAGS-rtld.c variable to avoid using VSX registers and
+	insns in _dl_start to prevent a TOC reference before relocs are
+	resolved.
+
+2011-02-15  Ulrich Drepper  <drepper@gmail.com>
+
+	[BZ #12469]
+	* Makeconfig: Remove RANLIB definition.
+	* Makerules: Don't use RANLIB.
+	* aclocal.m4: Remove ranlib test.
+	* configure.in: No need to check for ranlib.
+	* elf/rtld-Rules: Don't use RANLIB.
+
+2011-02-16  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* sysdeps/mach/i386/sysdep.h: Add _MACH_I386_SYSDEP_H inclusion
+	protection macro.
+	* sysdeps/mach/i386/thread_state.h: Add _MACH_I386_THREAD_STATE_H
+	inclusion protection macro.
+
+	* stdio-common/psiginfo.c (psiginfo): Check pinfo->si_signo against
+	SIGRTMIN and SIGRTMAX and print information in that case only when
+	SIGRTMIN is defined.
+
+2011-02-11  Jakub Jelinek  <jakub@redhat.com>
+
+	* stdio-common/printf-parsemb.c (__parse_one_specmb): Handle
+	arginfo fn returning -1.
+
+	* stdio-common/_i18n_number.h (_i18n_number_rewrite): Ensure decimal
+	and thousands string is zero terminated.
+
+2011-02-03  Andreas Schwab  <schwab@redhat.com>
+
+	* sysdeps/unix/sysv/linux/sparc/bits/socket.h: Sync with
+	sysdeps/unix/sysv/linux/bits/socket.h.
+
+2011-01-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* bits/sched.h (__CPU_ZERO, __CPU_SET, __CPU_CLR, __CPU_ISSET)
+	(__CPU_COUNT): Remove old macros.
+	(__CPU_ZERO_S, __CPU_SET_S, __CPU_CLR_S, __CPU_ISSET_S)
+	(__CPU_COUNT, __CPU_EQUAL_S, __CPU_OP_S, __CPU_ALLOC_SIZE)
+	(__CPU_ALLOC, __CPU_FREE): Add macros.
+	(__sched_cpualloc, __sched_cpufree): Add declarations.
+
+2011-02-05  Ulrich Drepper  <drepper@gmail.com>
+
+	* nscd/nscd-client.h: Define MAX_TIMEOUT_VALUE.
+	(struct datahead): Reuse 32 bits of the alignment for a TTL field.
+	* nscd/aicache.c (addhstaiX): Return timeout of added value.
+	(readdhstai): Return value of addhstaiX call.
+	* nscd/grpcache.c (cache_addgr): Return timeout of added value.
+	(addgrbyX): Return value returned by cache_addgr.
+	(readdgrbyname): Return value returned by addgrbyX.
+	(readdgrbygid): Likewise.
+	* nscd/pwdcache.c (cache_addpw): Return timeout of added value.
+	(addpwbyX): Return value returned by cache_addpw.
+	(readdpwbyname): Return value returned by addhstbyX.
+	(readdpwbyuid): Likewise.
+	* nscd/servicescache.c (cache_addserv): Return timeout of added value.
+	(addservbyX): Return value returned by cache_addserv.
+	(readdservbyname): Return value returned by addservbyX:
+	(readdservbyport): Likewise.
+	* nscd/hstcache.c (cache_addhst): Return timeout of added value.
+	(addhstbyX): Return value returned by cache_addhst.
+	(readdhstbyname): Return value returned by addhstbyX.
+	(readdhstbyaddr): Likewise.
+	(readdhstbynamev6): Likewise.
+	(readdhstbyaddrv6): Likewise.
+	* nscd/initgrcache.c (addinitgroupsX): Return timeout of added value.
+	(readdinitgroups): Return value returned by addinitgroupsX.
+	* nscd/cache.c (readdfcts): Change return value of functions to time_t.
+	(prune_cache): Keep track of timeout value of re-added entries.
+	* nscd/connections.c (nscd_run_prune): Use MAX_TIMEOUT_VALUE.
+	* nscd/nscd.h: Adjust prototypes of readd* functions.
+
+2011-02-04  Roland McGrath  <roland@redhat.com>
+
+	* nis/nis_server.c (nis_servstate): Use the right name for 0.
+	(nis_stats): Likewise.
+	* nis/nis_modify.c (nis_modify): Likewise.
+	* nis/nis_remove.c (nis_remove): Likewise.
+	* nis/nis_add.c (nis_add): Likewise.
+
+	* elf/dl-object.c (_dl_new_object): Remove unused variable L.
+
+	* posix/fnmatch_loop.c: Add some consts.
+
+	* sysdeps/x86_64/multiarch/memset-x86-64.S: Add an #undef.
+
+2011-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	[BZ #12460]
+	* config.make.in (config-cflags-novzeroupper): Define.
+	* configure.in: Substitute libc_cv_cc_novzeroupper.
+	* elf/Makefile (AVX-CFLAGS): Define.
+	(CFLAGS-tst-audit4.c): Replace -mavx with $(AVX-CFLAGS).
+	(CFLAGS-tst-auditmod4a.c): Likewise.
+	(CFLAGS-tst-auditmod4b.c): Likewise.
+	(CFLAGS-tst-auditmod6b.c): Likewise.
+	(CFLAGS-tst-auditmod6c.c): Likewise.
+	(CFLAGS-tst-auditmod7b.c): Likewise.
+	* sysdeps/i386/configure.in: Check -mno-vzeroupper.
+
+2011-02-02  Ulrich Drepper  <drepper@gmail.com>
+
+	* elf/dl-runtime.c (_dl_call_pltexit): Pass correct address of the
+	function to the callback.
+	Patch partly by Jiri Olsa <jolsa@redhat.com>.
+
+2011-02-02  Andreas Schwab  <schwab@redhat.com>
+
+	* shadow/sgetspent.c: Check return value of __sgetspent_r instead
+	of errno.
+
 2011-01-19  Ulrich Drepper  <drepper@gmail.com>
 
 	[BZ #11724]
@@ -1353,6 +2594,7 @@
 
 2010-07-06  Andreas Schwab  <schwab@redhat.com>
 
+	[BZ #11577]
 	* elf/dl-version.c (match_symbol): Don't pass NULL occation to
 	dl_signal_cerror.
 
