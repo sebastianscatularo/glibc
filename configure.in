@@ -1095,26 +1095,8 @@ fi
 AC_SUBST(SYSINCLUDES)
 AC_SUBST(CXX_SYSINCLUDES)
 
-# check if ranlib is necessary
-AC_CACHE_CHECK(whether ranlib is necessary, libc_cv_ranlib_necessary, [dnl
-cat > conftest.c <<EOF
-int a;
-char b;
-void c(void) {}
-EOF
-$CC $CFLAGS $CPPFLAGS -c conftest.c
-$AR cr conftest.a conftest.o
-cp conftest.a conftest2.a
-$RANLIB conftest.a
-if cmp -s conftest.a conftest2.a; then
-  libc_cv_ranlib_necessary=no
-else
-  libc_cv_ranlib_necessary=yes
-fi
-rm -rf conftest*])
-if test "$libc_cv_ranlib_necessary" = no; then
- RANLIB=:
-fi
+# ranlib is never necessary on Linux and Hurd systems
+RANLIB=:
 
 # Test if LD_LIBRARY_PATH contains the notation for the current directory
 # since this would lead to problems installing/building glibc.
@@ -1406,7 +1388,7 @@ EOF
 		      fi
 		    fi
 		  fi
-		  rm -f conftest.[cs]
+		  rm -f conftest.{c,s}
 		 ])
     if test $libc_cv_visibility_attribute != yes; then
       AC_MSG_ERROR(compiler support for visibility attribute is required)
@@ -1422,7 +1404,7 @@ EOF
 		  int bar (int x) { return x; }
 EOF
 		  libc_cv_broken_visibility_attribute=yes
-		  if AC_TRY_COMMAND(${CC-cc} -Werror -S conftest.c -o conftest.s1>&AS_MESSAGE_LOG_FD); then
+		  if AC_TRY_COMMAND(${CC-cc} -Werror -S conftest.c -o conftest.s 1>&AS_MESSAGE_LOG_FD); then
 changequote(,)dnl
 		    if grep '\.hidden[ 	_]foo' conftest.s >/dev/null; then
 changequote([,])dnl
@@ -1824,7 +1806,7 @@ EOF
 		  else
 		    libc_cv_have_section_quotes=unknown
 		  fi
-		  rm -f conftest.[cs]
+		  rm -f conftest.{c,s}
 		 ])
   if test $libc_cv_have_section_quotes = yes; then
     AC_DEFINE(HAVE_SECTION_QUOTES)
@@ -2098,7 +2080,7 @@ fi
 
 if test -n "$submachine"; then
   AC_CACHE_CHECK([for compiler option for CPU variant],
-  		 libc_cv_cc_submachine, [dnl
+		 libc_cv_cc_submachine, [dnl
   libc_cv_cc_submachine=no
   for opt in "-march=$submachine" "-mcpu=$submachine"; do
     if AC_TRY_COMMAND([${CC-cc} $opt -xc /dev/null -S -o /dev/null]); then
@@ -2240,6 +2222,7 @@ dnl sysdeps/CPU/configure.in checks set this via arch-specific asm tests
 AC_SUBST(libc_cv_cpp_asm_debuginfo)
 AC_SUBST(libc_cv_cc_sse4)
 AC_SUBST(libc_cv_cc_avx)
+AC_SUBST(libc_cv_cc_novzeroupper)
 AC_SUBST(libc_cv_as_i686)
 
 AC_SUBST(use_ldconfig)
