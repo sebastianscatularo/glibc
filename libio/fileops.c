@@ -49,6 +49,7 @@
 # include "../iconv/gconv_int.h"
 # include <shlib-compat.h>
 # include <not-cancel.h>
+# include <kernel-features.h>
 #endif
 #ifndef errno
 extern int errno;

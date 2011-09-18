@@ -34,6 +34,8 @@
 
 #include <fd_to_filename.h>
 
+#include <kernel-features.h>
+
 FILE *
 freopen64 (filename, mode, fp)
      const char* filename;

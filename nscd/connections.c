@@ -52,9 +52,8 @@
 #include "dbg_log.h"
 #include "selinux.h"
 #include <resolv/resolv.h>
-#ifdef HAVE_SENDFILE
-# include <kernel-features.h>
-#endif
+
+#include <kernel-features.h>
 
 
 /* Wrapper functions with error checking for standard functions.  */
