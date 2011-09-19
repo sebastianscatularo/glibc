@@ -86,7 +86,7 @@ $as_echo X/"$0" |
 # See whether gas has R_PPC_REL16 relocs.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for R_PPC_REL16 gas support" >&5
 $as_echo_n "checking for R_PPC_REL16 gas support... " >&6; }
-if test "${libc_cv_ppc_rel16+set}" = set; then :
+if ${libc_cv_ppc_rel16+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   cat > conftest.s <<\EOF
@@ -114,7 +114,7 @@ fi
 # See whether GCC uses -msecure-plt.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for -msecure-plt by default" >&5
 $as_echo_n "checking for -msecure-plt by default... " >&6; }
-if test "${libc_cv_ppc_secure_plt+set}" = set; then :
+if ${libc_cv_ppc_secure_plt+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   echo 'int foo (void) { extern int bar; return bar; }' > conftest.c
