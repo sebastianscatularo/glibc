@@ -85,7 +85,7 @@ $as_echo X/"$0" |
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking if -g produces usable source locations for assembler-with-cpp" >&5
 $as_echo_n "checking if -g produces usable source locations for assembler-with-cpp... " >&6; }
-if test "${libc_cv_cpp_asm_debuginfo+set}" = set; then :
+if ${libc_cv_cpp_asm_debuginfo+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   cat > conftest.S <<EOF

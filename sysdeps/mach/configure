@@ -119,7 +119,7 @@ $as_echo "$ac_try_echo"; } >&5
     mv -f conftest.er1 conftest.err
   fi
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } >/dev/null && {
+  test $ac_status = 0; } > conftest.i && {
 	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
 	 test ! -s conftest.err
        }; then :
@@ -130,7 +130,7 @@ sed 's/^/| /' conftest.$ac_ext >&5
 
     ac_retval=1
 fi
-  eval $as_lineno_stack; test "x$as_lineno_stack" = x && { as_lineno=; unset as_lineno;}
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
   as_fn_set_status $ac_retval
 
 } # ac_fn_c_try_cpp
@@ -143,7 +143,7 @@ ac_fn_c_check_header_preproc ()
   as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
 $as_echo_n "checking for $2... " >&6; }
-if eval "test \"\${$3+set}\"" = set; then :
+if eval \${$3+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -155,12 +155,12 @@ if ac_fn_c_try_cpp "$LINENO"; then :
 else
   eval "$3=no"
 fi
-rm -f conftest.err conftest.$ac_ext
+rm -f conftest.err conftest.i conftest.$ac_ext
 fi
 eval ac_res=\$$3
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
-  eval $as_lineno_stack; test "x$as_lineno_stack" = x && { as_lineno=; unset as_lineno;}
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
 
 } # ac_fn_c_check_header_preproc
 # This file is generated from configure.in by Autoconf.  DO NOT EDIT!
@@ -170,7 +170,7 @@ if test -n "$ac_tool_prefix"; then
 set dummy ${ac_tool_prefix}mig; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
-if test "${ac_cv_prog_MIG+set}" = set; then :
+if ${ac_cv_prog_MIG+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   if test -n "$MIG"; then
@@ -210,7 +210,7 @@ if test -z "$ac_cv_prog_MIG"; then
 set dummy mig; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
-if test "${ac_cv_prog_ac_ct_MIG+set}" = set; then :
+if ${ac_cv_prog_ac_ct_MIG+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   if test -n "$ac_ct_MIG"; then
@@ -265,7 +265,7 @@ fi
 
 
 ac_fn_c_check_header_preproc "$LINENO" "mach/mach_types.h" "ac_cv_header_mach_mach_types_h"
-if test "x$ac_cv_header_mach_mach_types_h" = x""yes; then :
+if test "x$ac_cv_header_mach_mach_types_h" = xyes; then :
 
 else
   as_fn_error $? "cannot find Mach headers" "$LINENO" 5
@@ -273,7 +273,7 @@ fi
 
 
 ac_fn_c_check_header_preproc "$LINENO" "mach/mach_types.defs" "ac_cv_header_mach_mach_types_defs"
-if test "x$ac_cv_header_mach_mach_types_defs" = x""yes; then :
+if test "x$ac_cv_header_mach_mach_types_defs" = xyes; then :
 
 else
   as_fn_error $? "cannot find Mach .defs files" "$LINENO" 5
@@ -285,7 +285,7 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for task_t in mach/mach_types.h" >&5
 $as_echo_n "checking for task_t in mach/mach_types.h... " >&6; }
-if test "${libc_cv_mach_task_t+set}" = set; then :
+if ${libc_cv_mach_task_t+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
@@ -322,7 +322,7 @@ sed 's/^/| /' conftest.$ac_ext >&5
 
 	ac_retval=1
 fi
-  eval $as_lineno_stack; test "x$as_lineno_stack" = x && { as_lineno=; unset as_lineno;}
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
   as_fn_set_status $ac_retval
 
 } # ac_fn_c_try_compile
@@ -351,7 +351,7 @@ if test $libc_cv_mach_task_t != task_t; then
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for thread_t in mach/mach_types.h" >&5
 $as_echo_n "checking for thread_t in mach/mach_types.h... " >&6; }
-if test "${libc_cv_mach_thread_t+set}" = set; then :
+if ${libc_cv_mach_thread_t+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -380,7 +380,7 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for creation_time in task_basic_info" >&5
 $as_echo_n "checking for creation_time in task_basic_info... " >&6; }
-if test "${libc_cv_mach_task_creation_time+set}" = set; then :
+if ${libc_cv_mach_task_creation_time+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -431,7 +431,7 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for grep that handles long lines and -e" >&5
 $as_echo_n "checking for grep that handles long lines and -e... " >&6; }
-if test "${ac_cv_path_GREP+set}" = set; then :
+if ${ac_cv_path_GREP+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   if test -z "$GREP"; then
@@ -494,7 +494,7 @@ $as_echo "$ac_cv_path_GREP" >&6; }
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for egrep" >&5
 $as_echo_n "checking for egrep... " >&6; }
-if test "${ac_cv_path_EGREP+set}" = set; then :
+if ${ac_cv_path_EGREP+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   if echo a | $GREP -E '(a|b)' >/dev/null 2>&1
@@ -561,7 +561,7 @@ $as_echo "$ac_cv_path_EGREP" >&6; }
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for host_page_size in mach_host.defs" >&5
 $as_echo_n "checking for host_page_size in mach_host.defs... " >&6; }
-if test "${libc_cv_mach_host_page_size+set}" = set; then :
+if ${libc_cv_mach_host_page_size+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -586,11 +586,11 @@ if test $libc_cv_mach_host_page_size = yes; then
 fi
 
 ac_fn_c_check_header_preproc "$LINENO" "mach/machine/ndr_def.h" "ac_cv_header_mach_machine_ndr_def_h"
-if test "x$ac_cv_header_mach_machine_ndr_def_h" = x""yes; then :
+if test "x$ac_cv_header_mach_machine_ndr_def_h" = xyes; then :
     DEFINES="$DEFINES -DNDR_DEF_HEADER='<mach/machine/ndr_def.h>'"
 else
   ac_fn_c_check_header_preproc "$LINENO" "machine/ndr_def.h" "ac_cv_header_machine_ndr_def_h"
-if test "x$ac_cv_header_machine_ndr_def_h" = x""yes; then :
+if test "x$ac_cv_header_machine_ndr_def_h" = xyes; then :
     DEFINES="$DEFINES -DNDR_DEF_HEADER='<machine/ndr_def.h>'"
 fi
 
@@ -601,7 +601,7 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for i386_io_perm_modify in mach_i386.defs" >&5
 $as_echo_n "checking for i386_io_perm_modify in mach_i386.defs... " >&6; }
-if test "${libc_cv_mach_i386_ioports+set}" = set; then :
+if ${libc_cv_mach_i386_ioports+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -627,7 +627,7 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for i386_set_gdt in mach_i386.defs" >&5
 $as_echo_n "checking for i386_set_gdt in mach_i386.defs... " >&6; }
-if test "${libc_cv_mach_i386_gdt+set}" = set; then :
+if ${libc_cv_mach_i386_gdt+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -656,7 +656,7 @@ fi
 # See if mig groks `retcode'.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $MIG supports the retcode keyword" >&5
 $as_echo_n "checking whether $MIG supports the retcode keyword... " >&6; }
-if test "${hurd_cv_mig_retcode+set}" = set; then :
+if ${hurd_cv_mig_retcode+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   cat > conftest.defs <<\EOF

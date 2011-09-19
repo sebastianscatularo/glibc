@@ -114,7 +114,7 @@ sed 's/^/| /' conftest.$ac_ext >&5
 
 	ac_retval=1
 fi
-  eval $as_lineno_stack; test "x$as_lineno_stack" = x && { as_lineno=; unset as_lineno;}
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
   as_fn_set_status $ac_retval
 
 } # ac_fn_c_try_compile
@@ -124,7 +124,7 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC $CFLAGS supports -mlong-double-128" >&5
 $as_echo_n "checking whether $CC $CFLAGS supports -mlong-double-128... " >&6; }
-if test "${libc_cv_mlong_double_128+set}" = set; then :
+if ${libc_cv_mlong_double_128+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   save_CFLAGS="$CFLAGS"
