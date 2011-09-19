@@ -86,7 +86,7 @@ $as_echo X/"$0" |
 # Accept binutils which knows about ".machine".
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for .machine support" >&5
 $as_echo_n "checking for .machine support... " >&6; }
-if test "${libc_cv_ppc_machine+set}" = set; then :
+if ${libc_cv_ppc_machine+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   cat > conftest.s <<\EOF

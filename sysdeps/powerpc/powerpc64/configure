@@ -87,7 +87,7 @@ $as_echo X/"$0" |
 # and unfortunately early Linux PPC64 linkers use it as well.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for support for omitting dot symbols" >&5
 $as_echo_n "checking for support for omitting dot symbols... " >&6; }
-if test "${libc_cv_omit_dot_syms+set}" = set; then :
+if ${libc_cv_omit_dot_syms+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   libc_cv_omit_dot_syms=no
@@ -116,7 +116,7 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for linker support for overlapping .opd entries" >&5
 $as_echo_n "checking for linker support for overlapping .opd entries... " >&6; }
-if test "${libc_cv_overlapping_opd+set}" = set; then :
+if ${libc_cv_overlapping_opd+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   libc_cv_overlapping_opd=no
