@@ -1,4 +1,4 @@
-# Copyright (C) 1993,94,95,96,97,98,99,2000,2001,2002,2003,2004,2009
+# Copyright (C) 1993,94,95,96,97,98,99,2000,2001,2002,2003,2004,2009,2011
 #	Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
@@ -139,6 +139,7 @@ rpcuserlibs := $(common-objpfx)mach/libmachuser.so \
 	       $(common-objpfx)hurd/libhurduser.so
 link-rpcuserlibs := $(rpcuserlibs:%user.so=%user-link.so)
 $(common-objpfx)libc.so: $(link-rpcuserlibs)
+$(common-objpfx)linkobj/libc.so: $(link-rpcuserlibs)
 rpath-dirs += mach hurd
 
 # Make sure the `lib' pass builds the dummy shared objects so
