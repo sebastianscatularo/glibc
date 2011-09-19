@@ -1,6 +1,13 @@
+Subject: [PATCH, Hurd] Include RPC user stubs in linkobj/libc.so
+To: libc-alpha@sourceware.org
+Cc: roland@frob.com, samuel.thibault@gnu.org
+
 From: Thomas Schwinge <thomas@schwinge.name>
-Subject: [PATCH] t/linkobj
 
-<patch description>
+This is needed after 7b57bfe5988e476ea40934457dfd1c8a231e2391, ``Obsolete RPC
+implementation in libc.''
 
-Signed-off-by: Thomas Schwinge <thomas@schwinge.name>
+2011-09-19  Thomas Schwinge  <thomas@schwinge.name>
+
+	* sysdeps/mach/hurd/Makefile ($(common-objpfx)linkobj/libc.so): Link
+	against $(link-rpcuserlibs).
