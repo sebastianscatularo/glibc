@@ -1,5 +1,5 @@
 /* strlen(str) -- determine the length of the string STR.
-   Copyright (C) 2009, 2010 Free Software Foundation, Inc.
+   Copyright (C) 2009, 2010, 2011 Free Software Foundation, Inc.
    Contributed by Ulrich Drepper <drepper@redhat.com>.
    This file is part of the GNU C Library.
 
@@ -32,7 +32,10 @@ ENTRY(strlen)
 	cmpl	$0, __cpu_features+KIND_OFFSET(%rip)
 	jne	1f
 	call	__init_cpu_features
-1:	leaq	__strlen_sse2(%rip), %rax
+1:	leaq	__strlen_sse2_pminub(%rip), %rax
+	testl	$bit_Prefer_PMINUB_for_stringop, __cpu_features+FEATURE_OFFSET+index_Prefer_PMINUB_for_stringop(%rip)
+	jnz	2f
+	leaq	__strlen_sse2(%rip), %rax
 	testl	$bit_SSE4_2, __cpu_features+CPUID_OFFSET+index_SSE4_2(%rip)
 	jz	2f
 	leaq	__strlen_sse42(%rip), %rax
