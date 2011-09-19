@@ -1,4 +1,5 @@
-/* Copyright (C) 1996-1999, 2001-2006, 2007 Free Software Foundation, Inc.
+/* Copyright (C) 1996-1999,2001-2006,2007,2011
+	Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Thorsten Kukuk <kukuk@vt.uni-paderborn.de>, 1996.
 
@@ -317,7 +318,7 @@ getspent_next_nss_netgr (const char *name, struct spwd *result, ent_t *ent,
 			 char *group, char *buffer, size_t buflen,
 			 int *errnop)
 {
-  char *curdomain, *host, *user, *domain, *p2;
+  char *curdomain = NULL, *host, *user, *domain, *p2;
   size_t p2len;
 
   if (!nss_getspnam_r)
@@ -327,15 +328,7 @@ getspent_next_nss_netgr (const char *name, struct spwd *result, ent_t *ent,
   if (ent->setent_status != NSS_STATUS_SUCCESS)
     return ent->setent_status;
 
-  if (yp_get_default_domain (&curdomain) != YPERR_SUCCESS)
-    {
-      ent->netgroup = false;
-      ent->first = false;
-      give_spwd_free (&ent->pwd);
-      return NSS_STATUS_UNAVAIL;
-    }
-
-  if (ent->first == true)
+  if (ent->first)
     {
       memset (&ent->netgrdata, 0, sizeof (struct __netgrent));
       __internal_setnetgrent (group, &ent->netgrdata);
@@ -344,10 +337,8 @@ getspent_next_nss_netgr (const char *name, struct spwd *result, ent_t *ent,
 
   while (1)
     {
-      char *saved_cursor;
       enum nss_status status;
 
-      saved_cursor = ent->netgrdata.cursor;
       status = __internal_getnetgrent_r (&host, &user, &domain,
 					 &ent->netgrdata, buffer, buflen,
 					 errnop);
@@ -362,8 +353,19 @@ getspent_next_nss_netgr (const char *name, struct spwd *result, ent_t *ent,
       if (user == NULL || user[0] == '-')
 	continue;
 
-      if (domain != NULL && strcmp (curdomain, domain) != 0)
-	continue;
+      if (domain != NULL)
+	{
+	  if (curdomain == NULL
+	      && yp_get_default_domain (&curdomain) != YPERR_SUCCESS)
+	    {
+	      __internal_endnetgrent (&ent->netgrdata);
+	      ent->netgroup = false;
+	      give_spwd_free (&ent->pwd);
+	      return NSS_STATUS_UNAVAIL;
+	    }
+	  if (strcmp (curdomain, domain) != 0)
+	    continue;
+	}
 
       /* If name != NULL, we are called from getpwnam */
       if (name != NULL)
