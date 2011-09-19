@@ -1,9 +1,3 @@
-Subject: [PATCH] Regenerate all configure files with autoconf 2.66
+Subject: [PATCH] t/host-independency
 
 From: Thomas Schwinge <thomas@schwinge.name>
-
----
-
-    $ (PATH=$HOME/tmp/source/autoconf/v2.66.build.install/bin:$PATH; find -name configure.in | while read f; do autoconf "$f" > "${f%.in}" || echo >&2 "### $f failed"; done)
-
----
