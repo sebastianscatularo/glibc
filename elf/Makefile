@@ -150,8 +150,8 @@ install-others	= $(inst_slibdir)/$(rtld-installed-name)
 install-bin-script = ldd
 endif
 
-others		= sprof sln
-install-bin	= sprof
+others		= sprof sln pldd
+install-bin	= sprof pldd
 others-static   = sln
 install-rootsbin = sln
 
@@ -163,6 +163,8 @@ install-rootsbin += ldconfig
 
 ldconfig-modules := cache readlib xmalloc xstrdup chroot_canon
 extra-objs	+= $(ldconfig-modules:=.o)
+
+pldd-modules := xmalloc
 
 # To find xmalloc.c and xstrdup.c
 vpath %.c ../locale/programs
@@ -176,7 +178,7 @@ install-others += $(inst_auditdir)/sotruss-lib.so
 install-bin-script += sotruss
 generated += sotruss
 CPPFLAGS-sotruss-lib = -DNOT_IN_libc
-$(objpfx)sotruss-lib.so: $(objpfx)sotruss-lib.os $(common-objpfx)shlib.lds
+$(objpfx)sotruss-lib.so: $(objpfx)sotruss-lib.os
 	$(build-module-asneeded)
 $(objpfx)sotruss-lib.so: $(common-objpfx)libc.so $(objpfx)ld.so \
 	$(common-objpfx)libc_nonshared.a
@@ -353,6 +355,8 @@ endif
 # Command to link into a larger single relocatable object.
 reloc-link = $(LINK.o) -nostdlib -nostartfiles -r
 
+$(objpfx)sotruss-lib.so: $(shlib-lds)
+
 $(objpfx)dl-allobjs.os: $(all-rtld-routines:%=$(objpfx)%.os)
 	$(reloc-link) -o $@ $^
 
@@ -404,18 +408,11 @@ generated += librtld.map librtld.mk rtld-libc.a librtld.os.map
 z-now-yes = -Wl,-z,now
 
 $(objpfx)ld.so: $(objpfx)librtld.os $(ld-map)
-	@rm -f $@.lds
-	$(LINK.o) -nostdlib -nostartfiles -shared $(z-now-$(bind-now))	\
-		  $(LDFLAGS-rtld) -Wl,-z,defs -Wl,--verbose 2>&1 |	\
-		  LC_ALL=C \
-		  sed -e '/^=========/,/^=========/!d;/^=========/d'	\
-		      -e 's/\. = .* + SIZEOF_HEADERS;/& _begin = . - SIZEOF_HEADERS;/' \
-		  > $@.lds
 	$(LINK.o) -nostdlib -nostartfiles -shared -o $@			\
 		  $(LDFLAGS-rtld) -Wl,-z,defs $(z-now-$(bind-now))	\
 		  $(filter-out $(map-file),$^) $(load-map-file)		\
-		  -Wl,-soname=$(rtld-installed-name) -T $@.lds
-	rm -f $@.lds
+		  -Wl,-soname=$(rtld-installed-name)			\
+		  -Wl,-defsym=_begin=0
 	readelf -s $@ \
 	  | $(AWK) '($$7 ~ /^UND(|EF)$$/ && $$1 != "0:" && $$4 != "REGISTER") { print; p=1 } END { exit p != 0 }'
 
@@ -494,6 +491,9 @@ $(objpfx)ldd: ldd.bash.in $(common-objpfx)soversions.mk \
 $(objpfx)sprof: $(libdl)
 
 $(objpfx)ldconfig: $(ldconfig-modules:%=$(objpfx)%.o)
+
+$(objpfx)pldd: $(pldd-modules:%=$(objpfx)%.o)
+
 SYSCONF-FLAGS := -D'SYSCONFDIR="$(sysconfdir)"'
 CFLAGS-ldconfig.c = $(SYSCONF-FLAGS) -D'LIBDIR="$(libdir)"' \
 		    -D'SLIBDIR="$(slibdir)"' -DIS_IN_ldconfig=1
@@ -967,8 +967,9 @@ ifeq (yes,$(build-shared))
 tests: $(objpfx)check-textrel.out $(objpfx)check-execstack.out
 
 all-built-dso = $(common-objpfx)libc.so \
-		$(sort $(wildcard $(common-objpfx)*/lib*.so \
-				  $(common-objpfx)iconvdata/*.so))
+		$(filter-out $(common-objpfx)linkobj/libc.so, \
+			     $(sort $(wildcard $(common-objpfx)*/lib*.so \
+					       $(common-objpfx)iconvdata/*.so)))
 
 $(objpfx)check-textrel.out: $(objpfx)check-textrel $(all-built-dso)
 	$(dir $<)$(notdir $<) $(filter-out $<, $^) > $@
