@@ -1,3 +1,8 @@
-Subject: [PATCH] t/missing_includes
+Subject: [PATCH] Add missing includes
 
 From: Thomas Schwinge <thomas@schwinge.name>
+
+2011-09-20  Thomas Schwinge  <thomas@schwinge.name>
+
+	* nss/makedb.c: Include <sys/param.h> (for MAX, roundup) and
+	<sys/uio.h> (for writev).
