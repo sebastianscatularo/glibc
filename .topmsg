@@ -1,3 +1,7 @@
-Subject: [PATCH] t/mmap
+Subject: [PATCH] mmap deficiencies
 
 From: Thomas Schwinge <thomas@schwinge.name>
+
+2011-09-22  Thomas Schwinge  <thomas@schwinge.name>
+
+	* nss/makedb.c [!MAP_POPULATE]: #define MAP_POPULATE 0.
