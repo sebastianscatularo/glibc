@@ -33,7 +33,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <sys/param.h>
 #include <sys/stat.h>
+#include <sys/uio.h>
 #include "nss_db/nss_db.h"
 
 /* Get libc version number.  */
