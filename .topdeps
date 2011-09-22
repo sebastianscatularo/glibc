@@ -37,3 +37,4 @@ t/linkobj
 t/host-independency
 t/missing_includes
 t/pldd
+t/cancellation
