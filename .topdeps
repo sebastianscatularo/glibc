@@ -35,3 +35,4 @@ t/elfosabi_gnu
 t/no_hidden
 t/linkobj
 t/host-independency
+t/missing_includes
