@@ -1,3 +1,24 @@
-Subject: [PATCH] t/cancellation
+Subject: [PATCH] Update generic not-cancel.h
 
 From: Thomas Schwinge <thomas@schwinge.name>
+
+2011-09-22  Thomas Schwinge  <thomas@schwinge.name>
+
+	* sysdeps/generic/not-cancel.h (open_not_cancel, open_not_cancel_2):
+	Define to plain __open if not in libc.so, libpthread.so or librt.so.
+
+---
+
+    gcc-4.4   -shared [...] -o [...]/nss/libnss_db.so [...] [...]/linkobj/libc.so [...]
+    [...]/nss/libnss_db_pic.a(db-open.os): In function `internal_setent':
+    [...]/nss/nss_db/db-open.c:45: undefined reference to `__libc_open'
+    collect2: ld returned 1 exit status
+    make[2]: *** [[...]/nss/libnss_db.so] Error 1
+    make[2]: Leaving directory `[...]/nss'
+    make[1]: *** [nss/others] Error 2
+
+
+A similar change (albeit for cancellable vs. non-cancellable) has been done in
+5777d565adb19dd2133c71be65455b8551f3ea43, many moons ago.
+
+---
