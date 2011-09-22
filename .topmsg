@@ -2,7 +2,9 @@ Subject: [PATCH] Add missing includes
 
 From: Thomas Schwinge <thomas@schwinge.name>
 
-2011-09-20  Thomas Schwinge  <thomas@schwinge.name>
+2011-09-22  Thomas Schwinge  <thomas@schwinge.name>
 
-	* nss/makedb.c: Include <sys/param.h> (for MAX, roundup) and
+	* nss/makedb.c: Include <sys/param.h> (for MAX and roundup), and
 	<sys/uio.h> (for writev).
+	* nss/nss_db/db-initgroups.c: Include <limits.h> (for ULONG_MAX),
+	<string.h> (for strlen and strncmp), and <sys/param.h> (for MIN).
