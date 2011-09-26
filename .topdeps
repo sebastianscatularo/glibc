@@ -39,3 +39,4 @@ t/missing_includes
 t/pldd
 t/cancellation
 t/mmap
+t/eglibc_backports
