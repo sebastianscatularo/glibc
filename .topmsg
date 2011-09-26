@@ -1,2 +1,13 @@
-Subject: [PATCH] t/eglibc_backports
+Subject: Backports from EGLIBC.
 
+    $ GIT_ALTERNATE_OBJECT_DIRECTORIES=$PWD/../eglibc/git/.git/objects git cherry-pick -x --strategy=subtree SHA1
+
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
+
+    $ GIT_ALTERNATE_OBJECT_DIRECTORIES=$PWD/../eglibc/git/.git/objects git commit
+
+After ``tg update'' (and possibly dealing with merge conflicts), manually check
+which can be removed, and remove the ChangeLog.SHA1.
+
+If there are no backports, ``git diff baseline'' must only show the .top* files
+on t/eglibc_backports.
