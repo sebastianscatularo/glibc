@@ -1,4 +1,5 @@
-/* Copyright (C) 2001,02, 2003, 2011 Free Software Foundation, Inc.
+/* Checking macros for select functions.
+   Copyright (C) 2011 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -16,32 +17,18 @@
    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
    02111-1307 USA.  */
 
-#include <sysdep.h>
-#define _ERRNO_H	1
-#include <bits/errno.h>
-
-/* For the calculation see asm/vsyscall.h.  */
-#define VSYSCALL_ADDR_vtime	0xffffffffff600400
-
-
-/* Return the current time as a `time_t' and also put it in *T if T is
-   not NULL.  Time is represented as seconds from Jan 1 00:00:00 1970.  */
-
-ENTRY (time)
-	/* Align stack.  */
-	sub	$0x8, %rsp
-	cfi_adjust_cfa_offset(8)
-
-#ifdef SHARED
-	movq	__vdso_time(%rip), %rax
-	PTR_DEMANGLE (%rax)
-#else
-	movq	$VSYSCALL_ADDR_vtime, %rax
+#ifndef _SYS_SELECT_H
+# error "Never include <bits/select2.h> directly; use <sys/select.h> instead."
 #endif
-	callq	*%rax
 
-	add	$0x8, %rsp
-	cfi_adjust_cfa_offset(-8)
-	ret
-PSEUDO_END_NOERRNO(time)
-libc_hidden_def (time)
+/* Helper functions to issue warnings and errors when needed.  */
+extern unsigned long int __fdelt_chk (unsigned long int __d);
+extern unsigned long int __fdelt_warn (unsigned long int __d)
+  __warnattr ("bit outside of fd_set selected");
+#undef __FDELT
+#define	__FDELT(d) \
+  ({ unsigned long int __d = d;						    \
+     (__builtin_constant_p (__d)					    \
+      ? (__d >= __FD_SETSIZE						    \
+	 ? __fdelt_warn (__d) : (__d / __NFDBITS))			    \
+      : __fdelt_chk (__d)); })
