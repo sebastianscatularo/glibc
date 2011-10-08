@@ -28,9 +28,8 @@
 #include "../inet/netgroup.h"
 #include "nscd.h"
 #include "dbg_log.h"
-#ifdef HAVE_SENDFILE
-# include <kernel-features.h>
-#endif
+
+#include <kernel-features.h>
 
 
 /* This is the standard reply in case the service is disabled.  */

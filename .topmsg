@@ -6,11 +6,12 @@ From: Thomas Schwinge <thomas@schwinge.name>
 Reliably #include <kernel-features.h> in files that are using __ASSUME_*
 macros.
 
-2011-09-19  Thomas Schwinge  <thomas@schwinge.name>
+2011-10-08  Thomas Schwinge  <thomas@schwinge.name>
 
-	* libio/fileops.c: Include <kernel-features.h>.
+	* libio/fileops.c: Unconditionally include <kernel-features.h>.
 	* libio/freopen.c: Likewise.
 	* libio/freopen64.c: Likewise.
 	* misc/syslog.c: Likewise.
 	* nscd/connections.c: Likewise.
+	* nscd/netgroupcache.c: Likewise.
 	* sysdeps/posix/getcwd.c: Likewise.
