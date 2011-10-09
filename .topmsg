@@ -7,8 +7,6 @@ ELF extensions. We need to accept loading such binaries on hurd-i386 too.
 
 2011-06-19  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
-	* elf/elf.h (ELFOSABI_GNU): Define macro.
-	(ELFOSABI_LINUX): Comment that it is just an alias for ELFOSABI_GNU.
         * sysdeps/mach/hurd/ldsodefs.h: New file, defines VALID_ELF_HEADER,
         VALID_ELF_OSABI, VALID_ELF_ABIVERSION, MORE_ELF_HEADER_DATA, declares
         _dl_non_dynamic_init.
