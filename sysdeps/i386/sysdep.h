@@ -1,5 +1,5 @@
 /* Assembler macros for i386.
-   Copyright (C) 1991-93,95,96,98,2002,2003,2005,2006
+   Copyright (C) 1991-93,95,96,98,2002,2003,2005,2006,2011
    Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
@@ -173,5 +173,7 @@ __i686.get_pc_thunk.reg:						      \
 #define L(name)		name
 #endif
 #endif
+
+#define atom_text_section .section ".text.atom", "ax"
 
 #endif	/* __ASSEMBLER__ */
