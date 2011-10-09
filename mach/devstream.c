@@ -120,11 +120,6 @@ dealloc_ref (void *cookie)
   return 0;
 }
 
-#define cookie_io_functions_t __io_functions
-#define write __write
-#define read __read
-#define close __close
-
 FILE *
 mach_open_devstream (mach_port_t dev, const char *mode)
 {
