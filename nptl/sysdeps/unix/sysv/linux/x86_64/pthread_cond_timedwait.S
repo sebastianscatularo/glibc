@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2005, 2007, 2009, 2010 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2005, 2007, 2009, 2010, 2011 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@redhat.com>, 2002.
 
@@ -25,9 +25,6 @@
 #include <pthread-errnos.h>
 
 #include <kernel-features.h>
-
-/* For the calculation see asm/vsyscall.h.  */
-#define VSYSCALL_ADDR_vgettimeofday	0xffffffffff600000
 
 
 	.text
@@ -63,9 +60,9 @@ __pthread_cond_timedwait:
 	cfi_adjust_cfa_offset(8)
 	cfi_rel_offset(%r15, 0)
 #ifdef __ASSUME_FUTEX_CLOCK_REALTIME
-# define FRAME_SIZE 32
+# define FRAME_SIZE (32+8)
 #else
-# define FRAME_SIZE 48
+# define FRAME_SIZE (48+8)
 #endif
 	subq	$FRAME_SIZE, %rsp
 	cfi_adjust_cfa_offset(FRAME_SIZE)
@@ -453,13 +450,11 @@ __pthread_cond_timedwait:
 	movq	__vdso_clock_gettime@GOTPCREL(%rip), %rax
 	movq	(%rax), %rax
 	PTR_DEMANGLE (%rax)
-	jz	26f
 	call	*%rax
-	jmp	27f
-#  endif
-26:	movl	$__NR_clock_gettime, %eax
+#  else
+	movl	$__NR_clock_gettime, %eax
 	syscall
-27:
+#  endif
 #  ifndef __ASSUME_POSIX_TIMERS
 	cmpq	$-ENOSYS, %rax
 	je	19f
@@ -473,8 +468,9 @@ __pthread_cond_timedwait:
 # else
 	leaq	24(%rsp), %rdi
 	xorl	%esi, %esi
-	movq	$VSYSCALL_ADDR_vgettimeofday, %rax
-	callq	*%rax
+	/* This call works because we directly jump to a system call entry
+	   which preserves all the registers.  */
+	call	JUMPTARGET(__gettimeofday)
 
 	/* Compute relative timeout.  */
 	movq	40(%rsp), %rax
@@ -611,8 +607,9 @@ __pthread_cond_timedwait:
 	/* clock_gettime not available.  */
 19:	leaq	32(%rsp), %rdi
 	xorl	%esi, %esi
-	movq	$VSYSCALL_ADDR_vgettimeofday, %rax
-	callq	*%rax
+	/* This call works because we directly jump to a system call entry
+	   which preserves all the registers.  */
+	call	JUMPTARGET(__gettimeofday)
 
 	/* Compute relative timeout.  */
 	movq	40(%rsp), %rax
