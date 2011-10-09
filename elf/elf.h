@@ -142,7 +142,8 @@ typedef struct
 #define ELFOSABI_SYSV		0	/* Alias.  */
 #define ELFOSABI_HPUX		1	/* HP-UX */
 #define ELFOSABI_NETBSD		2	/* NetBSD.  */
-#define ELFOSABI_LINUX		3	/* Linux.  */
+#define ELFOSABI_GNU		3	/* Object uses GNU ELF extensions.  */
+#define ELFOSABI_LINUX		ELFOSABI_GNU /* Compatibility alias.  */
 #define ELFOSABI_SOLARIS	6	/* Sun Solaris.  */
 #define ELFOSABI_AIX		7	/* IBM AIX.  */
 #define ELFOSABI_IRIX		8	/* SGI Irix.  */
@@ -1338,17 +1339,6 @@ typedef struct
 
 #define DT_SPARC_REGISTER 0x70000001
 #define DT_SPARC_NUM	2
-
-/* Bits present in AT_HWCAP on SPARC.  */
-
-#define HWCAP_SPARC_FLUSH	1	/* The CPU supports flush insn.  */
-#define HWCAP_SPARC_STBAR	2
-#define HWCAP_SPARC_SWAP	4
-#define HWCAP_SPARC_MULDIV	8
-#define HWCAP_SPARC_V9		16	/* The CPU is v9, so v8plus is ok.  */
-#define HWCAP_SPARC_ULTRA3	32
-#define HWCAP_SPARC_BLKINIT	64	/* Sun4v with block-init/load-twin.  */
-#define HWCAP_SPARC_N2		128
 
 /* MIPS R3000 specific definitions.  */
 
