@@ -27,8 +27,9 @@
 	.align 16
 	cfi_startproc
 _dl_runtime_resolve:
+	cfi_adjust_cfa_offset(16) # Incorporate PLT
 	subq $56,%rsp
-	cfi_adjust_cfa_offset(72) # Incorporate PLT
+	cfi_adjust_cfa_offset(56)
 	movq %rax,(%rsp)	# Preserve registers otherwise clobbered.
 	movq %rcx, 8(%rsp)
 	movq %rdx, 16(%rsp)
@@ -148,24 +149,22 @@ L(have_avx):
 	// Get XFEATURE_ENABLED_MASK
 	xgetbv
 	andl	$0x6, %eax
-	cmpl	$0x6, %eax
-	// Nonzero if SSE and AVX state saving is enabled.
-	sete	%al
-2:	leal	-1(%eax,%eax), %eax
+2:	subl	$0x5, %eax
 	movl	%eax, L(have_avx)(%rip)
 	cmpl	$0, %eax
 
 1:	js	L(no_avx)
 
 #  define RESTORE_AVX
+#  define MORE_CODE
 #  include "dl-trampoline.h"
 
 	.align 16
 L(no_avx):
 # endif
 
-#  undef RESTORE_AVX
-#  include "dl-trampoline.h"
+# undef RESTORE_AVX
+# include "dl-trampoline.h"
 
 	cfi_endproc
 	.size _dl_runtime_profile, .-_dl_runtime_profile
