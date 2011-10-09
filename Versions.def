@@ -31,9 +31,8 @@ libc {
   GLIBC_2.12
   GLIBC_2.13
   GLIBC_2.14
-%ifdef USE_IN_LIBIO
+  GLIBC_2.15
   HURD_CTHREADS_0.3
-%endif
 %ifdef EXPORT_UNWIND_FIND_FDE
   GCC_3.0
 %endif
