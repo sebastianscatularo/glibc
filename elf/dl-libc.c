@@ -1,5 +1,6 @@
 /* Handle loading and unloading shared objects for internal libc purposes.
-   Copyright (C) 1999-2002,2004-2006,2009,2010 Free Software Foundation, Inc.
+   Copyright (C) 1999-2002,2004-2006,2009,2010,2011
+   Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Zack Weinberg <zack@rabi.columbia.edu>, 1999.
 
@@ -44,10 +45,10 @@ dlerror_run (void (*operate) (void *), void *args)
   const char *last_errstring = NULL;
   bool malloced;
 
-  (void) GLRO(dl_catch_error) (&objname, &last_errstring, &malloced,
-			       operate, args);
+  int result = (GLRO(dl_catch_error) (&objname, &last_errstring, &malloced,
+				      operate, args)
+		?: last_errstring != NULL);
 
-  int result = last_errstring != NULL;
   if (result && malloced)
     free ((char *) last_errstring);
 
@@ -62,6 +63,8 @@ struct do_dlopen_args
   const char *name;
   /* Opening mode.  */
   int mode;
+  /* This is the caller of the dlopen() function.  */
+  const void *caller_dlopen;
 
   /* Return from do_dlopen.  */
   struct link_map *map;
@@ -83,8 +86,9 @@ do_dlopen (void *ptr)
 {
   struct do_dlopen_args *args = (struct do_dlopen_args *) ptr;
   /* Open and relocate the shared object.  */
-  args->map = GLRO(dl_open) (args->name, args->mode, NULL, __LM_ID_CALLER,
-			     __libc_argc, __libc_argv, __environ);
+  args->map = GLRO(dl_open) (args->name, args->mode, args->caller_dlopen,
+			     __LM_ID_CALLER, __libc_argc, __libc_argv,
+			     __environ);
 }
 
 static void
@@ -153,6 +157,7 @@ __libc_dlopen_mode (const char *name, int mode)
   struct do_dlopen_args args;
   args.name = name;
   args.mode = mode;
+  args.caller_dlopen = RETURN_ADDRESS (0);
 
 #ifdef SHARED
   if (__builtin_expect (_dl_open_hook != NULL, 0))
@@ -302,22 +307,19 @@ libc_freeres_fn (free_mem)
 	}
     }
 
-  if (USE___THREAD || GL(dl_tls_dtv_slotinfo_list) != NULL)
-    {
-      /* Free the memory allocated for the dtv slotinfo array.  We can do
-	 this only if all modules which used this memory are unloaded.  */
+  /* Free the memory allocated for the dtv slotinfo array.  We can do
+     this only if all modules which used this memory are unloaded.  */
 #ifdef SHARED
-      if (GL(dl_initial_dtv) == NULL)
-	/* There was no initial TLS setup, it was set up later when
-	   it used the normal malloc.  */
-	free_slotinfo (&GL(dl_tls_dtv_slotinfo_list));
-      else
+  if (GL(dl_initial_dtv) == NULL)
+    /* There was no initial TLS setup, it was set up later when
+       it used the normal malloc.  */
+    free_slotinfo (&GL(dl_tls_dtv_slotinfo_list));
+  else
 #endif
-	/* The first element of the list does not have to be deallocated.
-	   It was allocated in the dynamic linker (i.e., with a different
-	   malloc), and in the static library it's in .bss space.  */
-	free_slotinfo (&GL(dl_tls_dtv_slotinfo_list)->next);
-    }
+    /* The first element of the list does not have to be deallocated.
+       It was allocated in the dynamic linker (i.e., with a different
+       malloc), and in the static library it's in .bss space.  */
+    free_slotinfo (&GL(dl_tls_dtv_slotinfo_list)->next);
 
   void *scope_free_list = GL(dl_scope_free_list);
   GL(dl_scope_free_list) = NULL;
