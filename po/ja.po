@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libc 2.14\n"
 "POT-Creation-Date: 2011-05-31 00:06-0400\n"
-"PO-Revision-Date: 2011-07-09 09:17+0900\n"
+"PO-Revision-Date: 2011-10-08 09:53+0900\n"
 "Last-Translator: Yasuaki Taniguchi <yasuakit@gmail.com>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
 "Language: ja\n"
@@ -98,11 +98,13 @@ msgid "%s%s%s:%u: %s%sUnexpected error: %s.\n"
 msgstr "%s%s%s:%u: %s%s予期しないエラーです: %s。\n"
 
 #: assert/assert.c:105
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%s%s%s:%u: %s%sAssertion `%s' failed.\n"
 "%n"
-msgstr "%s%s%s:%u: %s%sアサーション `%s' が失敗しました。\n"
+msgstr ""
+"%s%s%s:%u: %s%sアサーション `%s' に失敗しました。\n"
+"%n"
 
 #: catgets/gencat.c:110 catgets/gencat.c:114 nscd/nscd.c:100 nss/makedb.c:61
 msgid "NAME"
@@ -294,14 +296,12 @@ msgid "Usage: xtrace [OPTION]... PROGRAM [PROGRAMOPTION]...\\n"
 msgstr "使用法: xtrace [OPTION]... PROGRAM [PROGRAMOPTION]...\\n"
 
 #: debug/xtrace.sh:33 malloc/memusage.sh:27
-#, fuzzy
 msgid "Try \\`%s --help' or `%s --usage' for more information.\\n"
-msgstr "詳細は `%s --help' または `%s --usage' を実行して下さい。\n"
+msgstr "詳細は \\`%s --help' または `%s --usage' を実行してください。\\n"
 
 #: debug/xtrace.sh:39
-#, fuzzy
 msgid "%s: option '%s' requires an argument.\\n"
-msgstr "%s: オプション '--%s' は引数が必要です\n"
+msgstr "%s: オプション '%s' は引数が必要です。\\n"
 
 #: debug/xtrace.sh:46
 msgid ""
@@ -438,7 +438,7 @@ msgstr "空の動的文字列トークンの代入です"
 #: elf/dl-deps.c:133
 #, c-format
 msgid "cannot load auxiliary `%s' because of empty dynamic string token substitution\n"
-msgstr "動的ロードに際し空文字トークンによる置換えを行ったために auxliary `%s' のロードに失敗しました\n"
+msgstr "動的ロードに際し空文字トークンによる置換えを行ったために auxiliary `%s' のロードに失敗しました\n"
 
 #: elf/dl-deps.c:474
 msgid "cannot allocate dependency list"
@@ -641,9 +641,8 @@ msgid "TLS generation counter wrapped!  Please report this."
 msgstr "TLS 生成カウンタが一周しました!  これを報告してください。"
 
 #: elf/dl-open.c:462
-#, fuzzy
 msgid "cannot load any more object with static TLS"
-msgstr "静的 TLS ブロック内にメモリを配置出来ません"
+msgstr "静的 TLS ブロックではこれ以上オブジェクトをロードできません"
 
 #: elf/dl-open.c:511
 msgid "invalid mode for dlopen()"
@@ -696,9 +695,8 @@ msgid "cannot create TLS data structures"
 msgstr "TLS データ構造体を作成できません"
 
 #: elf/dl-version.c:172
-#, fuzzy
 msgid "version lookup error"
-msgstr "シンボル検索エラーです"
+msgstr "バージョン検索エラーです"
 
 #: elf/dl-version.c:303
 msgid "cannot allocate version reference table"
@@ -766,7 +764,7 @@ msgstr "補助キャッシュファイルを無視しています"
 
 #: elf/ldconfig.c:159
 msgid "Configure Dynamic Linker Run Time Bindings."
-msgstr "動的リンカランタイムのバインディングをを設定します。"
+msgstr "動的リンカランタイムのバインディングを設定します。"
 
 #: elf/ldconfig.c:339
 #, c-format
@@ -1098,40 +1096,36 @@ msgid ""
 msgstr ""
 
 #: elf/sotruss.ksh:46
-#, fuzzy
 msgid "Mandatory arguments to long options are also mandatory for any corresponding\\nshort options.\\n"
-msgstr "長い形式のオプションで必須または任意の引数は、それに対応する短い形式のオプションでも同様に必須または任意です。"
+msgstr "長い形式のオプションで必須または任意の引数は、それに対応する短い形式のオプションでも同様に必須または任意です。\\n"
 
 #: elf/sotruss.ksh:56
-#, fuzzy
 msgid "%s: option requires an argument -- '%s'\\n"
-msgstr "%s: オプションには引数が必要です -- '%c'\n"
+msgstr "%s: オプションには引数が必要です -- '%c'\\n"
 
 #: elf/sotruss.ksh:57 elf/sotruss.ksh:68 elf/sotruss.ksh:134
-#, fuzzy
 msgid "Try \\`%s --help' or \\`%s --usage' for more information.\\n"
-msgstr "詳細は `%s --help' または `%s --usage' を実行して下さい。\n"
+msgstr "詳細は `%s --help' または `%s --usage' を実行して下さい。\\n"
 
 #: elf/sotruss.ksh:62
-#, fuzzy
 msgid "%s: option is ambiguous; possibilities:"
-msgstr "%s: オプション '%s' は曖昧です\n"
+msgstr "%s: オプション '%s' は曖昧です: 次のものが可能です:"
 
 #: elf/sotruss.ksh:80
-#, fuzzy
 msgid "Written by %s.\\n"
-msgstr "作者 %s。\n"
+msgstr "作者 %s。\\n"
 
 #: elf/sotruss.ksh:87
 msgid ""
 "Usage: %s [-ef] [-F FROMLIST] [-o FILENAME] [-T TOLIST] [--exit]\n"
 "\t    [--follow] [--from FROMLIST] [--output FILENAME] [--to TOLIST]\\n"
 msgstr ""
+"使用法: %s [-ef] [-F FROMLIST] [-o FILENAME] [-T TOLIST] [--exit]\n"
+"\t    [--follow] [--from FROMLIST] [--output FILENAME] [--to TOLIST]\\n"
 
 #: elf/sotruss.ksh:133
-#, fuzzy
 msgid "%s: unrecognized option '%c%s'\\n"
-msgstr "%s: オプション '%c%s' を認識できません\n"
+msgstr "%s: オプション '%c%s' を認識できません\\n"
 
 #: elf/sprof.c:77
 msgid "Output selection:"
@@ -2460,9 +2454,9 @@ msgid "symbol `%.*s' not in repertoire map"
 msgstr "シンボル `%.*s' がレパートリーマップ内にありません"
 
 #: locale/programs/locale-spec.c:131
-#, fuzzy, c-format
+#, c-format
 msgid "unknown name \"%s\""
-msgstr "不明なセット`%s'です"
+msgstr "不明な名前 \"%s\" です"
 
 #: locale/programs/locale.c:74
 msgid "System information:"
@@ -2687,9 +2681,9 @@ msgid "cannot change mode of new locale archive"
 msgstr "新しいロケール書庫のモードを変更できません"
 
 #: locale/programs/locarchive.c:285
-#, fuzzy, c-format
+#, c-format
 msgid "cannot read data from locale archive"
-msgstr "ロケール書庫に追加できません"
+msgstr "ロケール書庫からデータを読み込めません"
 
 #: locale/programs/locarchive.c:318
 #, c-format
@@ -2771,7 +2765,7 @@ msgstr "\"%s\" はディレクトリではありません。無視します"
 #: locale/programs/locarchive.c:1308
 #, c-format
 msgid "cannot open directory \"%s\": %s: ignored"
-msgstr "ディレクト \"%s\" を開けません: %s: 無視します"
+msgstr "ディレクトリ \"%s\" を開けません: %s: 無視します"
 
 #: locale/programs/locarchive.c:1380
 #, c-format
@@ -2896,9 +2890,8 @@ msgid "bogus mcheck_status, library is buggy\n"
 msgstr "mcheck_status がおかしいです。ライブラリにバグがあります\n"
 
 #: malloc/memusage.sh:33
-#, fuzzy
 msgid "%s: option '%s' requires an argument\\n"
-msgstr "%s: オプション '--%s' は引数が必要です\n"
+msgstr "%s: オプション '%s' は引数が必要です\\n"
 
 #: malloc/memusage.sh:39
 msgid ""
@@ -2954,17 +2947,16 @@ msgstr ""
 "\n"
 
 #: malloc/memusage.sh:101
-#, fuzzy
 msgid ""
 "Syntax: memusage [--data=FILE] [--progname=NAME] [--png=FILE] [--unbuffered]\n"
 "\t    [--buffer=SIZE] [--no-timer] [--time-based] [--total]\n"
 "\t    [--title=STRING] [--x-size=SIZE] [--y-size=SIZE]\n"
 "\t    PROGRAM [PROGRAMOPTION]..."
 msgstr ""
-"構文 : memusage [--data=FILE] [--progname=NAME] [--png=FILE] [--unbuffered]\n"
-"            [--buffer=SIZE] [--no-timer] [--time-based] [--total]\n"
-"            [--title=STRING] [--x-size=SIZE] [--y-size=SIZE]\n"
-"            PROGRAM [PROGRAMOPTION]..."
+"使用法: memusage [--data=FILE] [--progname=NAME] [--png=FILE] [--unbuffered]\n"
+"\t    [--buffer=SIZE] [--no-timer] [--time-based] [--total]\n"
+"\t    [--title=STRING] [--x-size=SIZE] [--y-size=SIZE]\n"
+"\t    PROGRAM [PROGRAMOPTION]..."
 
 #: malloc/memusage.sh:193
 msgid "memusage: option \\`${1##*=}' is ambiguous"
@@ -3654,7 +3646,7 @@ msgstr "yp_update: サーバアドレスを取得できません\n"
 #: nscd/aicache.c:83 nscd/hstcache.c:492
 #, c-format
 msgid "Haven't found \"%s\" in hosts cache!"
-msgstr "ホストキャッシュに内に \"%s\" が見つかりません!"
+msgstr "ホストキャッシュ内に \"%s\" が見つかりません!"
 
 #: nscd/aicache.c:85 nscd/hstcache.c:494
 #, c-format
@@ -4138,7 +4130,7 @@ msgid "            %2lus  server runtime\n"
 msgstr "            %2lus  サーバ 実行時間\n"
 
 #: nscd/nscd_stat.c:241
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%15d  current number of threads\n"
 "%15d  maximum number of threads\n"
@@ -4152,6 +4144,7 @@ msgstr ""
 "%15lu  クライアントが待機しなければならなかった回数\n"
 "%15s  paranoia mode enabled\n"
 "%15lu  内部再起動\n"
+"%15u  再起動回数\n"
 
 #: nscd/nscd_stat.c:276
 #, c-format
@@ -4183,26 +4176,26 @@ msgstr ""
 "\n"
 "%s キャッシュ:\n"
 "\n"
-"%15s  cache is enabled\n"
-"%15s  cache is persistent\n"
-"%15s  cache is shared\n"
-"%15zu  suggested size\n"
-"%15zu  total data pool size\n"
-"%15zu  used data pool size\n"
-"%15lu  seconds time to live for positive entries\n"
-"%15lu  seconds time to live for negative entries\n"
-"%15<PRIuMAX>  cache hits on positive entries\n"
-"%15<PRIuMAX>  cache hits on negative entries\n"
-"%15<PRIuMAX>  cache misses on positive entries\n"
-"%15<PRIuMAX>  cache misses on negative entries\n"
-"%15lu%% cache hit rate\n"
-"%15zu  current number of cached values\n"
-"%15zu  maximum number of cached values\n"
-"%15zu  maximum chain length searched\n"
-"%15<PRIuMAX>  number of delays on rdlock\n"
-"%15<PRIuMAX>  number of delays on wrlock\n"
-"%15<PRIuMAX>  memory allocations failed\n"
-"%15s  check /etc/%s for changes\n"
+"%15s  キャッシュが有効\n"
+"%15s  キャッシュが永続的\n"
+"%15s  キャッシュが共有されている\n"
+"%15zu  提案されるサイズ\n"
+"%15zu  全データプールサイズ\n"
+"%15zu  使用中のデータプールサイズ\n"
+"%15lu  正のエントリのキャッシュ保持秒数\n"
+"%15lu  負のエントリのキャッシュ保持秒数\n"
+"%15<PRIuMAX>  正のエントリのキャッシュヒット\n"
+"%15<PRIuMAX>  負のエントリのキャッシュヒット\n"
+"%15<PRIuMAX>  正のエントリのキャッシュミス\n"
+"%15<PRIuMAX>  負のエントリのキャッシュミス\n"
+"%15lu%% キャッシュヒット率\n"
+"%15zu  現在のキャッシュ個数\n"
+"%15zu  最大のキャッシュ個数\n"
+"%15zu  検索される最大連鎖長\n"
+"%15<PRIuMAX>  rdlock の遅延数\n"
+"%15<PRIuMAX>  wrlock の遅延数\n"
+"%15<PRIuMAX>  メモリ割り当て失敗\n"
+"%15s  変更に関しては /etc/%s を確認してください\n"
 
 #: nscd/pwdcache.c:423
 #, c-format
@@ -4341,11 +4334,11 @@ msgstr "使用されるサービス設定"
 
 #: nss/getent.c:60
 msgid "disable IDN encoding"
-msgstr ""
+msgstr "IDN エンコーディングを無効にする"
 
 #: nss/getent.c:65
 msgid "Get entries from administrative database."
-msgstr "管理データベースからエントリを取得する"
+msgstr "管理データベースからエントリを取得します。"
 
 #: nss/getent.c:149 nss/getent.c:479
 #, c-format
@@ -4380,7 +4373,7 @@ msgstr "データベースのコンテキストを、1 エントリ 1 行で表�
 
 #: nss/makedb.c:70
 msgid "Create simple DB database from textual input."
-msgstr "テキスト入力から単純なデータベスを作成します。"
+msgstr "テキスト入力から単純なデータベースを作成します。"
 
 #: nss/makedb.c:73
 msgid ""
@@ -4844,14 +4837,14 @@ msgid "Signal sent by the kernel"
 msgstr ""
 
 #: stdio-common/psiginfo.c:204
-#, fuzzy, c-format
+#, c-format
 msgid "Unknown signal %d\n"
-msgstr "不明なシグナル %d"
+msgstr "不明なシグナル %d です\n"
 
 #: stdio-common/psignal.c:51
 #, c-format
 msgid "%s%sUnknown signal %d\n"
-msgstr "%s%s不明なのシグナル %d です\n"
+msgstr "%s%s不明なシグナル %d です\n"
 
 #: stdio-common/psignal.c:52
 msgid "Unknown signal"
@@ -5379,7 +5372,7 @@ msgstr "rpcinfo: %sは不明なホストです\n"
 
 #: sunrpc/svc_run.c:71
 msgid "svc_run: - out of memory"
-msgstr "mesvc_run: - メモリが足りません"
+msgstr "svc_run: - メモリが足りません"
 
 #: sunrpc/svc_run.c:91
 msgid "svc_run: - poll failed"
@@ -6576,12 +6569,16 @@ msgid "%s: warning: zone \"%s\" abbreviation \"%s\" %s\n"
 msgstr ""
 
 #: timezone/zdump.c:242
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%s: usage is %s [ --version ] [ --help ] [ -v ] [ -c [loyear,]hiyear ] zonename ...\n"
 "\n"
 "Report bugs to tz@elsie.nci.nih.gov.\n"
-msgstr "%s: 使用法: %s [ --version ] [ -v ] [ -c [loyear,]hiyear ] zonename ...\n"
+msgstr ""
+"%s: 使用法: %s [ --version ] [ --help ] [ -v ] [ -c [loyear,]hiyear ] zonename ...\n"
+"\n"
+"バグを発見したら <tz@elsie.nci.nih.gov> に報告してください。\n"
+"翻訳に関するバグは<translation-team-ja@lists.sourceforge.net>に報告してください。\n"
 
 #: timezone/zdump.c:311
 #, c-format
@@ -6590,7 +6587,7 @@ msgstr ""
 
 #: timezone/zdump.c:398
 msgid "Error writing to standard output"
-msgstr ""
+msgstr "標準出力へ書き込み中にエラーが発生しました"
 
 #: timezone/zdump.c:421
 #, c-format
@@ -6617,15 +6614,18 @@ msgid "warning: "
 msgstr "警告: "
 
 #: timezone/zic.c:459
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%s: usage is %s [ --version ] [ --help ] [ -v ] [ -l localtime ] [ -p posixrules ] \\\n"
 "\t[ -d directory ] [ -L leapseconds ] [ -y yearistype ] [ filename ... ]\n"
 "\n"
 "Report bugs to tz@elsie.nci.nih.gov.\n"
 msgstr ""
-"%s: 使用法: %s [ --version ] [ -v ] [ -l localtime ] [ -p posixrules ] \\\n"
+"%s: 使用法 %s [ --version ] [ --help ] [ -v ] [ -l localtime ] [ -p posixrules ] \\\n"
 "\t[ -d directory ] [ -L leapseconds ] [ -y yearistype ] [ filename ... ]\n"
+"\n"
+"バグを発見したら <tz@elsie.nci.nih.gov> に報告してください。\n"
+"翻訳に関するバグは<translation-team-ja@lists.sourceforge.net>に報告してください。\n"
 
 #: timezone/zic.c:496
 msgid "wild compilation-time specification of zic_t"
@@ -6745,7 +6745,7 @@ msgstr "名前がないルールです"
 
 #: timezone/zic.c:972
 msgid "invalid saved time"
-msgstr "不正な保存時刻"
+msgstr "不正な保存時刻です"
 
 #: timezone/zic.c:993
 msgid "wrong number of fields on Zone line"
@@ -6871,7 +6871,7 @@ msgstr "%s: %sの書き込みエラーです\n"
 
 #: timezone/zic.c:2019
 msgid "no POSIX environment variable for zone"
-msgstr ""
+msgstr "ゾーン用の POSIX 環境変数ではありません"
 
 #: timezone/zic.c:2176
 msgid "can't determine time zone abbreviation to use just after until time"
@@ -6932,23 +6932,23 @@ msgstr ""
 
 #: timezone/zic.c:2613
 msgid "time zone abbreviation lacks alphabetic at start"
-msgstr ""
+msgstr "タイムゾーン省略名がアルファベットで開始していません"
 
 #: timezone/zic.c:2615
 msgid "time zone abbreviation has more than 3 alphabetics"
-msgstr ""
+msgstr "タイムゾーン省略名がアルファベット4文字以上です"
 
 #: timezone/zic.c:2617
 msgid "time zone abbreviation has too many alphabetics"
-msgstr ""
+msgstr "タイムゾーン省略名に含まれるアルファベットが多すぎます"
 
 #: timezone/zic.c:2627
 msgid "time zone abbreviation differs from POSIX standard"
-msgstr ""
+msgstr "タイムゾーン省略名が POSIX 標準と異なります"
 
 #: timezone/zic.c:2639
 msgid "too many, or too long, time zone abbreviations"
-msgstr "タイムゾーンの省略名が多すぎるか長すぎます"
+msgstr "タイムゾーン省略名が多すぎるか長すぎます"
 
 #: timezone/zic.c:2680
 #, c-format
