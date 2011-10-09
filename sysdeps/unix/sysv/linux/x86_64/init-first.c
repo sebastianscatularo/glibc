@@ -17,18 +17,19 @@
    02111-1307 USA.  */
 
 #ifdef SHARED
+# include <time.h>
+# include <sysdep.h>
 # include <dl-vdso.h>
 # include <bits/libc-vdso.h>
-
-long int (*__vdso_gettimeofday) (struct timeval *, void *) attribute_hidden;
 
 long int (*__vdso_clock_gettime) (clockid_t, struct timespec *)
   __attribute__ ((nocommon));
 strong_alias (__vdso_clock_gettime, __GI___vdso_clock_gettime attribute_hidden)
 
-long int (*__vdso_getcpu) (unsigned *, unsigned *, void *);
+long int (*__vdso_getcpu) (unsigned *, unsigned *, void *) attribute_hidden;
 
-long int (*__vdso_time) (time_t *) attribute_hidden;
+
+extern long int __syscall_clock_gettime (clockid_t, struct timespec *);
 
 
 static inline void
@@ -36,15 +37,9 @@ _libc_vdso_platform_setup (void)
 {
   PREPARE_VERSION (linux26, "LINUX_2.6", 61765110);
 
-  void *p = _dl_vdso_vsym ("gettimeofday", &linux26);
-  /* If the vDSO is not available we fall back on the old vsyscall.  */
-#define VSYSCALL_ADDR_vgettimeofday	0xffffffffff600000ul
+  void *p = _dl_vdso_vsym ("clock_gettime", &linux26);
   if (p == NULL)
-    p = (void *) VSYSCALL_ADDR_vgettimeofday;
-  PTR_MANGLE (p);
-  __vdso_gettimeofday = p;
-
-  p = _dl_vdso_vsym ("clock_gettime", &linux26);
+    p = __syscall_clock_gettime;
   PTR_MANGLE (p);
   __GI___vdso_clock_gettime = p;
 
@@ -55,14 +50,6 @@ _libc_vdso_platform_setup (void)
     p = (void *) VSYSCALL_ADDR_vgetcpu;
   PTR_MANGLE (p);
   __vdso_getcpu = p;
-
-  p = _dl_vdso_vsym ("time", &linux26);
-  /* If the vDSO is not available we fall back on the old vsyscall.  */
-#define VSYSCALL_ADDR_vtime	0xffffffffff600400
-  if (p == NULL)
-    p = (void *) VSYSCALL_ADDR_vtime;
-  PTR_MANGLE (p);
-  __vdso_time = p;
 }
 
 # define VDSO_SETUP _libc_vdso_platform_setup
