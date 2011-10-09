@@ -161,6 +161,7 @@ struct rtld_global_ro _rtld_global_ro attribute_relro =
     ._dl_lazy = 1,
     ._dl_fpu_control = _FPU_DEFAULT,
     ._dl_pointer_guard = 1,
+    ._dl_pagesize = EXEC_PAGESIZE,
 
     /* Function pointers.  */
     ._dl_debug_printf = _dl_debug_printf,
@@ -543,7 +544,7 @@ _dl_start (void *arg)
       /* Relocate ourselves so we can do normal function calls and
 	 data access using the global offset table.  */
 
-      ELF_DYNAMIC_RELOCATE (&bootstrap_map, 0, 0);
+      ELF_DYNAMIC_RELOCATE (&bootstrap_map, 0, 0, 0);
     }
   bootstrap_map.l_relocated = 1;
 
@@ -778,7 +779,12 @@ cannot allocate TLS data structures for initial thread");
 
   /* And finally install it for the main thread.  If ld.so itself uses
      TLS we know the thread pointer was initialized earlier.  */
-  const char *lossage = TLS_INIT_TP (tcbp, USE___THREAD);
+  const char *lossage
+#ifdef USE___THREAD
+    = TLS_INIT_TP (tcbp, USE___THREAD);
+#else
+    = TLS_INIT_TP (tcbp, 0);
+#endif
   if (__builtin_expect (lossage != NULL, 0))
     _dl_fatal_printf ("cannot set up thread-local storage: %s\n", lossage);
   tls_init_tp_called = true;
@@ -1945,8 +1951,9 @@ ERROR: ld.so: object '%s' cannot be loaded as audit interface: %s; ignored.\n",
 
 	  /* Relocate the main executable.  */
 	  struct relocate_args args = { .l = l,
-					.reloc_mode = (GLRO(dl_lazy)
-						       ? RTLD_LAZY : 0) };
+					.reloc_mode = ((GLRO(dl_lazy)
+						       ? RTLD_LAZY : 0)
+						       | __RTLD_NOIFUNC) };
 	  _dl_receive_error (print_unresolved, relocate_doit, &args);
 
 	  /* This loop depends on the dependencies of the executable to
@@ -2021,24 +2028,22 @@ ERROR: ld.so: object '%s' cannot be loaded as audit interface: %s; ignored.\n",
 	    {
 	      /* We have to do symbol dependency testing.  */
 	      struct relocate_args args;
-	      struct link_map *l;
+	      unsigned int i;
 
-	      args.reloc_mode = GLRO(dl_lazy) ? RTLD_LAZY : 0;
+	      args.reloc_mode = ((GLRO(dl_lazy) ? RTLD_LAZY : 0)
+				 | __RTLD_NOIFUNC);
 
-	      l = main_map;
-	      while (l->l_next != NULL)
-		l = l->l_next;
-	      do
+	      i = main_map->l_searchlist.r_nlist;
+	      while (i-- > 0)
 		{
+		  struct link_map *l = main_map->l_initfini[i];
 		  if (l != &GL(dl_rtld_map) && ! l->l_faked)
 		    {
 		      args.l = l;
 		      _dl_receive_error (print_unresolved, relocate_doit,
 					 &args);
 		    }
-		  l = l->l_prev;
 		}
-	      while (l != NULL);
 
 	      if ((GLRO(dl_debug_mask) & DL_DEBUG_PRELINK)
 		  && rtld_multiple_ref)
@@ -2046,7 +2051,7 @@ ERROR: ld.so: object '%s' cannot be loaded as audit interface: %s; ignored.\n",
 		  /* Mark the link map as not yet relocated again.  */
 		  GL(dl_rtld_map).l_relocated = 0;
 		  _dl_relocate_object (&GL(dl_rtld_map),
-				       main_map->l_scope, 0, 0);
+				       main_map->l_scope, __RTLD_NOIFUNC, 0);
 		}
 	    }
 #define VERNEEDTAG (DT_NUM + DT_THISPROCNUM + DT_VERSIONTAGIDX (DT_VERNEED))
@@ -2197,7 +2202,7 @@ ERROR: ld.so: object '%s' cannot be loaded as audit interface: %s; ignored.\n",
       _dl_debug_printf ("\nInitial object scopes\n");
 
       for (struct link_map *l = main_map; l != NULL; l = l->l_next)
-	_dl_show_scope (l);
+	_dl_show_scope (l, 0);
     }
 
   if (prelinked)
@@ -2255,13 +2260,12 @@ ERROR: ld.so: object '%s' cannot be loaded as audit interface: %s; ignored.\n",
       /* If we are profiling we also must do lazy reloaction.  */
       GLRO(dl_lazy) |= consider_profiling;
 
-      struct link_map *l = main_map;
-      while (l->l_next)
-	l = l->l_next;
-
       HP_TIMING_NOW (start);
-      do
+      unsigned i = main_map->l_searchlist.r_nlist;
+      while (i-- > 0)
 	{
+	  struct link_map *l = main_map->l_initfini[i];
+
 	  /* While we are at it, help the memory handling a bit.  We have to
 	     mark some data structures as allocated with the fake malloc()
 	     implementation in ld.so.  */
@@ -2280,10 +2284,7 @@ ERROR: ld.so: object '%s' cannot be loaded as audit interface: %s; ignored.\n",
 	  /* Add object to slot information data if necessasy.  */
 	  if (l->l_tls_blocksize != 0 && tls_init_tp_called)
 	    _dl_add_to_slotinfo (l);
-
-	  l = l->l_prev;
 	}
-      while (l);
       HP_TIMING_NOW (stop);
 
       HP_TIMING_DIFF (relocate_time, start, stop);
@@ -2313,7 +2314,12 @@ ERROR: ld.so: object '%s' cannot be loaded as audit interface: %s; ignored.\n",
      TLS we know the thread pointer was initialized earlier.  */
   if (! tls_init_tp_called)
     {
-      const char *lossage = TLS_INIT_TP (tcbp, USE___THREAD);
+      const char *lossage
+#ifdef USE___THREAD
+	= TLS_INIT_TP (tcbp, USE___THREAD);
+#else
+	= TLS_INIT_TP (tcbp, 0);
+#endif
       if (__builtin_expect (lossage != NULL, 0))
 	_dl_fatal_printf ("cannot set up thread-local storage: %s\n",
 			  lossage);
