@@ -28,6 +28,7 @@
 #include "spawn_int.h"
 #include <not-cancel.h>
 #include <local-setxid.h>
+#include <shlib-compat.h>
 
 
 /* The Unix standard contains a long explanation of the way to signal
@@ -65,6 +66,15 @@ script_execute (const char *file, char *const argv[], char *const envp[])
   }
 }
 
+static inline void
+maybe_script_execute (const char *file, char *const argv[], char *const envp[],
+                      int xflags)
+{
+  if (SHLIB_COMPAT (libc, GLIBC_2_2, GLIBC_2_15)
+      && (xflags & SPAWN_XFLAGS_TRY_SHELL)
+      && errno == ENOEXEC)
+    script_execute (file, argv, envp);
+}
 
 /* Spawn a new process executing PATH with the attributes describes in *ATTRP.
    Before running the process perform the actions described in FILE-ACTIONS. */
@@ -72,7 +82,7 @@ int
 __spawni (pid_t *pid, const char *file,
 	  const posix_spawn_file_actions_t *file_actions,
 	  const posix_spawnattr_t *attrp, char *const argv[],
-	  char *const envp[], int use_path)
+	  char *const envp[], int xflags)
 {
   pid_t new_pid;
   char *path, *p, *name;
@@ -226,13 +236,12 @@ __spawni (pid_t *pid, const char *file,
 	}
     }
 
-  if (! use_path || strchr (file, '/') != NULL)
+  if ((xflags & SPAWN_XFLAGS_USE_PATH) == 0 || strchr (file, '/') != NULL)
     {
       /* The FILE parameter is actually a path.  */
       __execve (file, argv, envp);
 
-      if (errno == ENOEXEC)
-	script_execute (file, argv, envp);
+      maybe_script_execute (file, argv, envp, xflags);
 
       /* Oh, oh.  `execve' returns.  This is bad.  */
       _exit (SPAWN_ERROR);
@@ -277,8 +286,7 @@ __spawni (pid_t *pid, const char *file,
       /* Try to execute this name.  If it works, execv will not return.  */
       __execve (startp, argv, envp);
 
-      if (errno == ENOEXEC)
-	script_execute (startp, argv, envp);
+      maybe_script_execute (startp, argv, envp, xflags);
 
       switch (errno)
 	{
