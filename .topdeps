@@ -42,3 +42,4 @@ t/mmap
 t/eglibc_backports
 t/repair-mach_devstream.c
 t/O_CLOEXEC
+t/pagesize
