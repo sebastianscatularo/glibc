@@ -106,7 +106,7 @@ hp_timing_t _dl_cpuclock_offset;
 
 void (*_dl_init_static_tls) (struct link_map *) = &_dl_nothread_init_static_tls;
 
-size_t _dl_pagesize = EXEC_PAGESIZE;
+size_t _dl_pagesize = /* EXEC_PAGESIZE */ 4096;
 
 unsigned int _dl_osversion;
 
