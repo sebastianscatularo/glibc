@@ -1,3 +1,7 @@
-Subject: [PATCH] t/opendirat
+Subject: [PATCH, Hurd] opendirat
 
 From: Thomas Schwinge <thomas@schwinge.name>
+
+2011-10-11  Thomas Schwinge  <thomas@schwinge.name>
+
+	* sysdeps/mach/hurd/opendir.c (__opendirat): New function.
