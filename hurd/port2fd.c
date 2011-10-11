@@ -23,7 +23,7 @@
 #include <fcntl.h>
 
 /* Store PORT in file descriptor D, doing appropriate ctty magic.
-   FLAGS are as for `open'; only O_IGNORE_CTTY is meaningful.
+   FLAGS are as for `open'; only O_IGNORE_CTTY and O_CLOEXEC are meaningful.
    D should be locked, and will not be unlocked.  */
 
 void
