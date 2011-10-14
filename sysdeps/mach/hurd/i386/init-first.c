@@ -1,7 +1,6 @@
 /* Initialization code run first thing by the ELF startup code.  For i386/Hurd.
-   Copyright (C) 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-	2005, 2007, 2011 Free Software Foundation, Inc.
-
+   Copyright (C) 1995-2005, 2007, 2011
+	Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -325,6 +324,7 @@ _dl_init_first (int argc, ...)
 {
   first_init ();
 
+  /* If we use ``__builtin_frame_address (0) + 2'' here, GCC gets confused.  */
   init (&argc);
 }
 #endif
@@ -352,15 +352,17 @@ strong_alias (posixland_init, __libc_init_first);
    This poorly-named function is called by static-start.S,
    which should not exist at all.  */
 void
-_hurd_stack_setup (void *arg, ...)
+_hurd_stack_setup (void)
 {
-  void *caller = (&arg)[-1];
+  intptr_t caller = (intptr_t) __builtin_return_address (0);
 
   void doinit (intptr_t *data)
     {
       /* This function gets called with the argument data at TOS.  */
-      void doinit1 (volatile int argc, ...)
+      void doinit1 (int argc, ...)
 	{
+          /* If we use ``__builtin_frame_address (0) + 2'' here, GCC gets
+             confused.  */
 	  init ((int *) &argc);
 	}
 
@@ -368,7 +370,7 @@ _hurd_stack_setup (void *arg, ...)
          jump to `doinit1' (above), so it is as if __libc_init_first's
          caller had called `doinit1' with the argument data already on the
          stack.  */
-      *--data = (intptr_t) caller;
+      *--data = caller;
       asm volatile ("movl %0, %%esp\n" /* Switch to new outermost stack.  */
 		    "movl $0, %%ebp\n" /* Clear outermost frame pointer.  */
 		    "jmp *%1" : : "r" (data), "r" (&doinit1) : "sp");
@@ -377,7 +379,7 @@ _hurd_stack_setup (void *arg, ...)
 
   first_init ();
 
-  _hurd_startup (&arg, &doinit);
+  _hurd_startup ((void **) __builtin_frame_address (0) + 2, &doinit);
 }
 #endif
 
