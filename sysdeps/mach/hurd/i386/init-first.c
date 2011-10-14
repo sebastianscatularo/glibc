@@ -1,7 +1,6 @@
 /* Initialization code run first thing by the ELF startup code.  For i386/Hurd.
-   Copyright (C) 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-	2005, 2007, 2011 Free Software Foundation, Inc.
-
+   Copyright (C) 1995-2005, 2007, 2011
+	Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -254,7 +253,14 @@ init (int *data)
       /* Push the user code address on the top of the new stack.  It will
 	 be the return address for `init1'; we will jump there with NEWSP
 	 as the stack pointer.  */
-      *--newsp = __builtin_return_address (0);
+      /* The following expression would typically be written as
+         ``__builtin_return_address (0)''.  But, for example, GCC 4.4.6 doesn't
+         recognize that this read operation may alias the following write
+         operation, and thus is free to reorder the two, clobbering the
+         original return address.  */
+      *--newsp = * ((int *) __builtin_frame_address (0) + 1);
+      /* GCC 4.4.6 also wants us to force loading *NEWSP already here.  */
+      asm volatile ("# %0" : : "X" (*newsp));
       * ((void **) __builtin_frame_address (0) + 1) = &switch_stacks;
       /* Force NEWSP into %eax and &init1 into %ecx, which are not restored
 	 by function return.  */
@@ -283,7 +289,14 @@ init (int *data)
 
       /* The argument data is just above the stack frame we will unwind by
 	 returning.  Mutate our own return address to run the code below.  */
-      usercode = __builtin_return_address (0);
+      /* The following expression would typically be written as
+         ``__builtin_return_address (0)''.  But, for example, GCC 4.4.6 doesn't
+         recognize that this read operation may alias the following write
+         operation, and thus is free to reorder the two, clobbering the
+         original return address.  */
+      usercode = * ((int *) __builtin_frame_address (0) + 1);
+      /* GCC 4.4.6 also wants us to force loading USERCODE already here.  */
+      asm volatile ("# %0" : : "X" (usercode));
       * ((void **) __builtin_frame_address (0) + 1) = &call_init1;
       /* Force USERCODE into %eax and &init1 into %ecx, which are not
 	 restored by function return.  */
@@ -336,6 +349,7 @@ _dl_init_first (int argc, ...)
 {
   first_init ();
 
+  /* If we use ``__builtin_frame_address (0) + 2'' here, GCC gets confused.  */
   init (&argc);
 }
 #endif
@@ -363,15 +377,17 @@ strong_alias (posixland_init, __libc_init_first);
    This poorly-named function is called by static-start.S,
    which should not exist at all.  */
 void
-_hurd_stack_setup (void *arg, ...)
+_hurd_stack_setup (void)
 {
-  void *caller = (&arg)[-1];
+  intptr_t caller = (intptr_t) __builtin_return_address (0);
 
   void doinit (intptr_t *data)
     {
       /* This function gets called with the argument data at TOS.  */
-      void doinit1 (volatile int argc, ...)
+      void doinit1 (int argc, ...)
 	{
+          /* If we use ``__builtin_frame_address (0) + 2'' here, GCC gets
+             confused.  */
 	  init ((int *) &argc);
 	}
 
@@ -379,7 +395,7 @@ _hurd_stack_setup (void *arg, ...)
          jump to `doinit1' (above), so it is as if __libc_init_first's
          caller had called `doinit1' with the argument data already on the
          stack.  */
-      *--data = (intptr_t) caller;
+      *--data = caller;
       asm volatile ("movl %0, %%esp\n" /* Switch to new outermost stack.  */
 		    "movl $0, %%ebp\n" /* Clear outermost frame pointer.  */
 		    "jmp *%1" : : "r" (data), "r" (&doinit1) : "sp");
@@ -388,7 +404,7 @@ _hurd_stack_setup (void *arg, ...)
 
   first_init ();
 
-  _hurd_startup (&arg, &doinit);
+  _hurd_startup ((void **) __builtin_frame_address (0) + 2, &doinit);
 }
 #endif
 
