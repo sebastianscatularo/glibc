@@ -242,7 +242,14 @@ init (int *data)
       /* Push the user code address on the top of the new stack.  It will
 	 be the return address for `init1'; we will jump there with NEWSP
 	 as the stack pointer.  */
-      *--newsp = __builtin_return_address (0);
+      /* The following expression would typically be written as
+         ``__builtin_return_address (0)''.  But, for example, GCC 4.4.6 doesn't
+         recognize that this read operation may alias the following write
+         operation, and thus is free to reorder the two, clobbering the
+         original return address.  */
+      *--newsp = * ((int *) __builtin_frame_address (0) + 1);
+      /* GCC 4.4.6 also wants us to force loading *NEWSP already here.  */
+      asm volatile ("# %0" : : "X" (*newsp));
       * ((void **) __builtin_frame_address (0) + 1) = &switch_stacks;
       /* Force NEWSP into %eax and &init1 into %ecx, which are not restored
 	 by function return.  */
@@ -271,7 +278,14 @@ init (int *data)
 
       /* The argument data is just above the stack frame we will unwind by
 	 returning.  Mutate our own return address to run the code below.  */
-      usercode = __builtin_return_address (0);
+      /* The following expression would typically be written as
+         ``__builtin_return_address (0)''.  But, for example, GCC 4.4.6 doesn't
+         recognize that this read operation may alias the following write
+         operation, and thus is free to reorder the two, clobbering the
+         original return address.  */
+      usercode = * ((int *) __builtin_frame_address (0) + 1);
+      /* GCC 4.4.6 also wants us to force loading USERCODE already here.  */
+      asm volatile ("# %0" : : "X" (usercode));
       * ((void **) __builtin_frame_address (0) + 1) = &call_init1;
       /* Force USERCODE into %eax and &init1 into %ecx, which are not
 	 restored by function return.  */
