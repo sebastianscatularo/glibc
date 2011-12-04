@@ -14,8 +14,8 @@ Reported on <http://savannah.gnu.org/bugs/?18216>.
 
 	* sysdeps/mach/hurd/bits/stat.h (struct stat): Align to what is done
 	for Linux: use nsec instead of usec, as well as:
-	[__USE_MISC] (st_atim, st_mtim, st_ctim): Provide these ``struct
-	timespec''s.
+	[__USE_MISC || __USE_XOPEN2K8] (st_atim, st_mtim, st_ctim): Provide
+	these ``struct timespec''s.
 	(struct stat64): Likewise.
 	(_STATBUF_ST_NSEC): Define.
 	* sysdeps/mach/hurd/xstatconv.c (xstat64_conv): Adapt to that.
