@@ -61,3 +61,4 @@ t/posix2008
 t/posix_opt.h
 t/readlinkat
 t/sbrk
+t/select-inputcheck
