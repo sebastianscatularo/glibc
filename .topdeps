@@ -50,3 +50,4 @@ t/critical-sections
 tg/dup3-lock
 t/recvfrom
 t/socket_server_indexcheck
+t/ioctl_decode_argument
