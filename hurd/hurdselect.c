@@ -50,10 +50,7 @@ _hurd_select (int nfds,
   error_t err;
   fd_set rfds, wfds, xfds;
   int firstfd, lastfd;
-  mach_msg_timeout_t to = (timeout != NULL ?
-			   (timeout->tv_sec * 1000 +
-			    (timeout->tv_nsec + 999999) / 1000000) :
-			   0);
+  mach_msg_timeout_t to = 0;
   struct
     {
       struct hurd_userlink ulink;
@@ -71,6 +68,24 @@ _hurd_select (int nfds,
     };
   assert (sizeof (union typeword) == sizeof (mach_msg_type_t));
   assert (sizeof (uint32_t) == sizeof (mach_msg_type_t));
+
+  if (nfds < 0 || nfds > FD_SETSIZE)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+
+  if (timeout != NULL)
+    {
+      if (timeout->tv_sec < 0 || timeout->tv_nsec < 0)
+	{
+	  errno = EINVAL;
+	  return -1;
+	}
+
+      to = timeout->tv_sec * 1000 +
+	   (timeout->tv_nsec + 999999) / 1000000;
+    }
 
   if (sigmask && __sigprocmask (SIG_SETMASK, sigmask, &oset))
     return -1;
