@@ -51,3 +51,4 @@ tg/dup3-lock
 t/recvfrom
 t/socket_server_indexcheck
 t/ioctl_decode_argument
+t/ioctl-base-types
