@@ -67,3 +67,4 @@ t/SOL_IP
 t/sysvshm
 t/ttyname_ERANGE
 t/bigmem
+t/locarchive
