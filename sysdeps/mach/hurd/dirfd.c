@@ -26,6 +26,8 @@ int
 dirfd (DIR *dirp)
 {
   int fd;
+
+  HURD_CRITICAL_BEGIN;
   __mutex_lock (&_hurd_dtable_lock);
   for (fd = 0; fd < _hurd_dtablesize; ++fd)
     if (_hurd_dtable[fd] == dirp->__fd)
@@ -36,6 +38,7 @@ dirfd (DIR *dirp)
       fd = -1;
     }
   __mutex_unlock (&_hurd_dtable_lock);
+  HURD_CRITICAL_END;
 
   return fd;
 }
