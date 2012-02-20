@@ -1,16 +1,16 @@
-Subject: Baseline for our topic branches.
+From: Pino Toscano <toscano.pino@tiscali.it>
+Subject: [PATCH] nanosleep: check for invalid parameter values
+
+mach: nanosleep: check for invalid parameter values
+
+Check for invalid values of the `requested_time' parameters; move the
+calculation of `ms' after the validation of `requested_time'.
+
+2011-12-10  Pino Toscano  <toscano.pino@tiscali.it>
+
+        * sysdeps/mach/nanosleep.c (__nanosleep): Return EINVAL for negative
+        seconds or nanoseconds of `requested_time', or for nanoseconds equal
+        or greater than 1000000000.
 
 ---
-
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+http://cygwin.com/ml/libc-alpha/2011-12/msg00020.html
