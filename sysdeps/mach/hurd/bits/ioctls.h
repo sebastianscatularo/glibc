@@ -158,6 +158,7 @@ enum __ioctl_datum { IOC_8, IOC_16, IOC_32, IOC_64 };
    _IOT_foobar is defined either in this file,
    or where struct foobar is defined.  */
 #define	_IO(g, n)	_IOC (IOC_VOID, (g), (n), 0)
+#define	_IOIW(g, n, t)	_IOC (IOC_VOID, (g), (n), _IOC_ENCODE_TYPE (t))
 #define	_IOR(g, n, t)	_IOC (IOC_OUT, (g), (n), _IOC_ENCODE_TYPE (t))
 #define	_IOW(g, n, t)	_IOC (IOC_IN, (g), (n), _IOC_ENCODE_TYPE (t))
 #define	_IOWR(g, n, t)	_IOC (IOC_INOUT, (g), (n), _IOC_ENCODE_TYPE (t))

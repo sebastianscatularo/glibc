@@ -1,16 +1,13 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] ioctl() incorrectly decodes argument
+
+2005-07-28  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+        * ioctl.c (__ioctl): Add handling of parameter-less ioctls.
+
+2005-07-28  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+        * ioctls.h (_IOIW): New macro for immediate-write ioctls.
 
 ---
-
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+http://www.sourceware.org/bugzilla/show_bug.cgi?id=766
