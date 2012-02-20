@@ -1,16 +1,16 @@
-Subject: Baseline for our topic branches.
+From: Pino Toscano  <toscano.pino@tiscali.it>
+Subject: [PATCH] recvfrom(): take into account null address ports
+
+Some kinds of sockets may return a null address port when calling the
+`socket_recv' RPC, so avoid using it in case an address argument buffer is
+asked to be filled.  In such case, set the length of that address buffer to
+zero.
+
+2011-11-26  Pino Toscano  <toscano.pino@tiscali.it>
+
+        * sysdeps/mach/hurd/recvfrom.c (__recvfrom): Check also for a null
+        address port.  Set `addr_len' to 0 when not filling `addrarg'.
 
 ---
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+http://cygwin.com/ml/libc-alpha/2011-11/msg00089.html
