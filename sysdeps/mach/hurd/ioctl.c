@@ -89,7 +89,7 @@ __ioctl (int fd, unsigned long int request, ...)
   void *p;
 #endif
 
-  void *arg;
+  void *arg = NULL;
 
   error_t err;
 
@@ -140,7 +140,7 @@ __ioctl (int fd, unsigned long int request, ...)
 	  in (_IOT_COUNT1 (type), _IOT_TYPE1 (type));
 	  in (_IOT_COUNT2 (type), _IOT_TYPE2 (type));
 	}
-      else if (_IOC_INOUT (request) == IOC_VOID)
+      else if ((_IOC_INOUT (request) == IOC_VOID) && _IOT_COUNT0 (type))
 	{
 	  /* The RPC takes a single integer_t argument.
 	     Rather than pointing to the value, ARG is the value itself.  */
@@ -209,11 +209,15 @@ __ioctl (int fd, unsigned long int request, ...)
       return msg.header.RetCode;
     }
 
-  va_list ap;
+  if (_IOT_COUNT0 (type))
+    {
+      /* Data need either be sent, received, or even both.  */
+      va_list ap;
 
-  va_start (ap, request);
-  arg = va_arg (ap, void *);
-  va_end (ap);
+      va_start (ap, request);
+      arg = va_arg (ap, void *);
+      va_end (ap);
+    }
 
   {
     /* Check for a registered handler for REQUEST.  */
