@@ -1,16 +1,9 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] Add SOL_IP, SOL_IPV6, SOL_ICMPV6
 
----
+The patch below defines the SOL_IP, SOL_IPV6 and SOL_ICMPV6 macros for
+socket options.
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
+2009-09-28  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+        * bits/in.h (SOL_IP, SOL_IPV6, SOL_ICMPV6): New macros.
