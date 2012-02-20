@@ -28,7 +28,7 @@
 int
 unlockpt (int fd)
 {
-  char buf[sizeof (_PATH_TTY) + 2];
+  char buf[1024]; /* XXX */
 
   /* BSD doesn't have a lock, but it does have `revoke'.  */
   if (__ptsname_r (fd, buf, sizeof (buf)))
