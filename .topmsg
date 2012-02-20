@@ -1,16 +1,14 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] Fix setres[ug]id handling of -1
+
+When passed -1, setres[ug]id are supposed not to change the existing
+value.  The patch below does this the same way as setre[ug]id.
+
+2011-10-17  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+* sysdeps/mach/hurd/setresgid.c (__setresgid): Handle the -1 case, which
+shall preserve existing values.
+* sysdeps/mach/hurd/setresuid.c (__setresuid): Likewise.
 
 ---
-
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+http://cygwin.com/ml/libc-alpha/2011-10/msg00031.html
