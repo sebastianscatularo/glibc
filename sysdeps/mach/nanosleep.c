@@ -28,11 +28,19 @@ __nanosleep (const struct timespec *requested_time,
 {
   mach_port_t recv;
   struct timeval before, after;
-  const mach_msg_timeout_t ms
-    = requested_time->tv_sec * 1000
-    + (requested_time->tv_nsec + 999999) / 1000000;
+  mach_msg_timeout_t ms;
+
+  if (requested_time->tv_sec < 0
+      || requested_time->tv_nsec < 0
+      || requested_time->tv_nsec >= 1000000000)
+    {
+      errno = EINVAL;
+      return -1;
+    }
 
   recv = __mach_reply_port ();
+  ms = requested_time->tv_sec * 1000
+       + (requested_time->tv_nsec + 999999) / 1000000;
 
   if (remaining && __gettimeofday (&before, NULL) < 0)
     return -1;
