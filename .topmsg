@@ -1,16 +1,18 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] Fix value of __libc_stack_end
+
+When using some libthread, we need to update the value of __libc_stack_end
+to what the libthread allocated. This requires making __libc_stack_end
+non-relro to be able to modify it.
+
+2011-08-24  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+* sysdeps/generic/ldsodefs.h [LIBC_STACK_END_NOT_RELRO] (__libc_stack_end): Do
+not use attribute_relro.
+* sysdeps/mach/hurd/dl-sysdep.h (LIBC_STACK_END_NOT_RELRO): Define.
+* sysdeps/mach/hurd/i386/init-first.c (init): Update __libc_stack_end to
+libthread-provided value.
+* sysdeps/mach/hurd/dl-sysdep.c (__libc_stack_end): Do not use attribute_relro.
 
 ---
-
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+http://www.cygwin.com/ml/libc-alpha/2011-08/msg00124.html
