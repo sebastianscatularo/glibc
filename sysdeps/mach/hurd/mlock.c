@@ -40,7 +40,7 @@ mlock (const void *addr, size_t len)
   page = trunc_page ((vm_address_t) addr);
   len = round_page ((vm_address_t) addr + len) - page;
   err = __vm_wire (hostpriv, __mach_task_self (), page, len,
-		   VM_PROT_ALL); /* XXX ? */
+		   VM_PROT_READ);
   __mach_port_deallocate (__mach_task_self (), hostpriv);
 
   return err ? __hurd_fail (err) : 0;
