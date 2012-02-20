@@ -1,16 +1,15 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] null pathnames shall return ENOENT
+
+Here is a patch to fix chdir("") and chroot("") into returning ENOENT as
+required by POSIX.
+
+2009-09-13  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+        * hurd/hurdchdir.c (_hurd_change_directory_port_from_name):
+        Return ENOENT when name is empty.
+        * sysdeps/mach/hurd/chroot.c (chroot): Return ENOENT when path
+        is empty.
 
 ---
-
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+http://sources.redhat.com/ml/libc-alpha/2009-09/msg00025.html

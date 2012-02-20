@@ -38,6 +38,12 @@ chroot (const char *path)
   len = strlen (path);
   if (len >= 2 && path[len - 2] == '/' && path[len - 1] == '.')
     lookup = path;
+  else if (len == 0)
+    {
+      /* Special-case null pathname according to POSIX */
+      errno = ENOENT;
+      return -1;
+    }
   else
     {
       char *n = alloca (len + 3);

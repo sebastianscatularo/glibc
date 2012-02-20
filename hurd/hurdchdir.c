@@ -38,6 +38,12 @@ _hurd_change_directory_port_from_name (struct hurd_port *portcell,
   len = strlen (name);
   if (len >= 2 && name[len - 2] == '/' && name[len - 1] == '.')
     lookup = name;
+  else if (len == 0)
+    {
+      /* Special-case null pathname according to POSIX */
+      errno = ENOENT;
+      return -1;
+    }
   else
     {
       char *n = alloca (len + 3);
