@@ -1,16 +1,15 @@
-Subject: Baseline for our topic branches.
+From: Pino Toscano <toscano.pino@tiscali.it>
+Subject: [PATCH] hurdsock: reject negative domains
+
+Reject negative socket domains right away; otherwise, it is possible to read
+and set out-of-bounds locations of the `servers' array (returning the values
+at those invalid memory locations), and even try to deallocate ports with
+random values if the `dead' parameter is different than zero.
+
+2011-11-21  Pino Toscano  <toscano.pino@tiscali.it>
+
+        * hurd/hurdsock.c (_hurd_socket_server): Check for negative domains,
+        and reject them.
 
 ---
-
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+http://cygwin.com/ml/libc-alpha/2011-11/msg00076.html
