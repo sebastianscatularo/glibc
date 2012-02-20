@@ -1,16 +1,8 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] Fix mkdir / error value
 
----
+(needed for busybox's mkdir -p)
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+In the / case, directory_name_split can't really split that into an
+absolute ROOT file_t and ".", since name is supposed to be a pointer in
+file_name... Changing the interface is being proposed.
