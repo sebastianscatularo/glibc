@@ -60,6 +60,8 @@
 #undef _POSIX_NO_TRUNC		/* Overlong file names get error?  */
 #undef _POSIX_SYNC_IO		/* File supports O_SYNC et al?  */
 
+/* XPG4.2 shared memory is supported.  */
+#define _XOPEN_SHM      1
 
 /* We do not have the POSIX threads interface.  */
 #define _POSIX_THREADS	-1
