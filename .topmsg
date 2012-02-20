@@ -1,6 +1,10 @@
 From: Samuel Thibault <samuel.thibault@ens-lyon.org>
 Subject: [PATCH] Add some basic types for ioctls.
 
+Some applications use unsigned and size_t in ioctls, so bits/ioctls.h
+should define _IOT__IOTBASE_unsigned and _IOT__IOTBASE_size_t, here is a
+patch.
+
 ---
 
 http://sources.redhat.com/ml/libc-alpha/2007-07/msg00078.html
