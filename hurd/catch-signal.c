@@ -28,9 +28,9 @@ hurd_catch_signal (sigset_t sigset,
 		   error_t (*operate) (struct hurd_signal_preemptor *),
 		   sighandler_t handler)
 {
-  jmp_buf buf;
+  sigjmp_buf buf;
   void throw (int signo, long int sigcode, struct sigcontext *scp)
-    { longjmp (buf, scp->sc_error ?: EGRATUITOUS); }
+    { siglongjmp (buf, scp->sc_error ?: EGRATUITOUS); }
 
   struct hurd_signal_preemptor preemptor =
     {
@@ -41,12 +41,12 @@ hurd_catch_signal (sigset_t sigset,
   struct hurd_sigstate *const ss = _hurd_self_sigstate ();
   error_t error;
 
-  if (handler == SIG_ERR)
+  if (handler != SIG_ERR)
     /* Not our handler; don't bother saving state.  */
     error = 0;
   else
     /* This returns again with nonzero value when we preempt a signal.  */
-    error = setjmp (buf);
+    error = sigsetjmp (buf, 1);
 
   if (error == 0)
     {
