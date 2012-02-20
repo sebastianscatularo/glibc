@@ -1,16 +1,15 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] Fix signal-catching functions.
 
----
+2010-09-13  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
+        Fix signal-catching functions.
 
-As the baseline is merged into the topic branches, it is forward-only.
+        We need to restore the signal mask, because else the signal handling
+        code will have blocked the catched signal and for instance calling
+        hurd_catch_signal again would then dump core.  There was also a trivial
+        inverted logic.
 
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+        * hurd/catch-signal.c (hurd_catch_signal): Use sigsetjmp/siglongjmp
+        instead of setjmp/longjmp to restore the signal mask. Call sigsetjmp
+        when handler == SIG_ERR, not when handler != SIG_ERR.
