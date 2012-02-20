@@ -63,3 +63,4 @@ t/readlinkat
 t/sbrk
 t/select-inputcheck
 t/setresid
+t/SOL_IP
