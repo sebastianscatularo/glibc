@@ -23,6 +23,7 @@
 #include <sys/stat.h>
 #include <hurd.h>
 #include <hurd/fd.h>
+#include <string.h>
 
 int
 mkdirat (fd, path, mode)
@@ -32,7 +33,10 @@ mkdirat (fd, path, mode)
 {
   error_t err;
   const char *name;
-  file_t parent = __directory_name_split_at (fd, path, (char **) &name);
+  file_t parent;
+  if (!strcmp(path, "/"))
+    return EEXIST;
+  parent = __directory_name_split_at (fd, path, (char **) &name);
   if (parent == MACH_PORT_NULL)
     return -1;
   err = __dir_mkdir (parent, name, mode & ~_hurd_umask);

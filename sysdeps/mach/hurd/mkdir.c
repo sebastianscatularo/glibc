@@ -20,6 +20,7 @@
 #include <stddef.h>
 #include <sys/stat.h>
 #include <hurd.h>
+#include <string.h>
 
 /* Create a directory named FILE_NAME with protections MODE.  */
 int
@@ -29,7 +30,10 @@ __mkdir (file_name, mode)
 {
   error_t err;
   const char *name;
-  file_t parent = __directory_name_split (file_name, (char **) &name);
+  file_t parent;
+  if (!strcmp(file_name, "/"))
+    return EEXIST;
+  parent = __directory_name_split (file_name, (char **) &name);
   if (parent == MACH_PORT_NULL)
     return -1;
   err = __dir_mkdir (parent, name, mode & ~_hurd_umask);
