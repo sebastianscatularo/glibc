@@ -1,16 +1,10 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] readlinkat
+
+2009-09-27  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+        * sysdeps/mach/hurd/readlinkat.c: New file, heavily inherited from
+        sysdeps/mach/hurd/readlink.c
 
 ---
-
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+http://cygwin.com/ml/libc-alpha/2009-09/msg00058.html
