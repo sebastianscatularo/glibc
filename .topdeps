@@ -45,3 +45,4 @@ t/O_CLOEXEC
 t/pagesize
 t/opendirat
 t/usr
+t/catch-signal
