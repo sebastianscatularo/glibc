@@ -1,16 +1,19 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] Fix POSIX 2008 visibility
+
+Here are a few POSIX 2008 visibility updates, to align the core & hurd
+with the Linux headers.
+
+Samuel
+
+
+2011-12-04  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+        * bits/sigaction.h [__USE_XOPEN2K8]: Define SA_RESTART,
+        SA_NODEFER, SA_RESETHAND.
+        * sysdeps/mach/hurd/bits/fcntl.h [__USE_XOPEN2K8]: Define
+        O_NOFOLLOW, O_DIRECTORY, O_CLOEXEC, F_GETOWN, F_SETOWN,
+        F_DUPFD_CLOEXEC.
 
 ---
-
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+http://cygwin.com/ml/libc-alpha/2011-12/msg00005.html
