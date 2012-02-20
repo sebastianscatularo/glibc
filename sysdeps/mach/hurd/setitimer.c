@@ -220,7 +220,7 @@ setitimer_locked (const struct itimerval *new, struct itimerval *old,
 	  /* Start up the itimer thread running `timer_thread' (below).  */
 	  if (err = __thread_create (__mach_task_self (),
 				     &_hurd_itimer_thread))
-	    return __hurd_fail (err);
+	    goto out;
 	  _hurd_itimer_thread_stack_base = 0; /* Anywhere.  */
 	  _hurd_itimer_thread_stack_size = __vm_page_size; /* Small stack.  */
 	  if ((err = __mach_setup_thread (__mach_task_self (),
