@@ -1,16 +1,13 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] setitimer.c: Fix unlock in error patch
+
+In some error path, setitimer_locked would not perform unlocking, here
+is a patch.
+
+2009-02-01  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+        * sysdeps/mach/hurd/setitimer.c (setitimer_locked): Use common exit path
+        instead of returning without unlocking.
 
 ---
-
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+http://sourceware.org/ml/libc-alpha/2009-02/msg00003.html
