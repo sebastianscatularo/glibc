@@ -1,16 +1,10 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] ttyname_r returning EINVAL
+
+2011-08-05  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+        * sysdeps/mach/hurd/ttyname_r.c (__ttyname_r): Return ERANGE instead of
+        EINVAL when BUFLEN is too smal.
 
 ---
-
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+http://sourceware.org/ml/libc-alpha/2011-08/msg00013.html

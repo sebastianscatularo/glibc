@@ -43,7 +43,7 @@ __ttyname_r (int fd, char *buf, size_t buflen)
   len = strlen (nodename) + 1;
   if (len > buflen)
     {
-      errno = EINVAL;
+      errno = ERANGE;
       return errno;
     }
 
