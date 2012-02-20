@@ -71,3 +71,4 @@ t/locarchive
 t/mkdir_root
 t/mlock
 t/pthread_types
+t/sendmsg-SCM_RIGHTS
