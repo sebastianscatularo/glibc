@@ -68,3 +68,4 @@ t/sysvshm
 t/ttyname_ERANGE
 t/bigmem
 t/locarchive
+t/mkdir_root
