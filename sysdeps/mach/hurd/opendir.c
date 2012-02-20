@@ -52,9 +52,11 @@ _hurd_fd_opendir (struct hurd_fd *d)
     return NULL;
 
   /* Set the descriptor to close on exec. */
+  HURD_CRITICAL_BEGIN;
   __spin_lock (&d->port.lock);
   d->flags |= FD_CLOEXEC;
   __spin_unlock (&d->port.lock);
+  HURD_CRITICAL_END;
 
   dirp->__fd = d;
   dirp->__data = dirp->__ptr = NULL;
