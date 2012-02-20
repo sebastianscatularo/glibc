@@ -56,3 +56,4 @@ t/IPV6_PKTINFO
 t/itimer-lock
 t/libc_stack_end
 t/mach-nanosleep
+t/null-pathname
