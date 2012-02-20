@@ -58,3 +58,4 @@ t/libc_stack_end
 t/mach-nanosleep
 t/null-pathname
 t/posix2008
+t/posix_opt.h
