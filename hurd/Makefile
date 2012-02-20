@@ -60,6 +60,7 @@ routines = hurdstartup hurdinit \
 	   vpprintf \
 	   ports-get ports-set hurdports hurdmsg \
 	   errno-loc \
+	   sysvshm \
 	   $(sig) $(dtable) $(inlines) port-cleanup report-wait xattr
 sig	= hurdsig hurdfault siginfo hurd-raise preempt-sig \
 	  trampoline longjmp-ts catch-exc exc2signal hurdkill sigunwind \
@@ -68,7 +69,7 @@ dtable	= dtable port2fd new-fd alloc-fd intern-fd \
 	  getdport openport \
 	  fd-close fd-read fd-write hurdioctl ctty-input ctty-output
 inlines = $(inline-headers:%.h=%-inlines)
-distribute = hurdstartup.h hurdfault.h hurdhost.h \
+distribute = hurdstartup.h hurdfault.h hurdhost.h sysvshm.h \
 	     faultexc.defs intr-rpc.defs intr-rpc.h intr-msg.h Notes
 
 # XXX this is a temporary hack; see hurdmalloc.h
