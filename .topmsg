@@ -1,16 +1,17 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] Fix sbrk beyond 128MB
+
+The patch below fixes sbrk() calls beyond the initial allocation of
+128MB: passing pagebrk makes the kernel return an error when there is
+some room (but not enough for the desired increase) between pagebrk and
+_hurd_data_end where vm is already allocated.
+
+2009-09-14  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+        * sysdeps/mach/hurd/brk.c (_hurd_set_brk): When more space needs to be
+        allocated, call __vm_protect to finish enabling the existing space, and
+        pass a copy of _hurd_data_end instead of pagebrk to __vm_allocate to
+        allocate the remainder.
 
 ---
-
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+http://sources.redhat.com/ml/libc-alpha/2009-09/msg00030.html
