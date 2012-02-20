@@ -47,3 +47,4 @@ t/opendirat
 t/usr
 t/catch-signal
 t/critical-sections
+tg/dup3-lock
