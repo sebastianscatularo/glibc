@@ -57,3 +57,4 @@ t/itimer-lock
 t/libc_stack_end
 t/mach-nanosleep
 t/null-pathname
+t/posix2008
