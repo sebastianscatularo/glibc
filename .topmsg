@@ -1,16 +1,15 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] Missing critical region locks.
+
+2009-01-12  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+        * hurd/hurd/fd.h (_hurd_fd_get): Call HURD_CRITICAL_BEGIN/
+        HURD_CRITICAL_END around holding _hurd_dtable_lock.
+        * sysdeps/mach/hurd/dirfd (dirfd): Likewise.
+        * sysdeps/mach/hurd/opendir.c (_hurd_fd_opendir): Call
+        HURD_CRITICAL_BEGIN/HURD_CRITICAL_END around holding
+        d->port.lock.
 
 ---
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+http://sources.redhat.com/ml/libc-alpha/2009-01/msg00030.html

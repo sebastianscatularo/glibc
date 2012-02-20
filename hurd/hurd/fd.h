@@ -65,6 +65,7 @@ _hurd_fd_get (int fd)
 {
   struct hurd_fd *descriptor;
 
+  HURD_CRITICAL_BEGIN;
   __mutex_lock (&_hurd_dtable_lock);
   if (fd < 0 || fd >= _hurd_dtablesize)
     descriptor = NULL;
@@ -87,6 +88,7 @@ _hurd_fd_get (int fd)
 	}
     }
   __mutex_unlock (&_hurd_dtable_lock);
+  HURD_CRITICAL_END;
 
   return descriptor;
 }
