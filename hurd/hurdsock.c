@@ -47,6 +47,12 @@ _hurd_socket_server (int domain, int dead)
 {
   socket_t server;
 
+  if (domain < 0)
+    {
+      errno = EAFNOSUPPORT;
+      return MACH_PORT_NULL;
+    }
+
   HURD_CRITICAL_BEGIN;
   __mutex_lock (&lock);
 
