@@ -1,16 +1,15 @@
-Subject: Baseline for our topic branches.
+From: Jeremie Koenig <jk@jk.fr.eu.org>
+Subject: [PATCH] Signal code refactoring.
 
----
+These patches should not change the current
+behavior, although they do fix a few minor bugs which were made
+apparent in the process. They are unchanged from my previous post
+earlier this month.
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+    34f5960 _hurd_internal_post_signal: Split into more functions
+    420eec9 _hurd_internal_post_signal: Scope variables more restrictively
+    1f5accd _hurd_internal_post_signal: Split out inner functions
+    1bb0a1d Hurd signals: refactor check_pending_signals
+    1764465 Hurd signals: reindent
+    28473d2 Hurd signals: make sigsuspend POSIX-conformant.
+    26d091a Hurd signals: fix uninitialized value.
