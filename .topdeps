@@ -76,3 +76,4 @@ t/thread-cancel
 t/unlockpt-chroot
 t/unwind-resume
 t/no-hp-timing
+t/hurdsig-fixes
