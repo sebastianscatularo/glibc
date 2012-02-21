@@ -1,6 +1,6 @@
 From: Jeremie Koenig <jk@jk.fr.eu.org>
-Subject: [PATCH] implement SA_SIGINFO signal handlers.
+Subject: [PATCH] Small signal fixes
 
-    52baaca Hurd signals: Copy bits/sigaction.h
-    4232c66 Hurd signals: SA_SIGINFO support
-    1831cfe Hurd signals: Use POSIX sigcodes
+    22e7268 Hurd signals: fix sigwait for pending signals
+    da8bf5e Hurd signals: clear the pending mask in fork and spawn
+    8e87205 Hurd signals: don't drop blocked ignored signals     
