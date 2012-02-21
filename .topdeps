@@ -78,3 +78,4 @@ t/unwind-resume
 t/no-hp-timing
 t/hurdsig-fixes
 t/hurdsig-global-dispositions
+t/hurdsig-SA_SIGINFO
