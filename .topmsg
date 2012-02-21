@@ -1,15 +1,12 @@
 From: Jeremie Koenig <jk@jk.fr.eu.org>
-Subject: [PATCH] Signal code refactoring.
+Subject: [PATCH] Global signal dispositions.
 
-These patches should not change the current
-behavior, although they do fix a few minor bugs which were made
-apparent in the process. They are unchanged from my previous post
-earlier this month.
+Although they should not change the
+default behaviors of signals for cthread programs, these patches add
+new functions which can be used by libpthread to enable
+POSIX-conforming behavior of signals on a per-thread basis.
 
-    34f5960 _hurd_internal_post_signal: Split into more functions
-    420eec9 _hurd_internal_post_signal: Scope variables more restrictively
-    1f5accd _hurd_internal_post_signal: Split out inner functions
-    1bb0a1d Hurd signals: refactor check_pending_signals
-    1764465 Hurd signals: reindent
-    28473d2 Hurd signals: make sigsuspend POSIX-conformant.
-    26d091a Hurd signals: fix uninitialized value.
+    e407ae3 Hurd signals: implement global signal dispositions
+    38eb4b3 Hurd signals: provide a sigstate destructor
+    344dfd6 Hurd signals: fix sigwait() for global signals
+    fb055f2 Hurd signals: fix global untraced signals.
