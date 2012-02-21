@@ -1,12 +1,6 @@
 From: Jeremie Koenig <jk@jk.fr.eu.org>
-Subject: [PATCH] Global signal dispositions.
+Subject: [PATCH] implement SA_SIGINFO signal handlers.
 
-Although they should not change the
-default behaviors of signals for cthread programs, these patches add
-new functions which can be used by libpthread to enable
-POSIX-conforming behavior of signals on a per-thread basis.
-
-    e407ae3 Hurd signals: implement global signal dispositions
-    38eb4b3 Hurd signals: provide a sigstate destructor
-    344dfd6 Hurd signals: fix sigwait() for global signals
-    fb055f2 Hurd signals: fix global untraced signals.
+    52baaca Hurd signals: Copy bits/sigaction.h
+    4232c66 Hurd signals: SA_SIGINFO support
+    1831cfe Hurd signals: Use POSIX sigcodes
