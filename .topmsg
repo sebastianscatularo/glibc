@@ -1,12 +1,6 @@
-From: Jeremie Koenig <jk@jk.fr.eu.org>
-Subject: [PATCH] Global signal dispositions.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] Set version for global signal disposition functions
 
-Although they should not change the
-default behaviors of signals for cthread programs, these patches add
-new functions which can be used by libpthread to enable
-POSIX-conforming behavior of signals on a per-thread basis.
+This adds the symbols needed by libpthread & such to the external interface.
 
-    e407ae3 Hurd signals: implement global signal dispositions
-    38eb4b3 Hurd signals: provide a sigstate destructor
-    344dfd6 Hurd signals: fix sigwait() for global signals
-    fb055f2 Hurd signals: fix global untraced signals.
+The version here is just the current version, but it has to eventually be the version when the patch will actually be applied upstream.
