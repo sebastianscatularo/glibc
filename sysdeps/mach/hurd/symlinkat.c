@@ -1,5 +1,5 @@
 /* Create a symbolic link named relative to an open directory.  Hurd version.
-   Copyright (C) 1991,1992,1993,1994,1995,1996,1997,2006
+   Copyright (C) 1991,1992,1993,1994,1995,1996,1997,2006,2012
 	Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
@@ -51,6 +51,7 @@ symlinkat (from, fd, to)
     return -1;
 
   /* Create a new, unlinked node in the target directory.  */
+  node = MACH_PORT_NULL;
   err = __dir_mkfile (dir, O_WRITE, 0777 & ~_hurd_umask, &node);
 
   if (! err)
@@ -66,7 +67,9 @@ symlinkat (from, fd, to)
     err = __dir_link (dir, node, name, 1);
 
   __mach_port_deallocate (__mach_task_self (), dir);
-  __mach_port_deallocate (__mach_task_self (), node);
+
+  if (node != MACH_PORT_NULL)
+    __mach_port_deallocate (__mach_task_self (), node);
 
   if (err)
     return __hurd_fail (err);
