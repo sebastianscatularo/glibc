@@ -1,4 +1,4 @@
-/* Copyright (C) 1991, 92, 93, 94, 95, 96, 97 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 12 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -44,6 +44,7 @@ __symlink (from, to)
     return -1;
 
   /* Create a new, unlinked node in the target directory.  */
+  node = MACH_PORT_NULL;
   err = __dir_mkfile (dir, O_WRITE, 0777 & ~_hurd_umask, &node);
 
   if (! err)
@@ -59,7 +60,9 @@ __symlink (from, to)
     err = __dir_link (dir, node, name, 1);
 
   __mach_port_deallocate (__mach_task_self (), dir);
-  __mach_port_deallocate (__mach_task_self (), node);
+
+  if (node != MACH_PORT_NULL)
+    __mach_port_deallocate (__mach_task_self (), node);
 
   if (err)
     return __hurd_fail (err);
