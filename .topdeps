@@ -22,7 +22,6 @@ t/bits_sched.h
 t/dl-sysdep.c_SHARED
 t/__rtld_lock_recursive_t
 t/____longjmp_chk
-t/unwind-resume.c
 t/extern_inline
 t/ld.so_auxv
 t/grantpt
@@ -74,7 +73,6 @@ t/pthread_types
 t/sendmsg-SCM_RIGHTS
 t/thread-cancel
 t/unlockpt-chroot
-t/unwind-resume
 t/no-hp-timing
 t/hurdsig-fixes
 t/hurdsig-global-dispositions
