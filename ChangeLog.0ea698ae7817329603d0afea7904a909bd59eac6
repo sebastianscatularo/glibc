@@ -1,0 +1,5 @@
+2011-12-26  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* sysdeps/mach/hurd/mmap.c (__mmap): When MAPADDR is nonzero, try
+	__vm_allocate and __vm_map with ANYWHERE set to 0 first, and try with
+	ANYWHERE set to 1 only on KERN_NO_SPACE error.

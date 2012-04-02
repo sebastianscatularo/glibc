@@ -1,5 +1,4 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$CVSid$])
 AC_PREREQ(2.53)dnl		dnl Minimum Autoconf version required.
 AC_INIT([GNU C Library], [(see version.h)], [http://sourceware.org/bugzilla/], [glibc])
 AC_CONFIG_SRCDIR([include/features.h])
@@ -1067,11 +1066,16 @@ if test -n "$sysheaders"; then
   SYSINCLUDES="$SYSINCLUDES \
 -isystem `echo $sysheaders | sed 's/:/ -isystem /g'`"
   if test -n "$CXX"; then
+    CXX_SYSINCLUDES=
     cxxversion=`$CXX -dumpversion 2>&AS_MESSAGE_LOG_FD` &&
     cxxmachine=`$CXX -dumpmachine 2>&AS_MESSAGE_LOG_FD` &&
-    cxxheaders=`$CXX -print-file-name=../../../../include/c++/`"$cxxversion" &&
-    CXX_SYSINCLUDES="-isystem $cxxheaders \
+    for d in include "$cxxmachine/include"; do
+      i=../../../../$d/c++/$cxxversion
+      cxxheaders=`$CXX -print-file-name="$i"` &&
+      test "x$cxxheaders" != x && test "x$i" != "x$cxxheaders" &&
+      CXX_SYSINCLUDES="$CXX_SYSINCLUDES -isystem $cxxheaders \
 -isystem $cxxheaders/$cxxmachine -isystem $cxxheaders/backward"
+    done
   fi
 fi
 AC_SUBST(SYSINCLUDES)
@@ -2345,6 +2349,7 @@ AC_SUBST(libc_cv_cpp_asm_debuginfo)
 AC_SUBST(libc_cv_cc_sse4)
 AC_SUBST(libc_cv_cc_avx)
 AC_SUBST(libc_cv_cc_novzeroupper)
+AC_SUBST(libc_cv_cc_fma4)
 AC_SUBST(libc_cv_as_i686)
 
 AC_SUBST(use_ldconfig)
