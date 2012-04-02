@@ -98,7 +98,7 @@ elf_machine_runtime_setup (struct link_map *l, int lazy, int profile)
       /* The GOT entries for functions in the PLT have not yet been filled
 	 in.  Their initial contents will arrange when called to push an
 	 offset into the .rel.plt section, push _GLOBAL_OFFSET_TABLE_[1],
-	 and then jump to _GLOBAL_OFFSET_TABLE[2].  */
+	 and then jump to _GLOBAL_OFFSET_TABLE_[2].  */
       got = (Elf64_Addr *) D_PTR (l, l_info[DT_PLTGOT]);
       /* If a library is prelinked but we have to relocate anyway,
 	 we have to be able to undo the prelinking of .got.plt.
@@ -207,10 +207,14 @@ _dl_start_user:\n\
 /* A reloc type used for ld.so cmdline arg lookups to reject PLT entries.  */
 #define ELF_MACHINE_JMP_SLOT	R_X86_64_JUMP_SLOT
 
+/* The relative ifunc relocation.  */
+// XXX This is a work-around for a broken linker.  Remove!
+#define ELF_MACHINE_IRELATIVE	R_X86_64_IRELATIVE
+
 /* The x86-64 never uses Elf64_Rel relocations.  */
 #define ELF_MACHINE_NO_REL 1
 
-/* We define an initialization functions.  This is called very early in
+/* We define an initialization function.  This is called very early in
    _dl_sysdep_start.  */
 #define DL_PLATFORM_INIT dl_platform_init ()
 
@@ -230,8 +234,8 @@ elf_machine_fixup_plt (struct link_map *map, lookup_t t,
   return *reloc_addr = value;
 }
 
-/* Return the final value of a plt relocation.  On x86-64 the
-   JUMP_SLOT relocation ignores the addend. */
+/* Return the final value of a PLT relocation.  On x86-64 the
+   JUMP_SLOT relocation ignores the addend.  */
 static inline Elf64_Addr
 elf_machine_plt_value (struct link_map *map, const Elf64_Rela *reloc,
 		       Elf64_Addr value)

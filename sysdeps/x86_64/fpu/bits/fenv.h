@@ -97,10 +97,13 @@ fenv_t;
 #endif
 
 
-#ifdef __OPTIMIZE__
+#ifdef __USE_EXTERN_INLINES
+__BEGIN_DECLS
+
 /* Optimized versions.  */
-extern int __feraiseexcept_renamed (int) __asm__ ("feraiseexcept");
-__extern_inline int feraiseexcept (int __excepts)
+extern int __REDIRECT_NTH (__feraiseexcept_renamed, (int), feraiseexcept);
+__extern_inline int
+__NTH (feraiseexcept (int __excepts))
 {
   if (__builtin_constant_p (__excepts)
       && (__excepts & ~(FE_INVALID | FE_DIVBYZERO)) == 0)
@@ -115,11 +118,11 @@ __extern_inline int feraiseexcept (int __excepts)
 	}
       if ((FE_DIVBYZERO & __excepts) != 0)
 	{
-	  float f = 1.0;
-	  float g = 0.0;
+	  float __f = 1.0;
+	  float __g = 0.0;
 
-	  __asm__ __volatile__ ("divss %1, %0" : : "x" (f), "x" (g));
-	  (void) &f;
+	  __asm__ __volatile__ ("divss %1, %0" : : "x" (__f), "x" (__g));
+	  (void) &__f;
 	}
 
       return 0;
@@ -127,4 +130,6 @@ __extern_inline int feraiseexcept (int __excepts)
 
   return __feraiseexcept_renamed (__excepts);
 }
+
+__END_DECLS
 #endif
