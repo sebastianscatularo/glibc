@@ -1,8 +1,7 @@
-
 /*
  * IBM Accurate Mathematical Library
  * written by International Business Machines Corp.
- * Copyright (C) 2001 Free Software Foundation
+ * Copyright (C) 2001, 2011 Free Software Foundation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -33,6 +32,12 @@
 #include "endian.h"
 #include "mpa.h"
 
+#ifndef SECTION
+# define SECTION
+#endif
+
+#include "mpsqrt.h"
+
 /****************************************************************************/
 /* Multi-Precision square root function subroutine for precision p >= 4.    */
 /* The relative error is bounded by 3.501*r**(1-p), where r=2**24.          */
@@ -41,31 +46,31 @@
 /* p as integer. Routine computes sqrt(*x) and stores result in *y          */
 /****************************************************************************/
 
-double fastiroot(double);
+static double fastiroot(double);
 
-void __mpsqrt(mp_no *x, mp_no *y, int p) {
-#include "mpsqrt.h"
-
-  int i,m,ex,ey;
+void
+SECTION
+__mpsqrt(mp_no *x, mp_no *y, int p) {
+  int i,m,ey;
   double dx,dy;
   mp_no
     mphalf   = {0,{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
-                   0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
-                   0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}},
+		   0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+		   0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}},
     mp3halfs = {0,{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
-                   0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
-                   0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}};
+		   0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+		   0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}};
   mp_no mpxn,mpz,mpu,mpt1,mpt2;
 
   /* Prepare multi-precision 1/2 and 3/2 */
   mphalf.e  =0;  mphalf.d[0]  =ONE;  mphalf.d[1]  =HALFRAD;
   mp3halfs.e=1;  mp3halfs.d[0]=ONE;  mp3halfs.d[1]=ONE;  mp3halfs.d[2]=HALFRAD;
 
-  ex=EX;      ey=EX/2;     __cpy(x,&mpxn,p);    mpxn.e -= (ey+ey);
+  ey=EX/2;     __cpy(x,&mpxn,p);    mpxn.e -= (ey+ey);
   __mp_dbl(&mpxn,&dx,p);   dy=fastiroot(dx);    __dbl_mp(dy,&mpu,p);
   __mul(&mpxn,&mphalf,&mpz,p);
 
-  m=mp[p];
+  m=__mpsqrt_mp[p];
   for (i=0; i<m; i++) {
     __mul(&mpu,&mpu,&mpt1,p);
     __mul(&mpt1,&mpz,&mpt2,p);
@@ -82,7 +87,9 @@ void __mpsqrt(mp_no *x, mp_no *y, int p) {
 /* Compute a double precision approximation for 1/sqrt(x)  */
 /* with the relative error bounded by 2**-51.              */
 /***********************************************************/
-double fastiroot(double x) {
+static double
+SECTION
+fastiroot(double x) {
   union {int i[2]; double d;} p,q;
   double y,z, t;
   int n;
