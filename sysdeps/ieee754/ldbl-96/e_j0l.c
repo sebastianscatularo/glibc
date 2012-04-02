@@ -108,9 +108,9 @@ __ieee754_j0l (long double x)
 {
   long double z, s, c, ss, cc, r, u, v;
   int32_t ix;
-  u_int32_t se, i0, i1;
+  u_int32_t se;
 
-  GET_LDOUBLE_WORDS (se, i0, i1, x);
+  GET_LDOUBLE_EXP (se, x);
   ix = se & 0x7fff;
   if (__builtin_expect (ix >= 0x7fff, 0))
     return one / (x * x);
@@ -144,13 +144,12 @@ __ieee754_j0l (long double x)
     }
   if (__builtin_expect (ix < 0x3fef, 0)) /* |x| < 2**-16 */
     {
-      if (huge + x > one)
-	{			/* raise inexact if x != 0 */
-	  if (ix < 0x3fde) /* |x| < 2^-33 */
-	    return one;
-	  else
-	    return one - 0.25 * x * x;
-	}
+      /* raise inexact if x != 0 */
+      math_force_eval (huge + x);
+      if (ix < 0x3fde) /* |x| < 2^-33 */
+	return one;
+      else
+	return one - 0.25 * x * x;
     }
   z = x * x;
   r = z * (R[0] + z * (R[1] + z * (R[2] + z * (R[3] + z * R[4]))));
