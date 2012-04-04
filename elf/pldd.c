@@ -1,5 +1,5 @@
 /* List dynamic shared objects linked into given process.
-   Copyright (C) 2011 Free Software Foundation, Inc.
+   Copyright (C) 2011, 2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@gmail.com>, 2011.
 
@@ -14,9 +14,8 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
 
 #include <alloca.h>
 #include <argp.h>
@@ -44,8 +43,10 @@ extern char *program_invocation_short_name;
 #define PACKAGE _libc_intl_domainname
 
 /* External functions.  */
-extern void *xmalloc (size_t n);
-extern void *xrealloc (void *p, size_t n);
+extern void *xmalloc (size_t n)
+  __attribute_malloc__ __attribute_alloc_size (1);
+extern void *xrealloc (void *o, size_t n)
+  __attribute_malloc__ __attribute_alloc_size (2);
 
 /* Name and version of program.  */
 static void print_version (FILE *stream, struct argp_state *state);
@@ -220,7 +221,7 @@ print_version (FILE *stream, struct argp_state *state)
 Copyright (C) %s Free Software Foundation, Inc.\n\
 This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
-"), "2011");
+"), "2012");
   fprintf (stream, gettext ("Written by %s.\n"), "Ulrich Drepper");
 }
 
