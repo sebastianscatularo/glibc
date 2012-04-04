@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 Free Software Foundation, Inc.
+/* Copyright (C) 2011, 2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@gmail.com>, 2011.
 
@@ -13,9 +13,8 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
 
 #include <math.h>
 #include <math_private.h>
@@ -29,12 +28,12 @@ u_threshold= -7.45133219101941108420e+02;  /* 0xc0874910, 0xD52D3051 */
 double
 __exp (double x)
 {
-  if (__builtin_expect (x > o_threshold, 0))
+  if (__builtin_expect (isgreater (x, o_threshold), 0))
     {
       if (_LIB_VERSION != _IEEE_)
 	return __kernel_standard_f (x, x, 6);
     }
-  else if (__builtin_expect (x < u_threshold, 0))
+  else if (__builtin_expect (isless (x, u_threshold), 0))
     {
       if (_LIB_VERSION != _IEEE_)
 	return __kernel_standard_f (x, x, 7);
