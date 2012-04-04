@@ -1,10 +1,15 @@
-From: Samuel Thibault <samuel.thibault@ens-lyon.org>
-Subject: [PATCH] ttyname_r returning EINVAL
+Subject: Backports from master.
 
-2011-08-05  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+Use ``git cherry-pick -x SHA1''.
 
-        * sysdeps/mach/hurd/ttyname_r.c (__ttyname_r): Return ERANGE instead of
-        EINVAL when BUFLEN is too smal.
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
 
----
-http://sourceware.org/ml/libc-alpha/2011-08/msg00013.html
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
+
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
+
+Check this, and remove the ChangeLog.SHA1.
+
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
