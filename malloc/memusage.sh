@@ -1,5 +1,5 @@
 #! @BASH@
-# Copyright (C) 1999-2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+# Copyright (C) 1999-2011, 2012 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 # Contributed by Ulrich Drepper <drepper@gnu.org>, 1999.
 
@@ -14,9 +14,8 @@
 # Lesser General Public License for more details.
 
 # You should have received a copy of the GNU Lesser General Public
-# License along with the GNU C Library; if not, write to the Free
-# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-# 02111-1307 USA.
+# License along with the GNU C Library; if not, see
+# <http://www.gnu.org/licenses/>.
 
 memusageso='@SLIBDIR@/libmemusage.so'
 memusagestat='@BINDIR@/memusagestat'
@@ -73,7 +72,7 @@ do_version() {
   printf $"Copyright (C) %s Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-" "2011"
+" "2012"
   printf $"Written by %s.
 " "Ulrich Drepper"
   exit 0
