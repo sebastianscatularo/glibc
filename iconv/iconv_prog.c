@@ -1,5 +1,5 @@
 /* Convert text in given files from the specified from-set to the to-set.
-   Copyright (C) 1998-2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+   Copyright (C) 1998-2011, 2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@cygnus.com>, 1998.
 
@@ -14,8 +14,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   along with this program; if not, see <http://www.gnu.org/licenses/>.  */
 
 #include <argp.h>
 #include <assert.h>
@@ -424,7 +423,7 @@ print_version (FILE *stream, struct argp_state *state)
 Copyright (C) %s Free Software Foundation, Inc.\n\
 This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
-"), "2011");
+"), "2012");
   fprintf (stream, gettext ("Written by %s.\n"), "Ulrich Drepper");
 }
 
@@ -719,9 +718,8 @@ add_known_names (struct gconv_module *node)
     add_known_names (node->right);
   do
     {
-      if (strcmp (node->from_string, "INTERNAL"))
-	tsearch (node->from_string, &printlist,
-		 (__compar_fn_t) strverscmp);
+      if (strcmp (node->from_string, "INTERNAL") != 0)
+	tsearch (node->from_string, &printlist, (__compar_fn_t) strverscmp);
       if (strcmp (node->to_string, "INTERNAL") != 0)
 	tsearch (node->to_string, &printlist, (__compar_fn_t) strverscmp);
 
