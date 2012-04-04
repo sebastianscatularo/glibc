@@ -1,24 +1,16 @@
-To: libc-alpha@sourceware.org
-Subject: [PATCH] Repair previous commit to mach/devstream.c.
-
-From: Thomas Schwinge <thomas@schwinge.name>
-
-2011-10-08  Thomas Schwinge  <thomas@schwinge.name>
-
-	* mach/devstream.c (cookie_io_functions_t, write, read, close): Remove
-	definitions; repair previous commit.
+Subject: Baseline for our topic branches.
 
 ---
 
-Hi!
+This need not strictly be a TopGit branch, but it is for easy synchronization
+between different machines.
 
-The 3ce1f2959437e952b9db4eaeed2407424f11a4d1 cleanup commit removed
-USE_IN_LIBIO (which had always been defined); however this mach/devstream.c
-code had been conditioned with #ifndef, not #ifdef.
+As the baseline is merged into the topic branches, it is forward-only.
 
+To advance it:
 
-Grüße,
- Thomas
-
+    $ echo [SHA1] > .topdeps
+    $ git commit -m Advance. -- .topdeps
+    $ tg update
 
 ---
