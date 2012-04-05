@@ -26,7 +26,6 @@ t/extern_inline
 t/ld.so_auxv
 t/grantpt
 posix/regex_internal.c/MAX_undefined
-t/__i686_defined
 t/master_backports
 t/cpuclock
 t/regenerate_errno.h
@@ -39,7 +38,6 @@ t/pldd
 t/cancellation
 t/mmap
 t/eglibc_backports
-t/repair-mach_devstream.c
 t/O_CLOEXEC
 t/pagesize
 t/opendirat
@@ -64,7 +62,6 @@ t/select-inputcheck
 t/setresid
 t/SOL_IP
 t/sysvshm
-t/ttyname_ERANGE
 t/bigmem
 t/locarchive
 t/mkdir_root
