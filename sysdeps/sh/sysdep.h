@@ -1,5 +1,5 @@
 /* Assembler macros for SH.
-   Copyright (C) 1999, 2000, 2005 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2005, 2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -13,17 +13,14 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
 
 #include <sysdeps/generic/sysdep.h>
 
 #ifdef	__ASSEMBLER__
 
 /* Syntactic details of assembler.  */
-
-#ifdef HAVE_ELF
 
 #define ALIGNARG(log2) log2
 /* For ELF we need the `.type' directive to make shared libs work right.  */
@@ -36,15 +33,6 @@
 #define PLTJMP(_x)	_x
 #endif
 
-#else
-
-#define ALIGNARG(log2) log2
-#define ASM_TYPE_DIRECTIVE(name,type)	/* Nothing is specified.  */
-#define ASM_SIZE_DIRECTIVE(name)	/* Nothing is specified.  */
-
-#define PLTJMP(_x)	_x
-
-#endif
 
 /* Define an entry point visible from C.  */
 #define	ENTRY(name)							      \
@@ -80,12 +68,10 @@
 #define CALL_MCOUNT		/* Do nothing.  */
 #endif
 
-#ifdef	NO_UNDERSCORES
 /* Since C identifiers are not normally prefixed with an underscore
    on this system, the asm identifier `syscall_error' intrudes on the
    C name space.  Make sure we use an innocuous name.  */
 #define	syscall_error	__syscall_error
 #define mcount		_mcount
-#endif
 
 #endif	/* __ASSEMBLER__ */
