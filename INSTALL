@@ -20,7 +20,7 @@ Configuring and compiling GNU Libc
 
 GNU libc cannot be compiled in the source directory.  You must build it
 in a separate build directory.  For example, if you have unpacked the
-glibc sources in `/src/gnu/glibc-2.4', create a directory
+glibc sources in `/src/gnu/glibc-VERSION', create a directory
 `/src/gnu/glibc-build' to put the object files in.  This allows
 removing the whole build directory in case an error occurs, which is
 the safest way to get a fresh start and should always be done.
@@ -28,7 +28,7 @@ the safest way to get a fresh start and should always be done.
    From your object directory, run the shell script `configure' located
 at the top level of the source tree.  In the scenario above, you'd type
 
-     $ ../glibc-2.4/configure ARGS...
+     $ ../glibc-VERSION/configure ARGS...
 
    Please note that even though you're building in a separate build
 directory, the compilation needs to modify a few files in the source
@@ -65,10 +65,9 @@ will be used, and CFLAGS sets optimization options for the compiler.
 
      This option is primarily of use on a system where the headers in
      `/usr/include' come from an older version of glibc.  Conflicts can
-     occasionally happen in this case.  Note that Linux libc5 qualifies
-     as an older version of glibc.  You can also use this option if you
-     want to compile glibc with a newer set of kernel headers than the
-     ones found in `/usr/include'.
+     occasionally happen in this case.  You can also use this option if
+     you want to compile glibc with a newer set of kernel headers than
+     the ones found in `/usr/include'.
 
 `--enable-add-ons[=LIST]'
      Specify add-on packages to include in the build.  If this option is
@@ -80,7 +79,7 @@ will be used, and CFLAGS sets optimization options for the compiler.
      absolute directory name or can be a directory name relative to the
      main source directory, or relative to the build directory (that
      is, the current working directory).  For example,
-     `--enable-add-ons=nptl,../glibc-libidn-2.4'.
+     `--enable-add-ons=nptl,../glibc-libidn-VERSION'.
 
 `--enable-kernel=VERSION'
      This option is currently only useful on GNU/Linux systems.  The
@@ -102,8 +101,6 @@ will be used, and CFLAGS sets optimization options for the compiler.
      Use this option if your computer lacks hardware floating-point
      support and your operating system does not emulate an FPU.
 
-     these
-
 `--disable-shared'
      Don't build shared libraries even if it is possible.  Not all
      systems support shared libraries; you need ELF support and
@@ -112,14 +109,6 @@ will be used, and CFLAGS sets optimization options for the compiler.
 `--disable-profile'
      Don't build libraries with profiling information.  You may want to
      use this option if you don't plan to do profiling.
-
-`--enable-omitfp'
-     Use maximum optimization for the normal (static and shared)
-     libraries, and compile separate static libraries with debugging
-     information and no optimization.  We recommend not doing this.
-     The extra optimization doesn't gain you much, it may provoke
-     compiler bugs, and you won't be able to trace bugs through the C
-     library.
 
 `--disable-versioning'
      Don't compile the shared libraries with symbol version information.
@@ -204,9 +193,9 @@ cross-compiler for the target you configured the library for; it is
 important to use this same `CC' value when running `configure', like
 this: `CC=TARGET-gcc configure TARGET'.  Set `BUILD_CC' to the compiler
 to use for programs run on the build system as part of compiling the
-library.  You may need to set `AR' and `RANLIB' to cross-compiling
-versions of `ar' and `ranlib' if the native tools are not configured to
-work with object files for the target you configured for.
+library.  You may need to set `AR' to cross-compiling versions of `ar'
+if the native tools are not configured to work with object files for
+the target you configured for.
 
 Installing the C Library
 ========================
@@ -219,10 +208,11 @@ C library, we recommend that you shut the system down to single-user
 mode first, and reboot afterward.  This minimizes the risk of breaking
 things when the library changes out from underneath.
 
-   If you're upgrading from Linux libc5 or some other C library, you
-need to replace the `/usr/include' with a fresh directory before
-installing it.  The new `/usr/include' should contain the Linux
-headers, but nothing else.
+   `make install' will do the entire job of upgrading from a previous
+installation of glibc 2.x.  There may sometimes be headers left behind
+from the previous installation, but those are generally harmless.  If
+you want to avoid leaving headers behind you can do things in the
+following order.
 
    You must first build the library (`make'), optionally check it
 (`make check'), switch the include directories and then install (`make
@@ -230,19 +220,11 @@ install').  The steps must be done in this order.  Not moving the
 directory before install will result in an unusable mixture of header
 files from both libraries, but configuring, building, and checking the
 library requires the ability to compile and run programs against the old
+library.  The new `/usr/include', after switching the include
+directories and before installing the library should contain the Linux
+headers, but nothing else.  If you do this, you will need to restore
+any headers from non-glibc libraries youself after installing the
 library.
-
-   If you are upgrading from a previous installation of glibc 2.0 or
-2.1, `make install' will do the entire job.  You do not need to remove
-the old includes - if you want to do so anyway you must then follow the
-order given above.
-
-   You may also need to reconfigure GCC to work with the new library.
-The easiest way to do that is to figure out the compiler switches to
-make it work again (`-Wl,--dynamic-linker=/lib/ld-linux.so.2' should
-work on GNU/Linux systems) and use them to recompile gcc.  You can also
-edit the specs file (`/usr/lib/gcc-lib/TARGET/VERSION/specs'), but that
-is a bit of a black art.
 
    You can install glibc somewhere other than where you configured it
 to go by setting the `install_root' variable on the command line for
@@ -251,8 +233,8 @@ paths for installation.  This is useful when setting up a chroot
 environment or preparing a binary distribution.  The directory should be
 specified with an absolute file name.
 
-   Glibc 2.2 includes a daemon called `nscd', which you may or may not
-want to run.  `nscd' caches name service lookups; it can dramatically
+   Glibc includes a daemon called `nscd', which you may or may not want
+to run.  `nscd' caches name service lookups; it can dramatically
 improve performance with NIS+, and may help with DNS as well.
 
    One auxiliary program, `/usr/libexec/pt_chown', is installed setuid
@@ -298,16 +280,15 @@ build the GNU C library:
 
    * GCC 3.4 or newer, GCC 4.1 recommended
 
-     For the 2.4 release or later, GCC 3.4 or higher is required; as of
-     this writing, GCC 4.4 is the compiler we advise to use for current
-     versions.  On certain machines including `powerpc64', compilers
-     prior to GCC 4.0 have bugs that prevent them compiling the C
-     library code in the 2.4 release.  On other machines, GCC 4.1 is
-     required to build the C library with support for the correct `long
-     double' type format; these include `powerpc' (32 bit), `s390' and
-     `s390x'.  For other architectures special compiler-provided
-     headers are needed (like `cpuid.h' on x86) which only come with
-     later compiler versions.
+     GCC 3.4 or higher is required; as of this writing, GCC 4.4 is the
+     compiler we advise to use for current versions.  On certain
+     machines including `powerpc64', compilers prior to GCC 4.0 have
+     bugs that prevent them compiling the C library code.  On other
+     machines, GCC 4.1 is required to build the C library with support
+     for the correct `long double' type format; these include `powerpc'
+     (32 bit), `s390' and `s390x'.  For other architectures special
+     compiler-provided headers are needed (like `cpuid.h' on x86) which
+     only come with later compiler versions.
 
      You can use whatever compiler you like to compile programs that
      use GNU libc, but be aware that both GCC 2.7 and 2.8 have bugs in
@@ -317,12 +298,11 @@ build the GNU C library:
      Check the FAQ for any special compiler issues on particular
      platforms.
 
-   * GNU `binutils'
+   * GNU `binutils' 2.15 or later
 
      You must use GNU `binutils' (as and ld) to build the GNU C library.
      No other assembler or linker has the necessary functionality at the
-     moment.  The configure scripts checks for the appropriate version
-     for the platform.  Too-old versions will prevent building glibc.
+     moment.
 
    * GNU `texinfo' 3.12f
 
@@ -382,9 +362,7 @@ kernel you can get your hands on.
 config' as above; then, rename or delete `/usr/include', create a new
 `/usr/include', and make symbolic links of `/usr/include/linux' and
 `/usr/include/asm' into the kernel sources.  You can then configure
-glibc with no special options.  This tactic is recommended if you are
-upgrading from libc5, since you need to get rid of the old header files
-anyway.
+glibc with no special options.
 
    After installing GNU libc, you may need to remove or rename
 `/usr/include/linux' and `/usr/include/asm', and replace them with
@@ -406,12 +384,6 @@ of these files.
 configure glibc with `--prefix=/usr'.  If you set some other prefix or
 allow it to default to `/usr/local', then all the components are
 installed there.
-
-   If you are upgrading from libc5, you need to recompile every shared
-library on your system against the new library for the sake of new code,
-but keep the old libraries around for old binaries to use.  This is
-complicated and difficult.  Consult the Glibc2 HOWTO at
-`http://www.imaxx.net/~thrytis/glibc' for details.
 
    You cannot use `nscd' with 2.0 kernels, due to bugs in the
 kernel-side thread support.  `nscd' happens to hit these bugs
