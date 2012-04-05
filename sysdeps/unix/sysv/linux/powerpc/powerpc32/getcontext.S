@@ -1,5 +1,5 @@
 /* Save current context.
-   Copyright (C) 2002, 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2002, 2004, 2005, 2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -13,9 +13,8 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA
-   02110-1301 USA.  */
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
 
 #include <sysdep.h>
 #include <rtld-global-offsets.h>
@@ -54,12 +53,12 @@ versioned_symbol (libc, __getcontext, getcontext, GLIBC_2_3_4)
 
 #if SHLIB_COMPAT (libc, GLIBC_2_3_3, GLIBC_2_3_4)
 	compat_text_section
-	
-# undef __CONTEXT_FUNC_NAME	
+
+# undef __CONTEXT_FUNC_NAME
 # define __CONTEXT_FUNC_NAME __novec_getcontext
 # undef __CONTEXT_ENABLE_VRS
 
-# clude "getcontext-common.S"
+# include "getcontext-common.S"
 
 	.previous
 
