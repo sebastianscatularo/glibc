@@ -1,4 +1,0 @@
-2012-02-15  Roland McGrath  <roland@hack.frob.com>
-
-	[BZ #4822]
-	* sysdeps/mach/hurd/malloc-machine.h (madvise): New macro.
