@@ -1,4 +1,5 @@
-/* Copyright (C) 1991-1995,1997-2006,2007,2009,2011 Free Software Foundation, Inc.
+/* Copyright (C) 1991-1995,1997-2007,2009,2011,2012
+   Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Written by Per Bothner <bothner@cygnus.com>.
 
@@ -13,9 +14,8 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.
 
    As a special exception, if you link the code in this file with
    files compiled with a GNU compiler to produce an executable,
@@ -58,29 +58,9 @@
 #endif
 
 #ifndef __P
-# if _G_HAVE_SYS_CDEFS
-#  include <sys/cdefs.h>
-# else
-#  ifdef __STDC__
-#   define __P(p) p
-#   define __PMT(p) p
-#  else
-#   define __P(p) ()
-#   define __PMT(p) ()
-#  endif
-# endif
+# include <sys/cdefs.h>
 #endif /*!__P*/
 
-/* For backward compatibility */
-#ifndef _PARAMS
-# define _PARAMS(protos) __P(protos)
-#endif /*!_PARAMS*/
-
-#ifndef __STDC__
-# ifndef const
-#  define const
-# endif
-#endif
 #define _IO_UNIFIED_JUMPTABLES 1
 #ifndef _G_HAVE_PRINTF_FP
 # define _IO_USE_DTOA 1
@@ -371,7 +351,7 @@ typedef __ssize_t __io_read_fn (void *__cookie, char *__buf, size_t __nbytes);
    opened for append (__mode.__append set), then set the file pointer
    to the end of the file and then do the write; if not, just write at
    the current file pointer.  */
-typedef __ssize_t __io_write_fn (void *__cookie, __const char *__buf,
+typedef __ssize_t __io_write_fn (void *__cookie, const char *__buf,
 				 size_t __n);
 
 /* Move COOKIE's file position to *POS bytes from the
