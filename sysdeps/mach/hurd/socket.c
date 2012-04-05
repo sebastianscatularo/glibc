@@ -1,6 +1,4 @@
-/* Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2008 Free Software
-   Foundation, Inc.
-
+/* Copyright (C) 1992-1998,2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -14,9 +12,8 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
 
 #include <errno.h>
 #include <sys/socket.h>
@@ -65,7 +62,7 @@ __socket (domain, type, protocol)
      isn't supported.  */
   if (err == MACH_SEND_INVALID_DEST || err == MIG_SERVER_DIED
       || err == MIG_BAD_ID || err == EOPNOTSUPP)
-    err = EPFNOSUPPORT;
+    err = EAFNOSUPPORT;
 
   if (! err)
     {
