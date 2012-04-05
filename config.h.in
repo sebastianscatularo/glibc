@@ -8,11 +8,6 @@
 # error "glibc must not be compiled with -ffast-math"
 #endif
 
-/* Define if using ELF, which supports weak symbols.
-   This implies HAVE_ASM_WEAK_DIRECTIVE and NO_UNDERSCORES; set by
-   --with-elf.  */
-#undef	HAVE_ELF
-
 /* Define if building with SELinux support.  Set by --with-selinux.  */
 #undef	HAVE_SELINUX
 
@@ -21,13 +16,6 @@
 
 /* Defined if building with SELinux support & libcap libs are detected.  */
 #undef  HAVE_LIBCAP
-
-/* Define if using XCOFF. Set by --with-xcoff.  */
-#undef	HAVE_XCOFF
-
-/* Define if C symbols are asm symbols.  Don't define if C symbols
-   have a `_' prepended to make the asm symbol.  */
-#undef	NO_UNDERSCORES
 
 /* Define if weak symbols are available via the `.weak' directive.  */
 #undef	HAVE_ASM_WEAK_DIRECTIVE
@@ -41,9 +29,6 @@
 /* Define to the assembler line separator character for multiple
    assembler instructions per line.  Default is `;'  */
 #undef ASM_LINE_SEP
-
-/* Define if not using ELF, but `.init' and `.fini' sections are available.  */
-#undef	HAVE_INITFINI
 
 /* Define if __attribute__((section("foo"))) puts quotes around foo.  */
 #undef  HAVE_SECTION_QUOTES
@@ -102,9 +87,11 @@
    certain registers (CR0, MQ, CTR, LR) in asm statements.  */
 #undef	BROKEN_PPC_ASM_CR0
 
-/* Defined on SPARC if ld doesn't handle R_SPARC_WDISP22 against .hidden
-   symbol.  sysdeps/sparc/sparc32/elf/configure.  */
-#undef	BROKEN_SPARC_WDISP22
+/* Defined on SPARC if as and ld both support GOTDATA relocations.  */
+#undef  HAVE_BINUTILS_GOTDATA
+
+/* Defined on SPARC if GCC emits GOTDATA relocations.  */
+#undef  HAVE_GCC_GOTDATA
 
 /* Define if the linker supports the -z combreloc option.  */
 #undef	HAVE_Z_COMBRELOC
@@ -118,17 +105,20 @@
 /* Define if gcc supports AVX.  */
 #undef	HAVE_AVX_SUPPORT
 
+/* Define if gcc supports VEX encoding.  */
+#undef	HAVE_SSE2AVX_SUPPORT
+
 /* Define if gcc supports FMA4.  */
 #undef	HAVE_FMA4_SUPPORT
 
-/* Define if the compiler's exception support is based on libunwind.  */
+/* Define if the compiler\'s exception support is based on libunwind.  */
 #undef	HAVE_CC_WITH_LIBUNWIND
 
 /* Define if the access to static and hidden variables is position independent
    and does not need relocations.  */
 #undef	PI_STATIC_AND_HIDDEN
 
-/* Define this to disable the `hidden_proto' et al macros in
+/* Define this to disable the 'hidden_proto' et al macros in
    include/libc-symbols.h that avoid PLT slots in the shared objects.  */
 #undef	NO_HIDDEN
 

@@ -1,5 +1,5 @@
 /* libc-internal interface for mutex locks.  NPTL version.
-   Copyright (C) 1996-2003, 2005, 2007 Free Software Foundation, Inc.
+   Copyright (C) 1996-2003, 2005, 2007, 2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -13,9 +13,8 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   License along with the GNU C Library; see the file COPYING.LIB.  If
+   not, see <http://www.gnu.org/licenses/>.  */
 
 #ifndef _BITS_LIBC_LOCK_H
 #define _BITS_LIBC_LOCK_H 1
@@ -142,7 +141,7 @@ typedef pthread_key_t __libc_key_t;
 #ifdef __PIC__
 # define __libc_maybe_call(FUNC, ARGS, ELSE) \
   (__extension__ ({ __typeof (FUNC) *_fn = (FUNC); \
-                    _fn != NULL ? (*_fn) ARGS : ELSE; }))
+		    _fn != NULL ? (*_fn) ARGS : ELSE; }))
 #else
 # define __libc_maybe_call(FUNC, ARGS, ELSE) \
   (FUNC != NULL ? FUNC ARGS : ELSE)
@@ -383,13 +382,13 @@ typedef pthread_key_t __libc_key_t;
    no C++ code is called in the middle.  The old-style handling is
    faster and the support is not going away.  */
 extern void _pthread_cleanup_push (struct _pthread_cleanup_buffer *buffer,
-                                   void (*routine) (void *), void *arg);
+				   void (*routine) (void *), void *arg);
 extern void _pthread_cleanup_pop (struct _pthread_cleanup_buffer *buffer,
-                                  int execute);
+				  int execute);
 extern void _pthread_cleanup_push_defer (struct _pthread_cleanup_buffer *buffer,
-                                         void (*routine) (void *), void *arg);
+					 void (*routine) (void *), void *arg);
 extern void _pthread_cleanup_pop_restore (struct _pthread_cleanup_buffer *buffer,
-                                          int execute);
+					  int execute);
 
 /* Start critical region with cleanup.  */
 #define __libc_cleanup_region_start(DOIT, FCT, ARG) \
@@ -437,7 +436,7 @@ __libc_cleanup_routine (struct __pthread_cleanup_frame *f)
     struct __pthread_cleanup_frame __clframe				      \
       __attribute__ ((__cleanup__ (__libc_cleanup_routine)))		      \
       = { .__cancel_routine = (fct), .__cancel_arg = (arg),		      \
-          .__do_it = 1 };
+	  .__do_it = 1 };
 
 #define __libc_cleanup_pop(execute) \
     __clframe.__do_it = (execute);					      \
@@ -471,7 +470,7 @@ extern int __register_atfork (void (*__prepare) (void),
    library.  */
 
 extern int __pthread_mutex_init (pthread_mutex_t *__mutex,
-				 __const pthread_mutexattr_t *__mutex_attr);
+				 const pthread_mutexattr_t *__mutex_attr);
 
 extern int __pthread_mutex_destroy (pthread_mutex_t *__mutex);
 
@@ -490,7 +489,7 @@ extern int __pthread_mutexattr_settype (pthread_mutexattr_t *__attr,
 
 #ifdef __USE_UNIX98
 extern int __pthread_rwlock_init (pthread_rwlock_t *__rwlock,
-				  __const pthread_rwlockattr_t *__attr);
+				  const pthread_rwlockattr_t *__attr);
 
 extern int __pthread_rwlock_destroy (pthread_rwlock_t *__rwlock);
 
@@ -509,7 +508,7 @@ extern int __pthread_key_create (pthread_key_t *__key,
 				 void (*__destr_function) (void *));
 
 extern int __pthread_setspecific (pthread_key_t __key,
-				  __const void *__pointer);
+				  const void *__pointer);
 
 extern void *__pthread_getspecific (pthread_key_t __key);
 
