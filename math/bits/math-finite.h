@@ -1,5 +1,5 @@
 /* Entry points to finite-math-only compiler runs.
-   Copyright (C) 2011 Free Software Foundation, Inc.
+   Copyright (C) 2011, 2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -13,9 +13,8 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
 
 #ifndef _MATH_H
 # error "Never use <bits/math-finite.h> directly; include <math.h> instead."
@@ -259,6 +258,13 @@ extern float __REDIRECT_NTH (log2f, (float), __log2f_finite);
 # ifdef __MATH_DECLARE_LDOUBLE
 extern long double __REDIRECT_NTH (log2l, (long double), __log2l_finite);
 # endif
+#endif
+
+/* ldexp.  */
+extern double __REDIRECT_NTH (ldexp, (double, int), scalbn);
+extern float __REDIRECT_NTH (ldexpf, (float, int), scalbnf);
+#ifdef __MATH_DECLARE_LDOUBLE
+extern long double __REDIRECT_NTH (ldexpl, (long double, int), scalbnl);
 #endif
 
 /* pow.  */
