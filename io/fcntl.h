@@ -1,4 +1,4 @@
-/* Copyright (C) 1991,1992,1994-2001,2003,2004,2005,2006,2007,2009,2010,2011
+/* Copyright (C) 1991,1992,1994-2001,2003-2007,2009-2011,2012
 	Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
@@ -13,9 +13,8 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
 
 /*
  *	POSIX Standard: 6.5 File Control Operations	<fcntl.h>
@@ -131,17 +130,17 @@ extern int fcntl (int __fd, int __cmd, ...);
    This function is a cancellation point and therefore not marked with
    __THROW.  */
 #ifndef __USE_FILE_OFFSET64
-extern int open (__const char *__file, int __oflag, ...) __nonnull ((1));
+extern int open (const char *__file, int __oflag, ...) __nonnull ((1));
 #else
 # ifdef __REDIRECT
-extern int __REDIRECT (open, (__const char *__file, int __oflag, ...), open64)
+extern int __REDIRECT (open, (const char *__file, int __oflag, ...), open64)
      __nonnull ((1));
 # else
 #  define open open64
 # endif
 #endif
 #ifdef __USE_LARGEFILE64
-extern int open64 (__const char *__file, int __oflag, ...) __nonnull ((1));
+extern int open64 (const char *__file, int __oflag, ...) __nonnull ((1));
 #endif
 
 #ifdef __USE_ATFILE
@@ -155,18 +154,18 @@ extern int open64 (__const char *__file, int __oflag, ...) __nonnull ((1));
    This function is a cancellation point and therefore not marked with
    __THROW.  */
 # ifndef __USE_FILE_OFFSET64
-extern int openat (int __fd, __const char *__file, int __oflag, ...)
+extern int openat (int __fd, const char *__file, int __oflag, ...)
      __nonnull ((2));
 # else
 #  ifdef __REDIRECT
-extern int __REDIRECT (openat, (int __fd, __const char *__file, int __oflag,
+extern int __REDIRECT (openat, (int __fd, const char *__file, int __oflag,
 				...), openat64) __nonnull ((2));
 #  else
 #   define openat openat64
 #  endif
 # endif
 # ifdef __USE_LARGEFILE64
-extern int openat64 (int __fd, __const char *__file, int __oflag, ...)
+extern int openat64 (int __fd, const char *__file, int __oflag, ...)
      __nonnull ((2));
 # endif
 #endif
@@ -177,17 +176,17 @@ extern int openat64 (int __fd, __const char *__file, int __oflag, ...)
    This function is a cancellation point and therefore not marked with
    __THROW.  */
 #ifndef __USE_FILE_OFFSET64
-extern int creat (__const char *__file, __mode_t __mode) __nonnull ((1));
+extern int creat (const char *__file, __mode_t __mode) __nonnull ((1));
 #else
 # ifdef __REDIRECT
-extern int __REDIRECT (creat, (__const char *__file, __mode_t __mode),
+extern int __REDIRECT (creat, (const char *__file, __mode_t __mode),
 		       creat64) __nonnull ((1));
 # else
 #  define creat creat64
 # endif
 #endif
 #ifdef __USE_LARGEFILE64
-extern int creat64 (__const char *__file, __mode_t __mode) __nonnull ((1));
+extern int creat64 (const char *__file, __mode_t __mode) __nonnull ((1));
 #endif
 
 #if !defined F_LOCK && (defined __USE_MISC || (defined __USE_XOPEN_EXTENDED \
