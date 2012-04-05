@@ -1,4 +1,4 @@
-/* Copyright (C) 1991, 1992, 1995-2010, 2011 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 1992, 1995-2011, 2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    This program is free software; you can redistribute it and/or modify
@@ -12,8 +12,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   along with this program; if not, see <http://www.gnu.org/licenses/>.  */
 
 #include <unistd.h>
 #include <errno.h>
@@ -1105,7 +1104,7 @@ main (int argc, char *argv[])
 Copyright (C) %s Free Software Foundation, Inc.\n\
 This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
-"), "2011");
+"), "2012");
       printf (gettext ("Written by %s.\n"), "Roland McGrath");
       return 0;
     }
