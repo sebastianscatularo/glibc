@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1997-2003,2004,2005,2006,2007
+/* Copyright (C) 1993, 1997-2003,2004,2005,2006,2007,2012
 	Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
@@ -13,9 +13,8 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.
 
    As a special exception, if you link the code in this file with
    files compiled with a GNU compiler to produce an executable,
@@ -634,11 +633,11 @@ extern _IO_off64_t _IO_wstr_seekoff (_IO_FILE *, _IO_off64_t, int, int)
 extern _IO_wint_t _IO_wstr_pbackfail (_IO_FILE *, _IO_wint_t) __THROW;
 extern void _IO_wstr_finish (_IO_FILE *, int) __THROW;
 
-extern int _IO_vasprintf (char **result_ptr, __const char *format,
+extern int _IO_vasprintf (char **result_ptr, const char *format,
 			  _IO_va_list args) __THROW;
-extern int _IO_vdprintf (int d, __const char *format, _IO_va_list arg);
+extern int _IO_vdprintf (int d, const char *format, _IO_va_list arg);
 extern int _IO_vsnprintf (char *string, _IO_size_t maxlen,
-			  __const char *format, _IO_va_list args) __THROW;
+			  const char *format, _IO_va_list args) __THROW;
 
 
 extern _IO_size_t _IO_getline (_IO_FILE *,char *, _IO_size_t, int, int);
@@ -927,11 +926,7 @@ VTABLE_LABEL(builtinbuf_vtable, builtinbuf, 10)
 # endif
 #endif /* !defined(builtinbuf_vtable) && defined(__cplusplus) */
 
-#if defined(__STDC__) || defined(__cplusplus)
-# define _IO_va_start(args, last) va_start(args, last)
-#else
-# define _IO_va_start(args, last) va_start(args)
-#endif
+#define _IO_va_start(args, last) va_start(args, last)
 
 extern struct _IO_fake_stdiobuf _IO_stdin_buf, _IO_stdout_buf, _IO_stderr_buf;
 
