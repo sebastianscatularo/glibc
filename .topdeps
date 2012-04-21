@@ -80,3 +80,4 @@ t/hurdsig-SA_SIGINFO
 t/hurdsig-fixes-2
 t/hurdsig-global-dispositions-versions
 t/symlink_dealloc
+t/hooks
