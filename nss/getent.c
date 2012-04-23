@@ -472,7 +472,6 @@ static int
 netgroup_keys (int number, char *key[])
 {
   int result = 0;
-  int i;
 
   if (number == 0)
     {
@@ -518,6 +517,12 @@ initgroups_keys (int number, char *key[])
   int ngrps = 100;
   size_t grpslen = ngrps * sizeof (gid_t);
   gid_t *grps = alloca (grpslen);
+
+  if (number == 0)
+    {
+      fprintf (stderr, _("Enumeration not supported on %s\n"), "initgroups");
+      return 3;
+    }
 
   for (int i = 0; i < number; ++i)
     {

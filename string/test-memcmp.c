@@ -1,5 +1,5 @@
 /* Test and measure memcmp functions.
-   Copyright (C) 1999, 2002, 2003, 2005, 2011 Free Software Foundation, Inc.
+   Copyright (C) 1999-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Written by Jakub Jelinek <jakub@redhat.com>, 1999.
    Added wmemcmp support by Liubov Dmitrieva <liubov.dmitrieva@gmail.com>, 2011.
@@ -29,10 +29,24 @@
 # define MEMCPY wmemcpy
 # define SIMPLE_MEMCMP simple_wmemcmp
 # define CHAR wchar_t
-# define MAX_CHAR 256000
-# define UCHAR uint32_t
+# define UCHAR wchar_t
 # define CHARBYTES 4
+# define CHAR__MIN WCHAR_MIN
+# define CHAR__MAX WCHAR_MAX
+int
+simple_wmemcmp (const wchar_t *s1, const wchar_t *s2, size_t n)
+{
+  int ret = 0;
+  /* Warning!
+	wmemcmp has to use SIGNED comparison for elements.
+	memcmp has to use UNSIGNED comparison for elemnts.
+  */
+  while (n-- && (ret = *s1 < *s2 ? -1 : *s1 == *s2 ? 0 : 1) == 0) {s1++; s2++;}
+  return ret;
+}
 #else
+# include <limits.h>
+
 # define MEMCMP memcmp
 # define MEMCPY memcpy
 # define SIMPLE_MEMCMP simple_memcmp
@@ -40,18 +54,20 @@
 # define MAX_CHAR 255
 # define UCHAR unsigned char
 # define CHARBYTES 1
-#endif
-
-typedef int (*proto_t) (const CHAR *, const CHAR *, size_t);
+# define CHAR__MIN CHAR_MIN
+# define CHAR__MAX CHAR_MAX
 
 int
-SIMPLE_MEMCMP (const CHAR *s1, const CHAR *s2, size_t n)
+simple_memcmp (const char *s1, const char *s2, size_t n)
 {
   int ret = 0;
 
-  while (n-- && (ret = *(UCHAR *) s1++ - *(UCHAR *) s2++) == 0);
+  while (n-- && (ret = *(unsigned char *) s1++ - *(unsigned char *) s2++) == 0);
   return ret;
 }
+#endif
+
+typedef int (*proto_t) (const CHAR *, const CHAR *, size_t);
 
 IMPL (SIMPLE_MEMCMP, 0)
 IMPL (MEMCMP, 1)
@@ -121,7 +137,7 @@ do_test (size_t align1, size_t align2, size_t len, int exp_result)
   s2 = (CHAR *) (buf2 + align2);
 
   for (i = 0; i < len; i++)
-    s1[i] = s2[i] = 1 + (23 << ((CHARBYTES - 1) * 8)) * i % MAX_CHAR;
+    s1[i] = s2[i] = 1 + (23 << ((CHARBYTES - 1) * 8)) * i % CHAR__MAX;
 
   s1[len] = align1;
   s2[len] = align2;
@@ -412,8 +428,8 @@ check1 (void)
   s2[99] = 1;
   s1[100] = 116;
   s2[100] = 116;
-  s1[101] = -13;
-  s2[101] = -13;
+  s1[101] = CHAR__MIN;
+  s2[101] = CHAR__MAX;
   s1[102] = -109;
   s2[102] = -109;
   s1[103] = 1;
@@ -434,8 +450,8 @@ check1 (void)
   s2[110] = -109;
   s1[111] = 1;
   s2[111] = 1;
-  s1[112] = 20;
-  s2[112] = 20;
+  s1[112] = CHAR__MAX;
+  s2[112] = CHAR__MIN;
   s1[113] = -13;
   s2[113] = -13;
   s1[114] = -109;
@@ -444,9 +460,12 @@ check1 (void)
   s2[115] = 1;
 
   n = 116;
-  exp_result = SIMPLE_MEMCMP (s1, s2, n);
-  FOR_EACH_IMPL (impl, 0)
-    check_result (impl, s1, s2, n, exp_result);
+  for (size_t i = 0; i < n; i++)
+    {
+      exp_result = SIMPLE_MEMCMP (s1 + i, s2 + i, n - i);
+      FOR_EACH_IMPL (impl, 0)
+	check_result (impl, s1 + i, s2 + i, n - i, exp_result);
+    }
 }
 
 int
