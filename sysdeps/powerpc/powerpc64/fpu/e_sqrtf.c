@@ -1,5 +1,5 @@
 /* Single-precision floating point square root.
-   Copyright (C) 1997, 2003, 2004, 2006 Free Software Foundation, Inc.
+   Copyright (C) 1997, 2003, 2004, 2006, 2011 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -20,6 +20,7 @@
 #include <math.h>
 #include <math_private.h>
 
+#undef __ieee754_sqrtf
 float
 __ieee754_sqrtf (float x)
 {
@@ -27,3 +28,4 @@ __ieee754_sqrtf (float x)
   __asm ("fsqrts %0,%1" : "=f" (z) : "f" (x));
   return z;
 }
+strong_alias (__ieee754_sqrtf, __sqrtf_finite)
