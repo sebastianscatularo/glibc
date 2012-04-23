@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2007,2008,2009,2010 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2007,2008,2009,2010,2011 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@redhat.com>, 2002.
 
@@ -17,6 +17,7 @@
    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
    02111-1307 USA.  */
 
+#include <ctype.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -239,6 +240,9 @@ start_thread (void *arg)
   /* Initialize resolver state pointer.  */
   __resp = &pd->res;
 
+  /* Initialize pointers to locale data.  */
+  __ctype_init ();
+
   /* Allow setxid from now onwards.  */
   if (__builtin_expect (atomic_exchange_acq (&pd->setxid_futex, 0) == -2, 0))
     lll_futex_wake (&pd->setxid_futex, 1, LLL_PRIVATE);
@@ -453,8 +457,9 @@ __pthread_create_2_1 (newthread, attr, start_routine, arg)
   int err = ALLOCATE_STACK (iattr, &pd);
   if (__builtin_expect (err != 0, 0))
     /* Something went wrong.  Maybe a parameter of the attributes is
-       invalid or we could not allocate memory.  */
-    return err;
+       invalid or we could not allocate memory.  Note we have to
+       translate error codes.  */
+    return err == ENOMEM ? EAGAIN : err;
 
 
   /* Initialize the TCB.  All initializations with zero should be
