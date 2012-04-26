@@ -18,12 +18,9 @@ t/socketpair_flags
 t/pipe2
 t/dup3
 t/accept4
-t/bits_sched.h
 t/dl-sysdep.c_SHARED
-t/__rtld_lock_recursive_t
 t/____longjmp_chk
 t/extern_inline
-t/ld.so_auxv
 t/grantpt
 posix/regex_internal.c/MAX_undefined
 t/master_backports
@@ -66,7 +63,6 @@ t/bigmem
 t/locarchive
 t/mkdir_root
 t/mlock
-t/pthread_types
 t/sendmsg-SCM_RIGHTS
 t/thread-cancel
 t/unlockpt-chroot
