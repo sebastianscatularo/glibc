@@ -4,7 +4,6 @@ Subject: [PATCH] tls-threadvar
 TODO: replace the custom threadvar mechanism with generic TLS.
 That will fix sigaltstack.
 
-
-Do not yet use TLS for errno.
-
-glibc-2.8/debian/patches/hurd-i386/local-tls.diff 3057
+* sysdeps/mach/hurd/errno-loc.c: Remove file.
+* sysdeps/mach/hurd/errno.c: Remove file.
+* sysdeps/mach/hurd/dl-sysdep.c (errno): Remove variable.
