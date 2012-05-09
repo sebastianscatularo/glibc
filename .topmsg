@@ -4,5 +4,5 @@ From: Thomas Schwinge <thomas@schwinge.name>
 
 2011-10-11  Thomas Schwinge  <thomas@schwinge.name>
 
-	* sysdeps/mach/hurd/dl-sysdep.c (open_file): Don't be afraid of
-	O_CLOEXEC.
+	* sysdeps/mach/hurd/dl-sysdep.c (open_file): Do not raise
+	assertion on O_CLOEXEC flag.
