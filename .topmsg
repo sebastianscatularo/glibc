@@ -6,3 +6,10 @@ Subject: [PATCH] Fix mkdir / error value
 In the / case, directory_name_split can't really split that into an
 absolute ROOT file_t and ".", since name is supposed to be a pointer in
 file_name... Changing the interface is being proposed.
+
+2010-06-12  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* sysdeps/mach/hurd/mkdir.c: Include <string.h>
+	(__mkdir): When path is `/', just return EEXISTS.
+	* sysdeps/mach/hurd/mkdirat.c: Include <string.h>
+	(mkdirat): When path is `/', just return EEXISTS.
