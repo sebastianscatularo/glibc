@@ -7,5 +7,7 @@ http://www.sourceware.org/bugzilla/show_bug.cgi?id=3906
 defines IPV6_PKTINFO (and no RXINFO). For better compatibility, shouldn't
 IPV6_RXINFO be deprecated and IPV6_PKTINFO defined as a replacement?”
 
-* bits/in.h (IPV6_PKTINFO): Define new macro.
-(IPV6_RXINFO,IPV6_TXINFO,SCM_SRCINFO): Redefine to IPV6_PKTINFO.
+2007-01-23  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* bits/in.h (IPV6_PKTINFO): Define new macro.
+	(IPV6_RXINFO,IPV6_TXINFO,SCM_SRCINFO): Redefine to IPV6_PKTINFO.
