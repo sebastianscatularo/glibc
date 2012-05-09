@@ -4,3 +4,7 @@ Subject: [PATCH] ptrmangle
 Pointer mangling.
 
 glibc-2.8/debian/patches/hurd-i386/submitted-ptr-mangle.diff 3057
+
+2007-11-02  Aurelien Jarno  <aurel32@debian.org>
+
+	* sysdeps/mach/i386/sysdep.h (PTR_MANGLE, PTR_DEMANGLE): Define macros.
