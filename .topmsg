@@ -8,3 +8,12 @@ patch.
 ---
 
 http://sources.redhat.com/ml/libc-alpha/2007-07/msg00078.html
+
+2007-07-21  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+        * sysdeps/mach/hurd/bits/ioctls.h (_IOT__IOTBASE_long, _IOT_char,
+        _IOT_short, _IOT_int, _IOT_long, _IOT__IOTBASE_int8_t,
+        _IOT__IOTBASE_uint8_t, _IOT__IOTBASE_int16_t, _IOT__IOTBASE_uint16_t,
+        _IOT__IOTBASE_int32_t, _IOT__IOTBASE_uint32_t, _IOT__IOTBASE_int64_t,
+        _IOT__IOTBASE_uint64_t, _IOT__IOTBASE_size_t, _IOT__IOTBASE_ssize_t,
+        _IOTBASE_unsigned, _IOTBASE_signed): Define macros.
