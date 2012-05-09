@@ -13,3 +13,8 @@ glibc-2.8/debian/patches/hurd-i386/submitted-strtoul.diff 3057
     /media/data/home/thomas/tmp/source/glibc/git/glibc.hurd/stdlib/strtol.c:99: undefined reference to `__libc_tsd_LOCALE_data'
     collect2: ld returned 1 exit status
     make[2]: *** [/media/Stalin/tmp/glibc.hurd.gnu-2/elf/ld.so] Error 1
+
+2007-11-02  Aurelien Jarno  <aurel32@debian.org>
+
+       * hurd/lookup-retry.c (__hurd_file_name_lookup_retry): Call
+       __strtoul_internal instead of strtoul.
