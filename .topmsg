@@ -3,4 +3,8 @@ Subject: [PATCH] t/hooks
 
 Add link rules to sort hooks, otherwise they are not properly recorded
 
+2012-04-21  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+        * Makerules (shlib.lds): Add hurd hooks sorting rules.
+
 Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
