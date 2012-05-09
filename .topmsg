@@ -5,4 +5,4 @@ Fix some ``extern inline'' stuff.
 
 glibc-2.8/debian/patches/hurd-i386/submitted-extern_inline.diff 3057
 
-Probably all done by Samuel Thibault.
+2008-01-08  Samuel Thibault  <samuel.thibault@ens-lyon.org>
