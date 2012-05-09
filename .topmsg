@@ -1,8 +1,10 @@
 From: Samuel Thibault <samuel.thibault@ens-lyon.org>
 Subject: [PATCH] No hp timing
 
-2010-08-21  Samuel Thibault  <samuel.thibault@ens-lyon.org> 
-
 We don't have support for hp timing for now, even the i686 variant, which needs
 to know the CPU speed.
 Copied from sysdeps/generic/hp-timing.h
+
+2010-08-21  Samuel Thibault  <samuel.thibault@ens-lyon.org> 
+
+	* sysdeps/mach/hurd/hp-timing.h: New file.
