@@ -7,12 +7,13 @@ non-relro to be able to modify it.
 
 2011-08-24  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
-* sysdeps/generic/ldsodefs.h [LIBC_STACK_END_NOT_RELRO] (__libc_stack_end): Do
-not use attribute_relro.
-* sysdeps/mach/hurd/dl-sysdep.h (LIBC_STACK_END_NOT_RELRO): Define.
-* sysdeps/mach/hurd/i386/init-first.c (init): Update __libc_stack_end to
-libthread-provided value.
-* sysdeps/mach/hurd/dl-sysdep.c (__libc_stack_end): Do not use attribute_relro.
+        * sysdeps/generic/ldsodefs.h [LIBC_STACK_END_NOT_RELRO]
+        (__libc_stack_end): Do not use attribute_relro.
+        * sysdeps/mach/hurd/dl-sysdep.h (LIBC_STACK_END_NOT_RELRO): Define.
+        * sysdeps/mach/hurd/i386/init-first.c (init): Update __libc_stack_end to
+        libthread-provided value.
+        * sysdeps/mach/hurd/dl-sysdep.c (__libc_stack_end): Do not use
+        attribute_relro.
 
 ---
 http://www.cygwin.com/ml/libc-alpha/2011-08/msg00124.html
