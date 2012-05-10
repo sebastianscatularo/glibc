@@ -1,16 +1,17 @@
 From: Pino Toscano <toscano.pino@tiscali.it>
-Subject: [PATCH] nanosleep: check for invalid parameter values
+Subject: [PATCH] mach: compliance fixes for nanosleep
 
-mach: nanosleep: check for invalid parameter values
+Make the nanosleep Mach implementation behave a bit more POSIX compliant:
+* check for invalid values of the `requested_time' parameter
+* check for an interrupted __mach_msg call, and only in that case modify
+`remaining' with the remaining time (correctly calculated, as before it was
+set to the elapsed time); fail with EINTR in this case
 
-Check for invalid values of the `requested_time' parameters; move the
-calculation of `ms' after the validation of `requested_time'.
+2012-04-28  Pino Toscano  <toscano.pino@tiscali.it>
 
-2011-12-10  Pino Toscano  <toscano.pino@tiscali.it>
-
-        * sysdeps/mach/nanosleep.c (__nanosleep): Return EINVAL for negative
-        seconds or nanoseconds of `requested_time', or for nanoseconds equal
-        or greater than 1000000000.
+        * sysdeps/mach/nanosleep.c: Return EINVAL for invalid values of
+        `requested_time'.  Properly set the remaining time and return EINTR
+        if interrupted.
 
 ---
 http://cygwin.com/ml/libc-alpha/2011-12/msg00020.html
