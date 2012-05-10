@@ -76,3 +76,4 @@ t/symlink_dealloc
 t/mknod-error
 t/openat-mode
 t/paths
+t/posix-types
