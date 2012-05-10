@@ -75,3 +75,4 @@ t/hurdsig-global-dispositions-versions
 t/symlink_dealloc
 t/mknod-error
 t/openat-mode
+t/paths
