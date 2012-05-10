@@ -1,16 +1,8 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] Define some posix types
 
----
+2011-01-10  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+	* io/fcntl.h (mode_t, off_t, pid_t): Define types.
+	(__mode_t_defined, __off_t_defined, __pid_t_defined): Define macros.
+	* streams/stropts.h (t_scalar_t): Define type.
