@@ -159,6 +159,7 @@ init (int *data)
      for malloc et al, or so we can use malloc below for the real
      threadvars array.  */
   memset (threadvars, 0, sizeof threadvars);
+  threadvars[_HURD_THREADVAR_LOCALE] = (unsigned long int) &_nl_global_locale;
   __hurd_threadvar_stack_offset = (unsigned long int) threadvars;
 
   /* Since the cthreads initialization code uses malloc, and the
