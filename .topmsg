@@ -11,3 +11,7 @@ glibc-2.8/debian/patches/hurd-i386/local-tls-support.diff 3151
 
 	Align up includes as on Linux, to fix build.
 	* sysdeps/mach/hurd/tls.h: Include <sysdep.h>.
+
+Do not yet use TLS for errno.
+
+glibc-2.8/debian/patches/hurd-i386/local-tls.diff 3057
