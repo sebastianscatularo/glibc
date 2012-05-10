@@ -34,14 +34,14 @@ __openat (fd, file, oflag)
      const char *file;
      int oflag;
 {
-  int mode;
+  mode_t mode;
   io_t port;
 
   if (oflag & O_CREAT)
     {
       va_list arg;
       va_start (arg, oflag);
-      mode = va_arg (arg, int);
+      mode = va_arg (arg, mode_t);
       va_end (arg);
     }
   else
