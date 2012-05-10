@@ -1,16 +1,7 @@
-Subject: Baseline for our topic branches.
+Subject: [PATCH] getcontext, makecontext, setcontext, swapcontext
 
----
+From: Thomas Schwinge <thomas@codesourcery.com>
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
+Adapted from the Linux x86 functions.
 
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+Totally untested, and blocked (for thread-switching) on t/tls-threadvars.
