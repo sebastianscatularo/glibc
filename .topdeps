@@ -77,3 +77,5 @@ t/mknod-error
 t/openat-mode
 t/paths
 t/posix-types
+t/hooks
+t/libpthread_depends
