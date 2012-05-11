@@ -39,7 +39,6 @@ __nanosleep (const struct timespec *requested_time,
   const mach_msg_timeout_t ms
     = requested_time->tv_sec * 1000
     + (requested_time->tv_nsec + 999999) / 1000000;
-
   recv = __mach_reply_port ();
 
   if (remaining && __gettimeofday (&before, NULL) < 0)
