@@ -1,5 +1,5 @@
-/* Copyright (C) 1991, 1992, 1993, 1994, 1995, 1997, 2002, 2008 Free Software
-   Foundation, Inc.
+/* Duplicate a file descriptor to a given number, with flags.  Hurd version.
+   Copyright (C) 1991-2012 Free Software Foundation, Inc.
 
    This file is part of the GNU C Library.
 
@@ -28,7 +28,7 @@
    open on the same file as FD is, and setting FD2's flags according to FLAGS.
    Return FD2 or -1.  */
 int
-dup3 (int fd, int fd2, int flags)
+__dup3 (int fd, int fd2, int flags)
 {
   struct hurd_fd *d;
 
@@ -37,7 +37,7 @@ dup3 (int fd, int fd2, int flags)
   if ((flags & ~O_CLOEXEC
        || fd2 == fd)
       /* ... with the exception in case that dup2 behavior is requested: if FD
-	 is valid and FD2 is already the same then just return it.  */	 
+	 is valid and FD2 is already the same then just return it.  */
       && ! (flags == -1
 	    && fd2 == fd))
     return __hurd_fail (EINVAL);
@@ -137,4 +137,5 @@ dup3 (int fd, int fd2, int flags)
 
   return fd2;
 }
-libc_hidden_def (dup3)
+libc_hidden_def (__dup3)
+weak_alias (__dup3, dup3)
