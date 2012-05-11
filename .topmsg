@@ -1,19 +1,15 @@
-From: Samuel Thibault <samuel.thibault@ens-lyon.org>
-Subject: [PATCH] Fix signal-catching functions.
+Subject: Backports from master.
 
-2010-09-13  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+Use ``git cherry-pick -x SHA1''.
 
-        Fix signal-catching functions.
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
 
-        We need to restore the signal mask, because else the signal handling
-        code will have blocked the catched signal and for instance calling
-        hurd_catch_signal again would then dump core.  There was also a trivial
-        inverted logic.
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
 
-        * hurd/catch-signal.c (hurd_catch_signal): Use sigsetjmp/siglongjmp
-        instead of setjmp/longjmp to restore the signal mask. Call sigsetjmp
-        when handler == SIG_ERR, not when handler != SIG_ERR.
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
 
----
+Check this, and remove the ChangeLog.SHA1.
 
-http://sourceware.org/ml/libc-alpha/2010-09/msg00015.html
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
