@@ -1,8 +1,15 @@
-From: Thomas Schwinge <thomas@schwinge.name>
-Subject: [PATCH] bits_socket.h
+Subject: Backports from master.
 
-2011-10-08  Thomas Schwinge  <thomas@schwinge.name>
+Use ``git cherry-pick -x SHA1''.
 
-	* sysdeps/mach/hurd/bits/socket.h: New file, copy from the bsd4.4 one.
-	(SOCK_MAX, SOCK_TYPE_MASK, SOCK_CLOEXEC, SOCK_NONBLOCK): New
-	definitions.
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
+
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
+
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
+
+Check this, and remove the ChangeLog.SHA1.
+
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
