@@ -1,16 +1,15 @@
-From: Pino Toscano  <toscano.pino@tiscali.it>
-Subject: [PATCH] recvfrom(): take into account null address ports
+Subject: Backports from master.
 
-Some kinds of sockets may return a null address port when calling the
-`socket_recv' RPC, so avoid using it in case an address argument buffer is
-asked to be filled.  In such case, set the length of that address buffer to
-zero.
+Use ``git cherry-pick -x SHA1''.
 
-2011-11-26  Pino Toscano  <toscano.pino@tiscali.it>
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
 
-        * sysdeps/mach/hurd/recvfrom.c (__recvfrom): Check also for a null
-        address port.  Set `addr_len' to 0 when not filling `addrarg'.
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
 
----
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
 
-http://cygwin.com/ml/libc-alpha/2011-11/msg00089.html
+Check this, and remove the ChangeLog.SHA1.
+
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
