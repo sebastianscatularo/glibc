@@ -1,15 +1,15 @@
-From: Samuel Thibault <samuel.thibault@ens-lyon.org>
-Subject: [PATCH] Fix mkdir / error value
+Subject: Backports from master.
 
-(needed for busybox's mkdir -p)
+Use ``git cherry-pick -x SHA1''.
 
-In the / case, directory_name_split can't really split that into an
-absolute ROOT file_t and ".", since name is supposed to be a pointer in
-file_name... Changing the interface is being proposed.
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
 
-2010-06-12  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
 
-	* sysdeps/mach/hurd/mkdir.c: Include <string.h>
-	(__mkdir): When path is `/', just return EEXISTS.
-	* sysdeps/mach/hurd/mkdirat.c: Include <string.h>
-	(mkdirat): When path is `/', just return EEXISTS.
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
+
+Check this, and remove the ChangeLog.SHA1.
+
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
