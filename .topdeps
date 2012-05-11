@@ -1,2 +1,1 @@
-t/pipe2
-t/master_backports
+t/socketpair_flags
