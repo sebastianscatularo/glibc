@@ -1,5 +1,5 @@
 /* setresuid -- set real user ID, effective user ID, and saved-set user ID
-   Copyright (C) 2002, 2005, 2006, 2011 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -36,7 +36,7 @@ __setresuid (uid_t ruid, uid_t euid, uid_t suid)
   if (!err)
     {
       /* Make a new auth handle which has EUID as the first element in the
-         list of effective uids.  */
+	 list of effective uids.  */
 
       uid_t *newgen, *newaux;
       uid_t auxs[2] = { ruid, suid };
@@ -84,7 +84,8 @@ __setresuid (uid_t ruid, uid_t euid, uid_t suid)
 	      else if (_hurd_id.gen.nuids >= 1)
 		auxs[0] = _hurd_id.gen.uids[0];
 	      else
-		/* Not even an effective uid, fallback to the only UID we have. */
+		/* Not even an effective UID.
+                   Fall back to the only UID we have. */
 		auxs[0] = suid;
 	    }
 	  if (_hurd_id.aux.nuids <= 1)
@@ -107,6 +108,7 @@ __setresuid (uid_t ruid, uid_t euid, uid_t suid)
 			_hurd_id.aux.gids, _hurd_id.aux.ngids,
 			&newauth));
     }
+
   __mutex_unlock (&_hurd_id.lock);
   HURD_CRITICAL_END;
 

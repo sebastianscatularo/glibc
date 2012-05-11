@@ -1,4 +1,4 @@
-/* Copyright (C) 1991,93,94,95,96,97,2002 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -30,8 +30,8 @@ __mkdir (file_name, mode)
   error_t err;
   const char *name;
   file_t parent;
-  if (!strcmp(file_name, "/"))
-    return EEXIST;
+  if (!strcmp (file_name, "/"))
+    return __hurd_fail (EEXIST);
   parent = __directory_name_split (file_name, (char **) &name);
   if (parent == MACH_PORT_NULL)
     return -1;

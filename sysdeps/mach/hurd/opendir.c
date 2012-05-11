@@ -80,12 +80,7 @@ __opendirat (int dfd, const char *name)
       return NULL;
     }
 
-  int flags = O_RDONLY | O_NONBLOCK | O_DIRECTORY;
-#if 0
-#ifdef O_CLOEXEC
-  flags |= O_CLOEXEC;
-#endif
-#endif
+  int flags = O_RDONLY | O_NONBLOCK | O_DIRECTORY | O_CLOEXEC;
   int fd;
 #ifdef IS_IN_rtld
   assert (dfd == AT_FDCWD);
