@@ -1,0 +1,9 @@
+2012-05-10  Thomas Schwinge  <thomas@schwinge.name>
+
+	accept4 for GNU Hurd.
+	* include/sys/socket.h (__libc_accept4): New prototype.
+	* sysdeps/mach/hurd/accept4.c: New file, copy from accept.c.  Evolve it
+	to implement __libc_accept4.
+	* sysdeps/mach/hurd/accept.c (accept): Reimplement using
+	__libc_accept4.
+	* sysdeps/mach/hurd/kernel-features.h (__ASSUME_ACCEPT4): Define.
