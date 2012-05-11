@@ -1,17 +1,15 @@
-From: Samuel Thibault <samuel.thibault@ens-lyon.org>
-Subject: [PATCH] Fix sbrk beyond 128MB
+Subject: Backports from master.
 
-The patch below fixes sbrk() calls beyond the initial allocation of
-128MB: passing pagebrk makes the kernel return an error when there is
-some room (but not enough for the desired increase) between pagebrk and
-_hurd_data_end where vm is already allocated.
+Use ``git cherry-pick -x SHA1''.
 
-2009-09-14  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
 
-        * sysdeps/mach/hurd/brk.c (_hurd_set_brk): When more space needs to be
-        allocated, call __vm_protect to finish enabling the existing space, and
-        pass a copy of _hurd_data_end instead of pagebrk to __vm_allocate to
-        allocate the remainder.
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
 
----
-http://sources.redhat.com/ml/libc-alpha/2009-09/msg00030.html
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
+
+Check this, and remove the ChangeLog.SHA1.
+
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
