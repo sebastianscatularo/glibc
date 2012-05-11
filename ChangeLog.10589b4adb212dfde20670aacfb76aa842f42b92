@@ -1,0 +1,4 @@
+2012-05-10  Thomas Schwinge  <thomas@schwinge.name>
+
+	* hurd/lookup-retry.c (__hurd_file_name_lookup_retry): Use
+	__strtoul_internal rather than strtoul.
