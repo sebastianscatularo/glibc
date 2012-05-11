@@ -1,0 +1,3 @@
+2012-05-10  Thomas Schwinge  <thomas@schwinge.name>
+
+	* elf/Makefile (pldd-modules): Define unconditionally.

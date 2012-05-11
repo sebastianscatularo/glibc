@@ -1,0 +1,4 @@
+2012-05-10  Thomas Schwinge  <thomas@schwinge.name>
+
+	* sysdeps/mach/hurd/Makefile ($(common-objpfx)linkobj/libc.so):
+	Depend on against $(link-rpcuserlibs).
