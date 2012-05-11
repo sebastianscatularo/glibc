@@ -1,0 +1,7 @@
+2012-04-02  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* string/test-memcmp.c [! WIDE]: #include <limits.h> for CHAR_MIN,
+	CHAR_MAX.
+	* string/test-strcmp.c [! WIDE]: Likewise.
+	* time/tst-mktime2.c: Likewise for INT_MAX.
+	* string/test-string.h: #include <sys/param.h> for MIN.

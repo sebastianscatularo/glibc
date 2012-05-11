@@ -1,6 +1,5 @@
 /* Operating system support for run-time dynamic linker.  Hurd version.
-   Copyright (C) 1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2010
-	Free Software Foundation, Inc.
+   Copyright (C) 1995-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -17,6 +16,8 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
+/* In the static library, this is all handled by dl-support.c
+   or by the vanilla definitions in the rest of the C library.  */
 #ifdef SHARED
 
 #include <hurd.h>
@@ -317,7 +318,7 @@ open_file (const char *file_name, int flags,
       return MACH_PORT_NULL;
     }
 
-  assert (!(flags & ~O_READ));
+  assert (!(flags & ~(O_READ | O_CLOEXEC)));
 
   startdir = _dl_hurd_data->portarray[file_name[0] == '/' ?
 				      INIT_PORT_CRDIR : INIT_PORT_CWDIR];
