@@ -1,5 +1,4 @@
-/* Copyright (C) 1992, 1993, 1994, 1997, 1999, 2002, 2008 Free Software
-   Foundation, Inc.
+/* Copyright (C) 1992-2012 Free Software Foundation, Inc.
 
    This file is part of the GNU C Library.
 
@@ -84,7 +83,7 @@ __libc_accept4 (int fd, __SOCKADDR_ARG addrarg, socklen_t *addr_len, int flags)
     {
       if (*addr_len > buflen)
 	*addr_len = buflen;
-      
+
       if (buf != (char *) addr)
 	{
 	  memcpy (addr, buf, *addr_len);

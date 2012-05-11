@@ -1,4 +1,4 @@
-/* Copyright (C) 1997, 2000, 2004, 2007 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -22,7 +22,7 @@
 #endif
 
 /* To select the IP level.  */
-#define SOL_IP	0
+#define SOL_IP		0
 
 /* Options for use with `getsockopt' and `setsockopt' at the IP level.
    The first word in the comment at the right is the data type used;
@@ -50,9 +50,9 @@ struct ip_opts
     char ip_opts[40];		/* Actually variable in size.  */
   };
 
-/* Socket level values for IPv6.  */
-#define SOL_IPV6        41
-#define SOL_ICMPV6      58
+/* Socket-level values for IPv6.  */
+#define SOL_IPV6		41
+#define SOL_ICMPV6		58
 
 /* IPV6 socket options.  */
 #define IPV6_ADDRFORM		1
