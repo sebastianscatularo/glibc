@@ -1,4 +1,4 @@
-/* Copyright (C) 1991,92,93,94,95,97,2002,2009 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -59,9 +59,6 @@ readlinkat (fd, file_name, buf, len)
 
   __mach_port_deallocate (__mach_task_self (), file);
 
-  if (err)
-    return __hurd_fail (err);
-  else
-    return len;
+  return err ? __hurd_fail (err) : len;
 }
-libc_hidden_def (readlinkat);
+libc_hidden_def (readlinkat)

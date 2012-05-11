@@ -1,5 +1,5 @@
 /* Convenience function to catch expected signals during an operation.
-   Copyright (C) 1996 Free Software Foundation, Inc.
+   Copyright (C) 1996-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -27,6 +27,9 @@ hurd_catch_signal (sigset_t sigset,
 		   error_t (*operate) (struct hurd_signal_preemptor *),
 		   sighandler_t handler)
 {
+  /* We need to restore the signal mask, because otherwise the
+     signal-handling code will have blocked the caught signal and for
+     instance calling hurd_catch_signal again would then dump core.  */
   sigjmp_buf buf;
   void throw (int signo, long int sigcode, struct sigcontext *scp)
     { siglongjmp (buf, scp->sc_error ?: EGRATUITOUS); }

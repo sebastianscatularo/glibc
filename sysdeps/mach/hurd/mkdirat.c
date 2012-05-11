@@ -1,6 +1,5 @@
 /* Create a directory named relative to another open directory.  Hurd version.
-   Copyright (C) 1991,1993,1994,1995,1996,1997,2002,2006
-	Free Software Foundation, Inc.
+   Copyright (C) 1991-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -33,8 +32,8 @@ mkdirat (fd, path, mode)
   error_t err;
   const char *name;
   file_t parent;
-  if (!strcmp(path, "/"))
-    return EEXIST;
+  if (!strcmp (path, "/"))
+    return __hurd_fail (EEXIST);
   parent = __directory_name_split_at (fd, path, (char **) &name);
   if (parent == MACH_PORT_NULL)
     return -1;
