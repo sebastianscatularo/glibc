@@ -1,9 +1,15 @@
-From: Samuel Thibault <samuel.thibault@ens-lyon.org>
-Subject: [PATCH] Fix mlock() in all cases except non-readable pages.
+Subject: Backports from master.
 
-2006-01-18  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+Use ``git cherry-pick -x SHA1''.
 
-        Fix mlock() in all cases except non-readable pages. 
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
 
-        * glibc/sysdeps/mach/hurd/mlock.c (mlock): Give VM_PROT_READ
-        instead of VM_PROT_ALL as parameter to __vm_wire function.
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
+
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
+
+Check this, and remove the ChangeLog.SHA1.
+
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
