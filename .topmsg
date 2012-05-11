@@ -1,8 +1,15 @@
-From: Ludovic Courtès <ludo@gnu.org>
-Subject: [PATCH] Fix invalid port deallocation in `symlink'
+Subject: Backports from master.
 
-2012-03-18  Ludovic Courtès  <address@hidden>
+Use ``git cherry-pick -x SHA1''.
 
-        * sysdeps/mach/hurd/symlink.c (__symlink): Deallocate NODE only
-        when it is non-null.
-        * sysdeps/mach/hurd/symlinkat.c (symlinkat): Likewise.
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
+
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
+
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
+
+Check this, and remove the ChangeLog.SHA1.
+
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
