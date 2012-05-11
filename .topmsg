@@ -1,15 +1,15 @@
-From: Samuel Thibault <samuel.thibault@ens-lyon.org>
-Subject: [PATCH] Missing critical region locks.
+Subject: Backports from master.
 
-2009-01-12  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+Use ``git cherry-pick -x SHA1''.
 
-        * hurd/hurd/fd.h (_hurd_fd_get): Call HURD_CRITICAL_BEGIN/
-        HURD_CRITICAL_END around holding _hurd_dtable_lock.
-        * sysdeps/mach/hurd/dirfd (dirfd): Likewise.
-        * sysdeps/mach/hurd/opendir.c (_hurd_fd_opendir): Call
-        HURD_CRITICAL_BEGIN/HURD_CRITICAL_END around holding
-        d->port.lock.
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
 
----
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
 
-http://sources.redhat.com/ml/libc-alpha/2009-01/msg00030.html
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
+
+Check this, and remove the ChangeLog.SHA1.
+
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
