@@ -1,14 +1,15 @@
-From: Samuel Thibault <samuel.thibault@ens-lyon.org>
-Subject: [PATCH] Fix setres[ug]id handling of -1
+Subject: Backports from master.
 
-When passed -1, setres[ug]id are supposed not to change the existing
-value.  The patch below does this the same way as setre[ug]id.
+Use ``git cherry-pick -x SHA1''.
 
-2011-10-17  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
 
-* sysdeps/mach/hurd/setresgid.c (__setresgid): Handle the -1 case, which
-shall preserve existing values.
-* sysdeps/mach/hurd/setresuid.c (__setresuid): Likewise.
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
 
----
-http://cygwin.com/ml/libc-alpha/2011-10/msg00031.html
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
+
+Check this, and remove the ChangeLog.SHA1.
+
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
