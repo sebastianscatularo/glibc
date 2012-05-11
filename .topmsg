@@ -1,7 +1,15 @@
-Subject: [PATCH] mmap deficiencies
+Subject: Backports from master.
 
-From: Thomas Schwinge <thomas@schwinge.name>
+Use ``git cherry-pick -x SHA1''.
 
-2011-09-22  Thomas Schwinge  <thomas@schwinge.name>
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
 
-	* nss/makedb.c [!MAP_POPULATE]: #define MAP_POPULATE 0.
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
+
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
+
+Check this, and remove the ChangeLog.SHA1.
+
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
