@@ -1,16 +1,15 @@
-From: Pino Toscano <toscano.pino@tiscali.it>
-Subject: [PATCH] nanosleep: check for invalid parameter values
+Subject: Backports from master.
 
-mach: nanosleep: check for invalid parameter values
+Use ``git cherry-pick -x SHA1''.
 
-Check for invalid values of the `requested_time' parameters; move the
-calculation of `ms' after the validation of `requested_time'.
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
 
-2011-12-10  Pino Toscano  <toscano.pino@tiscali.it>
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
 
-        * sysdeps/mach/nanosleep.c (__nanosleep): Return EINVAL for negative
-        seconds or nanoseconds of `requested_time', or for nanoseconds equal
-        or greater than 1000000000.
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
 
----
-http://cygwin.com/ml/libc-alpha/2011-12/msg00020.html
+Check this, and remove the ChangeLog.SHA1.
+
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
