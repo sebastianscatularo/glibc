@@ -1,11 +1,4 @@
-From: Thomas Schwinge <thomas@schwinge.name>
-Subject: [PATCH] ____longjmp_chk
+Subject: [PATCH] ____longjmp_chk for GNU Hurd on x86
 
-____longjmp_chk for GNU Hurd on i386.
-
-2009-08-09  Thomas Schwinge  <thomas@schwinge.name>
-
-	* sysdeps/mach/hurd/i386/____longjmp_chk.S: New file.
-	* sysdeps/mach/hurd/i386/signal-defines.sym: New file.
-	* sysdeps/mach/hurd/i386/Makefile (gen-as-const-headers): Add
-	signal-defines.sym.
+The guts have been merged, but there are still TODOs to be resolved in
+sysdeps/mach/hurd/i386/____longjmp_chk.S, and testing is needed.
