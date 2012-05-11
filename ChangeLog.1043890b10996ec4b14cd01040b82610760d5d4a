@@ -1,0 +1,6 @@
+2012-05-10  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* sysdeps/mach/hurd/brk.c (_hurd_set_brk): When more space needs to be
+	allocated, call __vm_protect to finish enabling the existing space, and
+	pass a copy of _hurd_data_end instead of PAGEBRK to __vm_allocate to
+	allocate the remainder.
