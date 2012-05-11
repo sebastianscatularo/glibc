@@ -1,10 +1,15 @@
-From: Samuel Thibault <samuel.thibault@ens-lyon.org>
-Subject: [PATCH] readlinkat
+Subject: Backports from master.
 
-2009-09-27  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+Use ``git cherry-pick -x SHA1''.
 
-        * sysdeps/mach/hurd/readlinkat.c: New file, heavily inherited from
-        sysdeps/mach/hurd/readlink.c
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
 
----
-http://cygwin.com/ml/libc-alpha/2009-09/msg00058.html
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
+
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
+
+Check this, and remove the ChangeLog.SHA1.
+
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
