@@ -1,13 +1,15 @@
-Subject: [PATCH, Hurd] Include RPC user stubs in linkobj/libc.so
-To: libc-alpha@sourceware.org
-Cc: roland@frob.com, samuel.thibault@gnu.org
+Subject: Backports from master.
 
-From: Thomas Schwinge <thomas@schwinge.name>
+Use ``git cherry-pick -x SHA1''.
 
-This is needed after 7b57bfe5988e476ea40934457dfd1c8a231e2391, ``Obsolete RPC
-implementation in libc.''
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
 
-2011-09-19  Thomas Schwinge  <thomas@schwinge.name>
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
 
-	* sysdeps/mach/hurd/Makefile ($(common-objpfx)linkobj/libc.so): Link
-	against $(link-rpcuserlibs).
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
+
+Check this, and remove the ChangeLog.SHA1.
+
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
