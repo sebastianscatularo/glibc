@@ -1,5 +1,4 @@
-/* Copyright (C) 1993-1998, 2001, 2003, 2005, 2006, 2011
-	Free Software Foundation, Inc.
+/* Copyright (C) 1993-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -51,9 +50,11 @@ _hurd_fd_opendir (struct hurd_fd *d)
     return NULL;
 
   /* Set the descriptor to close on exec. */
+  HURD_CRITICAL_BEGIN;
   __spin_lock (&d->port.lock);
   d->flags |= FD_CLOEXEC;
   __spin_unlock (&d->port.lock);
+  HURD_CRITICAL_END;
 
   dirp->__fd = d;
   dirp->__data = dirp->__ptr = NULL;
@@ -79,12 +80,7 @@ __opendirat (int dfd, const char *name)
       return NULL;
     }
 
-  int flags = O_RDONLY | O_NONBLOCK | O_DIRECTORY;
-#if 0
-#ifdef O_CLOEXEC
-  flags |= O_CLOEXEC;
-#endif
-#endif
+  int flags = O_RDONLY | O_NONBLOCK | O_DIRECTORY | O_CLOEXEC;
   int fd;
 #ifdef IS_IN_rtld
   assert (dfd == AT_FDCWD);
