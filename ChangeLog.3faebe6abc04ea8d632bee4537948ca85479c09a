@@ -1,0 +1,5 @@
+2012-05-10  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* sysdeps/mach/hurd/setresgid.c (__setresgid): Handle the -1 case,
+	which preserves existing values.
+	* sysdeps/mach/hurd/setresuid.c (__setresuid): Likewise.

@@ -1,4 +1,4 @@
-/* Copyright (C) 1991,92,93,94,95,96,97,99,2000 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -105,7 +105,7 @@ _hurd_set_brk (vm_address_t addr)
       /* We didn't allocate enough space!  Hopefully we can get some more!  */
 
       if (_hurd_data_end > pagebrk)
-	/* First finish allocation */
+	/* First finish allocation.  */
 	err = __vm_protect (__mach_task_self (), pagebrk,
 			    alloc_start - pagebrk, 0,
 			    VM_PROT_READ|VM_PROT_WRITE|VM_PROT_EXECUTE);

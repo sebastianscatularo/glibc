@@ -1,5 +1,5 @@
 /* setresgid -- set real group ID, effective group ID, and saved-set group ID
-   Copyright (C) 2002, 2005, 2006, 2011 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -36,7 +36,7 @@ __setresgid (gid_t rgid, gid_t egid, gid_t sgid)
   if (!err)
     {
       /* Make a new auth handle which has EGID as the first element in the
-         list of effective gids.  */
+	 list of effective gids.  */
 
       uid_t *newgen, *newaux;
       uid_t auxs[2] = { rgid, sgid };
@@ -84,7 +84,8 @@ __setresgid (gid_t rgid, gid_t egid, gid_t sgid)
 	      else if (_hurd_id.gen.ngids >= 1)
 		auxs[0] = _hurd_id.gen.gids[0];
 	      else
-		/* Not even an effective gid, fallback to the only UID we have. */
+		/* Not even an effective GID.
+                   Fall back to the only GID we have. */
 		auxs[0] = sgid;
 	    }
 	  if (_hurd_id.aux.ngids <= 1)

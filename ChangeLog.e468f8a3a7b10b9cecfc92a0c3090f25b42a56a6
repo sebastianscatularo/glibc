@@ -1,0 +1,6 @@
+2012-05-10  Thomas Schwinge  <thomas@schwinge.name>
+
+	* nss/makedb.c: Include <sys/param.h> (for MAX and roundup), and
+	<sys/uio.h> (for writev).
+	* nss/nss_db/db-initgroups.c: Include <limits.h> (for ULONG_MAX),
+	and <sys/param.h> (for MIN).

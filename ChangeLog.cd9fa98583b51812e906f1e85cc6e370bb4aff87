@@ -1,0 +1,3 @@
+2012-05-10  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* sysdeps/mach/hurd/dl-sysdep.c: Conditionalize contents on [SHARED].

@@ -1,5 +1,5 @@
 /* Change a port cell to a directory by looking up a name.
-   Copyright (C) 1999,2001,02 Free Software Foundation, Inc.
+   Copyright (C) 1999-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -38,11 +38,8 @@ _hurd_change_directory_port_from_name (struct hurd_port *portcell,
   if (len >= 2 && name[len - 2] == '/' && name[len - 1] == '.')
     lookup = name;
   else if (len == 0)
-    {
-      /* Special-case null pathname according to POSIX */
-      errno = ENOENT;
-      return -1;
-    }
+    /* Special-case empty file name according to POSIX.  */
+    return __hurd_fail (ENOENT);
   else
     {
       char *n = alloca (len + 3);

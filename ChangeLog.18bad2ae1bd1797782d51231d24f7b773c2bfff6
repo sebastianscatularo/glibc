@@ -1,0 +1,8 @@
+2012-05-10  Thomas Schwinge  <thomas@schwinge.name>
+
+	* sysdeps/mach/hurd/i386/init-first.c (init): Use
+	__builtin_frame_address instead of making assumptions about the
+	location of the return address relative to DATA.  Force early load of
+	the return address.
+	(_dl_init_first, doinit1 in doinit in _hurd_stack_setup): Don't use
+	__builtin_frame_address.

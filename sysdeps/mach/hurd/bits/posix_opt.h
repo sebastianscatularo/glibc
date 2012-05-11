@@ -1,5 +1,5 @@
 /* Define POSIX options for GNU/Hurd.
-   Copyright (C) 1998,2000,2001,2002,2006,2009 Free Software Foundation, Inc.
+   Copyright (C) 1998-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -82,8 +82,8 @@
 #define _POSIX_THREAD_PRIORITY_SCHEDULING	-1
 #define _POSIX_THREAD_ATTR_STACKSIZE		-1
 #define _POSIX_THREAD_ATTR_STACKADDR		-1
-#define _POSIX_THREAD_PRIO_INHERIT	-1
-#define _POSIX_THREAD_PRIO_PROTECT	-1
+#define _POSIX_THREAD_PRIO_INHERIT		-1
+#define _POSIX_THREAD_PRIO_PROTECT		-1
 #ifdef __USE_XOPEN2K8
 # define _POSIX_THREAD_ROBUST_PRIO_INHERIT	-1
 # define _POSIX_THREAD_ROBUST_PRIO_PROTECT	-1

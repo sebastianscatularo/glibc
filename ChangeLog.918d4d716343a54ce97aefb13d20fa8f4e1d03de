@@ -1,0 +1,4 @@
+2012-05-10  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* sysdeps/mach/hurd/xmknodat.c (__xmknodat): Deallocate NODE port only
+	if __dir_mkfile succeeded.

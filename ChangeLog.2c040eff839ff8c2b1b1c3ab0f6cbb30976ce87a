@@ -1,0 +1,4 @@
+2012-04-06  Andreas Jaeger  <aj@suse.de>
+
+	* nss/nss_db/db-initgroups.c: Include <string.h> for strlen and
+	strncmp	declarations.

@@ -1,0 +1,4 @@
+2012-05-10  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+        * sysdeps/mach/hurd/readlinkat.c: New file, heavily derived from
+        sysdeps/mach/hurd/readlink.c.

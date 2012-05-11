@@ -1,0 +1,3 @@
+2012-05-10  Thomas Schwinge  <thomas@schwinge.name>
+
+	* include/libc-symbols.h [NO_HIDDEN] (hidden_nolink): New macro.

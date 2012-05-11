@@ -1,0 +1,5 @@
+2012-05-10  Pino Toscano  <toscano.pino@tiscali.it>
+
+	* sysdeps/mach/nanosleep.c: Return EINVAL for invalid values of
+	REQUESTED_TIME.  Properly set the remaining time and return EINTR
+	if interrupted.

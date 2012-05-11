@@ -1,5 +1,4 @@
-/* Copyright (C) 1991, 1992, 1993, 1994, 1995, 1997, 2002, 2008 Free Software
-   Foundation, Inc.
+/* Copyright (C) 1991-2012 Free Software Foundation, Inc.
 
    This file is part of the GNU C Library.
 
@@ -30,7 +29,7 @@ __dup2 (int fd, int fd2)
     /* See the comment in dup3.  */
     flags = -1;
 
-  return dup3 (fd, fd2, flags);
+  return __dup3 (fd, fd2, flags);
 }
 libc_hidden_def (__dup2)
 weak_alias (__dup2, dup2)

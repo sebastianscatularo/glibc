@@ -1,0 +1,3 @@
+2012-05-10  Thomas Schwinge  <thomas@schwinge.name>
+
+	* nss/makedb.c (MAP_POPULATE): If not defined, define to zero.
