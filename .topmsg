@@ -1,15 +1,15 @@
-From: Pino Toscano <toscano.pino@tiscali.it>
-Subject: [PATCH] hurdsock: reject negative domains
+Subject: Backports from master.
 
-Reject negative socket domains right away; otherwise, it is possible to read
-and set out-of-bounds locations of the `servers' array (returning the values
-at those invalid memory locations), and even try to deallocate ports with
-random values if the `dead' parameter is different than zero.
+Use ``git cherry-pick -x SHA1''.
 
-2011-11-21  Pino Toscano  <toscano.pino@tiscali.it>
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
 
-        * hurd/hurdsock.c (_hurd_socket_server): Check for negative domains,
-        and reject them.
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
 
----
-http://cygwin.com/ml/libc-alpha/2011-11/msg00076.html
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
+
+Check this, and remove the ChangeLog.SHA1.
+
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
