@@ -1,24 +1,15 @@
-Subject: [PATCH] Build pldd also if use-ldconfig != yes || build-shared != yes
+Subject: Backports from master.
 
-From: Thomas Schwinge <thomas@schwinge.name>
+Use ``git cherry-pick -x SHA1''.
 
-2011-09-22  Thomas Schwinge  <thomas@schwinge.name>
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
 
-	* elf/Makefile (pldd-modules): Define unconditionally.
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
 
----
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
 
-If in config.make, ``use-ldconfig = no'':
+Check this, and remove the ChangeLog.SHA1.
 
-    [...]/elf/pldd.o: In function `find_maps32':
-    [...]/elf/pldd-xx.c:128: undefined reference to `xmalloc'
-    [...]/elf/pldd.o: In function `find_maps64':
-    [...]/elf/pldd-xx.c:128: undefined reference to `xmalloc'
-    [...]/elf/pldd.o: In function `get_process_info':
-    [...]/elf/pldd.c:216: undefined reference to `xrealloc'
-    collect2: ld returned 1 exit status
-    make[2]: *** [[...]/elf/pldd] Error 1
-    make[2]: Leaving directory `[...]/elf'
-    make[1]: *** [elf/others] Error 2
-
----
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
