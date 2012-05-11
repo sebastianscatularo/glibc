@@ -1,19 +1,15 @@
-From: Samuel Thibault <samuel.thibault@ens-lyon.org>
-Subject: [PATCH] Fix POSIX 2008 visibility
+Subject: Backports from master.
 
-Here are a few POSIX 2008 visibility updates, to align the core & hurd
-with the Linux headers.
+Use ``git cherry-pick -x SHA1''.
 
-Samuel
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
 
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
 
-2011-12-04  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
 
-        * bits/sigaction.h [__USE_XOPEN2K8]: Define SA_RESTART,
-        SA_NODEFER, SA_RESETHAND.
-        * sysdeps/mach/hurd/bits/fcntl.h [__USE_XOPEN2K8]: Define
-        O_NOFOLLOW, O_DIRECTORY, O_CLOEXEC, F_GETOWN, F_SETOWN,
-        F_DUPFD_CLOEXEC.
+Check this, and remove the ChangeLog.SHA1.
 
----
-http://cygwin.com/ml/libc-alpha/2011-12/msg00005.html
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
