@@ -1,0 +1,5 @@
+2012-05-10  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	[BZ #3906]
+	* bits/in.h (IPV6_PKTINFO): Define new macro.
+	(IPV6_RXINFO,IPV6_TXINFO,SCM_SRCINFO): Redefine to IPV6_PKTINFO.
