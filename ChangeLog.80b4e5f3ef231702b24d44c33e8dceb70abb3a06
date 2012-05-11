@@ -1,0 +1,3 @@
+2012-05-10  Thomas Schwinge  <thomas@schwinge.name>
+
+	* sysdeps/mach/hurd/opendir.c (__opendirat): New function.

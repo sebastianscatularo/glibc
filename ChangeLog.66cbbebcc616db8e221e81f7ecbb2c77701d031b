@@ -1,0 +1,5 @@
+2012-05-10  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+        Fix mlock in all cases except non-readable pages.
+        * sysdeps/mach/hurd/mlock.c (mlock): Give VM_PROT_READ
+        instead of VM_PROT_ALL as parameter to __vm_wire function.
