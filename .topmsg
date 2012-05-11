@@ -1,19 +1,15 @@
-From: Samuel Thibault <samuel.thibault@ens-lyon.org>
-Subject: [PATCH] Fix value of __libc_stack_end
+Subject: Backports from master.
 
-When using some libthread, we need to update the value of __libc_stack_end
-to what the libthread allocated. This requires making __libc_stack_end
-non-relro to be able to modify it.
+Use ``git cherry-pick -x SHA1''.
 
-2011-08-24  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
 
-        * sysdeps/generic/ldsodefs.h [LIBC_STACK_END_NOT_RELRO]
-        (__libc_stack_end): Do not use attribute_relro.
-        * sysdeps/mach/hurd/dl-sysdep.h (LIBC_STACK_END_NOT_RELRO): Define.
-        * sysdeps/mach/hurd/i386/init-first.c (init): Update __libc_stack_end to
-        libthread-provided value.
-        * sysdeps/mach/hurd/dl-sysdep.c (__libc_stack_end): Do not use
-        attribute_relro.
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
 
----
-http://www.cygwin.com/ml/libc-alpha/2011-08/msg00124.html
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
+
+Check this, and remove the ChangeLog.SHA1.
+
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
