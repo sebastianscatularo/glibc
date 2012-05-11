@@ -1,15 +1,15 @@
-Subject: [PATCH, Hurd] Avoid init-first.c miscompilation.
+Subject: Backports from master.
 
-From: Thomas Schwinge <thomas@schwinge.name>
+Use ``git cherry-pick -x SHA1''.
 
-GCC got smarter.  And stricter.
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
 
-2011-10-14  Thomas Schwinge  <thomas@schwinge.name>
-	    Ludovic Courtès  <ludo@gnu.org>
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
 
-	* sysdeps/mach/hurd/i386/init-first.c (init): Use
-	__builtin_frame_address instead of making assumptions about the
-	location of the return address relative to DATA.  Force early load of
-	the return address.
-	(_dl_init_first, doinit1 in doinit in _hurd_stack_setup): Don't use
-	__builtin_frame_address.
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
+
+Check this, and remove the ChangeLog.SHA1.
+
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
