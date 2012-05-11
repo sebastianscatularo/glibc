@@ -1,13 +1,15 @@
-From: Samuel Thibault <samuel.thibault@ens-lyon.org>
-Subject: [PATCH] setitimer.c: Fix unlock in error patch
+Subject: Backports from master.
 
-In some error path, setitimer_locked would not perform unlocking, here
-is a patch.
+Use ``git cherry-pick -x SHA1''.
 
-2009-02-01  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
 
-        * sysdeps/mach/hurd/setitimer.c (setitimer_locked): Use common exit path
-        instead of returning without unlocking.
+After ``tg update'' (and possibly dealing with merge conflicts), check which
+can be removed:
 
----
-http://sourceware.org/ml/libc-alpha/2009-02/msg00003.html
+    $ for c in ChangeLog.???*; do sha1=$(expr "$c" : 'ChangeLog.\(.*\)') && git rev-list HEAD | grep -q "$sha1" && echo "$sha1 has been merged"; done
+
+Check this, and remove the ChangeLog.SHA1.
+
+If there are no backports, ``git diff baseline'' must only show the .top*
+files on t/master_backports.
