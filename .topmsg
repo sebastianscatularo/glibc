@@ -7,7 +7,6 @@ TLS support.
 
 	* sysdeps/mach/hurd/bits/libc-lock.h [_LIBC - 0]: Include <tls.h>
 	* sysdeps/mach/hurd/tls.h: Include <stdint.h> and <sysdep.h>
-	* sysdeps/mach/hurd/tls.h: Include <sysdep.h>.
 	* include/errno.h (__GNU__): Do not define TLS errno for now.
 
 	* sysdeps/generic/thread_state.h (MACHINE_NEW_THREAD_STATE_FLAVOR): New
