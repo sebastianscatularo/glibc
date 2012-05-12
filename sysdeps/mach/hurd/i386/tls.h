@@ -151,7 +151,7 @@ _hurd_tls_fork (thread_t child, thread_t orig, struct i386_thread_state *state)
     return 0;
 
   struct descriptor desc, *_desc = &desc;
-  int err;
+  kern_return_t err;
   unsigned int count;
 
   if (__builtin_expect (sel, 0x48) & 4) /* LDT selector */
