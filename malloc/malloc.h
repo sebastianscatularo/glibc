@@ -1,5 +1,5 @@
 /* Prototypes and definition for malloc implementation.
-   Copyright (C) 1996, 1997, 1999, 2000, 2002-2004, 2005, 2007, 2009, 2011
+   Copyright (C) 1996,1997,1999,2000,2002-2004,2005,2007,2009,2011,2012
    Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
@@ -14,9 +14,8 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
 
 #ifndef _MALLOC_H
 #define _MALLOC_H 1
@@ -41,7 +40,7 @@
 #  define __MALLOC_HOOK_VOLATILE
 #  define __MALLOC_DEPRECATED
 # else
-#  define __MALLOC_HOOK_VOLATILE __volatile
+#  define __MALLOC_HOOK_VOLATILE volatile
 #  define __MALLOC_DEPRECATED __attribute_deprecated__
 # endif
 
@@ -171,18 +170,18 @@ extern void (*__MALLOC_HOOK_VOLATILE __malloc_initialize_hook) (void)
      __MALLOC_DEPRECATED;
 /* Hooks for debugging and user-defined versions. */
 extern void (*__MALLOC_HOOK_VOLATILE __free_hook) (void *__ptr,
-						   __const __malloc_ptr_t)
+						   const __malloc_ptr_t)
      __MALLOC_DEPRECATED;
 extern void *(*__MALLOC_HOOK_VOLATILE __malloc_hook) (size_t __size,
-						      __const __malloc_ptr_t)
+						      const __malloc_ptr_t)
      __MALLOC_DEPRECATED;
 extern void *(*__MALLOC_HOOK_VOLATILE __realloc_hook) (void *__ptr,
 						       size_t __size,
-						       __const __malloc_ptr_t)
+						       const __malloc_ptr_t)
      __MALLOC_DEPRECATED;
 extern void *(*__MALLOC_HOOK_VOLATILE __memalign_hook) (size_t __alignment,
 							size_t __size,
-							__const __malloc_ptr_t)
+							const __malloc_ptr_t)
      __MALLOC_DEPRECATED;
 extern void (*__MALLOC_HOOK_VOLATILE __after_morecore_hook) (void);
 

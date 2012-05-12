@@ -1,4 +1,4 @@
-# Copyright (C) 1995-2006, 2010 Free Software Foundation, Inc.
+# Copyright (C) 1995-2006, 2010, 2012 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -12,9 +12,8 @@
 # Lesser General Public License for more details.
 
 # You should have received a copy of the GNU Lesser General Public
-# License along with the GNU C Library; if not, write to the Free
-# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-# 02111-1307 USA.
+# License along with the GNU C Library; if not, see
+# <http://www.gnu.org/licenses/>.
 
 subdir		:= dlfcn
 headers		:= bits/dlfcn.h dlfcn.h
@@ -53,7 +52,7 @@ failtestmod.so-no-z-defs = yes
 glreflib2.so-no-z-defs = yes
 errmsg1mod.so-no-z-defs = yes
 
-ifeq (yesyesyes,$(build-static)$(build-shared)$(elf))
+ifeq (yes,$(build-shared))
 tests += tststatic tststatic2
 tests-static += tststatic tststatic2
 modules-names += modstatic modstatic2
@@ -134,4 +133,4 @@ $(objpfx)bug-atexit3.out: $(objpfx)bug-atexit3-lib.so
 # This ensures they will load libc.so for needed symbols if loaded by
 # a statically-linked program that hasn't already loaded it.
 $(objpfx)libdl.so: $(common-objpfx)libc.so $(common-objpfx)libc_nonshared.a \
-		   $(if $(filter yes,$(elf)), $(elfobjdir)/ld.so)
+		   $(elfobjdir)/ld.so

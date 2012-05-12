@@ -1,5 +1,5 @@
 /* Generate fastloading iconv module configuration files.
-   Copyright (C) 2000-2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+   Copyright (C) 2000-2011, 2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@redhat.com>, 2000.
 
@@ -14,8 +14,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   along with this program; if not, see <http://www.gnu.org/licenses/>.  */
 
 #include <argp.h>
 #include <assert.h>
@@ -248,9 +247,12 @@ static struct
 static const char gconv_module_ext[] = MODULE_EXT;
 
 
-extern void *xmalloc (size_t n) __attribute_malloc__;
-extern void *xcalloc (size_t n, size_t m) __attribute_malloc__;
-extern void *xrealloc (void *p, size_t n);
+extern void *xmalloc (size_t n)
+  __attribute_malloc__ __attribute_alloc_size (1);
+extern void *xcalloc (size_t n, size_t s)
+  __attribute_malloc__ __attribute_alloc_size (1, 2);
+extern void *xrealloc (void *o, size_t n)
+  __attribute_malloc__ __attribute_alloc_size (2);
 
 
 /* C string table handling.  */
@@ -396,7 +398,7 @@ print_version (FILE *stream, struct argp_state *state)
 Copyright (C) %s Free Software Foundation, Inc.\n\
 This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
-"), "2011");
+"), "2012");
   fprintf (stream, gettext ("Written by %s.\n"), "Ulrich Drepper");
 }
 

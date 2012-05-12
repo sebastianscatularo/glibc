@@ -1,5 +1,5 @@
 /* Test and measure strcpy functions.
-   Copyright (C) 1999, 2002, 2003, 2005, 2011 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2002, 2003, 2005, 2011, 2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Written by Jakub Jelinek <jakub@redhat.com>, 1999.
    Added wcscpy support by Liubov Dmitrieva <liubov.dmitrieva@gmail.com>, 2011
@@ -15,14 +15,14 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
 
 #ifdef WIDE
 # include <wchar.h>
 # define CHAR wchar_t
 # define UCHAR wchar_t
+# define sfmt "ls"
 # define BIG_CHAR WCHAR_MAX
 # define SMALL_CHAR 1273
 # define STRCMP wcscmp
@@ -31,6 +31,7 @@
 #else
 # define CHAR char
 # define UCHAR unsigned char
+# define sfmt "s"
 # define BIG_CHAR CHAR_MAX
 # define SMALL_CHAR 127
 # define STRCMP strcmp
@@ -80,7 +81,8 @@ do_one_test (impl_t *impl, CHAR *dst, const CHAR *src,
 
   if (STRCMP (dst, src) != 0)
     {
-      error (0, 0, "Wrong result in function %s dst \"%s\" src \"%s\"",
+      error (0, 0,
+	     "Wrong result in function %s dst \"%" sfmt "\" src \"%" sfmt "\"",
 	     impl->name, dst, src);
       ret = 1;
       return;
