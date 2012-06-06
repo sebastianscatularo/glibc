@@ -13,9 +13,8 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
 
 /* __brk is a special syscall under Linux since it never returns an
    error.  Instead, the error condition is indicated by returning the old
@@ -43,10 +42,7 @@ ENTRY (__brk)
 	cfi_window_save
 	cfi_register(%o7, %i7)
 #ifdef PIC
-1:	call	2f
-	sethi	%hi(_GLOBAL_OFFSET_TABLE_-(1b-.)), %l7
-2:	or	%l7, %lo(_GLOBAL_OFFSET_TABLE_-(1b-.)), %l7
-	add	%l7, %o7, %l7
+	SETUP_PIC_REG(l7)
 #endif
 
 	LOADSYSCALL(brk)
@@ -63,10 +59,20 @@ ENTRY (__brk)
 	 nop
 
 	/* Update __curbrk and return cleanly.  */
-.Lok:	sethi	%hi(__curbrk), %g1
+.Lok:
+#ifndef PIC
+	sethi	%hi(__curbrk), %g1
 	or	%g1, %lo(__curbrk), %g1
-#ifdef PIC
-	ldx	[%l7+%g1], %g1
+#else
+#ifdef HAVE_BINUTILS_GOTDATA
+	sethi	%gdop_hix22(__curbrk), %g1
+	xor	%g1, %gdop_lox10(__curbrk), %g1
+	ldx	[%l7 + %g1], %g1, %gdop(__curbrk)
+#else
+	sethi	%hi(__curbrk), %g1
+	or	%g1, %lo(__curbrk), %g1
+	ldx	[%l7 + %g1], %g1
+#endif
 #endif
 	stx	%o0, [%g1]
 	mov	%g0, %i0
@@ -79,10 +85,19 @@ ENTRY (__brk)
 .Lerr0:	set	ENOMEM, %o0
 .Lerr1:
 #ifndef _LIBC_REENTRANT
+#ifndef PIC
 	sethi	%hi(errno), %g1
 	or	%g1, %lo(errno), %g1
-#ifdef PIC
-	ldx	[%l7+%g1], %g1
+#else
+#ifdef HAVE_BINUTILS_GOTDATA
+	sethi	%gdop_hix22(errno), %g1
+	xor	%g1, %gdop_lox10(errno), %g1
+	ldx	[%l7 + %g1], %g1, %gdop(errno)
+#else
+	sethi	%hi(errno), %g1
+	or	%g1, %lo(errno), %g1
+	ldx	[%l7 + %g1], %g1
+#endif
 #endif
 	st	%o0, [%g1]
 #else

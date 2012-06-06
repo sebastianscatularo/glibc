@@ -19,6 +19,7 @@
    for a given program, even if it uses different argument
    parsers for various tasks).  */
 
+#include <stdlib.h>
 #include <argp.h>
 
 const char *argp_program_version =
@@ -37,7 +38,8 @@ static char doc[] =
    option will print out @code{argp_program_version}.  */
 static struct argp argp = { 0, 0, 0, doc };
 
-int main (int argc, char **argv)
+int
+main (int argc, char **argv)
 {
   argp_parse (&argp, argc, argv, 0, 0, 0);
   exit (0);

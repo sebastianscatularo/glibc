@@ -1,4 +1,4 @@
-# Copyright (C) 1997-2004, 2006, 2007 Free Software Foundation, Inc.
+# Copyright (C) 1997-2004, 2006, 2007, 2012 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -12,9 +12,8 @@
 # Lesser General Public License for more details.
 
 # You should have received a copy of the GNU Lesser General Public
-# License along with the GNU C Library; if not, write to the Free
-# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-# 02111-1307 USA.
+# License along with the GNU C Library; if not, see
+# <http://www.gnu.org/licenses/>.
 
 #
 #	Sub-makefile for real-time portion of the library.
@@ -69,7 +68,7 @@ LDFLAGS-rt.so = -Wl,--enable-new-dtags,-z,nodelete
 # a statically-linked program that hasn't already loaded it.
 $(objpfx)librt.so: $(common-objpfx)libc.so $(common-objpfx)libc_nonshared.a \
 		   $(shared-thread-library) \
-		   $(if $(filter yes,$(elf)), $(elfobjdir)/ld.so)
+		   $(elfobjdir)/ld.so
 
 ifeq (yes,$(build-shared))
 $(addprefix $(objpfx),$(tests)): $(objpfx)librt.so $(shared-thread-library)
@@ -84,5 +83,5 @@ tst-mqueue7-ARGS = -- $(built-program-cmd)
 
 ifeq (yes,$(build-static-nss))
 otherlibs += $(nssobjdir)/libnss_files.a $(resolvobjdir)/libnss_dns.a \
-             $(resolvobjdir)/libresolv.a
+	     $(resolvobjdir)/libresolv.a
 endif

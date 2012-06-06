@@ -1,5 +1,5 @@
 /* Prototype declarations for math functions; helper file for <math.h>.
-   Copyright (C) 1996-2002, 2003, 2006, 2011 Free Software Foundation, Inc.
+   Copyright (C) 1996-2003, 2006, 2011, 2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -13,9 +13,8 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
 
 /* NOTE: Because of the special way this file is used by <math.h>, this
    file must NOT be protected from multiple inclusion as header files
@@ -223,7 +222,7 @@ __END_NAMESPACE_C99
 #ifdef __USE_ISOC99
 __BEGIN_NAMESPACE_C99
 /* Return representation of NaN for double type.  */
-__MATHCALLX (nan,, (__const char *__tagb), (__const__));
+__MATHCALLX (nan,, (const char *__tagb), (__const__));
 __END_NAMESPACE_C99
 #endif
 
@@ -337,10 +336,10 @@ __MATHDECL (long long int,llround,, (_Mdouble_ __x));
 __MATHCALL (fdim,, (_Mdouble_ __x, _Mdouble_ __y));
 
 /* Return maximum numeric value from X and Y.  */
-__MATHCALL (fmax,, (_Mdouble_ __x, _Mdouble_ __y));
+__MATHCALLX (fmax,, (_Mdouble_ __x, _Mdouble_ __y), (__const__));
 
 /* Return minimum numeric value from X and Y.  */
-__MATHCALL (fmin,, (_Mdouble_ __x, _Mdouble_ __y));
+__MATHCALLX (fmin,, (_Mdouble_ __x, _Mdouble_ __y), (__const__));
 
 
 /* Classify given number.  */

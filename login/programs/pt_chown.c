@@ -1,5 +1,5 @@
 /* pt_chmod - helper program for `grantpt'.
-   Copyright (C) 1998, 1999, 2009 Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2009, 2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by C. Scott Ananian <cananian@alumni.princeton.edu>, 1998.
 
@@ -14,9 +14,8 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
 
 #include <argp.h>
 #include <errno.h>
@@ -64,7 +63,7 @@ print_version (FILE *stream, struct argp_state *state)
 Copyright (C) %s Free Software Foundation, Inc.\n\
 This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
-"), "2011");
+"), "2012");
 }
 
 static char *
