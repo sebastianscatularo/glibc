@@ -1,5 +1,5 @@
 /* System-specific socket constants and types.  Linux version.
-   Copyright (C) 1991, 1992, 1994-2001, 2004, 2006-2010, 2011
+   Copyright (C) 1991, 1992, 1994-2001, 2004, 2006-2010, 2011, 2012
    Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
@@ -14,9 +14,8 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
 
 #ifndef __BITS_SOCKET_H
 #define __BITS_SOCKET_H
@@ -430,7 +429,7 @@ __BEGIN_DECLS
    __THROW.  */
 extern int recvmmsg (int __fd, struct mmsghdr *__vmessages,
 		     unsigned int __vlen, int __flags,
-		     __const struct timespec *__tmo);
+		     const struct timespec *__tmo);
 
 /* Send a VLEN messages as described by VMESSAGES to socket FD.
    Return the number of datagrams successfully written or -1 for errors.
