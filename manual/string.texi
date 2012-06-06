@@ -303,7 +303,8 @@ This function was introduced in @w{Amendment 1} to @w{ISO C90}.
 The @code{strnlen} function returns the length of the string @var{s} in
 bytes if this length is smaller than @var{maxlen} bytes.  Otherwise it
 returns @var{maxlen}.  Therefore this function is equivalent to
-@code{(strlen (@var{s}) < n ? strlen (@var{s}) : @var{maxlen})} but it
+@code{(strlen (@var{s}) < @var{maxlen} ? strlen (@var{s}) : @var{maxlen})}
+but it
 is more efficient and works even if the string @var{s} is not
 null-terminated.
 
@@ -1647,9 +1648,12 @@ strchr ("hello, world", '?')
 
 The terminating null character is considered to be part of the string,
 so you can use this function get a pointer to the end of a string by
-specifying a null character as the value of the @var{c} argument.  It
-would be better (but less portable) to use @code{strchrnul} in this
-case, though.
+specifying a null character as the value of the @var{c} argument.
+
+When @code{strchr} returns a null pointer, it does not let you know
+the position of the terminating null character it has found.  If you
+need that information, it is better (but less portable) to use
+@code{strchrnul} than to search for it a second time.
 @end deftypefun
 
 @comment wchar.h

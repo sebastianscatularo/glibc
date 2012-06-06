@@ -1,5 +1,5 @@
 /* Cache handling for passwd lookup.
-   Copyright (C) 1998-2008, 2009, 2011 Free Software Foundation, Inc.
+   Copyright (C) 1998-2008, 2009, 2011, 2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@cygnus.com>, 1998.
 
@@ -14,8 +14,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   along with this program; if not, see <http://www.gnu.org/licenses/>.  */
 
 #include <alloca.h>
 #include <assert.h>
@@ -124,8 +123,9 @@ cache_addpw (struct database_dyn *db, int fd, request_header *req,
 	    written = TEMP_FAILURE_RETRY (send (fd, &notfound, total,
 						MSG_NOSIGNAL));
 
-	  /* If we cannot permanently store the result, so be it.  */
-	  if (__builtin_expect (db->negtimeout == 0, 0))
+	  /* If we have a transient error or cannot permanently store
+	     the result, so be it.  */
+	  if (errno == EAGAIN || __builtin_expect (db->negtimeout == 0, 0))
 	    {
 	      /* Mark the old entry as obsolete.  */
 	      if (dh != NULL)

@@ -1,4 +1,5 @@
-/* Copyright (C) 1991-1994,1996-1999,2003,2010 Free Software Foundation, Inc.
+/* Copyright (C) 1991-1994,1996-1999,2003,2010,2012
+   Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -12,9 +13,8 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
 
 /*
  *	POSIX Standard: 7.1-2 General Terminal Interface	<termios.h>
@@ -46,10 +46,10 @@ __BEGIN_DECLS
 #endif
 
 /* Return the output baud rate stored in *TERMIOS_P.  */
-extern speed_t cfgetospeed (__const struct termios *__termios_p) __THROW;
+extern speed_t cfgetospeed (const struct termios *__termios_p) __THROW;
 
 /* Return the input baud rate stored in *TERMIOS_P.  */
-extern speed_t cfgetispeed (__const struct termios *__termios_p) __THROW;
+extern speed_t cfgetispeed (const struct termios *__termios_p) __THROW;
 
 /* Set the output baud rate stored in *TERMIOS_P to SPEED.  */
 extern int cfsetospeed (struct termios *__termios_p, speed_t __speed) __THROW;
@@ -69,7 +69,7 @@ extern int tcgetattr (int __fd, struct termios *__termios_p) __THROW;
 /* Set the state of FD to *TERMIOS_P.
    Values for OPTIONAL_ACTIONS (TCSA*) are in <bits/termios.h>.  */
 extern int tcsetattr (int __fd, int __optional_actions,
-		      __const struct termios *__termios_p) __THROW;
+		      const struct termios *__termios_p) __THROW;
 
 
 #ifdef	__USE_BSD
