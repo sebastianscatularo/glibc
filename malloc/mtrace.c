@@ -15,9 +15,8 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
 
 #ifndef	_MALLOC_INTERNAL
 #define	_MALLOC_INTERNAL
@@ -64,7 +63,7 @@ static __ptr_t (*tr_old_realloc_hook) (__ptr_t ptr, __malloc_size_t size,
 				       const __ptr_t);
 static __ptr_t (*tr_old_memalign_hook) (__malloc_size_t __alignment,
 					__malloc_size_t __size,
-					__const __ptr_t);
+					const __ptr_t);
 
 /* This function is called when the block being alloc'd, realloc'd, or
    freed has an address matching the variable "mallwatch".  In a debugger,

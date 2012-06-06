@@ -1,4 +1,5 @@
-# Copyright (C) 1997,1998,2000-2004,2007,2009 Free Software Foundation, Inc.
+# Copyright (C) 1997,1998,2000-2004,2007,2009,2012
+# Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -12,9 +13,8 @@
 # Lesser General Public License for more details.
 
 # You should have received a copy of the GNU Lesser General Public
-# License along with the GNU C Library; if not, write to the Free
-# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-# 02111-1307 USA.
+# License along with the GNU C Library; if not, see
+# <http://www.gnu.org/licenses/>.
 
 #
 #	Makefile for iconv.
@@ -27,13 +27,7 @@ headers		= iconv.h gconv.h
 routines	= iconv_open iconv iconv_close \
 		  gconv_open gconv gconv_close gconv_db gconv_conf \
 		  gconv_builtin gconv_simple gconv_trans gconv_cache
-ifeq ($(elf),yes)
 routines	+= gconv_dl
-else
-CFLAGS-gconv_db.c = -DSTATIC_GCONV
-CFLAGS-gconv_cache.c = -DSTATIC_GCONV
-CFLAGS-gconv_simple.c = -DSTATIC_GCONV
-endif
 
 vpath %.c ../locale/programs ../intl
 
