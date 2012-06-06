@@ -36,6 +36,7 @@ asflags-cpu = @libc_cv_cc_submachine@
 
 config-cflags-sse4 = @libc_cv_cc_sse4@
 config-cflags-avx = @libc_cv_cc_avx@
+config-cflags-sse2avx = @libc_cv_cc_sse2avx@
 config-cflags-novzeroupper = @libc_cv_cc_novzeroupper@
 config-asflags-i686 = @libc_cv_as_i686@
 
@@ -44,14 +45,11 @@ sysincludes = @SYSINCLUDES@
 c++-sysincludes = @CXX_SYSINCLUDES@
 all-warnings = @all_warnings@
 
-elf = @elf@
 have-z-combreloc = @libc_cv_z_combreloc@
 have-z-execstack = @libc_cv_z_execstack@
-have-initfini = @libc_cv_have_initfini@
 have-Bgroup = @libc_cv_Bgroup@
 have-as-needed = @libc_cv_as_needed@
 libgcc_s_suffix = @libc_cv_libgcc_s_suffix@
-need-nopic-initfini = @nopic_initfini@
 with-fp = @with_fp@
 old-glibc-headers = @old_glibc_headers@
 unwind-find-fde = @libc_cv_gcc_unwind_find_fde@
@@ -89,12 +87,10 @@ sizeof-long-double = @sizeof_long_double@
 nss-crypt = @libc_cv_nss_crypt@
 
 # Configuration options.
-build-static = @static@
 build-shared = @shared@
 build-pic-default= @libc_cv_pic_default@
 build-profile = @profile@
-build-omitfp = @omitfp@
-build-bounded = @bounded@
+build-bounded = no
 build-static-nss = @static_nss@
 add-ons = @add_ons@
 add-on-subdirs = @add_on_subdirs@
@@ -113,7 +109,6 @@ AR = @AR@
 MAKEINFO = @MAKEINFO@
 AS = $(CC) -c
 MIG = @MIG@
-PWD_P = @PWD_P@
 BISON = @BISON@
 AUTOCONF = @AUTOCONF@
 OBJDUMP = @OBJDUMP@
