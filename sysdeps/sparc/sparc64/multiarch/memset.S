@@ -14,9 +14,8 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
 
 #include <sysdep.h>
 #include <rtld-global-offsets.h>
@@ -26,12 +25,7 @@
 ENTRY(memset)
 	.type	memset, @gnu_indirect_function
 # ifdef SHARED
-	mov	%o7, %o5
-	sethi	%hi(_GLOBAL_OFFSET_TABLE_-4), %o3
-	call	1f
-	 or	%o3, %lo(_GLOBAL_OFFSET_TABLE_+4), %o3
-1:	add	%o7, %o3, %o3
-	mov	%o5, %o7
+	SETUP_PIC_REG_LEAF(o3, o5)
 # endif
 	andcc	%o0, HWCAP_SPARC_BLKINIT, %g0
 	be	9f
@@ -62,12 +56,7 @@ END(memset)
 ENTRY(__bzero)
 	.type	bzero, @gnu_indirect_function
 # ifdef SHARED
-	mov	%o7, %o5
-	sethi	%hi(_GLOBAL_OFFSET_TABLE_-4), %o3
-	call	1f
-	 or	%o3, %lo(_GLOBAL_OFFSET_TABLE_+4), %o3
-1:	add	%o7, %o3, %o3
-	mov	%o5, %o7
+	SETUP_PIC_REG_LEAF(o3, o5)
 # endif
 	andcc	%o0, HWCAP_SPARC_BLKINIT, %g0
 	be	9f

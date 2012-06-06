@@ -1,5 +1,5 @@
 /* Implement simple hashing table with string based keys.
-   Copyright (C) 1994-1997,2000,2001,2002,2005 Free Software Foundation, Inc.
+   Copyright (C) 1994-1997,2000-2002,2005,2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Written by Ulrich Drepper <drepper@gnu.ai.mit.edu>, October 1994.
 
@@ -14,8 +14,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   along with this program; if not, see <http://www.gnu.org/licenses/>.  */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -53,8 +52,10 @@
 #define hashval_t uint32_t
 #include "hashval.h"
 
-extern void *xmalloc (size_t __n);
-extern void *xcalloc (size_t __n, size_t __m);
+extern void *xmalloc (size_t n)
+  __attribute_malloc__ __attribute_alloc_size (1);
+extern void *xcalloc (size_t n, size_t s)
+  __attribute_malloc__ __attribute_alloc_size (1, 2);
 
 typedef struct hash_entry
 {

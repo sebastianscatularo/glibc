@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2008,2009,2010 Free Software Foundation, Inc.
+# Copyright (C) 2002-2008,2009,2010,2012 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -12,9 +12,8 @@
 # Lesser General Public License for more details.
 
 # You should have received a copy of the GNU Lesser General Public
-# License along with the GNU C Library; if not, write to the Free
-# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-# 02111-1307 USA.
+# License along with the GNU C Library; if not, see
+# <http://www.gnu.org/licenses/>.
 
 #
 #	Sub-makefile for NPTL portion of the library.
@@ -335,14 +334,11 @@ ifneq (,$(patsubst .,,$(multidir)))
 generated-dirs := $(firstword $(subst /, , $(multidir)))
 crti-objs += $(multidir)/crti.o
 crtn-objs += $(multidir)/crtn.o
-omit-deps += $(multidir)/crti $(multidir)/crtn
 $(objpfx)$(multidir):
 	mkdir -p $@
 endif
 extra-objs += $(crti-objs) $(crtn-objs)
-omit-deps += crti crtn
-
-CFLAGS-pt-initfini.s = -g0 -fPIC -fno-inline-functions $(fno-unit-at-a-time)
+extra-objs += pt-crti.o
 endif
 
 CFLAGS-flockfile.c = -D_IO_MTSAFE_IO
@@ -352,11 +348,10 @@ CFLAGS-funlockfile.c = -D_IO_MTSAFE_IO
 link-libc-static := $(common-objpfx)libc.a $(static-gnulib) \
 		    $(common-objpfx)libc.a
 
-ifeq ($(build-static),yes)
 tests-static += tst-locale1 tst-locale2 tst-stackguard1-static
 tests += tst-stackguard1-static
 xtests-static += tst-setuid1-static
-endif
+
 # These tests are linked with libc before libpthread
 tests-reverse += tst-cancel5 tst-cancel23 tst-vfork1x tst-vfork2x
 
@@ -519,7 +514,7 @@ $(objpfx)libpthread.so: +postinit += $(addprefix $(objpfx),$(crtn-objs))
 # Depend on ld.so too to get proper versions of ld.so symbols.
 $(objpfx)libpthread.so: $(common-objpfx)libc.so \
 			$(common-objpfx)libc_nonshared.a \
-			$(if $(filter yes,$(elf)), $(elfobjdir)/ld.so)
+			$(elfobjdir)/ld.so
 
 # Make sure we link with the thread library.
 ifeq ($(build-shared),yes)
@@ -543,35 +538,12 @@ $(addprefix $(objpfx),$(tests) $(test-srcs)): $(objpfx)libpthread.a
 endif
 
 ifeq ($(build-shared),yes)
-vpath pt-initfini.c $(sysdirs)
-
-$(objpfx)pt-initfini.s: pt-initfini.c
-	$(compile.c) -S $(CFLAGS-pt-initfini.s) -finhibit-size-directive \
-		$(patsubst -f%,-fno-%,$(exceptions)) -o $@
 
 $(objpfx)tst-cleanup0.out: /dev/null $(objpfx)tst-cleanup0
 	$(make-test-out) 2>&1 | cmp - tst-cleanup0.expect > $@
 
-# We only have one kind of startup code files.  Static binaries and
-# shared libraries are build using the PIC version.
-$(objpfx)crti.S: $(objpfx)pt-initfini.s
-	sed -n -e '1,/@HEADER_ENDS/p' \
-	       -e '/@_.*_PROLOG_BEGINS/,/@_.*_PROLOG_ENDS/p' \
-	       -e '/@TRAILER_BEGINS/,$$p' $< > $@
-$(objpfx)crtn.S: $(objpfx)pt-initfini.s
-	sed -n -e '1,/@HEADER_ENDS/p' \
-	       -e '/@_.*_EPILOG_BEGINS/,/@_.*_EPILOG_ENDS/p' \
-	       -e '/@TRAILER_BEGINS/,$$p' $< > $@
-
-$(objpfx)defs.h: $(objpfx)pt-initfini.s
-	sed -n -e '/@TESTS_BEGIN/,/@TESTS_END/p' $< | \
-		$(AWK) -f ../csu/defs.awk > $@
-
-$(objpfx)crti.o: $(objpfx)crti.S $(objpfx)defs.h
-	$(compile.S) -g0 $(ASFLAGS-.os) -o $@
-
-$(objpfx)crtn.o: $(objpfx)crtn.S $(objpfx)defs.h
-	$(compile.S) -g0 $(ASFLAGS-.os) -o $@
+$(objpfx)crti.o: $(objpfx)pt-crti.o
+	ln -f $< $@
 
 ifneq ($(multidir),.)
 $(objpfx)$(multidir)/crti.o: $(objpfx)crti.o $(objpfx)$(multidir)/
@@ -581,7 +553,7 @@ $(objpfx)$(multidir)/crtn.o: $(objpfx)crtn.o $(objpfx)$(multidir)/
 	ln -f $< $@
 endif
 
-generated += crti.S crtn.S defs.h pt-initfini.s  libpthread_nonshared.a \
+generated += libpthread_nonshared.a \
 	     multidir.mk tst-atfork2.mtrace tst-cancel-wrappers.out \
 	     tst-tls6.out
 
