@@ -22,8 +22,8 @@ static char rcsid[] = "$NetBSD: $";
  * wrapper expl(x)
  */
 
-#include "math.h"
-#include "math_private.h"
+#include <math.h>
+#include <math_private.h>
 
 static const long double
 o_threshold= 1.1356523406294143949491931077970763428449E4L,
@@ -39,9 +39,9 @@ long double __expl(long double x)	/* wrapper exp */
 	if(_LIB_VERSION == _IEEE_) return z;
 	if(__finitel(x)) {
 	    if(x>o_threshold)
-	        return __kernel_standard(x,x,206); /* exp overflow */
+	        return __kernel_standard_l(x,x,206); /* exp overflow */
 	    else if(x<u_threshold)
-	        return __kernel_standard(x,x,207); /* exp underflow */
+	        return __kernel_standard_l(x,x,207); /* exp underflow */
 	}
 	return z;
 #endif

@@ -24,7 +24,7 @@
 #include <stdlib/gmp-impl.h>
 #include <stdlib/longlong.h>
 
-#include "_itowa.h"
+#include <_itowa.h>
 
 
 /* Canonize environment.  For some architectures not all values might
@@ -85,7 +85,7 @@ extern const wchar_t _itowa_lower_digits[] attribute_hidden;
 extern const wchar_t _itowa_upper_digits[] attribute_hidden;
 
 
-#if LLONG_MAX != LONG_MAX
+#if _ITOA_NEEDED
 wchar_t *
 _itowa (value, buflim, base, upper_case)
      unsigned long long int value;
