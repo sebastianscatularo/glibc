@@ -1,4 +1,4 @@
-# Copyright (C) 1991-2010, 2011 Free Software Foundation, Inc.
+# Copyright (C) 1991-2012 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -1107,6 +1107,8 @@ ifdef headers
 # headers in the sysdeps tree.
 $(inst_includedir)/%.h: $(objpfx)%.h $(+force)
 	$(do-install)
+$(inst_includedir)/%.h: $(common-objpfx)%.h $(+force)
+	$(do-install)
 $(inst_includedir)/%.h: %.h $(+force)
 	$(do-install)
 $(inst_includedir)/%.h: $(..)include/%.h $(+force)
@@ -1157,14 +1159,6 @@ $(make-target-directory)
 $(patsubst %/,cd % &&,$(objpfx)) \
 $(BUILD_CC) $($(basename $(<F))-CFLAGS) $(ALL_BUILD_CFLAGS) \
 	    $(firstword $(filter /%,$< $(shell pwd)/$<)) -o $(@F)
-endef
-
-# Command to compile $< in $(common-objdir) using the native libraries.
-# We must cd to $(objdir) anyway so that $(..)config.h is valid.
-define common-objdir-compile
-$(patsubst %/,cd % &&,$(objpfx)) \
-$(BUILD_CC) $($(basename $(<F))-CFLAGS) $(ALL_BUILD_CFLAGS) \
-	    $(firstword $(filter /%,$< $(shell pwd)/$<)) -o $(..)$(@F)
 endef
 
 # We always want to use configuration definitions.
