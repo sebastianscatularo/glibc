@@ -323,6 +323,9 @@ AC_ARG_WITH([cpu],
   esac
 ])
 
+dnl Let sysdeps/*/preconfigure act here, like they can in add-ons.
+LIBC_PRECONFIGURE([$srcdir], [for sysdeps])
+
 # An add-on can set this when it wants to disable the sanity check below.
 libc_config_ok=no
 
@@ -442,16 +445,7 @@ relative path required for add-on using \$libc_add_on_config_subdirs) ;;
       }
     fi
     if test -n "$libc_add_on"; then
-      if frags=`ls -d $libc_add_on_srcdir/sysdeps/*/preconfigure 2> /dev/null`
-      then
-	AC_MSG_CHECKING(add-on $libc_add_on for preconfigure fragments)
-	for frag in $frags; do
-	  name=`echo "$frag" | sed 's@/[[^/]]*$@@;s@^.*/@@'`
-	  echo $ECHO_N "$name $ECHO_C" >&AS_MESSAGE_FD
-	  . "$frag"
-	done
-	AC_MSG_RESULT()
-      fi
+      LIBC_PRECONFIGURE([$libc_add_on_srcdir], [add-on $libc_add_on for])
       use_add_ons="$use_add_ons $libc_add_on"
       add_ons_pfx="$add_ons_pfx $libc_add_on/"
       test -z "$libc_add_on_canonical" ||
@@ -755,23 +749,6 @@ AC_SUBST(submachine)
 
 # We have now validated the configuration.
 
-
-# Look for an `elf' subdirectory of each machine directory.
-# We prepend these rather than inserting them whereever the machine appears
-# because things specified by the machine's ELF ABI should override
-# OS-specific things, and should always be the same for any OS on the
-# machine (otherwise what's the point of an ABI?).
-elf_dirs=
-for d in $add_ons_pfx ''; do
-  for m in $mach; do
-    if test -d $srcdir/${d}sysdeps$m/elf; then
-      elf_dirs="$elf_dirs ${d}sysdeps$m/elf"
-    fi
-  done
-done
-sysnames="`echo $elf_dirs | sed -e 's,//,/,g'` $sysnames"
-
-
 # Expand the list of system names into a full list of directories
 # from each element's parent name and Implies file (if present).
 set $sysnames
@@ -853,7 +830,7 @@ changequote([,])dnl
 done
 
 # Add the default directories.
-default_sysnames="sysdeps/generic/elf sysdeps/generic"
+default_sysnames="sysdeps/generic"
 sysnames="$names $default_sysnames"
 AC_SUBST(sysnames)
 # The other names were emitted during the scan.
@@ -927,18 +904,18 @@ AC_PROG_LN_S
 LIBC_PROG_BINUTILS
 AC_SUBST(MIG)dnl Needed by sysdeps/mach/configure.in
 
-# Accept binutils 2.13 or newer.
+# Accept binutils 2.20 or newer.
 AC_CHECK_PROG_VER(AS, $AS, --version,
 		  [GNU assembler.* \([0-9]*\.[0-9.]*\)],
-		  [2.1[3-9]*|2.1[0-9][0-9]*|2.[2-9][0-9]*|[3-9].*|[1-9][0-9]*], AS=: critic_missing="$critic_missing as")
+		  [2.1[0-9][0-9]*|2.[2-9][0-9]*|[3-9].*|[1-9][0-9]*], AS=: critic_missing="$critic_missing as")
 AC_CHECK_PROG_VER(LD, $LD, --version,
 		  [GNU ld.* \([0-9][0-9]*\.[0-9.]*\)],
-		  [2.1[3-9]*|2.1[0-9][0-9]*|2.[2-9][0-9]*|[3-9].*|[1-9][0-9]*], LD=: critic_missing="$critic_missing ld")
+		  [2.1[0-9][0-9]*|2.[2-9][0-9]*|[3-9].*|[1-9][0-9]*], LD=: critic_missing="$critic_missing ld")
 
 # These programs are version sensitive.
 AC_CHECK_TOOL_PREFIX
 AC_CHECK_PROG_VER(CC, ${ac_tool_prefix}gcc ${ac_tool_prefix}cc, -v,
-  [version \([egcygnustpi-]*[0-9.]*\)], [3.4* | 4.[0-9]* ],
+  [version \([egcygnustpi-]*[0-9.]*\)], [4.[3-9].* | 4.[1-9][0-9].* | [5-9].* ],
   critic_missing="$critic_missing gcc")
 AC_CHECK_PROG_VER(MAKE, gnumake gmake make, --version,
   [GNU Make[^0-9]*\([0-9][0-9.]*\)],
@@ -1355,24 +1332,17 @@ fi
 
 AC_CACHE_CHECK(for .preinit_array/.init_array/.fini_array support,
 	       libc_cv_initfini_array, [dnl
-cat > conftest.c <<EOF
-int _start (void) { return 0; }
-int __start (void) { return 0; }
+LIBC_TRY_LINK_STATIC([
 int foo (void) { return 1; }
 int (*fp) (void) __attribute__ ((section (".init_array"))) = foo;
-EOF
-if AC_TRY_COMMAND([${CC-cc} $CFLAGS $CPPFLAGS $LDFLAGS -o conftest conftest.c
-		   -static -nostartfiles -nostdlib 1>&AS_MESSAGE_LOG_FD])
-then
-  if $READELF -S conftest | fgrep INIT_ARRAY > /dev/null; then
+],
+  [if $READELF -S conftest | fgrep INIT_ARRAY > /dev/null; then
     libc_cv_initfini_array=yes
   else
     libc_cv_initfini_array=no
-  fi
-else
-  libc_cv_initfini_array=no
-fi
-rm -f conftest*])
+  fi],
+  [libc_cv_initfini_array=no])
+])
 if test $libc_cv_initfini_array != yes; then
   AC_MSG_ERROR([Need linker with .init_array/.fini_array support.])
 fi
@@ -1380,9 +1350,9 @@ fi
 AC_CACHE_CHECK(whether to use .ctors/.dtors header and trailer,
 	       libc_cv_ctors_header, [dnl
   libc_cv_ctors_header=yes
-  AC_TRY_LINK([], [
-__attribute__ ((constructor)) void ctor (void) { puts("ctor"); }
-__attribute__ ((destructor))  void dtor (void) { puts("dtor"); }
+  LIBC_TRY_LINK_STATIC([
+__attribute__ ((constructor)) void ctor (void) { asm (""); }
+__attribute__ ((destructor))  void dtor (void) { asm (""); }
 ],
 	      [dnl
       AS_IF([$READELF -WS conftest$ac_exeext | $AWK '
@@ -1772,18 +1742,10 @@ fi
 AC_SUBST(fno_unit_at_a_time)
 
 AC_CACHE_CHECK(for -fstack-protector, libc_cv_ssp, [dnl
-cat > conftest.c <<EOF
-int foo;
-main () { return 0;}
-EOF
-if AC_TRY_COMMAND([${CC-cc} $CFLAGS $CPPFLAGS $LDFLAGS -Werror -fstack-protector
-			    -o conftest conftest.c 1>&AS_MESSAGE_LOG_FD])
-then
-  libc_cv_ssp=yes
-else
-  libc_cv_ssp=no
-fi
-rm -f conftest*])
+LIBC_TRY_CC_OPTION([$CFLAGS $CPPFLAGS -Werror -fstack-protector],
+		   [libc_cv_ssp=yes],
+		   [libc_cv_ssp=no])
+])
 AC_SUBST(libc_cv_ssp)
 
 AC_CACHE_CHECK(for -fgnu89-inline, libc_cv_gnu89_inline, [dnl
@@ -2019,15 +1981,22 @@ if test "$libc_cv_gcc_tls_model_attr" = no; then
   AC_MSG_ERROR([support for the tls_model attribute is required])
 fi
 
+dnl Determine how to disable generation of FMA instructions.
+AC_CACHE_CHECK([for compiler option to disable generation of FMA instructions],
+	       libc_cv_cc_nofma, [dnl
+libc_cv_cc_nofma=
+for opt in -ffp-contract=off -mno-fused-madd; do
+  LIBC_TRY_CC_OPTION([$opt], [libc_cv_cc_nofma=$opt; break])
+done])
+
 if test -n "$submachine"; then
   AC_CACHE_CHECK([for compiler option for CPU variant],
 		 libc_cv_cc_submachine, [dnl
   libc_cv_cc_submachine=no
   for opt in "-march=$submachine" "-mcpu=$submachine"; do
-    if AC_TRY_COMMAND([${CC-cc} $opt -xc /dev/null -S -o /dev/null]); then
+    LIBC_TRY_CC_OPTION([$opt], [
       libc_cv_cc_submachine="$opt"
-      break
-    fi
+      break], [])
   done])
   if test "x$libc_cv_cc_submachine" = xno; then
     AC_MSG_ERROR([${CC-cc} does not support $submachine])
@@ -2163,7 +2132,9 @@ AC_SUBST(libc_cv_cc_avx)
 AC_SUBST(libc_cv_cc_sse2avx)
 AC_SUBST(libc_cv_cc_novzeroupper)
 AC_SUBST(libc_cv_cc_fma4)
+AC_SUBST(libc_cv_cc_nofma)
 AC_SUBST(libc_cv_as_i686)
+AC_SUBST(libc_cv_sparc_as_vis3)
 
 AC_SUBST(use_ldconfig)
 AC_SUBST(ldd_rewrite_script)
