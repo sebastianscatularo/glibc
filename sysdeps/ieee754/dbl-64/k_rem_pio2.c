@@ -130,8 +130,8 @@ static char rcsid[] = "$NetBSD: k_rem_pio2.c,v 1.7 1995/05/10 20:46:25 jtc Exp $
  * to produce the hexadecimal values shown.
  */
 
-#include "math.h"
-#include "math_private.h"
+#include <math.h>
+#include <math_private.h>
 
 static const int init_jk[] = {2,3,4,6}; /* initial value for jk */
 
@@ -273,13 +273,16 @@ recompute:
 		y[0] = (ih==0)? fw: -fw;
 		break;
 	    case 1:
-	    case 2:
-		fw = 0.0;
-		for (i=jz;i>=0;i--) fw += fq[i];
-		y[0] = (ih==0)? fw: -fw;
-		fw = fq[0]-fw;
-		for (i=1;i<=jz;i++) fw += fq[i];
-		y[1] = (ih==0)? fw: -fw;
+	    case 2:;
+#if __FLT_EVAL_METHOD__ != 0
+		volatile
+#endif
+		double fv = 0.0;
+		for (i=jz;i>=0;i--) fv += fq[i];
+		y[0] = (ih==0)? fv: -fv;
+		fv = fq[0]-fv;
+		for (i=1;i<=jz;i++) fv += fq[i];
+		y[1] = (ih==0)? fv: -fv;
 		break;
 	    case 3:	/* painful */
 		for (i=jz;i>0;i--) {
