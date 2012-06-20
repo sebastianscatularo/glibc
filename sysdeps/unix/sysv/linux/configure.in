@@ -5,7 +5,7 @@ GLIBC_PROVIDES dnl See aclocal.m4 in the top level source directory.
 # existing system library, because we are the only system library.
 inhibit_glue=yes
 
-define([LIBC_LINUX_VERSION],[2.0.10])dnl
+define([LIBC_LINUX_VERSION],[2.6.19])dnl
 if test -n "$sysheaders"; then
   OLD_CPPFLAGS=$CPPFLAGS
   CPPFLAGS="$CPPFLAGS $SYSINCLUDES"
@@ -132,7 +132,7 @@ case "$prefix" in
   # and libc_cv_localedir.
   test -n "$libc_cv_slibdir" || \
   case $machine in
-  sparc/sparc64 | x86_64 | powerpc/powerpc64 | s390/s390-64)
+  sparc/sparc64 | x86_64* | powerpc/powerpc64 | s390/s390-64)
     libc_cv_slibdir="/lib64"
     if test "$libdir" = '${exec_prefix}/lib'; then
       libdir='${exec_prefix}/lib64';
