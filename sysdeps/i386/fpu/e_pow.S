@@ -114,7 +114,7 @@ ENTRY(__ieee754_pow)
 	fucomp	%st(1)		// y : x
 	fnstsw
 	sahf
-	jne	2f
+	jne	3f
 
 	/* OK, we have an integer value for y.  */
 	popl	%eax
@@ -157,7 +157,12 @@ ENTRY(__ieee754_pow)
 
 	cfi_adjust_cfa_offset (8)
 	.align ALIGNARG(4)
-2:	/* y is a real number.  */
+2:	/* y is a large integer (so even).  */
+	fxch			// x : y
+	fabs			// |x| : y
+	fxch			// y : x
+	.align ALIGNARG(4)
+3:	/* y is a real number.  */
 	fxch			// x : y
 	fldl	MO(one)		// 1.0 : x : y
 	fldl	MO(limit)	// 0.29 : 1.0 : x : y
@@ -230,6 +235,16 @@ ENTRY(__ieee754_pow)
 	testb	$2, %dh
 	jz	16f		// jump if x == +inf
 
+	// fistpll raises invalid exception for |y| >= 1L<<63, so test
+	// that (in which case y is certainly even) before testing
+	// whether y is odd.
+	fld	%st		// y : y
+	fabs			// |y| : y
+	fcompl	MO(p63)		// y
+	fnstsw
+	sahf
+	jnc	16f
+
 	// We must find out whether y is an odd integer.
 	fld	%st		// y : y
 	fistpll	(%esp)		// y
@@ -239,20 +254,13 @@ ENTRY(__ieee754_pow)
 	sahf
 	jne	17f
 
-	// OK, the value is an integer, but is the number of bits small
-	// enough so that all are coming from the mantissa?
+	// OK, the value is an integer.
 	popl	%eax
 	cfi_adjust_cfa_offset (-4)
 	popl	%edx
 	cfi_adjust_cfa_offset (-4)
 	andb	$1, %al
 	jz	18f		// jump if not odd
-	movl	%edx, %eax
-	orl	%edx, %edx
-	jns	155f
-	negl	%eax
-155:	cmpl	$0x00200000, %eax
-	ja	18f		// does not fit in mantissa bits
 	// It's an odd integer.
 	shrl	$31, %edx
 	fldl	MOX(minf_mzero, %edx, 8)
@@ -289,6 +297,16 @@ ENTRY(__ieee754_pow)
 	testb	$2, %dh
 	jz	25f
 
+	// fistpll raises invalid exception for |y| >= 1L<<63, so test
+	// that (in which case y is certainly even) before testing
+	// whether y is odd.
+	fld	%st		// y : y
+	fabs			// |y| : y
+	fcompl	MO(p63)		// y
+	fnstsw
+	sahf
+	jnc	25f
+
 	fld	%st		// y : y
 	fistpll	(%esp)		// y
 	fildll	(%esp)		// int(y) : y
@@ -297,16 +315,13 @@ ENTRY(__ieee754_pow)
 	sahf
 	jne	26f
 
-	// OK, the value is an integer, but is the number of bits small
-	// enough so that all are coming from the mantissa?
+	// OK, the value is an integer.
 	popl	%eax
 	cfi_adjust_cfa_offset (-4)
 	popl	%edx
 	cfi_adjust_cfa_offset (-4)
 	andb	$1, %al
 	jz	27f		// jump if not odd
-	cmpl	$0xffe00000, %edx
-	jbe	27f		// does not fit in mantissa bits
 	// It's an odd integer.
 	// Raise divide-by-zero exception and get minus infinity value.
 	fldl	MO(one)
@@ -329,6 +344,14 @@ ENTRY(__ieee754_pow)
 21:	testb	$2, %dh
 	jz	22f
 
+	// fistpll raises invalid exception for |y| >= 1L<<63, so test
+	// that (in which case y is certainly even) before testing
+	// whether y is odd.
+	fcoml	MO(p63)		// y
+	fnstsw
+	sahf
+	jnc	22f
+
 	fld	%st		// y : y
 	fistpll	(%esp)		// y
 	fildll	(%esp)		// int(y) : y
@@ -337,16 +360,13 @@ ENTRY(__ieee754_pow)
 	sahf
 	jne	23f
 
-	// OK, the value is an integer, but is the number of bits small
-	// enough so that all are coming from the mantissa?
+	// OK, the value is an integer.
 	popl	%eax
 	cfi_adjust_cfa_offset (-4)
 	popl	%edx
 	cfi_adjust_cfa_offset (-4)
 	andb	$1, %al
 	jz	24f		// jump if not odd
-	cmpl	$0xffe00000, %edx
-	jae	24f		// does not fit in mantissa bits
 	// It's an odd integer.
 	fldl	MO(mzero)
 	ret
