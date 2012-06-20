@@ -53,8 +53,6 @@ tests := tst-shm tst-clock tst-clock_nanosleep tst-timer tst-timer2 \
 extra-libs := librt
 extra-libs-others := $(extra-libs)
 
-distribute := aio_misc.h
-
 include ../Rules
 
 CFLAGS-aio_suspend.c = -fexceptions
@@ -80,8 +78,3 @@ $(tests:%=$(objpfx)%-bp): $(objpfx)librt_b.a $(bounded-thread-library)
 endif
 
 tst-mqueue7-ARGS = -- $(built-program-cmd)
-
-ifeq (yes,$(build-static-nss))
-otherlibs += $(nssobjdir)/libnss_files.a $(resolvobjdir)/libnss_dns.a \
-	     $(resolvobjdir)/libresolv.a
-endif

@@ -9,5 +9,5 @@ The ChangeLog hunk (which failed to apply) goes into ChangeLog.SHA1.
 After ``tg update'' (and possibly dealing with merge conflicts), manually check
 which can be removed, and remove the ChangeLog.SHA1.
 
-If there are no backports, ``git diff baseline'' must only show the .top* files
-on t/eglibc_backports.
+If there are no backports, ``git diff t/regenerate_configure'' must only show
+the .top* files on t/eglibc_backports.

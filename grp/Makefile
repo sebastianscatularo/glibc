@@ -1,4 +1,5 @@
-# Copyright (C) 1991,1992,1996-2000,2003,2004 Free Software Foundation, Inc.
+# Copyright (C) 1991,1992,1996-2000,2003,2004,2012
+# Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -21,8 +22,6 @@
 subdir	:= grp
 headers := grp.h
 
-distribute := tst_fgetgrent.c tst_fgetgrent.sh compat-initgroups.c
-
 routines := fgetgrent initgroups setgroups \
 	    getgrent getgrgid getgrnam putgrent \
 	    getgrent_r getgrgid_r getgrnam_r fgetgrent_r
@@ -37,12 +36,6 @@ endif
 
 
 include ../Rules
-
-ifeq (yes,$(build-static-nss))
-otherlibs += $(nssobjdir)/libnss_files.a $(resolvobjdir)/libnss_dns.a \
-	     $(resolvobjdir)/libresolv.a
-endif
-
 
 ifeq ($(have-thread-library),yes)
 
