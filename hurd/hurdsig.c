@@ -1277,8 +1277,6 @@ _hurdsig_init (const int *intarray, size_t intarraysize)
 	__libc_fatal ("hurd: Can't allocate threadvars for signal thread\n");
       memset (__hurd_sigthread_variables, 0,
 	      __hurd_threadvar_max * sizeof (unsigned long int));
-      __hurd_sigthread_variables[_HURD_THREADVAR_LOCALE]
-	= (unsigned long int) &_nl_global_locale;
 
       /* Reinitialize the MiG support routines so they will use a per-thread
 	 variable for the cached reply port.  */
