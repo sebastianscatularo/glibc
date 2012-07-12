@@ -1,16 +1,51 @@
-Subject: Baseline for our topic branches.
+Subject: [PATCH] t/sendmmsg
 
----
+From: Thomas Schwinge <thomas@codesourcery.com>
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
+id:"87a9zubdm9.fsf@schwinge.name"
 
-As the baseline is merged into the topic branches, it is forward-only.
+	* sysdeps/unix/sysv/linux/bits/socket.h (struct mmsghdr, recvmmsg)
+	(sendmmsg): Move declarations...
+	* socket/sys/socket.h: ... here.
+	* socket/recvmmsg.c: New file.
+	* socket/sendmmsg.c: New file.
+	* sysdeps/unix/sysv/linux/internal_recvmmsg.S [__ASSUME_RECVMMSG]
+	(recvmmsg): Rename to __recvmmsg, create weak alias and make definition
+	of __recvmmsg hidden.
+	* sysdeps/unix/sysv/linux/recvmmsg.c (recvmmsg): Likewise.  Include
+	<socket/recvmmsg.c> for ENOSYS stub.
+	* sysdeps/unix/sysv/linux/internal_sendmmsg.S [__ASSUME_SENDMMSG]
+	(sendmmsg): Rename to __sendmmsg, create weak alias and make definition
+	of __sendmmsg hidden.
+	* sysdeps/unix/sysv/linux/sendmmsg.c (sendmmsg): Likewise.  Include
+	<socket/sendmmsg.c> for ENOSYS stub.
+	* sysdeps/unix/sysv/linux/Makefile [subdir=socket] (sysdep_routines):
+	Move recvmmsg and sendmmsg...
+	* socket/Makefile (routines): ... here.
+	* socket/Versions (GLIBC_2.16): Add __sendmmsg, recvmmsg, and sendmmsg.
+	* include/sys/socket.h (__recvmmsg, __sendmmsg): Add declarations.
+	* resolv/res_send.c (send_dg): Invoke __sendmmsg instead of sendmmsg.
 
-To advance it:
+Missing; not yet in baseline:
 
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
+	* sysdeps/unix/sysv/linux/i386/nptl/libc.abilist (GLIBC_2.16): Add
+	__sendmmsg.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc32/fpu/nptl/libc.abilist
+	(GLIBC_2.16): Likewise.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/nptl/libc.abilist
+	(GLIBC_2.16): Likewise.
+	* sysdeps/unix/sysv/linux/s390/s390-32/nptl/libc.abilist (GLIBC_2.16):
+	Likewise.
+	* sysdeps/unix/sysv/linux/s390/s390-64/nptl/libc.abilist (GLIBC_2.16):
+	Likewise.
+	* sysdeps/unix/sysv/linux/sh/nptl/libc.abilist (GLIBC_2.16): Likewise.
+	* sysdeps/unix/sysv/linux/sparc/sparc32/nptl/libc.abilist (GLIBC_2.16):
+	Likewise.
+	* sysdeps/unix/sysv/linux/sparc/sparc64/nptl/libc.abilist (GLIBC_2.16):
+	Likewise.
+	* sysdeps/unix/sysv/linux/x86_64/64/nptl/libc.abilist (GLIBC_2.16):
+	Likewise.
+	* sysdeps/unix/sysv/linux/x86_64/x32/nptl/libc.abilist (GLIBC_2.16):
+	Likewise.
 
----
+TODO: 2.17 versions.
