@@ -1,3 +1,31 @@
+2012-03-30  Ulrich Drepper  <drepper@gmail.com>
+
+	* resolv/res_send.c (send_dg): Use sendmmsg if we have to write two
+	requests to save a system call.  Fix check that all bytes are sent.
+
+	* sysdeps/unix/sysv/linux/bits/socket.h (struct mmsghdr): Fix up
+	comments for sendmmsg.
+
+2012-03-30  Tulio Magno Quites Machado Filho  <tuliom@linux.vnet.ibm.com>
+
+	[BZ #13691]
+	* iconvdata/tcvn5712-1.c (FROM_LOOP): Fix a bug when converting strings
+	with only 1 character between 0x0041 and 0x01b0.
+	* wcsmbs/Makefile (tests): Add tst-mbsnrtowcs.
+	* wcsmbs/tst-mbsnrtowcs.c: New file.
+
+2012-03-29  David S. Miller  <davem@davemloft.net>
+
+	* libio/fileops.c (_IO_new_file_xsputn): Don't try to optimize
+	small copies by hand.
+
+2012-03-28  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	[BZ #13761]
+	* nis/nss_compat/compat-initgroups.c (getgrent_next_nss,
+	_nss_compat_initgroups_dyn): Fall back to malloc/free
+	for large group memberships.
+
 2012-03-28  David S. Miller  <davem@davemloft.net>
 
 	* sysdeps/sparc/sparc32/memcpy.S: Implement mempcpy using a stub
