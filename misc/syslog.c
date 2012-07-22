@@ -56,7 +56,9 @@ static char sccsid[] = "@(#)syslog.c	8.4 (Berkeley) 3/18/94";
 #include <libio/iolibio.h>
 #include <math_ldbl_opt.h>
 
-#define ftell(s) INTUSE(_IO_ftell) (s)
+#include <kernel-features.h>
+
+#define ftell(s) _IO_ftell (s)
 
 static int	LogType = SOCK_DGRAM;	/* type of socket connection */
 static int	LogFile = -1;		/* fd for log */
