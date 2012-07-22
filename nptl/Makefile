@@ -236,6 +236,8 @@ tests = tst-typesizes \
 	tst-cancel11 tst-cancel12 tst-cancel13 tst-cancel14 tst-cancel15 \
 	tst-cancel16 tst-cancel17 tst-cancel18 tst-cancel19 tst-cancel20 \
 	tst-cancel21 tst-cancel22 tst-cancel23 tst-cancel24 tst-cancel25 \
+	tst-cancel-self tst-cancel-self-cancelstate \
+	tst-cancel-self-canceltype tst-cancel-self-testcancel \
 	tst-cleanup0 tst-cleanup1 tst-cleanup2 tst-cleanup3 tst-cleanup4 \
 	tst-flock1 tst-flock2 \
 	tst-signal1 tst-signal2 tst-signal3 tst-signal4 tst-signal5 \
@@ -243,7 +245,7 @@ tests = tst-typesizes \
 	tst-exec1 tst-exec2 tst-exec3 tst-exec4 \
 	tst-exit1 tst-exit2 tst-exit3 \
 	tst-stdio1 tst-stdio2 \
-	tst-stack1 tst-stack2 tst-stack3 \
+	tst-stack1 tst-stack2 tst-stack3 tst-pthread-getattr \
 	tst-unload \
 	tst-dlsym1 \
 	tst-sysconf \
@@ -438,7 +440,9 @@ LDFLAGS-tst-atfork2 = -rdynamic
 tst-atfork2-ENV = MALLOC_TRACE=$(objpfx)tst-atfork2.mtrace
 $(objpfx)tst-atfork2mod.so: $(shared-thread-library)
 
+ifeq ($(cross-compiling),no)
 tests: $(objpfx)tst-stack3-mem
+endif
 tst-stack3-ENV = MALLOC_TRACE=$(objpfx)tst-stack3.mtrace
 $(objpfx)tst-stack3-mem: $(objpfx)tst-stack3.out
 	$(common-objpfx)malloc/mtrace $(objpfx)tst-stack3.mtrace > $@
@@ -456,10 +460,13 @@ $(objpfx)tst-tls4: $(libdl) $(shared-thread-library)
 $(objpfx)tst-tls4.out: $(objpfx)tst-tls4moda.so $(objpfx)tst-tls4modb.so
 
 $(objpfx)tst-tls5: $(objpfx)tst-tls5mod.so $(shared-thread-library)
+LDFLAGS-tst-tls5 = $(no-as-needed)
 LDFLAGS-tst-tls5mod.so = -Wl,-soname,tst-tls5mod.so
 
 ifeq ($(build-shared),yes)
+ifeq ($(cross-compiling),no)
 tests: $(objpfx)tst-tls6.out
+endif
 $(objpfx)tst-tls6.out: tst-tls6.sh $(objpfx)tst-tls5 \
 		       $(objpfx)tst-tls5moda.so $(objpfx)tst-tls5modb.so \
 		       $(objpfx)tst-tls5modc.so $(objpfx)tst-tls5modd.so \
@@ -499,7 +506,7 @@ $(objpfx)tst-clock2: $(common-objpfx)rt/librt.a
 $(objpfx)tst-rwlock14: $(common-objpfx)rt/librt.a
 endif
 
-LDFLAGS-tst-cancel24 = -lstdc++
+LDFLAGS-tst-cancel24 = $(no-as-needed) -lstdc++
 
 extra-B-pthread.so = -B$(common-objpfx)nptl/
 $(objpfx)libpthread.so: $(addprefix $(objpfx),$(crti-objs) $(crtn-objs))
