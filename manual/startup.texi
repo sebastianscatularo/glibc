@@ -34,8 +34,9 @@ This chapter looks at program startup from the execee's point of view.  To
 see the event from the execor's point of view, see @ref{Executing a File}.
 
 @menu
-* Program Arguments::           Parsing your program's command-line arguments.
+* Program Arguments::           Parsing your program's command-line arguments
 * Environment Variables::       Less direct parameters affecting your program
+* Auxiliary Vector::            Least direct parameters affecting your program
 * System Calls::                Requesting service from the system
 * Program Termination::         Telling the system you're done; return status
 @end menu
@@ -335,6 +336,9 @@ definition is added to the environment.  Otherwise, the @var{string} is
 interpreted as the name of an environment variable, and any definition
 for this variable in the environment is removed.
 
+If the function is successful it returns @code{0}.  Otherwise the return
+value is nonzero and @code{errno} is set to indicate the error.
+
 The difference to the @code{setenv} function is that the exact string
 given as the parameter @var{string} is put into the environment.  If the
 user should change the string after the @code{putenv} call this will
@@ -363,6 +367,10 @@ controls the action.  If replace is zero, nothing happens.  Otherwise
 the old entry is replaced by the new one.
 
 Please note that you cannot remove an entry completely using this function.
+
+If the function is successful it returns @code{0}.  Otherwise the
+environment is unchanged and the return value is @code{-1} and
+@code{errno} is set.
 
 This function was originally part of the BSD library but is now part of
 the Unix standard.
@@ -582,6 +590,33 @@ reordering of command line arguments by @code{getopt} and
 
 @c !!! GNU also has COREFILE, CORESERVER, EXECSERVERS
 @end table
+
+@node Auxiliary Vector
+@section Auxiliary Vector
+@cindex auxiliary vector
+
+When a program is executed, it receives information from the operating
+system about the environment in which it is operating.  The form of this
+information is a table of key-value pairs, where the keys are from the
+set of @samp{AT_} values in @file{elf.h}.  Some of the data is provided
+by the kernel for libc consumption, and may be obtained by ordinary
+interfaces, such as @code{sysconf}.  However, on a platform-by-platform
+basis there may be information that is not available any other way.
+
+@subsection Definition of @code{getauxval}
+@comment sys/auxv.h
+@deftypefun {unsigned long int} getauxval (unsigned long int @var{type})
+This function is used to inquire about the entries in the auxiliary
+vector.  The @var{type} argument should be one of the @samp{AT_} symbols
+defined in @file{elf.h}.  If a matching entry is found, the value is
+returned; if the entry is not found, zero is returned.
+@end deftypefun
+
+For some platforms, the key @code{AT_HWCAP} is the easiest way to inquire
+about any instruction set extensions available at runtime.  In this case,
+there will (of necessity) be a platform-specific set of @samp{HWCAP_}
+values masked together that describe the capabilities of the cpu on which
+the program is being executed.
 
 @node System Calls
 @section System Calls

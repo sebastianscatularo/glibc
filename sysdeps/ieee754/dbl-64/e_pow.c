@@ -47,6 +47,7 @@
 # define SECTION
 #endif
 
+static const double huge = 1.0e300, tiny = 1.0e-300;
 
 double __exp1(double x, double xx, double error);
 static double log1(double x, double *delta, double *error);
@@ -111,12 +112,12 @@ __ieee754_pow(double x, double y) {
     if (((v.i[HIGH_HALF] & 0x7fffffff) == 0x7ff00000 && v.i[LOW_HALF] != 0)
 	|| (v.i[HIGH_HALF] & 0x7fffffff) > 0x7ff00000)
       return y;
-    if (ABS(y) > 1.0e20) return (y>0)?0:1.0/ABS(x);
+    if (ABS(y) > 1.0e20) return (y>0)?0:1.0/0.0;
     k = checkint(y);
     if (k == -1)
       return y < 0 ? 1.0/x : x;
     else
-      return y < 0 ? 1.0/ABS(x) : 0.0;                               /* return 0 */
+      return y < 0 ? 1.0/0.0 : 0.0;                               /* return 0 */
   }
 
   qx = u.i[HIGH_HALF]&0x7fffffff;  /*   no sign   */
@@ -156,8 +157,8 @@ __ieee754_pow(double x, double y) {
 
   if (qy > 0x45f00000 && qy < 0x7ff00000) {
     if (x == 1.0) return 1.0;
-    if (y>0) return (x>1.0)?INF.x:0;
-    if (y<0) return (x<1.0)?INF.x:0;
+    if (y>0) return (x>1.0)?huge*huge:tiny*tiny;
+    if (y<0) return (x<1.0)?huge*huge:tiny*tiny;
   }
 
   if (x == 1.0) return 1.0;

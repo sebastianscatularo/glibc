@@ -1,5 +1,5 @@
 /* Run-time dynamic linker data structures for loaded ELF shared objects.
-   Copyright (C) 1995-2009, 2010, 2011, 2012 Free Software Foundation, Inc.
+   Copyright (C) 1995-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -560,6 +560,9 @@ struct rtld_global_ro
   /* Cached value of `getpagesize ()'.  */
   EXTERN size_t _dl_pagesize;
 
+  /* Do we read from ld.so.cache?  */
+  EXTERN int _dl_inhibit_cache;
+
   /* Copy of the content of `_dl_main_searchlist' at startup time.  */
   EXTERN struct r_scope_elem _dl_initial_searchlist;
 
@@ -593,6 +596,9 @@ struct rtld_global_ro
 
   /* Mask for important hardware capabilities we honour. */
   EXTERN uint64_t _dl_hwcap_mask;
+
+  /* Pointer to the auxv list supplied to the program at startup.  */
+  EXTERN ElfW(auxv_t) *_dl_auxv;
 
   /* Get architecture specific definitions.  */
 #define PROCINFO_DECL
@@ -714,7 +720,11 @@ rtld_hidden_proto (_dl_make_stack_executable)
    might use the variable which results in copy relocations on some
    platforms.  But this does not matter, ld.so can always use the local
    copy.  */
-extern void *__libc_stack_end attribute_relro;
+extern void *__libc_stack_end
+#ifndef LIBC_STACK_END_NOT_RELRO
+     attribute_relro
+#endif
+     ;
 rtld_hidden_proto (__libc_stack_end)
 
 /* Parameters passed to the dynamic linker.  */
