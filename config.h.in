@@ -1,4 +1,5 @@
-#if !defined __ASSEMBLER__ && !defined _ISOMAC && !defined __OPTIMIZE__
+#if !defined IS_IN_build && !defined __ASSEMBLER__ && !defined _ISOMAC \
+    && !defined __OPTIMIZE__
 # error "glibc cannot be compiled without optimization"
 #endif
 
@@ -177,6 +178,13 @@
 /* Define if `.ctors' and `.dtors' sections shouldn't be used.  */
 #undef	NO_CTORS_DTORS_SECTIONS
 
+/* Define if obsolete RPC code should be made available for user-level code
+   to link against.  */
+#undef LINK_OBSOLETE_RPC
+
+/* Define if Systemtap <sys/sdt.h> probes should be defined.  */
+#undef USE_STAP_PROBE
+
 /*
  */
 
@@ -216,5 +224,8 @@
 /* The locale code needs these definitions.  */
 
 #define HAVE_REGEX 1
+
+/* The ARM hard-float ABI is being used.  */
+#undef HAVE_ARM_PCS_VFP
 
 #endif
