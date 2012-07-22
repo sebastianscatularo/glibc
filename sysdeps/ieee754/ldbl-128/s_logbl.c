@@ -26,16 +26,29 @@ static char rcsid[] = "$NetBSD: $";
 #include <math.h>
 #include <math_private.h>
 
-long double __logbl(long double x)
+long double
+__logbl (long double x)
 {
-	int64_t lx,hx;
-	GET_LDOUBLE_WORDS64(hx,lx,x);
-	hx &= 0x7fffffffffffffffLL;		/* high |x| */
-	if((hx|lx)==0) return -1.0/fabs(x);
-	if(hx>=0x7fff000000000000LL) return x*x;
-	if((hx>>=48)==0) 			/* IEEE 754 logb */
-		return -16382.0;
-	else
-		return (long double) (hx-0x3fff);
+  int64_t lx, hx, ex;
+
+  GET_LDOUBLE_WORDS64 (hx, lx, x);
+  hx &= 0x7fffffffffffffffLL;	/* high |x| */
+  if ((hx | lx) == 0)
+    return -1.0 / fabs (x);
+  if (hx >= 0x7fff000000000000LL)
+    return x * x;
+  if ((ex = hx >> 48) == 0)	/* IEEE 754 logb */
+    {
+      /* POSIX specifies that denormal number is treated as
+         though it were normalized.  */
+      int ma;
+      if (hx == 0)
+	ma = __builtin_clzll (lx) + 64;
+      else
+	ma = __builtin_clzll (hx);
+      ex -= ma - 16;
+    }
+  return (long double) (ex - 16383);
 }
+
 weak_alias (__logbl, logbl)
