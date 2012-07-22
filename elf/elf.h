@@ -1327,6 +1327,7 @@ typedef struct
 #define R_SPARC_H34		85
 #define R_SPARC_SIZE32		86
 #define R_SPARC_SIZE64		87
+#define R_SPARC_WDISP10		88
 #define R_SPARC_JMP_IREL	248
 #define R_SPARC_IRELATIVE	249
 #define R_SPARC_GNU_VTINHERIT	250
@@ -2702,8 +2703,9 @@ typedef Elf32_Addr Elf32_Conflict;
 					   descriptor.  */
 #define R_X86_64_TLSDESC        36	/* TLS descriptor.  */
 #define R_X86_64_IRELATIVE	37	/* Adjust indirectly by program base */
+#define R_X86_64_RELATIVE64	38	/* 64-bit adjust by program base */
 
-#define R_X86_64_NUM		38
+#define R_X86_64_NUM		39
 
 
 /* AM33 relocations.  */

@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2011, 2012   Free Software Foundation, Inc.
+/* Copyright (C) 1991-2012   Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -67,10 +67,10 @@
   do {									      \
     unsigned int _val = val;						      \
     assert ((unsigned int) done < (unsigned int) INT_MAX);		      \
-    if (__builtin_expect ((unsigned int) INT_MAX - (unsigned int) done	      \
-			  < _val, 0))					      \
+    if (__builtin_expect (INT_MAX - done < _val, 0))			      \
       {									      \
 	done = -1;							      \
+	 __set_errno (EOVERFLOW);					      \
 	goto all_done;							      \
       }									      \
     done += _val;							      \
@@ -88,7 +88,7 @@
 # define PUT(F, S, N)	_IO_sputn ((F), (S), (N))
 # define PAD(Padchar) \
   if (width > 0)							      \
-    done_add (INTUSE(_IO_padn) (s, (Padchar), width))
+    done_add (_IO_padn (s, (Padchar), width))
 # define PUTC(C, F)	_IO_putc_unlocked (C, F)
 # define ORIENT		if (_IO_vtable_offset (s) == 0 && _IO_fwide (s, -1) != -1)\
 			  return -1
@@ -141,12 +141,17 @@
   do									      \
     {									      \
       assert ((size_t) done <= (size_t) INT_MAX);			      \
-      if ((size_t) PUT (s, (String), (Len)) != (size_t) (Len)		      \
-	  || (size_t) INT_MAX - (size_t) done < (size_t) (Len))		      \
+      if ((size_t) PUT (s, (String), (Len)) != (size_t) (Len))		      \
 	{								      \
 	  done = -1;							      \
 	  goto all_done;						      \
 	}								      \
+      if (__builtin_expect (INT_MAX - done < (Len), 0))			      \
+      {									      \
+	done = -1;							      \
+	 __set_errno (EOVERFLOW);					      \
+	goto all_done;							      \
+      }									      \
       done += (Len);							      \
     }									      \
   while (0)
@@ -1435,10 +1440,21 @@ vfprintf (FILE *s, const CHAR_T *format, va_list ap)
 	const UCHAR_T *tmp;	/* Temporary value.  */
 
 	tmp = ++f;
-	if (ISDIGIT (*tmp) && read_int (&tmp) && *tmp == L_('$'))
-	  /* The width comes from a positional parameter.  */
-	  goto do_positional;
+	if (ISDIGIT (*tmp))
+	  {
+	    int pos = read_int (&tmp);
 
+	    if (pos == -1)
+	      {
+		__set_errno (EOVERFLOW);
+		done = -1;
+		goto all_done;
+	      }
+
+	    if (pos && *tmp == L_('$'))
+	      /* The width comes from a positional parameter.  */
+	      goto do_positional;
+	  }
 	width = va_arg (ap, int);
 
 	/* Negative width means left justified.  */
@@ -1449,9 +1465,9 @@ vfprintf (FILE *s, const CHAR_T *format, va_list ap)
 	    left = 1;
 	  }
 
-	if (__builtin_expect (width >= (size_t) -1 / sizeof (CHAR_T) - 32, 0))
+	if (__builtin_expect (width >= INT_MAX / sizeof (CHAR_T) - 32, 0))
 	  {
-	    __set_errno (ERANGE);
+	    __set_errno (EOVERFLOW);
 	    done = -1;
 	    goto all_done;
 	  }
@@ -1481,9 +1497,10 @@ vfprintf (FILE *s, const CHAR_T *format, va_list ap)
     LABEL (width):
       width = read_int (&f);
 
-      if (__builtin_expect (width >= (size_t) -1 / sizeof (CHAR_T) - 32, 0))
+      if (__builtin_expect (width == -1
+			    || width >= INT_MAX / sizeof (CHAR_T) - 32, 0))
 	{
-	  __set_errno (ERANGE);
+	  __set_errno (EOVERFLOW);
 	  done = -1;
 	  goto all_done;
 	}
@@ -1518,10 +1535,21 @@ vfprintf (FILE *s, const CHAR_T *format, va_list ap)
 	  const UCHAR_T *tmp;	/* Temporary value.  */
 
 	  tmp = ++f;
-	  if (ISDIGIT (*tmp) && read_int (&tmp) > 0 && *tmp == L_('$'))
-	    /* The precision comes from a positional parameter.  */
-	    goto do_positional;
+	  if (ISDIGIT (*tmp))
+	    {
+	      int pos = read_int (&tmp);
 
+	      if (pos == -1)
+		{
+		  __set_errno (EOVERFLOW);
+		  done = -1;
+		  goto all_done;
+		}
+
+	      if (pos && *tmp == L_('$'))
+		/* The precision comes from a positional parameter.  */
+		goto do_positional;
+	    }
 	  prec = va_arg (ap, int);
 
 	  /* If the precision is negative the precision is omitted.  */
@@ -1529,15 +1557,26 @@ vfprintf (FILE *s, const CHAR_T *format, va_list ap)
 	    prec = -1;
 	}
       else if (ISDIGIT (*f))
-	prec = read_int (&f);
+	{
+	  prec = read_int (&f);
+
+	  /* The precision was specified in this case as an extremely
+	     large positive value.  */
+	  if (prec == -1)
+	    {
+	      __set_errno (EOVERFLOW);
+	      done = -1;
+	      goto all_done;
+	    }
+	}
       else
 	prec = 0;
       if (prec > width
 	  && prec > sizeof (work_buffer) / sizeof (work_buffer[0]) - 32)
 	{
-	  if (__builtin_expect (prec >= (size_t) -1 / sizeof (CHAR_T) - 32, 0))
+	  if (__builtin_expect (prec >= INT_MAX / sizeof (CHAR_T) - 32, 0))
 	    {
-	      __set_errno (ERANGE);
+	      __set_errno (EOVERFLOW);
 	      done = -1;
 	      goto all_done;
 	    }
@@ -1710,9 +1749,9 @@ do_positional:
 		     + sizeof (*args_type));
 
     /* Check for potential integer overflow.  */
-    if (__builtin_expect (nargs > SIZE_MAX / bytes_per_arg, 0))
+    if (__builtin_expect (nargs > INT_MAX / bytes_per_arg, 0))
       {
-	 __set_errno (ERANGE);
+	 __set_errno (EOVERFLOW);
 	 done = -1;
 	 goto all_done;
       }
@@ -2188,18 +2227,18 @@ _IO_helper_overflow (_IO_FILE *s, int c)
 static const struct _IO_jump_t _IO_helper_jumps =
 {
   JUMP_INIT_DUMMY,
-  JUMP_INIT (finish, INTUSE(_IO_wdefault_finish)),
+  JUMP_INIT (finish, _IO_wdefault_finish),
   JUMP_INIT (overflow, _IO_helper_overflow),
   JUMP_INIT (underflow, _IO_default_underflow),
-  JUMP_INIT (uflow, INTUSE(_IO_default_uflow)),
-  JUMP_INIT (pbackfail, (_IO_pbackfail_t) INTUSE(_IO_wdefault_pbackfail)),
-  JUMP_INIT (xsputn, INTUSE(_IO_wdefault_xsputn)),
-  JUMP_INIT (xsgetn, INTUSE(_IO_wdefault_xsgetn)),
+  JUMP_INIT (uflow, _IO_default_uflow),
+  JUMP_INIT (pbackfail, (_IO_pbackfail_t) _IO_wdefault_pbackfail),
+  JUMP_INIT (xsputn, _IO_wdefault_xsputn),
+  JUMP_INIT (xsgetn, _IO_wdefault_xsgetn),
   JUMP_INIT (seekoff, _IO_default_seekoff),
   JUMP_INIT (seekpos, _IO_default_seekpos),
   JUMP_INIT (setbuf, _IO_default_setbuf),
   JUMP_INIT (sync, _IO_default_sync),
-  JUMP_INIT (doallocate, INTUSE(_IO_wdefault_doallocate)),
+  JUMP_INIT (doallocate, _IO_wdefault_doallocate),
   JUMP_INIT (read, _IO_default_read),
   JUMP_INIT (write, _IO_default_write),
   JUMP_INIT (seek, _IO_default_seek),
@@ -2210,18 +2249,18 @@ static const struct _IO_jump_t _IO_helper_jumps =
 static const struct _IO_jump_t _IO_helper_jumps =
 {
   JUMP_INIT_DUMMY,
-  JUMP_INIT (finish, INTUSE(_IO_default_finish)),
+  JUMP_INIT (finish, _IO_default_finish),
   JUMP_INIT (overflow, _IO_helper_overflow),
   JUMP_INIT (underflow, _IO_default_underflow),
-  JUMP_INIT (uflow, INTUSE(_IO_default_uflow)),
-  JUMP_INIT (pbackfail, INTUSE(_IO_default_pbackfail)),
-  JUMP_INIT (xsputn, INTUSE(_IO_default_xsputn)),
-  JUMP_INIT (xsgetn, INTUSE(_IO_default_xsgetn)),
+  JUMP_INIT (uflow, _IO_default_uflow),
+  JUMP_INIT (pbackfail, _IO_default_pbackfail),
+  JUMP_INIT (xsputn, _IO_default_xsputn),
+  JUMP_INIT (xsgetn, _IO_default_xsgetn),
   JUMP_INIT (seekoff, _IO_default_seekoff),
   JUMP_INIT (seekpos, _IO_default_seekpos),
   JUMP_INIT (setbuf, _IO_default_setbuf),
   JUMP_INIT (sync, _IO_default_sync),
-  JUMP_INIT (doallocate, INTUSE(_IO_default_doallocate)),
+  JUMP_INIT (doallocate, _IO_default_doallocate),
   JUMP_INIT (read, _IO_default_read),
   JUMP_INIT (write, _IO_default_write),
   JUMP_INIT (seek, _IO_default_seek),
@@ -2267,7 +2306,7 @@ buffered_vfprintf (register _IO_FILE *s, const CHAR_T *format,
 
   /* Now print to helper instead.  */
 #ifndef COMPILE_WPRINTF
-  result = INTUSE(_IO_vfprintf) (hp, format, args);
+  result = _IO_vfprintf (hp, format, args);
 #else
   result = vfprintf (hp, format, args);
 #endif
@@ -2308,4 +2347,5 @@ ldbl_weak_alias (_IO_vfwprintf, vfwprintf);
 ldbl_strong_alias (_IO_vfprintf_internal, vfprintf);
 ldbl_hidden_def (_IO_vfprintf_internal, vfprintf)
 ldbl_strong_alias (_IO_vfprintf_internal, _IO_vfprintf);
+ldbl_hidden_def (_IO_vfprintf_internal, _IO_vfprintf)
 #endif
