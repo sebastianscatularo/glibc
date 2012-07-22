@@ -1,6 +1,7 @@
-constant HUGE_VAL
+macro-constant HUGE_VAL {double}
 
 #if !defined ISO && !defined POSIX
+# if !defined XPG3 && !defined XPG4 && !defined UNIX98
 macro fpclassify
 macro isfinite
 macro isinf
@@ -13,6 +14,12 @@ macro isless
 macro islessequal
 macro islessgreater
 macro isunordered
+type float_t
+type double_t
+# endif
+# if defined XPG3 || defined XPG4 || defined UNIX98
+function double isnan (double)
+# endif
 
 # if !defined ISO99 && !defined ISO11 && !defined POSIX2008
 constant M_E
@@ -31,29 +38,29 @@ constant M_SQRT1_2
 
 constant MAXFLOAT
 # endif
-constant HUGE_VALF
-constant HUGE_VALL
-constant INFINITY
-constant NAN
-
-macro FP_INFINITE
-macro FP_NAN
-macro FP_NORMAL
-macro FP_SUBNORMAL
-macro FP_ZERO
-
-optional-macro FP_FAST_FMA
-optional-macro FP_FAST_FMAF
-optional-macro FP_FAST_FMAL
-
-constant FP_ILOGB0
-constant FP_ILOGBNAN
-
 # if !defined XPG3 && !defined XPG4 && !defined UNIX98
-macro MATH_ERRNO == 1
-macro MATH_ERREXCEPT == 2
+macro-constant HUGE_VALF {float}
+macro-constant HUGE_VALL {long double}
+macro-constant INFINITY {float}
+macro-constant NAN {float}
 
-macro math_errhandling
+macro-int-constant FP_INFINITE
+macro-int-constant FP_NAN
+macro-int-constant FP_NORMAL
+macro-int-constant FP_SUBNORMAL
+macro-int-constant FP_ZERO
+
+optional-macro-int-constant FP_FAST_FMA {int} == 1
+optional-macro-int-constant FP_FAST_FMAF {int} == 1
+optional-macro-int-constant FP_FAST_FMAL {int} == 1
+
+macro-int-constant FP_ILOGB0
+macro-int-constant FP_ILOGBNAN
+
+macro-int-constant MATH_ERRNO {int} == 1
+macro-int-constant MATH_ERREXCEPT {int} == 2
+
+macro math_errhandling {int}
 # endif
 #endif
 
@@ -62,13 +69,13 @@ function double asin (double)
 function double atan (double)
 function double atan2 (double, double)
 function double ceil (double)
-#if !defined ISO && !defined POSIX
+#if !defined ISO && !defined POSIX && !defined XPG3 && !defined XPG4 && !defined UNIX98
 function double copysign (double, double)
 #endif
 function double cos (double)
 function double cosh (double)
 function double exp (double)
-#if !defined ISO && !defined POSIX
+#if !defined ISO && !defined POSIX && !defined XPG3 && !defined XPG4 && !defined UNIX98
 function double exp2 (double)
 #endif
 function double fabs (double)
@@ -78,7 +85,7 @@ function double frexp (double, int*)
 function double ldexp (double, int)
 function double log (double)
 function double log10 (double)
-#if !defined ISO && !defined POSIX
+#if !defined ISO && !defined POSIX && !defined XPG3 && !defined XPG4 && !defined UNIX98
 function double log2 (double)
 #endif
 function double modf (double, double*)
@@ -103,12 +110,15 @@ function double j1 (double)
 function double jn (int, double)
 # endif
 function double lgamma (double)
+# if !defined XPG3 && !defined XPG4 && !defined UNIX98
 function double tgamma (double)
+# endif
 # if !defined ISO99 && !defined ISO11 && !defined POSIX && !defined POSIX2008
 function double y0 (double)
 function double y1 (double)
 function double yn (int, double)
 # endif
+# if !defined XPG3
 function double acosh (double)
 function double asinh (double)
 function double atanh (double)
@@ -118,10 +128,13 @@ function int ilogb (double)
 function double log1p (double)
 function double logb (double)
 function double nextafter (double, double)
+#  if !defined XPG4 && !defined UNIX98
 function double nexttoward (double, long double)
 function double nearbyint (double)
+#  endif
 function double remainder (double, double)
 function double rint (double)
+#  if !defined XPG4 && !defined UNIX98
 function double round (double)
 function double trunc (double)
 function long lrint (double)
@@ -129,9 +142,11 @@ function {long long} llrint (double)
 function long lround (double)
 function {long long} llround (double)
 function double remquo (double, double, int*)
-# if defined XPG3 && defined XPG4 && defined UNIX98 && defined XOPEN2K
+#  endif
+#  if defined XPG4 || defined UNIX98 || defined XOPEN2K
 function double scalb (double, double)
-# endif
+#  endif
+#  if !defined XPG4 && !defined UNIX98
 function double scalbn (double, int)
 function double scalbln (double, long)
 function double fdim (double, double)
@@ -139,14 +154,16 @@ function double fmax (double, double)
 function double fmin (double, double)
 function double fma (double, double, double)
 function double nan (const char*)
+#  endif
+# endif
 
-# if !defined POSIX && !defined POSIX2008
+# if !defined ISO99 && !defined ISO11 && !defined POSIX && !defined POSIX2008
 // variable signgam
 allow signgam
 # endif
 #endif
 
-#if !defined ISO && !defined POSIX
+#if !defined ISO && !defined POSIX && !defined XPG3 && !defined XPG4 && !defined UNIX98
 function float acosf (float)
 function float asinf (float)
 function float atanf (float)
@@ -174,9 +191,6 @@ function float tanf (float)
 function float tanhf (float)
 function float erff (float)
 function float erfcf (float)
-#if defined XPG3 || defined XPG4 || defined UNIX98
-function float gammaf (float)
-#endif
 function float hypotf (float, float)
 #if !defined ISO99 && !defined ISO11 && !defined POSIX && !defined POSIX2008
 function float j0f (float)
@@ -210,9 +224,6 @@ function {long long} llrintf (float)
 function long lroundf (float)
 function {long long} llroundf (float)
 function float remquof (float, float, int*)
-#if defined XPG3 && defined XPG4 && defined UNIX98 && defined XOPEN2K
-function float scalbf (float, float)
-#endif
 function float scalbnf (float, int)
 function float scalblnf (float, long)
 function float fdimf (float, float)
@@ -248,9 +259,6 @@ function {long double} tanl (long double)
 function {long double} tanhl (long double)
 function {long double} erfl (long double)
 function {long double} erfcl (long double)
-#if defined XPG3 || defined XPG4 || defined UNIX98
-function {long double} gammal (long double)
-#endif
 function {long double} hypotl (long double, long double)
 #if !defined ISO99 && !defined ISO11 && !defined POSIX && !defined POSIX2008
 function {long double} j0l (long double)
@@ -284,9 +292,6 @@ function {long long} llrintl (long double)
 function long lroundl (long double)
 function {long long} llroundl (long double)
 function {long double} remquol (long double, long double, int*)
-#if defined XPG3 && defined XPG4 && defined UNIX98 && defined XOPEN2K
-function {long double} scalbl (long double, long double)
-#endif
 function {long double} scalbnl (long double, int)
 function {long double} scalblnl (long double, long)
 function {long double} fdiml (long double, long double)
@@ -300,11 +305,9 @@ allow asinf
 allow atanf
 allow atan2f
 allow ceilf
-allow copysignf
 allow cosf
 allow coshf
 allow expf
-allow exp2f
 allow fabsf
 allow floorf
 allow fmodf
@@ -312,49 +315,22 @@ allow frexpf
 allow ldexpf
 allow logf
 allow log10f
-allow log2f
+allow modff
 allow powf
 allow sinf
 allow sinhf
 allow sqrtf
 allow tanf
 allow tanhf
-allow erff
-allow erfcf
-allow gammaf
-allow hypotf
-allow j0f
-allow j1f
-allow jnf
-allow lgammaf
-allow tgammaf
-allow y0f
-allow y1f
-allow ynf
-allow isnanf
-allow acoshf
-allow asinhf
-allow atanhf
-allow cbrtf
-allow expm1f
-allow ilogbf
-allow log1pf
-allow logbf
-allow nextafterf
-allow remainderf
-allow rintf
-allow scalbf
 
 allow acosl
 allow asinl
 allow atanl
 allow atan2l
 allow ceill
-allow copysignl
 allow cosl
 allow coshl
 allow expl
-allow exp2l
 allow fabsl
 allow floorl
 allow fmodl
@@ -362,41 +338,18 @@ allow frexpl
 allow ldexpl
 allow logl
 allow log10l
-allow log2l
+allow modfl
 allow powl
 allow sinl
 allow sinhl
 allow sqrtl
 allow tanl
 allow tanhl
-allow erfl
-allow erfcl
-allow gammal
-allow hypotl
-allow j0l
-allow j1l
-allow jnl
-allow lgammal
-allow tgammal
-allow y0l
-allow y1l
-allow ynl
-allow isnanl
-allow acoshl
-allow asinhl
-allow atanhl
-allow cbrtl
-allow expm1l
-allow ilogbl
-allow log1pl
-allow logbl
-allow nextafterl
-allow remainderl
-allow rintl
-allow scalbl
 #endif
 
+#if !defined ISO && !defined ISO99 && !defined ISO11
 allow *_t
-// The following expressions are not entirely correct but the current
-// poorfnmatch implementation doesn't grok the right form.
-allow FP_*
+#endif
+#if !defined ISO && !defined POSIX && !defined XPG3 && !defined XPG4 && !defined UNIX98
+allow FP_[ABCDEFGHIJKLMNOPQRSTUVWXYZ]*
+#endif

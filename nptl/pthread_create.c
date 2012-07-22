@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2007,2008,2009,2010,2011 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@redhat.com>, 2002.
 
@@ -30,6 +30,8 @@
 #include <kernel-features.h>
 
 #include <shlib-compat.h>
+
+#include <stap-probe.h>
 
 
 /* Local function to start thread and handle cleanup.  */
@@ -299,6 +301,8 @@ start_thread (void *arg)
 	  CANCEL_RESET (oldtype);
 	}
 
+      LIBC_PROBE (pthread_start, 3, (pthread_t) pd, pd->start_routine, pd->arg);
+
       /* Run the code the user provided.  */
 #ifdef CALL_THREAD_FCT
       THREAD_SETMEM (pd, result, CALL_THREAD_FCT (pd));
@@ -355,7 +359,7 @@ start_thread (void *arg)
 
 #ifndef __ASSUME_SET_ROBUST_LIST
   /* If this thread has any robust mutexes locked, handle them now.  */
-# if __WORDSIZE == 64
+# ifdef __PTHREAD_MUTEX_HAVE_PREV
   void *robust = pd->robust_head.list;
 # else
   __pthread_slist_t *robust = pd->robust_list.__next;
@@ -555,6 +559,8 @@ __pthread_create_2_1 (newthread, attr, start_routine, arg)
 
   /* Pass the descriptor to the caller.  */
   *newthread = (pthread_t) pd;
+
+  LIBC_PROBE (pthread_create, 4, newthread, attr, start_routine, arg);
 
   /* Start the thread.  */
   return create_thread (pd, iattr, STACK_VARIABLES_ARGS);
