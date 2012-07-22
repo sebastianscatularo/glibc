@@ -39,3 +39,4 @@ t/hurdsig-fixes-2
 t/hurdsig-global-dispositions-versions
 t/hooks
 t/libpthread_depends
+t/sendmmsg
