@@ -65,11 +65,11 @@ freopen (filename, mode, fp)
   else
 #endif
     {
-      INTUSE(_IO_file_close_it) (fp);
+      _IO_file_close_it (fp);
       _IO_JUMPS ((struct _IO_FILE_plus *) fp) = &_IO_file_jumps;
       if (_IO_vtable_offset (fp) == 0 && fp->_wide_data != NULL)
 	fp->_wide_data->_wide_vtable = &_IO_wfile_jumps;
-      result = INTUSE(_IO_file_fopen) (fp, gfilename, mode, 1);
+      result = _IO_file_fopen (fp, gfilename, mode, 1);
       if (result != NULL)
 	result = __fopen_maybe_mmap (result);
     }
@@ -89,9 +89,9 @@ freopen (filename, mode, fp)
 	  else
 	    newfd =
 # endif
-	      dup3 (_IO_fileno (result), fd,
-		    (result->_flags2 & _IO_FLAGS2_CLOEXEC) != 0
-		    ? O_CLOEXEC : 0);
+	      __dup3 (_IO_fileno (result), fd,
+                      (result->_flags2 & _IO_FLAGS2_CLOEXEC) != 0
+                      ? O_CLOEXEC : 0);
 #else
 # define newfd 1
 #endif
