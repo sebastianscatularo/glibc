@@ -1,3 +1,77 @@
+2012-06-20  Petr Baudis  <pasky@ucw.cz>
+
+	* locales/mag_IN: Fix comment character.
+	* locales/tr_CY (LC_TIME): Remove redundant first_weekday
+	and first_workday.
+
+2012-06-04  Petr Baudis  <pasky@ucw.cz>
+
+	[BZ#13996]
+	* locales/tr_TR: Change currency from YTL to TL.
+	Patch by <gokcen@pardus.org.tr>.
+
+2012-06-04  Serkan Kaba  <serkan@gentoo.org>
+
+	[BZ#13223]
+	* locales/tr_TR: Fix first_weekday and first_workday.
+
+2012-06-01  Jeff Law  <law@redhat.com>
+
+	[BZ#14199]
+	* locales/en_ES: Fix first_weekday and first_workday.
+	* locales/{ast_ES, br_FR, cy_GB, de_DE, de_LU}: Likewise.
+	* locales/{el_GR, en_IE, eu_ES, fr_LU, fy_NL}: Likewise.
+	* locales/{ga_IE, gd_GB, gl_ES, gv_GB, it_IT}: Likewise.
+	* locales/{kw_GB, lij_IT, lt_LT, lv_LV, mt_MT}: Likewise.
+	* locales/{nl_BE, oc_FR, tr_CY, wa_BE}: Likewise.
+
+2012-04-20  Chandan Kumar  <chandankumar.093047@gmail.com>
+
+	[BZ#13968]
+	* locales/mag_IN: New file.
+	* SUPPORTED (SUPPORTED-LOCALES): Add appropriate entry.
+
+2012-05-21  Bruno Haible  <bruno@clisp.org>
+	    Andreas Jaeger  <aj@suse.de>
+
+	* SUPPORTED: Remove vi_VN.TCVN/TCVN5712-1.
+	* tst-strptime.c: Remove, we do not support vi_VN.TCVN5712-1
+	anymore.
+	* Makefile (LOCALES): Remove vi_VN.TCVN5712-1 from list.
+	(tests): Remove tst-strptime.
+
+2012-05-11  Andreas Schwab  <schwab@linux-m68k.org>
+
+	[BZ #11837]
+	* charmaps/GB18030: Add missing entries.
+
+2012-04-29  Aurelien Jarno  <aurelien@aurel32.net>
+
+	[BZ #13758]
+	* locales/de_AT (LC_TIME): Change month name from "Feber" to
+	"Februar".
+
+2012-04-12  Mike Frysinger  <vapier@gentoo.org>
+
+        [BZ #3768]
+	* locales/en_GB (LC_TIME): Set am_pm and t_fmt_ampm fields.
+	* locales/cy_GB (LC_TIME): Likewise.  Also copy date_fmt from en_GB.
+
+2012-04-04  Jeff Law  <law@redhat.com>
+
+	[BZ #6770]
+	* locales/ca_ES (LC_TIME): Add first_weekday and first_workday.
+
+2012-04-04  Petr Baudis  <pasky@ucw.cz>
+
+	[BZ #6770]
+	* locales/ca_ES: This locale is now maintained by Jordi Mallach.
+
+2012-04-04  Dmitry V. Levin  <ldv@altlinux.org>
+
+	[BZ #10346]
+	* locales/ru_UA (LC_TIME): Add first_weekday and first_workday.
+
 2012-03-09  Paul Eggert  <eggert@cs.ucla.edu>
 
 	[BZ #13673]
