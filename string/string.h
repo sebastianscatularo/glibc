@@ -1,5 +1,4 @@
-/* Copyright (C) 1991-1993,1995-2004,2007,2009,2010,2012
-   Free Software Foundation, Inc.
+/* Copyright (C) 1991-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -433,7 +432,7 @@ extern int __xpg_strerror_r (int __errnum, char *__buf, size_t __buflen)
 /* If a temporary buffer is required, at most BUFLEN bytes of BUF will be
    used.  */
 extern char *strerror_r (int __errnum, char *__buf, size_t __buflen)
-     __THROW __nonnull ((2));
+     __THROW __nonnull ((2)) __wur;
 # endif
 #endif
 
@@ -634,7 +633,7 @@ extern char *basename (const char *__filename) __THROW __nonnull ((1));
 #  include <bits/string2.h>
 # endif
 
-# if __USE_FORTIFY_LEVEL > 0 && defined __extern_always_inline
+# if __USE_FORTIFY_LEVEL > 0 && defined __fortify_function
 /* Functions with security checks.  */
 #  include <bits/string3.h>
 # endif
