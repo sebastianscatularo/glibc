@@ -78,8 +78,8 @@
    against.  These implemented tests should check all cases that are
    specified in ISO C99.
 
-   Exception testing: At the moment only divide-by-zero, invalid and
-   overflow exceptions are tested.  Underflow and inexact exceptions
+   Exception testing: At the moment only divide-by-zero, invalid,
+   overflow and underflow exceptions are tested.  Inexact exceptions
    aren't checked at the moment.
 
    NaN values: There exist signalling and quiet NaNs.  This implementation
@@ -128,18 +128,60 @@
 #include <string.h>
 #include <argp.h>
 
+/* Allow platforms without all rounding modes to test properly,
+   assuming they provide an __FE_UNDEFINED in <bits/fenv.h> which
+   causes fesetround() to return failure.  */
+#ifndef FE_TONEAREST
+# define FE_TONEAREST	__FE_UNDEFINED
+#endif
+#ifndef FE_TOWARDZERO
+# define FE_TOWARDZERO	__FE_UNDEFINED
+#endif
+#ifndef FE_UPWARD
+# define FE_UPWARD	__FE_UNDEFINED
+#endif
+#ifndef FE_DOWNWARD
+# define FE_DOWNWARD	__FE_UNDEFINED
+#endif
+
 /* Possible exceptions */
 #define NO_EXCEPTION			0x0
 #define INVALID_EXCEPTION		0x1
 #define DIVIDE_BY_ZERO_EXCEPTION	0x2
 #define OVERFLOW_EXCEPTION		0x4
+#define UNDERFLOW_EXCEPTION		0x8
 /* The next flags signals that those exceptions are allowed but not required.   */
-#define INVALID_EXCEPTION_OK		0x8
-#define DIVIDE_BY_ZERO_EXCEPTION_OK	0x10
-#define OVERFLOW_EXCEPTION_OK		0x20
+#define INVALID_EXCEPTION_OK		0x10
+#define DIVIDE_BY_ZERO_EXCEPTION_OK	0x20
+#define OVERFLOW_EXCEPTION_OK		0x40
+#define UNDERFLOW_EXCEPTION_OK		0x80
 #define EXCEPTIONS_OK INVALID_EXCEPTION_OK+DIVIDE_BY_ZERO_EXCEPTION_OK
-/* Some special test flags, passed togther with exceptions.  */
-#define IGNORE_ZERO_INF_SIGN		0x40
+/* Some special test flags, passed together with exceptions.  */
+#define IGNORE_ZERO_INF_SIGN		0x100
+
+/* Values underflowing only for float.  */
+#ifdef TEST_FLOAT
+# define UNDERFLOW_EXCEPTION_FLOAT	UNDERFLOW_EXCEPTION
+# define UNDERFLOW_EXCEPTION_OK_FLOAT	UNDERFLOW_EXCEPTION_OK
+#else
+# define UNDERFLOW_EXCEPTION_FLOAT	0
+# define UNDERFLOW_EXCEPTION_OK_FLOAT	0
+#endif
+/* Values underflowing only for double or types with a larger least
+   positive normal value.  */
+#if defined TEST_FLOAT || defined TEST_DOUBLE \
+  || (defined TEST_LDOUBLE && LDBL_MIN_EXP >= DBL_MIN_EXP)
+# define UNDERFLOW_EXCEPTION_DOUBLE	UNDERFLOW_EXCEPTION
+#else
+# define UNDERFLOW_EXCEPTION_DOUBLE	0
+#endif
+/* Values underflowing only for IBM long double or types with a larger least
+   positive normal value.  */
+#if defined TEST_FLOAT || (defined TEST_LDOUBLE && LDBL_MIN_EXP > DBL_MIN_EXP)
+# define UNDERFLOW_EXCEPTION_LDOUBLE_IBM	UNDERFLOW_EXCEPTION
+#else
+# define UNDERFLOW_EXCEPTION_LDOUBLE_IBM	0
+#endif
 
 /* Various constants (we must supply them precalculated for accuracy).  */
 #define M_PI_6l			.52359877559829887307710723054658383L
@@ -458,6 +500,11 @@ test_exceptions (const char *test_name, int exception)
     test_single_exception (test_name, exception, OVERFLOW_EXCEPTION,
 			   FE_OVERFLOW, "Overflow");
 #endif
+#ifdef FE_UNDERFLOW
+  if ((exception & UNDERFLOW_EXCEPTION_OK) == 0)
+    test_single_exception (test_name, exception, UNDERFLOW_EXCEPTION,
+			   FE_UNDERFLOW, "Underflow");
+#endif
   feclearexcept (FE_ALL_EXCEPT);
 }
 
@@ -503,8 +550,9 @@ check_float_internal (const char *test_name, FLOAT computed, FLOAT expected,
 	  ulp = diff / FUNC(ldexp) (1.0, FUNC(ilogb) (expected) - MANT_DIG);
 	  break;
 	case FP_SUBNORMAL:
-	  ulp = (FUNC(ldexp) (diff, MANT_DIG)
-		 / FUNC(ldexp) (1.0, FUNC(ilogb) (expected)));
+	  /* 1ulp for a subnormal value, shifted by MANT_DIG, is the
+	     least normal value.  */
+	  ulp = (FUNC(ldexp) (diff, MANT_DIG) / min_value);
 	  break;
 	default:
 	  /* It should never happen. */
@@ -758,7 +806,139 @@ acos_test (void)
   TEST_f_f (acos, 0.75L, 0.722734247813415611178377352641333362L);
   TEST_f_f (acos, 2e-17L, 1.57079632679489659923132169163975144L);
   TEST_f_f (acos, 0.0625L, 1.50825556499840522843072005474337068L);
+  TEST_f_f (acos, 0x0.ffffffp0L, 3.4526698471620358760324948263873649728491e-4L);
+  TEST_f_f (acos, -0x0.ffffffp0L, 3.1412473866050770348750401337968641476999L);
+#ifndef TEST_FLOAT
+  TEST_f_f (acos, 0x0.ffffffff8p0L, 1.5258789062648029736620564947844627548516e-5L);
+  TEST_f_f (acos, -0x0.ffffffff8p0L, 3.1415773948007305904329067627145550395696L);
+  TEST_f_f (acos, 0x0.ffffffffffffp0L, 8.4293697021788088529885473244391795127130e-8L);
+  TEST_f_f (acos, -0x0.ffffffffffffp0L, 3.1415925692960962166745548533940296398054L);
+#endif
+#if defined TEST_LDOUBLE && LDBL_MANT_DIG >= 64
+  TEST_f_f (acos, 0x0.ffffffffffffffffp0L, 3.2927225399135962333718255320079907245059e-10L);
+  TEST_f_f (acos, -0x0.ffffffffffffffffp0L, 3.1415926532605209844712837599423203309964L);
+#endif
   END (acos);
+}
+
+
+static void
+acos_test_tonearest (void)
+{
+  int save_round_mode;
+  errno = 0;
+  FUNC(acos) (0);
+  if (errno == ENOSYS)
+    /* Function not implemented.  */
+    return;
+
+  START (acos_tonearest);
+
+  save_round_mode = fegetround ();
+
+  if (!fesetround (FE_TONEAREST))
+    {
+      TEST_f_f (acos, 0, M_PI_2l);
+      TEST_f_f (acos, minus_zero, M_PI_2l);
+      TEST_f_f (acos, 1, 0);
+      TEST_f_f (acos, -1, M_PIl);
+      TEST_f_f (acos, 0.5, M_PI_6l*2.0);
+      TEST_f_f (acos, -0.5, M_PI_6l*4.0);
+    }
+
+  fesetround (save_round_mode);
+
+  END (acos_tonearest);
+}
+
+
+static void
+acos_test_towardzero (void)
+{
+  int save_round_mode;
+  errno = 0;
+  FUNC(acos) (0);
+  if (errno == ENOSYS)
+    /* Function not implemented.  */
+    return;
+
+  START (acos_towardzero);
+
+  save_round_mode = fegetround ();
+
+  if (!fesetround (FE_TOWARDZERO))
+    {
+      TEST_f_f (acos, 0, M_PI_2l);
+      TEST_f_f (acos, minus_zero, M_PI_2l);
+      TEST_f_f (acos, 1, 0);
+      TEST_f_f (acos, -1, M_PIl);
+      TEST_f_f (acos, 0.5, M_PI_6l*2.0);
+      TEST_f_f (acos, -0.5, M_PI_6l*4.0);
+    }
+
+  fesetround (save_round_mode);
+
+  END (acos_towardzero);
+}
+
+
+static void
+acos_test_downward (void)
+{
+  int save_round_mode;
+  errno = 0;
+  FUNC(acos) (0);
+  if (errno == ENOSYS)
+    /* Function not implemented.  */
+    return;
+
+  START (acos_downward);
+
+  save_round_mode = fegetround ();
+
+  if (!fesetround (FE_DOWNWARD))
+    {
+      TEST_f_f (acos, 0, M_PI_2l);
+      TEST_f_f (acos, minus_zero, M_PI_2l);
+      TEST_f_f (acos, 1, 0);
+      TEST_f_f (acos, -1, M_PIl);
+      TEST_f_f (acos, 0.5, M_PI_6l*2.0);
+      TEST_f_f (acos, -0.5, M_PI_6l*4.0);
+    }
+
+  fesetround (save_round_mode);
+
+  END (acos_downward);
+}
+
+
+static void
+acos_test_upward (void)
+{
+  int save_round_mode;
+  errno = 0;
+  FUNC(acos) (0);
+  if (errno == ENOSYS)
+    /* Function not implemented.  */
+    return;
+
+  START (acos_upward);
+
+  save_round_mode = fegetround ();
+
+  if (!fesetround (FE_UPWARD))
+    {
+      TEST_f_f (acos, 0, M_PI_2l);
+      TEST_f_f (acos, minus_zero, M_PI_2l);
+      TEST_f_f (acos, 1, 0);
+      TEST_f_f (acos, -1, M_PIl);
+      TEST_f_f (acos, 0.5, M_PI_6l*2.0);
+      TEST_f_f (acos, -0.5, M_PI_6l*4.0);
+    }
+
+  fesetround (save_round_mode);
+
+  END (acos_upward);
 }
 
 static void
@@ -813,8 +993,140 @@ asin_test (void)
   TEST_f_f (asin, 1.0, M_PI_2l);
   TEST_f_f (asin, -1.0, -M_PI_2l);
   TEST_f_f (asin, 0.75L, 0.848062078981481008052944338998418080L);
+  TEST_f_f (asin, 0x0.ffffffp0L, 1.5704510598101804156437184421571127056013L);
+  TEST_f_f (asin, -0x0.ffffffp0L, -1.5704510598101804156437184421571127056013L);
+#ifndef TEST_FLOAT
+  TEST_f_f (asin, 0x0.ffffffff8p0L, 1.5707810680058339712015850710748035974710L);
+  TEST_f_f (asin, -0x0.ffffffff8p0L, -1.5707810680058339712015850710748035974710L);
+  TEST_f_f (asin, 0x0.ffffffffffffp0L, 1.5707962425011995974432331617542781977068L);
+  TEST_f_f (asin, -0x0.ffffffffffffp0L, -1.5707962425011995974432331617542781977068L);
+#endif
+#if defined TEST_LDOUBLE && LDBL_MANT_DIG >= 64
+  TEST_f_f (asin, 0x0.ffffffffffffffffp0L, 1.5707963264656243652399620683025688888978L);
+  TEST_f_f (asin, -0x0.ffffffffffffffffp0L, -1.5707963264656243652399620683025688888978L);
+#endif
 
   END (asin);
+}
+
+
+static void
+asin_test_tonearest (void)
+{
+  int save_round_mode;
+  errno = 0;
+  FUNC(asin) (0);
+  if (errno == ENOSYS)
+    /* Function not implemented.  */
+    return;
+
+  START (asin_tonearest);
+
+  save_round_mode = fegetround ();
+
+  if (!fesetround (FE_TONEAREST))
+    {
+      TEST_f_f (asin, 0, 0);
+      TEST_f_f (asin, minus_zero, minus_zero);
+      TEST_f_f (asin, 0.5, M_PI_6l);
+      TEST_f_f (asin, -0.5, -M_PI_6l);
+      TEST_f_f (asin, 1.0, M_PI_2l);
+      TEST_f_f (asin, -1.0, -M_PI_2l);
+    }
+
+  fesetround (save_round_mode);
+
+  END (asin_tonearest);
+}
+
+
+static void
+asin_test_towardzero (void)
+{
+  int save_round_mode;
+  errno = 0;
+  FUNC(asin) (0);
+  if (errno == ENOSYS)
+    /* Function not implemented.  */
+    return;
+
+  START (asin_towardzero);
+
+  save_round_mode = fegetround ();
+
+  if (!fesetround (FE_TOWARDZERO))
+    {
+      TEST_f_f (asin, 0, 0);
+      TEST_f_f (asin, minus_zero, minus_zero);
+      TEST_f_f (asin, 0.5, M_PI_6l);
+      TEST_f_f (asin, -0.5, -M_PI_6l);
+      TEST_f_f (asin, 1.0, M_PI_2l);
+      TEST_f_f (asin, -1.0, -M_PI_2l);
+    }
+
+  fesetround (save_round_mode);
+
+  END (asin_towardzero);
+}
+
+
+static void
+asin_test_downward (void)
+{
+  int save_round_mode;
+  errno = 0;
+  FUNC(asin) (0);
+  if (errno == ENOSYS)
+    /* Function not implemented.  */
+    return;
+
+  START (asin_downward);
+
+  save_round_mode = fegetround ();
+
+  if (!fesetround (FE_DOWNWARD))
+    {
+      TEST_f_f (asin, 0, 0);
+      TEST_f_f (asin, minus_zero, minus_zero);
+      TEST_f_f (asin, 0.5, M_PI_6l);
+      TEST_f_f (asin, -0.5, -M_PI_6l);
+      TEST_f_f (asin, 1.0, M_PI_2l);
+      TEST_f_f (asin, -1.0, -M_PI_2l);
+    }
+
+  fesetround (save_round_mode);
+
+  END (asin_downward);
+}
+
+
+static void
+asin_test_upward (void)
+{
+  int save_round_mode;
+  errno = 0;
+  FUNC(asin) (0);
+  if (errno == ENOSYS)
+    /* Function not implemented.  */
+    return;
+
+  START (asin_upward);
+
+  save_round_mode = fegetround ();
+
+  if (!fesetround (FE_UPWARD))
+    {
+      TEST_f_f (asin, 0, 0);
+      TEST_f_f (asin, minus_zero, minus_zero);
+      TEST_f_f (asin, 0.5, M_PI_6l);
+      TEST_f_f (asin, -0.5, -M_PI_6l);
+      TEST_f_f (asin, 1.0, M_PI_2l);
+      TEST_f_f (asin, -1.0, -M_PI_2l);
+    }
+
+  fesetround (save_round_mode);
+
+  END (asin_upward);
 }
 
 static void
@@ -1674,6 +1986,37 @@ ccos_test (void)
   TEST_c_c (ccos, 0.75L, 1.25L, 1.38173873063425888530729933139078645L, -1.09193013555397466170919531722024128L);
   TEST_c_c (ccos, -2, -3, -4.18962569096880723013255501961597373L, -9.10922789375533659797919726277886212L);
 
+  TEST_c_c (ccos, 0.75, 89.5, 2.708024460708609732016532185663087200560e38L, -2.522786001038096774676288412995370563339e38L);
+  TEST_c_c (ccos, 0.75, -89.5, 2.708024460708609732016532185663087200560e38L, 2.522786001038096774676288412995370563339e38L);
+  TEST_c_c (ccos, -0.75, 89.5, 2.708024460708609732016532185663087200560e38L, 2.522786001038096774676288412995370563339e38L);
+  TEST_c_c (ccos, -0.75, -89.5, 2.708024460708609732016532185663087200560e38L, -2.522786001038096774676288412995370563339e38L);
+
+#ifndef TEST_FLOAT
+  TEST_c_c (ccos, 0.75, 710.5, 1.347490911916428129246890157395342279438e308L, -1.255317763348154410745082950806112487736e308L);
+  TEST_c_c (ccos, 0.75, -710.5, 1.347490911916428129246890157395342279438e308L, 1.255317763348154410745082950806112487736e308L);
+  TEST_c_c (ccos, -0.75, 710.5, 1.347490911916428129246890157395342279438e308L, 1.255317763348154410745082950806112487736e308L);
+  TEST_c_c (ccos, -0.75, -710.5, 1.347490911916428129246890157395342279438e308L, -1.255317763348154410745082950806112487736e308L);
+#endif
+
+#if defined TEST_LDOUBLE && LDBL_MAX_EXP >= 16384
+  TEST_c_c (ccos, 0.75, 11357.25, 9.001213196851067077465606717616495588201e4931L, -8.385498349388321535962327491346664141020e4931L);
+  TEST_c_c (ccos, 0.75, -11357.25, 9.001213196851067077465606717616495588201e4931L, 8.385498349388321535962327491346664141020e4931L);
+  TEST_c_c (ccos, -0.75, 11357.25, 9.001213196851067077465606717616495588201e4931L, 8.385498349388321535962327491346664141020e4931L);
+  TEST_c_c (ccos, -0.75, -11357.25, 9.001213196851067077465606717616495588201e4931L, -8.385498349388321535962327491346664141020e4931L);
+#endif
+
+#ifdef TEST_FLOAT
+  TEST_c_c (ccos, 0x1p-149, 180, plus_infty, -1.043535896672617552965983803453927655332e33L, OVERFLOW_EXCEPTION);
+#endif
+
+#if defined TEST_DOUBLE || (defined TEST_LDOUBLE && LDBL_MAX_EXP == 1024)
+  TEST_c_c (ccos, 0x1p-1074, 1440, plus_infty, -5.981479269486130556466515778180916082415e301L, OVERFLOW_EXCEPTION);
+#endif
+
+#if defined TEST_LDOUBLE && LDBL_MAX_EXP >= 16384
+  TEST_c_c (ccos, 0x1p-16434L, 22730, plus_infty, -1.217853148905605987081057582351152052687e4924L, OVERFLOW_EXCEPTION);
+#endif
+
   END (ccos, complex);
 }
 
@@ -1742,6 +2085,37 @@ ccosh_test (void)
   TEST_c_c (ccosh, 0.75L, 1.25L, 0.408242591877968807788852146397499084L, 0.780365930845853240391326216300863152L);
 
   TEST_c_c (ccosh, -2, -3, -3.72454550491532256547397070325597253L, 0.511822569987384608834463849801875634L);
+
+  TEST_c_c (ccosh, 89.5, 0.75, 2.708024460708609732016532185663087200560e38L, 2.522786001038096774676288412995370563339e38L);
+  TEST_c_c (ccosh, -89.5, 0.75, 2.708024460708609732016532185663087200560e38L, -2.522786001038096774676288412995370563339e38L);
+  TEST_c_c (ccosh, 89.5, -0.75, 2.708024460708609732016532185663087200560e38L, -2.522786001038096774676288412995370563339e38L);
+  TEST_c_c (ccosh, -89.5, -0.75, 2.708024460708609732016532185663087200560e38L, 2.522786001038096774676288412995370563339e38L);
+
+#ifndef TEST_FLOAT
+  TEST_c_c (ccosh, 710.5, 0.75, 1.347490911916428129246890157395342279438e308L, 1.255317763348154410745082950806112487736e308L);
+  TEST_c_c (ccosh, -710.5, 0.75, 1.347490911916428129246890157395342279438e308L, -1.255317763348154410745082950806112487736e308L);
+  TEST_c_c (ccosh, 710.5, -0.75, 1.347490911916428129246890157395342279438e308L, -1.255317763348154410745082950806112487736e308L);
+  TEST_c_c (ccosh, -710.5, -0.75, 1.347490911916428129246890157395342279438e308L, 1.255317763348154410745082950806112487736e308L);
+#endif
+
+#if defined TEST_LDOUBLE && LDBL_MAX_EXP >= 16384
+  TEST_c_c (ccosh, 11357.25, 0.75, 9.001213196851067077465606717616495588201e4931L, 8.385498349388321535962327491346664141020e4931L);
+  TEST_c_c (ccosh, -11357.25, 0.75, 9.001213196851067077465606717616495588201e4931L, -8.385498349388321535962327491346664141020e4931L);
+  TEST_c_c (ccosh, 11357.25, -0.75, 9.001213196851067077465606717616495588201e4931L, -8.385498349388321535962327491346664141020e4931L);
+  TEST_c_c (ccosh, -11357.25, -0.75, 9.001213196851067077465606717616495588201e4931L, 8.385498349388321535962327491346664141020e4931L);
+#endif
+
+#ifdef TEST_FLOAT
+  TEST_c_c (ccosh, 180, 0x1p-149, plus_infty, 1.043535896672617552965983803453927655332e33L, OVERFLOW_EXCEPTION);
+#endif
+
+#if defined TEST_DOUBLE || (defined TEST_LDOUBLE && LDBL_MAX_EXP == 1024)
+  TEST_c_c (ccosh, 1440, 0x1p-1074, plus_infty, 5.981479269486130556466515778180916082415e301L, OVERFLOW_EXCEPTION);
+#endif
+
+#if defined TEST_LDOUBLE && LDBL_MAX_EXP >= 16384
+  TEST_c_c (ccosh, 22730, 0x1p-16434L, plus_infty, 1.217853148905605987081057582351152052687e4924L, OVERFLOW_EXCEPTION);
+#endif
 
   END (ccosh, complex);
 }
@@ -1917,16 +2291,16 @@ cexp_test (void)
 #endif
 
   TEST_c_c (cexp, 88.75, 0.75, 2.558360358486542817001900410314204322891e38L, 2.383359453227311447654736314679677655100e38L);
-  TEST_c_c (cexp, -95, 0.75, 4.039714446238306526889476684000081624047e-42L, 3.763383677300535390271646960780570275931e-42L);
+  TEST_c_c (cexp, -95, 0.75, 4.039714446238306526889476684000081624047e-42L, 3.763383677300535390271646960780570275931e-42L, UNDERFLOW_EXCEPTION_FLOAT);
 
 #ifndef TEST_FLOAT
   TEST_c_c (cexp, 709.8125, 0.75, 1.355121963080879535248452862759108365762e308L, 1.262426823598609432507811340856186873507e308L);
-  TEST_c_c (cexp, -720, 0.75, 1.486960657116368433685753325516638551722e-313L, 1.385247284245720590980701226843815229385e-313L);
+  TEST_c_c (cexp, -720, 0.75, 1.486960657116368433685753325516638551722e-313L, 1.385247284245720590980701226843815229385e-313L, UNDERFLOW_EXCEPTION_DOUBLE);
 #endif
 
 #if defined TEST_LDOUBLE && LDBL_MAX_EXP >= 16384
   TEST_c_c (cexp, 11356.5625, 0.75, 9.052188470850960144814815984311663764287e4931L, 8.432986734191301036267148978260970230200e4931L);
-  TEST_c_c (cexp, -11370, 0.75, 8.631121063182211587489310508568170739592e-4939L, 8.040721827809267291427062346918413482824e-4939L);
+  TEST_c_c (cexp, -11370, 0.75, 8.631121063182211587489310508568170739592e-4939L, 8.040721827809267291427062346918413482824e-4939L, UNDERFLOW_EXCEPTION);
 #endif
 
 #ifdef TEST_FLOAT
@@ -2028,7 +2402,7 @@ clog_test (void)
   TEST_c_c (clog, -2, -3, 1.2824746787307683680267437207826593L, -2.1587989303424641704769327722648368L);
 
   TEST_c_c (clog, 0x1.fffffep+127L, 0x1.fffffep+127L, 89.06941264234832570836679262104313101776L, M_PI_4l);
-  TEST_c_c (clog, 0x1.fffffep+127L, 1.0L, 88.72283905206835305365817656031404273372L, 2.938736052218037251011746307725933020145e-39L);
+  TEST_c_c (clog, 0x1.fffffep+127L, 1.0L, 88.72283905206835305365817656031404273372L, 2.938736052218037251011746307725933020145e-39L, UNDERFLOW_EXCEPTION_FLOAT);
   TEST_c_c (clog, 0x1p-149L, 0x1p-149L, -102.9323563131518784484589700365392203592L, M_PI_4l);
   TEST_c_c (clog, 0x1p-147L, 0x1p-147L, -101.5460619520319878296245057936228672231L, M_PI_4l);
 
@@ -2112,7 +2486,7 @@ clog10_test (void)
   TEST_c_c (clog10, -2, -3, 0.556971676153418384603252578971164214L, -0.937554462986374708541507952140189646L);
 
   TEST_c_c (clog10, 0x1.fffffep+127L, 0x1.fffffep+127L, 38.68235441693561449174780668781319348761L, M_PI4_LOG10El);
-  TEST_c_c (clog10, 0x1.fffffep+127L, 1.0L, 38.53183941910362389414093724045094697423L, 1.276276851248440096917018665609900318458e-39L);
+  TEST_c_c (clog10, 0x1.fffffep+127L, 1.0L, 38.53183941910362389414093724045094697423L, 1.276276851248440096917018665609900318458e-39L, UNDERFLOW_EXCEPTION_FLOAT);
   TEST_c_c (clog10, 0x1p-149L, 0x1p-149L, -44.70295435610120748924022586658721447508L, M_PI4_LOG10El);
   TEST_c_c (clog10, 0x1p-147L, 0x1p-147L, -44.10089436477324509881274807713822842154L, M_PI4_LOG10El);
 
@@ -2627,6 +3001,37 @@ csin_test (void)
   TEST_c_c (csin, 0.75L, 1.25L, 1.28722291002649188575873510790565441L, 1.17210635989270256101081285116138863L);
   TEST_c_c (csin, -2, -3, -9.15449914691142957346729954460983256L, 4.16890695996656435075481305885375484L);
 
+  TEST_c_c (csin, 0.75, 89.5, 2.522786001038096774676288412995370563339e38L, 2.708024460708609732016532185663087200560e38L);
+  TEST_c_c (csin, 0.75, -89.5, 2.522786001038096774676288412995370563339e38L, -2.708024460708609732016532185663087200560e38L);
+  TEST_c_c (csin, -0.75, 89.5, -2.522786001038096774676288412995370563339e38L, 2.708024460708609732016532185663087200560e38L);
+  TEST_c_c (csin, -0.75, -89.5, -2.522786001038096774676288412995370563339e38L, -2.708024460708609732016532185663087200560e38L);
+
+#ifndef TEST_FLOAT
+  TEST_c_c (csin, 0.75, 710.5, 1.255317763348154410745082950806112487736e308L, 1.347490911916428129246890157395342279438e308L);
+  TEST_c_c (csin, 0.75, -710.5, 1.255317763348154410745082950806112487736e308L, -1.347490911916428129246890157395342279438e308L);
+  TEST_c_c (csin, -0.75, 710.5, -1.255317763348154410745082950806112487736e308L, 1.347490911916428129246890157395342279438e308L);
+  TEST_c_c (csin, -0.75, -710.5, -1.255317763348154410745082950806112487736e308L, -1.347490911916428129246890157395342279438e308L);
+#endif
+
+#if defined TEST_LDOUBLE && LDBL_MAX_EXP >= 16384
+  TEST_c_c (csin, 0.75, 11357.25, 8.385498349388321535962327491346664141020e4931L, 9.001213196851067077465606717616495588201e4931L);
+  TEST_c_c (csin, 0.75, -11357.25, 8.385498349388321535962327491346664141020e4931L, -9.001213196851067077465606717616495588201e4931L);
+  TEST_c_c (csin, -0.75, 11357.25, -8.385498349388321535962327491346664141020e4931L, 9.001213196851067077465606717616495588201e4931L);
+  TEST_c_c (csin, -0.75, -11357.25, -8.385498349388321535962327491346664141020e4931L, -9.001213196851067077465606717616495588201e4931L);
+#endif
+
+#ifdef TEST_FLOAT
+  TEST_c_c (csin, 0x1p-149, 180, 1.043535896672617552965983803453927655332e33L, plus_infty, OVERFLOW_EXCEPTION);
+#endif
+
+#if defined TEST_DOUBLE || (defined TEST_LDOUBLE && LDBL_MAX_EXP == 1024)
+  TEST_c_c (csin, 0x1p-1074, 1440, 5.981479269486130556466515778180916082415e301L, plus_infty, OVERFLOW_EXCEPTION);
+#endif
+
+#if defined TEST_LDOUBLE && LDBL_MAX_EXP >= 16384
+  TEST_c_c (csin, 0x1p-16434L, 22730, 1.217853148905605987081057582351152052687e4924L, plus_infty, OVERFLOW_EXCEPTION);
+#endif
+
   END (csin, complex);
 }
 
@@ -2694,6 +3099,37 @@ csinh_test (void)
 
   TEST_c_c (csinh, 0.75L, 1.25L, 0.259294854551162779153349830618433028L, 1.22863452409509552219214606515777594L);
   TEST_c_c (csinh, -2, -3, 3.59056458998577995201256544779481679L, -0.530921086248519805267040090660676560L);
+
+  TEST_c_c (csinh, 89.5, 0.75, 2.708024460708609732016532185663087200560e38L, 2.522786001038096774676288412995370563339e38L);
+  TEST_c_c (csinh, -89.5, 0.75, -2.708024460708609732016532185663087200560e38L, 2.522786001038096774676288412995370563339e38L);
+  TEST_c_c (csinh, 89.5, -0.75, 2.708024460708609732016532185663087200560e38L, -2.522786001038096774676288412995370563339e38L);
+  TEST_c_c (csinh, -89.5, -0.75, -2.708024460708609732016532185663087200560e38L, -2.522786001038096774676288412995370563339e38L);
+
+#ifndef TEST_FLOAT
+  TEST_c_c (csinh, 710.5, 0.75, 1.347490911916428129246890157395342279438e308L, 1.255317763348154410745082950806112487736e308L);
+  TEST_c_c (csinh, -710.5, 0.75, -1.347490911916428129246890157395342279438e308L, 1.255317763348154410745082950806112487736e308L);
+  TEST_c_c (csinh, 710.5, -0.75, 1.347490911916428129246890157395342279438e308L, -1.255317763348154410745082950806112487736e308L);
+  TEST_c_c (csinh, -710.5, -0.75, -1.347490911916428129246890157395342279438e308L, -1.255317763348154410745082950806112487736e308L);
+#endif
+
+#if defined TEST_LDOUBLE && LDBL_MAX_EXP >= 16384
+  TEST_c_c (csinh, 11357.25, 0.75, 9.001213196851067077465606717616495588201e4931L, 8.385498349388321535962327491346664141020e4931L);
+  TEST_c_c (csinh, -11357.25, 0.75, -9.001213196851067077465606717616495588201e4931L, 8.385498349388321535962327491346664141020e4931L);
+  TEST_c_c (csinh, 11357.25, -0.75, 9.001213196851067077465606717616495588201e4931L, -8.385498349388321535962327491346664141020e4931L);
+  TEST_c_c (csinh, -11357.25, -0.75, -9.001213196851067077465606717616495588201e4931L, -8.385498349388321535962327491346664141020e4931L);
+#endif
+
+#ifdef TEST_FLOAT
+  TEST_c_c (csinh, 180, 0x1p-149, plus_infty, 1.043535896672617552965983803453927655332e33L, OVERFLOW_EXCEPTION);
+#endif
+
+#if defined TEST_DOUBLE || (defined TEST_LDOUBLE && LDBL_MAX_EXP == 1024)
+  TEST_c_c (csinh, 1440, 0x1p-1074, plus_infty, 5.981479269486130556466515778180916082415e301L, OVERFLOW_EXCEPTION);
+#endif
+
+#if defined TEST_LDOUBLE && LDBL_MAX_EXP >= 16384
+  TEST_c_c (csinh, 22730, 0x1p-16434L, plus_infty, 1.217853148905605987081057582351152052687e4924L, OVERFLOW_EXCEPTION);
+#endif
 
   END (csinh, complex);
 }
@@ -2773,8 +3209,9 @@ csqrt_test (void)
 #ifndef TEST_FLOAT
   TEST_c_c (csqrt, 0x1.fffffffffffffp+1023L, 0x1.fffffffffffffp+1023L, 1.473094556905565378990473658199034571917e+154L, 6.101757441282702188537080005372547713595e+153L);
   TEST_c_c (csqrt, 0x1.fffffffffffffp+1023L, 0x1p+1023L, 1.379778091031440685006200821918878702861e+154L, 3.257214233483129514781233066898042490248e+153L);
-  TEST_c_c (csqrt, 0x1p-1074L, 0x1p-1074L, 2.442109726130830256743814843868934877597e-162L, 1.011554969366634726113090867589031782487e-162L);
-  TEST_c_c (csqrt, 0x1p-1073L, 0x1p-1073L, 3.453664695497464982856905711457966660085e-162L, 1.430554756764195530630723976279903095110e-162L);
+  /* Bug 14157: spurious exception may occur.  */
+  TEST_c_c (csqrt, 0x1p-1074L, 0x1p-1074L, 2.442109726130830256743814843868934877597e-162L, 1.011554969366634726113090867589031782487e-162L, UNDERFLOW_EXCEPTION_OK);
+  TEST_c_c (csqrt, 0x1p-1073L, 0x1p-1073L, 3.453664695497464982856905711457966660085e-162L, 1.430554756764195530630723976279903095110e-162L, UNDERFLOW_EXCEPTION_OK);
 #endif
 
 #if defined TEST_LDOUBLE && LDBL_MAX_EXP >= 16384
@@ -2840,6 +3277,36 @@ ctan_test (void)
   TEST_c_c (ctan, 0.75L, 1.25L, 0.160807785916206426725166058173438663L, 0.975363285031235646193581759755216379L);
   TEST_c_c (ctan, -2, -3, 0.376402564150424829275122113032269084e-2L, -1.00323862735360980144635859782192726L);
 
+  TEST_c_c (ctan, 1, 45, 1.490158918874345552942703234806348520895e-39L, 1.000000000000000000000000000000000000001L, UNDERFLOW_EXCEPTION_FLOAT);
+  TEST_c_c (ctan, 1, 47, 2.729321264492904590777293425576722354636e-41L, 1.0, UNDERFLOW_EXCEPTION_FLOAT);
+
+#ifndef TEST_FLOAT
+  TEST_c_c (ctan, 1, 355, 8.140551093483276762350406321792653551513e-309L, 1.0, UNDERFLOW_EXCEPTION_DOUBLE);
+  TEST_c_c (ctan, 1, 365, 1.677892637497921890115075995898773550884e-317L, 1.0, UNDERFLOW_EXCEPTION_DOUBLE);
+#endif
+
+#if defined TEST_LDOUBLE && LDBL_MAX_EXP >= 16384
+  TEST_c_c (ctan, 1, 5680, 4.725214596136812019616700920476949798307e-4934L, 1.0, UNDERFLOW_EXCEPTION);
+  TEST_c_c (ctan, 1, 5690, 9.739393181626937151720816611272607059057e-4943L, 1.0, UNDERFLOW_EXCEPTION);
+#endif
+
+  TEST_c_c (ctan, 0x3.243f6cp-1, 0, -2.287733242885645987394874673945769518150e7L, 0.0);
+
+  TEST_c_c (ctan, 0x1p127, 1, 0.2446359391192790896381501310437708987204L, 0.9101334047676183761532873794426475906201L);
+
+#ifndef TEST_FLOAT
+  TEST_c_c (ctan, 0x1p1023, 1, -0.2254627924997545057926782581695274244229L, 0.8786063118883068695462540226219865087189L);
+#endif
+
+#if defined TEST_LDOUBLE && LDBL_MAX_EXP >= 16384
+  TEST_c_c (ctan, 0x1p16383L, 1, 0.1608598776370396607204448234354670036772L, 0.8133818522051542536316746743877629761488L);
+#endif
+
+  TEST_c_c (ctan, 50000, 50000, plus_zero, 1.0, UNDERFLOW_EXCEPTION);
+  TEST_c_c (ctan, 50000, -50000, plus_zero, -1.0, UNDERFLOW_EXCEPTION);
+  TEST_c_c (ctan, -50000, 50000, minus_zero, 1.0, UNDERFLOW_EXCEPTION);
+  TEST_c_c (ctan, -50000, -50000, minus_zero, -1.0, UNDERFLOW_EXCEPTION);
+
   END (ctan, complex);
 }
 
@@ -2898,6 +3365,36 @@ ctanh_test (void)
 
   TEST_c_c (ctanh, 0.75L, 1.25L, 1.37260757053378320258048606571226857L, 0.385795952609750664177596760720790220L);
   TEST_c_c (ctanh, -2, -3, -0.965385879022133124278480269394560686L, 0.988437503832249372031403430350121098e-2L);
+
+  TEST_c_c (ctanh, 45, 1, 1.000000000000000000000000000000000000001L, 1.490158918874345552942703234806348520895e-39L, UNDERFLOW_EXCEPTION_FLOAT);
+  TEST_c_c (ctanh, 47, 1, 1.0, 2.729321264492904590777293425576722354636e-41L, UNDERFLOW_EXCEPTION_FLOAT);
+
+#ifndef TEST_FLOAT
+  TEST_c_c (ctanh, 355, 1, 1.0, 8.140551093483276762350406321792653551513e-309L, UNDERFLOW_EXCEPTION_DOUBLE);
+  TEST_c_c (ctanh, 365, 1, 1.0, 1.677892637497921890115075995898773550884e-317L, UNDERFLOW_EXCEPTION_DOUBLE);
+#endif
+
+#if defined TEST_LDOUBLE && LDBL_MAX_EXP >= 16384
+  TEST_c_c (ctanh, 5680, 1, 1.0, 4.725214596136812019616700920476949798307e-4934L, UNDERFLOW_EXCEPTION);
+  TEST_c_c (ctanh, 5690, 1, 1.0, 9.739393181626937151720816611272607059057e-4943L, UNDERFLOW_EXCEPTION);
+#endif
+
+  TEST_c_c (ctanh, 0, 0x3.243f6cp-1, 0.0, -2.287733242885645987394874673945769518150e7L);
+
+  TEST_c_c (ctanh, 1, 0x1p127, 0.9101334047676183761532873794426475906201L, 0.2446359391192790896381501310437708987204L);
+
+#ifndef TEST_FLOAT
+  TEST_c_c (ctanh, 1, 0x1p1023, 0.8786063118883068695462540226219865087189L, -0.2254627924997545057926782581695274244229L);
+#endif
+
+#if defined TEST_LDOUBLE && LDBL_MAX_EXP >= 16384
+  TEST_c_c (ctanh, 1, 0x1p16383L, 0.8133818522051542536316746743877629761488L, 0.1608598776370396607204448234354670036772L);
+#endif
+
+  TEST_c_c (ctanh, 50000, 50000, 1.0, plus_zero, UNDERFLOW_EXCEPTION);
+  TEST_c_c (ctanh, 50000, -50000, 1.0, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_c_c (ctanh, -50000, 50000, -1.0, plus_zero, UNDERFLOW_EXCEPTION);
+  TEST_c_c (ctanh, -50000, -50000, -1.0, minus_zero, UNDERFLOW_EXCEPTION);
 
   END (ctanh, complex);
 }
@@ -3001,10 +3498,13 @@ exp_test (void)
   TEST_f_f (exp, 1000.0L, 0.197007111401704699388887935224332313e435L);
 #endif
 
-  /* Bug 13922: OVERFLOW exception may be missing.  */
-  TEST_f_f (exp, max_value, plus_infty, OVERFLOW_EXCEPTION_OK);
-  /* Bug 13705: spurious OVERFLOW exception may be present.  */
-  TEST_f_f (exp, -max_value, 0, OVERFLOW_EXCEPTION_OK);
+#if !(defined TEST_LDOUBLE && LDBL_MAX_EXP > 1024)
+  TEST_f_f (exp, 710, plus_infty, OVERFLOW_EXCEPTION);
+  TEST_f_f (exp, -1234, plus_zero, UNDERFLOW_EXCEPTION);
+#endif
+  TEST_f_f (exp, 1e5, plus_infty, OVERFLOW_EXCEPTION);
+  TEST_f_f (exp, max_value, plus_infty, OVERFLOW_EXCEPTION);
+  TEST_f_f (exp, -max_value, 0, UNDERFLOW_EXCEPTION);
 
   END (exp);
 }
@@ -3137,13 +3637,20 @@ exp10_test (void)
   TEST_f_f (exp10, nan_value, nan_value);
   TEST_f_f (exp10, 3, 1000);
   TEST_f_f (exp10, -1, 0.1L);
-  TEST_f_f (exp10, 1e6, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_f_f (exp10, -1e6, 0);
-#ifndef TEST_LDOUBLE /* Bug 13914: spurious exceptions.  */
-  TEST_f_f (exp10, max_value, plus_infty, OVERFLOW_EXCEPTION);
-  /* Bug 13924: spurious OVERFLOW exception may be present.  */
-  TEST_f_f (exp10, -max_value, 0, OVERFLOW_EXCEPTION_OK);
+  TEST_f_f (exp10, 36, 1.0e36L);
+  TEST_f_f (exp10, -36, 1.0e-36L);
+#ifndef TEST_FLOAT
+  TEST_f_f (exp10, 305, 1.0e305L);
+  TEST_f_f (exp10, -305, 1.0e-305L, UNDERFLOW_EXCEPTION_LDOUBLE_IBM);
 #endif
+#if defined TEST_LDOUBLE && LDBL_MAX_10_EXP >= 4932
+  TEST_f_f (exp10, 4932, 1.0e4932L);
+  TEST_f_f (exp10, -4932, 1.0e-4932L, UNDERFLOW_EXCEPTION);
+#endif
+  TEST_f_f (exp10, 1e6, plus_infty, OVERFLOW_EXCEPTION);
+  TEST_f_f (exp10, -1e6, 0, UNDERFLOW_EXCEPTION);
+  TEST_f_f (exp10, max_value, plus_infty, OVERFLOW_EXCEPTION);
+  TEST_f_f (exp10, -max_value, 0, UNDERFLOW_EXCEPTION);
   TEST_f_f (exp10, 0.75L, 5.62341325190349080394951039776481231L);
 
   END (exp10);
@@ -3170,9 +3677,9 @@ exp2_test (void)
   TEST_f_f (exp2, 10, 1024);
   TEST_f_f (exp2, -1, 0.5);
   TEST_f_f (exp2, 1e6, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_f_f (exp2, -1e6, 0);
+  TEST_f_f (exp2, -1e6, 0, UNDERFLOW_EXCEPTION);
   TEST_f_f (exp2, max_value, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_f_f (exp2, -max_value, 0);
+  TEST_f_f (exp2, -max_value, 0, UNDERFLOW_EXCEPTION);
   TEST_f_f (exp2, 0.75L, 1.68179283050742908606225095246642979L);
 
   TEST_f_f (exp2, 100.5, 1.792728671193156477399422023278661496394e+30L);
@@ -3217,19 +3724,23 @@ expm1_test (void)
   TEST_f_f (expm1, 1, M_El - 1.0);
   TEST_f_f (expm1, 0.75L, 1.11700001661267466854536981983709561L);
 
+  TEST_f_f (expm1, 50.0L, 5.1847055285870724640864533229334853848275e+21L);
+
+#ifndef TEST_FLOAT
+  TEST_f_f (expm1, 127.0L, 1.4302079958348104463583671072905261080748e+55L);
+  TEST_f_f (expm1, 500.0L, 1.4035922178528374107397703328409120821806e+217L);
+#endif
+
 #if defined TEST_LDOUBLE && LDBL_MAX_EXP >= 16384
   TEST_f_f (expm1, 11356.25L, 9.05128237311923300051376115753226014206e+4931L);
 #endif
 
   errno = 0;
-  /* Bug 13787: OVERFLOW exception may be missing.  */
-  TEST_f_f (expm1, 100000.0, plus_infty, OVERFLOW_EXCEPTION_OK);
+  TEST_f_f (expm1, 100000.0, plus_infty, OVERFLOW_EXCEPTION);
   check_int ("errno for expm1(large) == ERANGE", errno, ERANGE, 0, 0, 0);
-  /* Bug 13787: OVERFLOW exception may be missing.  */
-  TEST_f_f (expm1, max_value, plus_infty, OVERFLOW_EXCEPTION_OK);
-#ifndef TEST_LDOUBLE /* Bug 13923.  */
-  TEST_f_f (expm1, -max_value, -1);
-#endif
+  TEST_f_f (expm1, max_value, plus_infty, OVERFLOW_EXCEPTION);
+  /* Bug 6778: spurious underflow exception.  */
+  TEST_f_f (expm1, -max_value, -1, UNDERFLOW_EXCEPTION_OK);
 
   END (expm1);
 }
@@ -3383,6 +3894,9 @@ floor_test (void)
   TEST_f_f (floor, 10141204801825835211973625643008.5L, 10141204801825835211973625643008.0L);
   TEST_f_f (floor, 10141204801825835211973625643008.75L, 10141204801825835211973625643008.0L);
   TEST_f_f (floor, 10141204801825835211973625643009.5L, 10141204801825835211973625643009.0L);
+
+  TEST_f_f (floor, 0xf.ffffffffffffff8p+47L, 0xf.fffffffffffep+47L);
+  TEST_f_f (floor, -0x8.000000000000004p+48L, -0x8.000000000001p+48L);
 #endif
 
   END (floor);
@@ -3448,16 +3962,17 @@ fma_test (void)
   TEST_fff_f (fma, 0x1.fffffffffffffp+1023, 0x1.001p+0, -0x1.fffffffffffffp+1023, 0x1.fffffffffffffp+1011);
   TEST_fff_f (fma, -0x1.fffffffffffffp+1023, 0x1.fffffffffffffp+0, 0x1.fffffffffffffp+1023, -0x1.ffffffffffffdp+1023);
   TEST_fff_f (fma, 0x1.fffffffffffffp+1023, 2.0, -0x1.fffffffffffffp+1023, 0x1.fffffffffffffp+1023);
-  TEST_fff_f (fma, 0x1.6a09e667f3bccp-538, 0x1.6a09e667f3bccp-538, 0.0, 0.0);
-  TEST_fff_f (fma, 0x1.deadbeef2feedp-495, 0x1.deadbeef2feedp-495, -0x1.bf86a5786a574p-989, 0x0.0000042625a1fp-1022);
-  TEST_fff_f (fma, 0x1.deadbeef2feedp-503, 0x1.deadbeef2feedp-503, -0x1.bf86a5786a574p-1005, 0x0.0000000004262p-1022);
-  TEST_fff_f (fma, 0x1p-537, 0x1p-538, 0x1p-1074, 0x0.0000000000002p-1022);
-  TEST_fff_f (fma, 0x1.7fffff8p-968, 0x1p-106, 0x0.000001p-1022, 0x0.0000010000001p-1022);
-  TEST_fff_f (fma, 0x1.4000004p-967, 0x1p-106, 0x0.000001p-1022, 0x0.0000010000003p-1022);
-  TEST_fff_f (fma, 0x1.4p-967, -0x1p-106, -0x0.000001p-1022, -0x0.0000010000002p-1022);
-  TEST_fff_f (fma, -0x1.19cab66d73e17p-959, 0x1.c7108a8c5ff51p-107, -0x0.80b0ad65d9b64p-1022, -0x0.80b0ad65d9d59p-1022);
-  TEST_fff_f (fma, -0x1.d2eaed6e8e9d3p-979, -0x1.4e066c62ac9ddp-63, -0x0.9245e6b003454p-1022, -0x0.9245c09c5fb5dp-1022);
-  TEST_fff_f (fma, 0x1.153d650bb9f06p-907, 0x1.2d01230d48407p-125, -0x0.b278d5acfc3cp-1022, -0x0.b22757123bbe9p-1022);
+  TEST_fff_f (fma, 0x1.6a09e667f3bccp-538, 0x1.6a09e667f3bccp-538, 0.0, 0.0, UNDERFLOW_EXCEPTION);
+  TEST_fff_f (fma, 0x1.deadbeef2feedp-495, 0x1.deadbeef2feedp-495, -0x1.bf86a5786a574p-989, 0x0.0000042625a1fp-1022, UNDERFLOW_EXCEPTION);
+  TEST_fff_f (fma, 0x1.deadbeef2feedp-503, 0x1.deadbeef2feedp-503, -0x1.bf86a5786a574p-1005, 0x0.0000000004262p-1022, UNDERFLOW_EXCEPTION);
+  TEST_fff_f (fma, 0x1p-537, 0x1p-538, 0x1p-1074, 0x0.0000000000002p-1022, UNDERFLOW_EXCEPTION);
+  TEST_fff_f (fma, 0x1.7fffff8p-968, 0x1p-106, 0x0.000001p-1022, 0x0.0000010000001p-1022, UNDERFLOW_EXCEPTION);
+  TEST_fff_f (fma, 0x1.4000004p-967, 0x1p-106, 0x0.000001p-1022, 0x0.0000010000003p-1022, UNDERFLOW_EXCEPTION);
+  TEST_fff_f (fma, 0x1.4p-967, -0x1p-106, -0x0.000001p-1022, -0x0.0000010000002p-1022, UNDERFLOW_EXCEPTION);
+  TEST_fff_f (fma, -0x1.19cab66d73e17p-959, 0x1.c7108a8c5ff51p-107, -0x0.80b0ad65d9b64p-1022, -0x0.80b0ad65d9d59p-1022, UNDERFLOW_EXCEPTION);
+  /* Sometimes the FE_UNDERFLOW is not set, so be prepared.  See Bug 14152.  */
+  TEST_fff_f (fma, -0x1.d2eaed6e8e9d3p-979, -0x1.4e066c62ac9ddp-63, -0x0.9245e6b003454p-1022, -0x0.9245c09c5fb5dp-1022, UNDERFLOW_EXCEPTION_OK);
+  TEST_fff_f (fma, 0x1.153d650bb9f06p-907, 0x1.2d01230d48407p-125, -0x0.b278d5acfc3cp-1022, -0x0.b22757123bbe9p-1022, UNDERFLOW_EXCEPTION);
   TEST_fff_f (fma, -0x1.fffffffffffffp-711, 0x1.fffffffffffffp-275, 0x1.fffffe00007ffp-983, 0x1.7ffffe00007ffp-983);
 #endif
 #if defined (TEST_LDOUBLE) && LDBL_MANT_DIG == 64
@@ -3466,12 +3981,13 @@ fma_test (void)
   TEST_fff_f (fma, 0xc.7fc000003ffffffp-1194L, 0x8.1e0003fffffffffp+15327L, -0x8.fffep+14072L, 0xc.ae9f164020effffp+14136L);
   TEST_fff_f (fma, -0x8.0001fc000000003p+1798L, 0xcp-2230L, 0x8.f7e000000000007p-468L, -0xc.0002f9ffee10404p-429L);
   TEST_fff_f (fma, 0xc.0000000000007ffp+10130L, -0x8.000000000000001p+4430L, 0xc.07000000001ffffp+14513L, -0xb.fffffffffffd7e4p+14563L);
-  TEST_fff_f (fma, 0xb.ffffp-4777L, 0x8.000000fffffffffp-11612L, -0x0.3800fff8p-16385L, 0x5.c7fe80c7ffeffffp-16385L);
+  /* Bug 14152: underflow exception may be missing.  */
+  TEST_fff_f (fma, 0xb.ffffp-4777L, 0x8.000000fffffffffp-11612L, -0x0.3800fff8p-16385L, 0x5.c7fe80c7ffeffffp-16385L, UNDERFLOW_EXCEPTION_OK);
 #endif
 #if defined (TEST_LDOUBLE) && LDBL_MANT_DIG == 113
   TEST_fff_f (fma, 0x1.bb2de33e02ccbbfa6e245a7c1f71p-2584L, -0x1.6b500daf0580d987f1bc0cadfcddp-13777L, 0x1.613cd91d9fed34b33820e5ab9d8dp-16378L, -0x1.3a79fb50eb9ce887cffa0f09bd9fp-16360L);
-  TEST_fff_f (fma, -0x1.f949b880cacb0f0c61540105321dp-5954L, -0x1.3876cec84b4140f3bd6198731b7ep-10525L, -0x0.a5dc1c6cfbc498c54fb0b504bf19p-16382L, -0x0.a5dc1c6cfbc498c54fb0b5038abbp-16382L);
-  TEST_fff_f (fma, -0x1.0000fffffffffp-16221L, 0x1.0000001fffff8007fep-239L, 0x0.ff87ffffffffffffe000003fffffp-16382L, 0x0.ff87ffffffffffffdffc003bff7fp-16382L);
+  TEST_fff_f (fma, -0x1.f949b880cacb0f0c61540105321dp-5954L, -0x1.3876cec84b4140f3bd6198731b7ep-10525L, -0x0.a5dc1c6cfbc498c54fb0b504bf19p-16382L, -0x0.a5dc1c6cfbc498c54fb0b5038abbp-16382L, UNDERFLOW_EXCEPTION);
+  TEST_fff_f (fma, -0x1.0000fffffffffp-16221L, 0x1.0000001fffff8007fep-239L, 0x0.ff87ffffffffffffe000003fffffp-16382L, 0x0.ff87ffffffffffffdffc003bff7fp-16382L, UNDERFLOW_EXCEPTION);
   TEST_fff_f (fma, -0x1.ac79c9376ef447f3827c9e9de008p-2228L, -0x1.5ba830022b6139e21fbe7270cad8p-6314L, 0x1.e8282b6a26bb6a9daf5c8e73e9f9p-8616L, 0x1.22f14a0253878a730cd1aee373adp-8541L);
   TEST_fff_f (fma, -0x1.c69749ec574caaa2ab8e97ddb9f3p+2652L, 0x1.f34235ff9d095449c29b4831b62dp+3311L, 0x1.fbe4302df23354dbd0c4d3cfe606p+5879L, -0x1.bb473bfdfb7a6e18886ce6e57eafp+5964L);
   TEST_fff_f (fma, -0x1.ca8835fc6ecfb5398625fc891be5p-1686L, 0x1.621e1972bbe2180e5be9dd7d8df5p-7671L, -0x1.7d2d21b73b52cf20dec2a83902a4p-9395L, -0x1.3d2322191c9c88bc68a62ab8042cp-9356L);
@@ -3607,6 +4123,14 @@ fmod_test (void)
   TEST_ff_f (fmod, 6.5, -2.25L, 2.0L);
   TEST_ff_f (fmod, -6.5, -2.25L, -2.0L);
 
+  TEST_ff_f (fmod, 0x0.fffffep-126L, 0x1p-149L, plus_zero);
+#ifndef TEST_FLOAT
+  TEST_ff_f (fmod, 0x0.fffffffffffffp-1022L, 0x1p-1074L, plus_zero);
+#endif
+#if defined TEST_LDOUBLE && LDBL_MIN_EXP <= -16381
+  TEST_ff_f (fmod, 0x0.fffffffffffffffep-16382L, 0x1p-16445L, plus_zero);
+#endif
+
   END (fmod);
 }
 
@@ -3721,7 +4245,7 @@ hypot_test (void)
   TEST_ff_f (hypot, 0x1.234566p-126L, 0x1.234566p-126L, 1.891441686191081936598531534017449451173e-38L);
 #endif
 
-#ifndef TEST_FLOAT
+#if !defined TEST_FLOAT && !(defined TEST_DOUBLE && defined TEST_INLINE)
   TEST_ff_f (hypot, 0x3p1021L, 0x4p1021L, 0x5p1021L);
 #endif
 
@@ -3743,13 +4267,22 @@ ilogb_test (void)
   TEST_f_i (ilogb, 1024, 10);
   TEST_f_i (ilogb, -2000, 10);
 
-  /* XXX We have a problem here: the standard does not tell us whether
-     exceptions are allowed/required.  ignore them for now.  */
-
-  TEST_f_i (ilogb, 0.0, FP_ILOGB0, EXCEPTIONS_OK);
-  TEST_f_i (ilogb, nan_value, FP_ILOGBNAN, EXCEPTIONS_OK);
-  TEST_f_i (ilogb, plus_infty, INT_MAX, EXCEPTIONS_OK);
-  TEST_f_i (ilogb, minus_infty, INT_MAX, EXCEPTIONS_OK);
+  /* ilogb (0.0) == FP_ILOGB0 plus invalid exception  */
+  errno = 0;
+  TEST_f_i (ilogb, 0.0, FP_ILOGB0, INVALID_EXCEPTION);
+  check_int ("errno for ilogb(0.0) unchanged", errno, EDOM, 0, 0, 0);
+  /* ilogb (NaN) == FP_ILOGBNAN plus invalid exception  */
+  errno = 0;
+  TEST_f_i (ilogb, nan_value, FP_ILOGBNAN, INVALID_EXCEPTION);
+  check_int ("errno for ilogb(NaN) unchanged", errno, EDOM, 0, 0, 0);
+  /* ilogb (inf) == INT_MAX plus invalid exception  */
+  errno = 0;
+  TEST_f_i (ilogb, plus_infty, INT_MAX, INVALID_EXCEPTION);
+  check_int ("errno for ilogb(Inf) unchanged", errno, EDOM, 0, 0, 0);
+  /* ilogb (-inf) == INT_MAX plus invalid exception  */
+  errno = 0;
+  TEST_f_i (ilogb, minus_infty, INT_MAX, INVALID_EXCEPTION);
+  check_int ("errno for ilogb(-Inf) unchanged", errno, EDOM, 0, 0, 0);
 
   END (ilogb);
 }
@@ -3815,10 +4348,12 @@ j0_test (void)
   TEST_f_f (j0, 4.0, -3.9714980986384737228659076845169804197562E-1L);
   TEST_f_f (j0, -4.0, -3.9714980986384737228659076845169804197562E-1L);
 
-  TEST_f_f (j0, 0x1.d7ce3ap+107L, 2.775523647291230802651040996274861694514e-17L);
+  /* Bug 14155: spurious exception may occur.  */
+  TEST_f_f (j0, 0x1.d7ce3ap+107L, 2.775523647291230802651040996274861694514e-17L, UNDERFLOW_EXCEPTION_OK);
 
 #ifndef TEST_FLOAT
-  TEST_f_f (j0, -0x1.001000001p+593L, -3.927269966354206207832593635798954916263e-90L);
+  /* Bug 14155: spurious exception may occur.  */
+  TEST_f_f (j0, -0x1.001000001p+593L, -3.927269966354206207832593635798954916263e-90L, UNDERFLOW_EXCEPTION_OK);
 #endif
 
   END (j0);
@@ -3859,7 +4394,8 @@ j1_test (void)
   TEST_f_f (j1, 0x1.3ffp+74L, 1.818984347516051243459364437186082741567e-12L);
 
 #ifndef TEST_FLOAT
-  TEST_f_f (j1, 0x1.ff00000000002p+840L, 1.846591691699331493194965158699937660696e-127L);
+  /* Bug 14155: spurious exception may occur.  */
+  TEST_f_f (j1, 0x1.ff00000000002p+840L, 1.846591691699331493194965158699937660696e-127L, UNDERFLOW_EXCEPTION_OK);
 #endif
 
   END (j1);
@@ -3944,7 +4480,8 @@ jn_test (void)
   TEST_ff_f (jn, 8, 2.4048255576957729L, 0.92165786705344923232879022467054148E-4L);
   TEST_ff_f (jn, 9, 2.4048255576957729L, 0.12517270977961513005428966643852564E-4L);
 
-  TEST_ff_f (jn, 2, 0x1.ffff62p+99L, -4.43860668048170034334926693188979974489e-16L);
+  /* Bug 14155: spurious exception may occur.  */
+  TEST_ff_f (jn, 2, 0x1.ffff62p+99L, -4.43860668048170034334926693188979974489e-16L, UNDERFLOW_EXCEPTION_OK);
 
   END (jn);
 }
@@ -5027,9 +5564,59 @@ logb_test (void)
   TEST_f_f (logb, 1024, 10);
   TEST_f_f (logb, -2000, 10);
 
+  TEST_f_f (logb, 0x0.1p-127, -131);
+  TEST_f_f (logb, 0x0.01p-127, -135);
+  TEST_f_f (logb, 0x0.011p-127, -135);
+#ifndef TEST_FLOAT
+  TEST_f_f (logb, 0x0.8p-1022, -1023);
+  TEST_f_f (logb, 0x0.1p-1022, -1026);
+  TEST_f_f (logb, 0x0.00111p-1022, -1034);
+  TEST_f_f (logb, 0x0.00001p-1022, -1042);
+  TEST_f_f (logb, 0x0.000011p-1022, -1042);
+  TEST_f_f (logb, 0x0.0000000000001p-1022, -1074);
+#endif
+#if defined TEST_LDOUBLE && LDBL_MIN_EXP - LDBL_MANT_DIG <= -16400
+  TEST_f_f (logb, 0x1p-16400L, -16400);
+  TEST_f_f (logb, 0x.00000000001p-16382L, -16426);
+#endif
+
   END (logb);
 }
 
+static void
+logb_test_downward (void)
+{
+  int save_round_mode;
+  errno = 0;
+
+  FUNC(logb) (0);
+  if (errno == ENOSYS)
+    /* Function not implemented.  */
+    return;
+
+  START (logb_downward);
+
+  save_round_mode = fegetround ();
+
+  if (!fesetround (FE_DOWNWARD))
+    {
+
+      /* IEEE 754-2008 says (section 5.3.3) that "logB(1) is +0.".  Libm
+         should not return -0 from logb in any rounding mode.  PowerPC32 has
+         failed with this test for power4 logb (and logbl on all PowerPC
+         platforms) in the past due to instruction selection.  GCC PR 52775
+         provides the availability of the fcfid insn in 32-bit mode which
+         eliminates the use of fsub in this instance and prevents the negative
+         signed 0.0.  */
+
+      /* BZ #887  */
+      TEST_f_f (logb, 1.000e+0, plus_zero);
+    }
+
+  fesetround (save_round_mode);
+
+  END (logb_downward);
+}
 
 static void
 lround_test (void)
@@ -5372,8 +5959,73 @@ nexttoward_test (void)
   TEST_ff_f (nexttoward, 1.1L, nan_value, nan_value);
   TEST_ff_f (nexttoward, nan_value, nan_value, nan_value);
 
-  /* XXX We need the hexadecimal FP number representation here for further
-     tests.  */
+#ifdef TEST_FLOAT
+  TEST_ff_f (nexttoward, 1.0, 1.1L, 0x1.000002p0);
+  TEST_ff_f (nexttoward, 1.0, LDBL_MAX, 0x1.000002p0);
+  TEST_ff_f (nexttoward, 1.0, 0x1.0000000000001p0, 0x1.000002p0);
+  TEST_ff_f (nexttoward, 1.0, 0.9L, 0x0.ffffffp0);
+  TEST_ff_f (nexttoward, 1.0, -LDBL_MAX, 0x0.ffffffp0);
+  TEST_ff_f (nexttoward, 1.0, 0x0.fffffffffffff8p0, 0x0.ffffffp0);
+  TEST_ff_f (nexttoward, -1.0, -1.1L, -0x1.000002p0);
+  TEST_ff_f (nexttoward, -1.0, -LDBL_MAX, -0x1.000002p0);
+  TEST_ff_f (nexttoward, -1.0, -0x1.0000000000001p0, -0x1.000002p0);
+  TEST_ff_f (nexttoward, -1.0, -0.9L, -0x0.ffffffp0);
+  TEST_ff_f (nexttoward, -1.0, LDBL_MAX, -0x0.ffffffp0);
+  TEST_ff_f (nexttoward, -1.0, -0x0.fffffffffffff8p0, -0x0.ffffffp0);
+  TEST_ff_f (nexttoward, -0x1.3p-145, -0xap-148L, -0x1.4p-145, UNDERFLOW_EXCEPTION);
+# if LDBL_MANT_DIG >= 64
+  TEST_ff_f (nexttoward, 1.0, 0x1.000000000000002p0L, 0x1.000002p0);
+  TEST_ff_f (nexttoward, 1.0, 0x0.ffffffffffffffffp0L, 0x0.ffffffp0);
+  TEST_ff_f (nexttoward, -1.0, -0x1.000000000000002p0L, -0x1.000002p0);
+  TEST_ff_f (nexttoward, -1.0, -0x0.ffffffffffffffffp0L, -0x0.ffffffp0);
+# endif
+# if LDBL_MANT_DIG >= 106
+  TEST_ff_f (nexttoward, 1.0, 0x1.000000000000000000000000008p0L, 0x1.000002p0);
+  TEST_ff_f (nexttoward, 1.0, 0x0.ffffffffffffffffffffffffffcp0L, 0x0.ffffffp0);
+  TEST_ff_f (nexttoward, -1.0, -0x1.000000000000000000000000008p0L, -0x1.000002p0);
+  TEST_ff_f (nexttoward, -1.0, -0x0.ffffffffffffffffffffffffffcp0L, -0x0.ffffffp0);
+# endif
+# if LDBL_MANT_DIG >= 113
+  TEST_ff_f (nexttoward, 1.0, 0x1.0000000000000000000000000001p0L, 0x1.000002p0);
+  TEST_ff_f (nexttoward, 1.0, 0x0.ffffffffffffffffffffffffffff8p0L, 0x0.ffffffp0);
+  TEST_ff_f (nexttoward, -1.0, -0x1.0000000000000000000000000001p0L, -0x1.000002p0);
+  TEST_ff_f (nexttoward, -1.0, -0x0.ffffffffffffffffffffffffffff8p0L, -0x0.ffffffp0);
+# endif
+#endif
+#ifdef TEST_DOUBLE
+  TEST_ff_f (nexttoward, 1.0, 1.1L, 0x1.0000000000001p0);
+  TEST_ff_f (nexttoward, 1.0, LDBL_MAX, 0x1.0000000000001p0);
+  TEST_ff_f (nexttoward, 1.0, 0x1.0000000000001p0, 0x1.0000000000001p0);
+  TEST_ff_f (nexttoward, 1.0, 0.9L, 0x0.fffffffffffff8p0);
+  TEST_ff_f (nexttoward, 1.0, -LDBL_MAX, 0x0.fffffffffffff8p0);
+  TEST_ff_f (nexttoward, 1.0, 0x0.fffffffffffff8p0, 0x0.fffffffffffff8p0);
+  TEST_ff_f (nexttoward, -1.0, -1.1L, -0x1.0000000000001p0);
+  TEST_ff_f (nexttoward, -1.0, -LDBL_MAX, -0x1.0000000000001p0);
+  TEST_ff_f (nexttoward, -1.0, -0x1.0000000000001p0, -0x1.0000000000001p0);
+  TEST_ff_f (nexttoward, -1.0, -0.9L, -0x0.fffffffffffff8p0);
+  TEST_ff_f (nexttoward, -1.0, LDBL_MAX, -0x0.fffffffffffff8p0);
+  TEST_ff_f (nexttoward, -1.0, -0x0.fffffffffffff8p0, -0x0.fffffffffffff8p0);
+  TEST_ff_f (nexttoward, -1.0, -0x8.00346dc5d6388p-3L, -0x1.0000000000001p0);
+  TEST_ff_f (nexttoward, 0x1p-1074, 0x1p-1073L, 0x1p-1073, UNDERFLOW_EXCEPTION);
+# if LDBL_MANT_DIG >= 64
+  TEST_ff_f (nexttoward, 1.0, 0x1.000000000000002p0L, 0x1.0000000000001p0);
+  TEST_ff_f (nexttoward, 1.0, 0x0.ffffffffffffffffp0L, 0x0.fffffffffffff8p0);
+  TEST_ff_f (nexttoward, -1.0, -0x1.000000000000002p0L, -0x1.0000000000001p0);
+  TEST_ff_f (nexttoward, -1.0, -0x0.ffffffffffffffffp0L, -0x0.fffffffffffff8p0);
+# endif
+# if LDBL_MANT_DIG >= 106
+  TEST_ff_f (nexttoward, 1.0, 0x1.000000000000000000000000008p0L, 0x1.0000000000001p0);
+  TEST_ff_f (nexttoward, 1.0, 0x0.ffffffffffffffffffffffffffcp0L, 0x0.fffffffffffff8p0);
+  TEST_ff_f (nexttoward, -1.0, -0x1.000000000000000000000000008p0L, -0x1.0000000000001p0);
+  TEST_ff_f (nexttoward, -1.0, -0x0.ffffffffffffffffffffffffffcp0L, -0x0.fffffffffffff8p0);
+# endif
+# if LDBL_MANT_DIG >= 113
+  TEST_ff_f (nexttoward, 1.0, 0x1.0000000000000000000000000001p0L, 0x1.0000000000001p0);
+  TEST_ff_f (nexttoward, 1.0, 0x0.ffffffffffffffffffffffffffff8p0L, 0x0.fffffffffffff8p0);
+  TEST_ff_f (nexttoward, -1.0, -0x1.0000000000000000000000000001p0L, -0x1.0000000000001p0);
+  TEST_ff_f (nexttoward, -1.0, -0x0.ffffffffffffffffffffffffffff8p0L, -0x0.fffffffffffff8p0);
+# endif
+#endif
 
   END (nexttoward);
 }
@@ -5621,11 +6273,9 @@ pow_test (void)
   check_int ("errno for pow(-0,-num) == ERANGE", errno, ERANGE, 0, 0, 0);
 
   TEST_ff_f (pow, 0x1p72L, 0x1p72L, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_ff_f (pow, 10, -0x1p72L, 0);
-  /* Bug 13873: OVERFLOW exception may be missing.  */
-  TEST_ff_f (pow, max_value, max_value, plus_infty, OVERFLOW_EXCEPTION_OK);
-  /* Bug 13872: spurious OVERFLOW exception may be present.  */
-  TEST_ff_f (pow, 10, -max_value, 0, OVERFLOW_EXCEPTION_OK);
+  TEST_ff_f (pow, 10, -0x1p72L, 0, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, max_value, max_value, plus_infty, OVERFLOW_EXCEPTION);
+  TEST_ff_f (pow, 10, -max_value, 0, UNDERFLOW_EXCEPTION);
 
   TEST_ff_f (pow, 0, 1, 0);
   TEST_ff_f (pow, 0, 11, 0);
@@ -5640,6 +6290,8 @@ pow_test (void)
   TEST_ff_f (pow, minus_zero, 11.1L, 0);
   TEST_ff_f (pow, 0, plus_infty, 0);
   TEST_ff_f (pow, minus_zero, plus_infty, 0);
+  TEST_ff_f (pow, 0, minus_infty, plus_infty, DIVIDE_BY_ZERO_EXCEPTION_OK);
+  TEST_ff_f (pow, minus_zero, minus_infty, plus_infty, DIVIDE_BY_ZERO_EXCEPTION_OK);
 
 #ifndef TEST_INLINE
   /* pow (x, +inf) == +inf for |x| > 1.  */
@@ -5815,7 +6467,7 @@ pow_test (void)
   TEST_ff_f (pow, 0.75L, 1.25L, 0.697953644326574699205914060237425566L);
 
 #if defined TEST_DOUBLE || defined TEST_LDOUBLE
-  TEST_ff_f (pow, -7.49321e+133, -9.80818e+16, 0);
+  TEST_ff_f (pow, -7.49321e+133, -9.80818e+16, 0, UNDERFLOW_EXCEPTION);
 #endif
 
   TEST_ff_f (pow, -1.0, -0xffffff, -1.0);
@@ -5864,30 +6516,31 @@ pow_test (void)
 
   TEST_ff_f (pow, -2.0, 126, 0x1p126);
   TEST_ff_f (pow, -2.0, 127, -0x1p127);
-  TEST_ff_f (pow, -2.0, -126, 0x1p-126);
-  TEST_ff_f (pow, -2.0, -127, -0x1p-127);
+  /* Allow inexact results for float to be considered to underflow.  */
+  TEST_ff_f (pow, -2.0, -126, 0x1p-126, UNDERFLOW_EXCEPTION_OK_FLOAT);
+  TEST_ff_f (pow, -2.0, -127, -0x1p-127, UNDERFLOW_EXCEPTION_OK_FLOAT);
 
-  TEST_ff_f (pow, -2.0, -0xffffff, minus_zero);
-  TEST_ff_f (pow, -2.0, -0x1fffffe, plus_zero);
+  TEST_ff_f (pow, -2.0, -0xffffff, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -2.0, -0x1fffffe, plus_zero, UNDERFLOW_EXCEPTION);
 #ifndef TEST_FLOAT
-  TEST_ff_f (pow, -2.0, -0x1.fffffffffffffp+52L, minus_zero);
-  TEST_ff_f (pow, -2.0, -0x1.fffffffffffffp+53L, plus_zero);
+  TEST_ff_f (pow, -2.0, -0x1.fffffffffffffp+52L, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -2.0, -0x1.fffffffffffffp+53L, plus_zero, UNDERFLOW_EXCEPTION);
 #endif
 #ifdef TEST_LDOUBLE
 # if LDBL_MANT_DIG >= 64
-  TEST_ff_f (pow, -2.0, -0x1.fffffffffffffffep+63L, minus_zero);
-  TEST_ff_f (pow, -2.0, -0x1.fffffffffffffffep+64L, plus_zero);
+  TEST_ff_f (pow, -2.0, -0x1.fffffffffffffffep+63L, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -2.0, -0x1.fffffffffffffffep+64L, plus_zero, UNDERFLOW_EXCEPTION);
 # endif
 # if LDBL_MANT_DIG >= 106
-  TEST_ff_f (pow, -2.0, -0x1.ffffffffffffffffffffffffff8p+105L, minus_zero);
-  TEST_ff_f (pow, -2.0, -0x1.ffffffffffffffffffffffffff8p+106L, plus_zero);
+  TEST_ff_f (pow, -2.0, -0x1.ffffffffffffffffffffffffff8p+105L, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -2.0, -0x1.ffffffffffffffffffffffffff8p+106L, plus_zero, UNDERFLOW_EXCEPTION);
 # endif
 # if LDBL_MANT_DIG >= 113
-  TEST_ff_f (pow, -2.0, -0x1.ffffffffffffffffffffffffffffp+112L, minus_zero);
-  TEST_ff_f (pow, -2.0, -0x1.ffffffffffffffffffffffffffffp+113L, plus_zero);
+  TEST_ff_f (pow, -2.0, -0x1.ffffffffffffffffffffffffffffp+112L, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -2.0, -0x1.ffffffffffffffffffffffffffffp+113L, plus_zero, UNDERFLOW_EXCEPTION);
 # endif
 #endif
-  TEST_ff_f (pow, -2.0, -max_value, plus_zero);
+  TEST_ff_f (pow, -2.0, -max_value, plus_zero, UNDERFLOW_EXCEPTION);
 
   TEST_ff_f (pow, -2.0, 0xffffff, minus_infty, OVERFLOW_EXCEPTION);
   TEST_ff_f (pow, -2.0, 0x1fffffe, plus_infty, OVERFLOW_EXCEPTION);
@@ -5909,39 +6562,37 @@ pow_test (void)
   TEST_ff_f (pow, -2.0, 0x1.ffffffffffffffffffffffffffffp+113L, plus_infty, OVERFLOW_EXCEPTION);
 # endif
 #endif
-  /* Bug 13873: OVERFLOW exception may be missing.  */
-  TEST_ff_f (pow, -2.0, max_value, plus_infty, OVERFLOW_EXCEPTION_OK);
+  TEST_ff_f (pow, -2.0, max_value, plus_infty, OVERFLOW_EXCEPTION);
 
   TEST_ff_f (pow, -max_value, 0.5, nan_value, INVALID_EXCEPTION);
   TEST_ff_f (pow, -max_value, 1.5, nan_value, INVALID_EXCEPTION);
   TEST_ff_f (pow, -max_value, 1000.5, nan_value, INVALID_EXCEPTION);
-  TEST_ff_f (pow, -max_value, -2, plus_zero);
-  TEST_ff_f (pow, -max_value, -3, minus_zero);
+  TEST_ff_f (pow, -max_value, -2, plus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -max_value, -3, minus_zero, UNDERFLOW_EXCEPTION);
   TEST_ff_f (pow, -max_value, 2, plus_infty, OVERFLOW_EXCEPTION);
   TEST_ff_f (pow, -max_value, 3, minus_infty, OVERFLOW_EXCEPTION);
 
-  TEST_ff_f (pow, -max_value, -0xffffff, minus_zero);
-  TEST_ff_f (pow, -max_value, -0x1fffffe, plus_zero);
+  TEST_ff_f (pow, -max_value, -0xffffff, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -max_value, -0x1fffffe, plus_zero, UNDERFLOW_EXCEPTION);
 #ifndef TEST_FLOAT
-  TEST_ff_f (pow, -max_value, -0x1.fffffffffffffp+52L, minus_zero);
-  TEST_ff_f (pow, -max_value, -0x1.fffffffffffffp+53L, plus_zero);
+  TEST_ff_f (pow, -max_value, -0x1.fffffffffffffp+52L, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -max_value, -0x1.fffffffffffffp+53L, plus_zero, UNDERFLOW_EXCEPTION);
 #endif
 #ifdef TEST_LDOUBLE
 # if LDBL_MANT_DIG >= 64
-  TEST_ff_f (pow, -max_value, -0x1.fffffffffffffffep+63L, minus_zero);
-  TEST_ff_f (pow, -max_value, -0x1.fffffffffffffffep+64L, plus_zero);
+  TEST_ff_f (pow, -max_value, -0x1.fffffffffffffffep+63L, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -max_value, -0x1.fffffffffffffffep+64L, plus_zero, UNDERFLOW_EXCEPTION);
 # endif
 # if LDBL_MANT_DIG >= 106
-  TEST_ff_f (pow, -max_value, -0x1.ffffffffffffffffffffffffff8p+105L, minus_zero);
-  TEST_ff_f (pow, -max_value, -0x1.ffffffffffffffffffffffffff8p+106L, plus_zero);
+  TEST_ff_f (pow, -max_value, -0x1.ffffffffffffffffffffffffff8p+105L, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -max_value, -0x1.ffffffffffffffffffffffffff8p+106L, plus_zero, UNDERFLOW_EXCEPTION);
 # endif
 # if LDBL_MANT_DIG >= 113
-  TEST_ff_f (pow, -max_value, -0x1.ffffffffffffffffffffffffffffp+112L, minus_zero);
-  TEST_ff_f (pow, -max_value, -0x1.ffffffffffffffffffffffffffffp+113L, plus_zero);
+  TEST_ff_f (pow, -max_value, -0x1.ffffffffffffffffffffffffffffp+112L, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -max_value, -0x1.ffffffffffffffffffffffffffffp+113L, plus_zero, UNDERFLOW_EXCEPTION);
 # endif
 #endif
-  /* Bug 13872: spurious OVERFLOW exception may be present.  */
-  TEST_ff_f (pow, -max_value, -max_value, plus_zero, OVERFLOW_EXCEPTION_OK);
+  TEST_ff_f (pow, -max_value, -max_value, plus_zero, UNDERFLOW_EXCEPTION);
 
   TEST_ff_f (pow, -max_value, 0xffffff, minus_infty, OVERFLOW_EXCEPTION);
   TEST_ff_f (pow, -max_value, 0x1fffffe, plus_infty, OVERFLOW_EXCEPTION);
@@ -5963,8 +6614,7 @@ pow_test (void)
   TEST_ff_f (pow, -max_value, 0x1.ffffffffffffffffffffffffffffp+113L, plus_infty, OVERFLOW_EXCEPTION);
 # endif
 #endif
-  /* Bug 13873: OVERFLOW exception may be missing.  */
-  TEST_ff_f (pow, -max_value, max_value, plus_infty, OVERFLOW_EXCEPTION_OK);
+  TEST_ff_f (pow, -max_value, max_value, plus_infty, OVERFLOW_EXCEPTION);
 
   TEST_ff_f (pow, -0.5, 126, 0x1p-126);
   TEST_ff_f (pow, -0.5, 127, -0x1p-127);
@@ -5991,39 +6641,39 @@ pow_test (void)
   TEST_ff_f (pow, -0.5, -0x1.ffffffffffffffffffffffffffffp+113L, plus_infty, OVERFLOW_EXCEPTION);
 # endif
 #endif
-  /* Bug 13873: OVERFLOW exception may be missing.  */
-  TEST_ff_f (pow, -0.5, -max_value, plus_infty, OVERFLOW_EXCEPTION_OK);
+  TEST_ff_f (pow, -0.5, -max_value, plus_infty, OVERFLOW_EXCEPTION);
 
-  TEST_ff_f (pow, -0.5, 0xffffff, minus_zero);
-  TEST_ff_f (pow, -0.5, 0x1fffffe, plus_zero);
+  TEST_ff_f (pow, -0.5, 0xffffff, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -0.5, 0x1fffffe, plus_zero, UNDERFLOW_EXCEPTION);
 #ifndef TEST_FLOAT
-  TEST_ff_f (pow, -0.5, 0x1.fffffffffffffp+52L, minus_zero);
-  TEST_ff_f (pow, -0.5, 0x1.fffffffffffffp+53L, plus_zero);
+  TEST_ff_f (pow, -0.5, 0x1.fffffffffffffp+52L, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -0.5, 0x1.fffffffffffffp+53L, plus_zero, UNDERFLOW_EXCEPTION);
 #endif
 #ifdef TEST_LDOUBLE
 # if LDBL_MANT_DIG >= 64
-  TEST_ff_f (pow, -0.5, 0x1.fffffffffffffffep+63L, minus_zero);
-  TEST_ff_f (pow, -0.5, 0x1.fffffffffffffffep+64L, plus_zero);
+  TEST_ff_f (pow, -0.5, 0x1.fffffffffffffffep+63L, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -0.5, 0x1.fffffffffffffffep+64L, plus_zero, UNDERFLOW_EXCEPTION);
 # endif
 # if LDBL_MANT_DIG >= 106
-  TEST_ff_f (pow, -0.5, 0x1.ffffffffffffffffffffffffff8p+105L, minus_zero);
-  TEST_ff_f (pow, -0.5, 0x1.ffffffffffffffffffffffffff8p+106L, plus_zero);
+  TEST_ff_f (pow, -0.5, 0x1.ffffffffffffffffffffffffff8p+105L, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -0.5, 0x1.ffffffffffffffffffffffffff8p+106L, plus_zero, UNDERFLOW_EXCEPTION);
 # endif
 # if LDBL_MANT_DIG >= 113
-  TEST_ff_f (pow, -0.5, 0x1.ffffffffffffffffffffffffffffp+112L, minus_zero);
-  TEST_ff_f (pow, -0.5, 0x1.ffffffffffffffffffffffffffffp+113L, plus_zero);
+  TEST_ff_f (pow, -0.5, 0x1.ffffffffffffffffffffffffffffp+112L, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -0.5, 0x1.ffffffffffffffffffffffffffffp+113L, plus_zero, UNDERFLOW_EXCEPTION);
 # endif
 #endif
-  TEST_ff_f (pow, -0.5, max_value, plus_zero);
+  TEST_ff_f (pow, -0.5, max_value, plus_zero, UNDERFLOW_EXCEPTION);
 
   TEST_ff_f (pow, -min_value, 0.5, nan_value, INVALID_EXCEPTION);
   TEST_ff_f (pow, -min_value, 1.5, nan_value, INVALID_EXCEPTION);
   TEST_ff_f (pow, -min_value, 1000.5, nan_value, INVALID_EXCEPTION);
   TEST_ff_f (pow, -min_value, -2, plus_infty, OVERFLOW_EXCEPTION);
   TEST_ff_f (pow, -min_value, -3, minus_infty, OVERFLOW_EXCEPTION);
-  TEST_ff_f (pow, -min_value, 1, -min_value);
-  TEST_ff_f (pow, -min_value, 2, plus_zero);
-  TEST_ff_f (pow, -min_value, 3, minus_zero);
+  /* Allow inexact results to be considered to underflow.  */
+  TEST_ff_f (pow, -min_value, 1, -min_value, UNDERFLOW_EXCEPTION_OK);
+  TEST_ff_f (pow, -min_value, 2, plus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -min_value, 3, minus_zero, UNDERFLOW_EXCEPTION);
 
   TEST_ff_f (pow, -min_value, -0xffffff, minus_infty, OVERFLOW_EXCEPTION);
   TEST_ff_f (pow, -min_value, -0x1fffffe, plus_infty, OVERFLOW_EXCEPTION);
@@ -6045,31 +6695,57 @@ pow_test (void)
   TEST_ff_f (pow, -min_value, -0x1.ffffffffffffffffffffffffffffp+113L, plus_infty, OVERFLOW_EXCEPTION);
 # endif
 #endif
-  /* Bug 13873: OVERFLOW exception may be missing.  */
-  TEST_ff_f (pow, -min_value, -max_value, plus_infty, OVERFLOW_EXCEPTION_OK);
+  TEST_ff_f (pow, -min_value, -max_value, plus_infty, OVERFLOW_EXCEPTION);
 
-  TEST_ff_f (pow, -min_value, 0xffffff, minus_zero);
-  TEST_ff_f (pow, -min_value, 0x1fffffe, plus_zero);
+  TEST_ff_f (pow, -min_value, 0xffffff, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -min_value, 0x1fffffe, plus_zero, UNDERFLOW_EXCEPTION);
 #ifndef TEST_FLOAT
-  TEST_ff_f (pow, -min_value, 0x1.fffffffffffffp+52L, minus_zero);
-  TEST_ff_f (pow, -min_value, 0x1.fffffffffffffp+53L, plus_zero);
+  TEST_ff_f (pow, -min_value, 0x1.fffffffffffffp+52L, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -min_value, 0x1.fffffffffffffp+53L, plus_zero, UNDERFLOW_EXCEPTION);
 #endif
 #ifdef TEST_LDOUBLE
 # if LDBL_MANT_DIG >= 64
-  TEST_ff_f (pow, -min_value, 0x1.fffffffffffffffep+63L, minus_zero);
-  TEST_ff_f (pow, -min_value, 0x1.fffffffffffffffep+64L, plus_zero);
+  TEST_ff_f (pow, -min_value, 0x1.fffffffffffffffep+63L, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -min_value, 0x1.fffffffffffffffep+64L, plus_zero, UNDERFLOW_EXCEPTION);
 # endif
 # if LDBL_MANT_DIG >= 106
-  TEST_ff_f (pow, -min_value, 0x1.ffffffffffffffffffffffffff8p+105L, minus_zero);
-  TEST_ff_f (pow, -min_value, 0x1.ffffffffffffffffffffffffff8p+106L, plus_zero);
+  TEST_ff_f (pow, -min_value, 0x1.ffffffffffffffffffffffffff8p+105L, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -min_value, 0x1.ffffffffffffffffffffffffff8p+106L, plus_zero, UNDERFLOW_EXCEPTION);
 # endif
 # if LDBL_MANT_DIG >= 113
-  TEST_ff_f (pow, -min_value, 0x1.ffffffffffffffffffffffffffffp+112L, minus_zero);
-  TEST_ff_f (pow, -min_value, 0x1.ffffffffffffffffffffffffffffp+113L, plus_zero);
+  TEST_ff_f (pow, -min_value, 0x1.ffffffffffffffffffffffffffffp+112L, minus_zero, UNDERFLOW_EXCEPTION);
+  TEST_ff_f (pow, -min_value, 0x1.ffffffffffffffffffffffffffffp+113L, plus_zero, UNDERFLOW_EXCEPTION);
 # endif
 #endif
-  /* Bug 13872: spurious OVERFLOW exception may be present.  */
-  TEST_ff_f (pow, -min_value, max_value, plus_zero, OVERFLOW_EXCEPTION_OK);
+  TEST_ff_f (pow, -min_value, max_value, plus_zero, UNDERFLOW_EXCEPTION);
+
+#ifndef TEST_LDOUBLE /* Bug 13881.  */
+  TEST_ff_f (pow, 0x0.ffffffp0, 10, 0.999999403953712118183885036774764444747L);
+  TEST_ff_f (pow, 0x0.ffffffp0, 100, 0.999994039553108359406305079606228341585L);
+  TEST_ff_f (pow, 0x0.ffffffp0, 1000, 0.9999403971297699052276650144650733772182L);
+  TEST_ff_f (pow, 0x0.ffffffp0, 0x1p24, 0.3678794302077803437135155590023422899744L);
+  TEST_ff_f (pow, 0x0.ffffffp0, 0x1p30, 1.603807831524924233828134753069728224044e-28L);
+  TEST_ff_f (pow, 0x0.ffffffp0, 0x1.234566p30, 2.374884712135295099971443365381007297732e-32L);
+  TEST_ff_f (pow, 0x0.ffffffp0, -10, 1.000000596046643153205170848674671339688L);
+  TEST_ff_f (pow, 0x0.ffffffp0, -100, 1.000005960482418779499387594989252621451L);
+  TEST_ff_f (pow, 0x0.ffffffp0, -1000, 1.000059606422943986382898964231519867906L);
+  TEST_ff_f (pow, 0x0.ffffffp0, -0x1p24, 2.7182819094701610539628664526874952929416L);
+  TEST_ff_f (pow, 0x0.ffffffp0, -0x1p30, 6.2351609734265057988914412331288163636075e+27L);
+  TEST_ff_f (pow, 0x0.ffffffp0, -0x1.234566p30, 4.2107307141696353498921307077142537353515e+31L);
+  TEST_ff_f (pow, 0x1.000002p0, 0x1p24, 7.3890552180866447284268641248075832310141L);
+  TEST_ff_f (pow, 0x1.000002p0, 0x1.234566p29, 4.2107033006507495188536371520637025716256e+31L);
+  TEST_ff_f (pow, 0x1.000002p0, -0x1.234566p29, 2.3749001736727769098946062325205705312166e-32L);
+#endif
+
+  /* Bug 13881: powl inaccurate so these tests disabled for long double.  */
+#if !defined TEST_FLOAT && !defined TEST_LDOUBLE
+  TEST_ff_f (pow, 0x0.fffffffffffff8p0L, 0x1.23456789abcdfp62L, 1.0118762747827252817436395051178295138220e-253L);
+  TEST_ff_f (pow, 0x0.fffffffffffff8p0L, -0x1.23456789abcdfp62L, 9.8826311568054561811190162420900667121992e+252L);
+  TEST_ff_f (pow, 0x1.0000000000001p0L, 0x1.23456789abcdfp61L, 9.8826311568044974397135026217687399395481e+252L);
+  TEST_ff_f (pow, 0x1.0000000000001p0L, -0x1.23456789abcdfp61L, 1.0118762747828234466621210689458255908670e-253L);
+#endif
+
+  TEST_ff_f (pow, 2.0L, -100000.0L, plus_zero, UNDERFLOW_EXCEPTION);
 
   END (pow);
 }
@@ -6896,13 +7572,13 @@ scalbn_test (void)
   TEST_fi_f (scalbn, 1, 0L, 1);
 
   TEST_fi_f (scalbn, 1, INT_MAX, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_fi_f (scalbn, 1, INT_MIN, plus_zero);
+  TEST_fi_f (scalbn, 1, INT_MIN, plus_zero, UNDERFLOW_EXCEPTION);
   TEST_fi_f (scalbn, max_value, INT_MAX, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_fi_f (scalbn, max_value, INT_MIN, plus_zero);
+  TEST_fi_f (scalbn, max_value, INT_MIN, plus_zero, UNDERFLOW_EXCEPTION);
   TEST_fi_f (scalbn, min_value, INT_MAX, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_fi_f (scalbn, min_value, INT_MIN, plus_zero);
+  TEST_fi_f (scalbn, min_value, INT_MIN, plus_zero, UNDERFLOW_EXCEPTION);
   TEST_fi_f (scalbn, min_value / 4, INT_MAX, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_fi_f (scalbn, min_value / 4, INT_MIN, plus_zero);
+  TEST_fi_f (scalbn, min_value / 4, INT_MIN, plus_zero, UNDERFLOW_EXCEPTION);
 
   END (scalbn);
 }
@@ -6927,32 +7603,32 @@ scalbln_test (void)
   TEST_fl_f (scalbln, 1, 0L, 1);
 
   TEST_fi_f (scalbln, 1, INT_MAX, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_fi_f (scalbln, 1, INT_MIN, plus_zero);
+  TEST_fi_f (scalbln, 1, INT_MIN, plus_zero, UNDERFLOW_EXCEPTION);
   TEST_fi_f (scalbln, max_value, INT_MAX, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_fi_f (scalbln, max_value, INT_MIN, plus_zero);
+  TEST_fi_f (scalbln, max_value, INT_MIN, plus_zero, UNDERFLOW_EXCEPTION);
   TEST_fi_f (scalbln, min_value, INT_MAX, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_fi_f (scalbln, min_value, INT_MIN, plus_zero);
+  TEST_fi_f (scalbln, min_value, INT_MIN, plus_zero, UNDERFLOW_EXCEPTION);
   TEST_fi_f (scalbln, min_value / 4, INT_MAX, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_fi_f (scalbln, min_value / 4, INT_MIN, plus_zero);
+  TEST_fi_f (scalbln, min_value / 4, INT_MIN, plus_zero, UNDERFLOW_EXCEPTION);
 
   TEST_fi_f (scalbln, 1, LONG_MAX, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_fi_f (scalbln, 1, LONG_MIN, plus_zero);
+  TEST_fi_f (scalbln, 1, LONG_MIN, plus_zero, UNDERFLOW_EXCEPTION);
   TEST_fi_f (scalbln, max_value, LONG_MAX, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_fi_f (scalbln, max_value, LONG_MIN, plus_zero);
+  TEST_fi_f (scalbln, max_value, LONG_MIN, plus_zero, UNDERFLOW_EXCEPTION);
   TEST_fi_f (scalbln, min_value, LONG_MAX, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_fi_f (scalbln, min_value, LONG_MIN, plus_zero);
+  TEST_fi_f (scalbln, min_value, LONG_MIN, plus_zero, UNDERFLOW_EXCEPTION);
   TEST_fi_f (scalbln, min_value / 4, LONG_MAX, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_fi_f (scalbln, min_value / 4, LONG_MIN, plus_zero);
+  TEST_fi_f (scalbln, min_value / 4, LONG_MIN, plus_zero, UNDERFLOW_EXCEPTION);
 
 #if LONG_MAX >= 0x100000000
   TEST_fi_f (scalbln, 1, 0x88000000L, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_fi_f (scalbln, 1, -0x88000000L, plus_zero);
+  TEST_fi_f (scalbln, 1, -0x88000000L, plus_zero, UNDERFLOW_EXCEPTION);
   TEST_fi_f (scalbln, max_value, 0x88000000L, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_fi_f (scalbln, max_value, -0x88000000L, plus_zero);
+  TEST_fi_f (scalbln, max_value, -0x88000000L, plus_zero, UNDERFLOW_EXCEPTION);
   TEST_fi_f (scalbln, min_value, 0x88000000L, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_fi_f (scalbln, min_value, -0x88000000L, plus_zero);
+  TEST_fi_f (scalbln, min_value, -0x88000000L, plus_zero, UNDERFLOW_EXCEPTION);
   TEST_fi_f (scalbln, min_value / 4, 0x88000000L, plus_infty, OVERFLOW_EXCEPTION);
-  TEST_fi_f (scalbln, min_value / 4, -0x88000000L, plus_zero);
+  TEST_fi_f (scalbln, min_value / 4, -0x88000000L, plus_zero, UNDERFLOW_EXCEPTION);
 #endif
 
   END (scalbn);
@@ -7403,7 +8079,8 @@ tan_test (void)
   TEST_f_f (tan, nan_value, nan_value);
   check_int ("errno for tan(NaN) == 0", errno, 0, 0, 0, 0);
 
-  TEST_f_f (tan, M_PI_4l, 1);
+  /* Bug 14154: spurious exception may occur.  */
+  TEST_f_f (tan, M_PI_4l, 1, UNDERFLOW_EXCEPTION_OK_FLOAT);
   TEST_f_f (tan, 0.75L, 0.931596459944072461165202756573936428L);
 
   TEST_f_f (tan, 0x1p65, -0.0472364872359047946798414219288370688827L);
@@ -7768,7 +8445,8 @@ y0_test (void)
   TEST_f_f (y0, 0x1.3ffp+74L, 1.818984347516051243459467456433028748678e-12L);
 
 #ifndef TEST_FLOAT
-  TEST_f_f (y0, 0x1.ff00000000002p+840L, 1.846591691699331493194965158699937660696e-127L);
+  /* Bug 14155: spurious exception may occur.  */
+  TEST_f_f (y0, 0x1.ff00000000002p+840L, 1.846591691699331493194965158699937660696e-127L, UNDERFLOW_EXCEPTION_OK);
 #endif
 
   END (y0);
@@ -7806,10 +8484,12 @@ y1_test (void)
   TEST_f_f (y1, 8.0, -0.158060461731247494255555266187483550L);
   TEST_f_f (y1, 10.0, 0.249015424206953883923283474663222803L);
 
-  TEST_f_f (y1, 0x1.27e204p+99L, -8.881610148467797208469612080785210013461e-16L);
+  /* Bug 14155: spurious exception may occur.  */
+  TEST_f_f (y1, 0x1.27e204p+99L, -8.881610148467797208469612080785210013461e-16L, UNDERFLOW_EXCEPTION_OK);
 
 #ifndef TEST_FLOAT
-  TEST_f_f (y1, 0x1.001000001p+593L, 3.927269966354206207832593635798954916263e-90L);
+  /* Bug 14155: spurious exception may occur.  */
+  TEST_f_f (y1, 0x1.001000001p+593L, 3.927269966354206207832593635798954916263e-90L, UNDERFLOW_EXCEPTION_OK);
 #endif
 
   END (y1);
@@ -8069,7 +8749,15 @@ main (int argc, char **argv)
 
   /* Trigonometric functions:  */
   acos_test ();
+  acos_test_tonearest ();
+  acos_test_towardzero ();
+  acos_test_downward ();
+  acos_test_upward ();
   asin_test ();
+  asin_test_tonearest ();
+  asin_test_towardzero ();
+  asin_test_downward ();
+  asin_test_upward ();
   atan_test ();
   atan2_test ();
   cos_test ();
@@ -8121,6 +8809,7 @@ main (int argc, char **argv)
   log1p_test ();
   log2_test ();
   logb_test ();
+  logb_test_downward ();
   modf_test ();
   ilogb_test ();
   scalb_test ();
