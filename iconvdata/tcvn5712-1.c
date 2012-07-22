@@ -379,7 +379,7 @@ static const struct
     last_ch = *statep >> 3;						      \
 									      \
     /* We have to buffer ch if it is a possible match in comp_table_data.  */ \
-    must_buffer_ch = last_ch && (ch >= 0x0041 && ch <= 0x01b0);		      \
+    must_buffer_ch = (ch >= 0x0041 && ch <= 0x01b0);                          \
 									      \
     if (last_ch)							      \
       {									      \

@@ -44,8 +44,7 @@ routines := wcscat wcschr wcscmp wcscpy wcscspn wcsdup wcslen wcsncat \
 strop-tests :=  wcscmp wmemcmp wcslen wcschr wcsrchr wcscpy
 tests := tst-wcstof wcsmbs-tst1 tst-wcsnlen tst-btowc tst-mbrtowc \
 	 tst-wcrtomb tst-wcpncpy tst-mbsrtowcs tst-wchar-h tst-mbrtowc2 \
-	 tst-c16c32-1 tst-mbsnrtowcs \
-	 wcsatcliff $(addprefix test-,$(strop-tests))
+	 tst-c16c32-1 wcsatcliff $(addprefix test-,$(strop-tests))
 
 include ../Rules
 
@@ -67,7 +66,7 @@ CFLAGS-wcstoull_l.c = $(strtox-CFLAGS)
 CFLAGS-wcstod_l.c = $(strtox-CFLAGS)
 CFLAGS-wcstold_l.c = $(strtox-CFLAGS)
 CFLAGS-wcstof_l.c = $(strtox-CFLAGS)
-CFLAGS-tst-wchar-h.c = -D_FORTIFY_SOURCE=2
+CPPFLAGS-tst-wchar-h.c = -D_FORTIFY_SOURCE=2
 
 CFLAGS-isoc99_wscanf.c += $(exceptions)
 CFLAGS-isoc99_fwscanf.c += $(exceptions)
