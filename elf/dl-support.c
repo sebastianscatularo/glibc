@@ -1,5 +1,5 @@
 /* Support for dynamic linking code in static libc.
-   Copyright (C) 1996-2008,2009,2010,2011 Free Software Foundation, Inc.
+   Copyright (C) 1996-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -107,6 +107,8 @@ void (*_dl_init_static_tls) (struct link_map *) = &_dl_nothread_init_static_tls;
 
 size_t _dl_pagesize = /* EXEC_PAGESIZE */ 4096;
 
+int _dl_inhibit_cache;
+
 unsigned int _dl_osversion;
 
 /* All known directories in sorted order.  */
@@ -123,6 +125,7 @@ int _dl_debug_fd = STDERR_FILENO;
 
 int _dl_correct_cache_id = _DL_CACHE_DEFAULT_ID;
 
+ElfW(auxv_t) *_dl_auxv;
 ElfW(Phdr) *_dl_phdr;
 size_t _dl_phnum;
 uint64_t _dl_hwcap __attribute__ ((nocommon));
@@ -186,6 +189,7 @@ _dl_aux_init (ElfW(auxv_t) *av)
   uid_t uid = 0;
   gid_t gid = 0;
 
+  _dl_auxv = av;
   for (; av->a_type != AT_NULL; ++av)
     switch (av->a_type)
       {

@@ -1,4 +1,0 @@
-2012-05-10  Pino Toscano  <toscano.pino@tiscali.it>
-
-	* hurd/hurdsock.c (_hurd_socket_server): Check for negative domains,
-	and reject them.
