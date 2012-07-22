@@ -1,6 +1,0 @@
-2012-06-23  Thomas Schwinge  <thomas@codesourcery.com>
-
-	* sysdeps/mach/start.c: Remove file.
-	* sysdeps/mach/hurd/i386/static-start.S: Fix start.S include.
-	* sysdeps/i386/init-first.c: Fix comment regarding start.S.
-	* sysdeps/sh/init-first.c: Likewise.
