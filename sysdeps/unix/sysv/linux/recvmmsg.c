@@ -1,4 +1,4 @@
-/* Copyright (C) 2010 Free Software Foundation, Inc.
+/* Copyright (C) 2010-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Andreas Schwab <schwab@redhat.com>, 2010.
 
@@ -26,8 +26,8 @@
 
 #ifdef __NR_recvmmsg
 int
-recvmmsg (int fd, struct mmsghdr *vmessages, unsigned int vlen, int flags,
-	  const struct timespec *tmo)
+__recvmmsg (int fd, struct mmsghdr *vmessages, unsigned int vlen, int flags,
+	    const struct timespec *tmo)
 {
   if (SINGLE_THREAD_P)
     return INLINE_SYSCALL (recvmmsg, 5, fd, vmessages, vlen, flags, tmo);
@@ -40,6 +40,9 @@ recvmmsg (int fd, struct mmsghdr *vmessages, unsigned int vlen, int flags,
 
   return result;
 }
+libc_hidden_def (__recvmmsg)
+
+weak_alias (__recvmmsg, recvmmsg)
 #elif defined __NR_socketcall
 # ifndef __ASSUME_RECVMMSG
 extern int __internal_recvmmsg (int fd, struct mmsghdr *vmessages,
@@ -50,8 +53,8 @@ extern int __internal_recvmmsg (int fd, struct mmsghdr *vmessages,
 static int have_recvmmsg;
 
 int
-recvmmsg (int fd, struct mmsghdr *vmessages, unsigned int vlen, int flags,
-	  const struct timespec *tmo)
+__recvmmsg (int fd, struct mmsghdr *vmessages, unsigned int vlen, int flags,
+	    const struct timespec *tmo)
 {
   if (__builtin_expect (have_recvmmsg >= 0, 1))
     {
@@ -84,16 +87,13 @@ recvmmsg (int fd, struct mmsghdr *vmessages, unsigned int vlen, int flags,
   __set_errno (ENOSYS);
   return -1;
 }
+libc_hidden_def (__recvmmsg)
+
+weak_alias (__recvmmsg, recvmmsg)
 # else
-/* When __ASSUME_RECVMMSG recvmmsg is defined in internal_recvmmsg.S.  */
+/* When __ASSUME_RECVMMSG, __recvmmsg and recvmmsg are defined in
+   internal_recvmmsg.S.  */
 # endif
 #else
-int
-recvmmsg (int fd, struct mmsghdr *vmessages, unsigned int vlen, int flags,
-	  const struct timespec *tmo)
-{
-  __set_errno (ENOSYS);
-  return -1;
-}
-stub_warning (recvmmsg)
+# include <socket/recvmmsg.c>
 #endif
