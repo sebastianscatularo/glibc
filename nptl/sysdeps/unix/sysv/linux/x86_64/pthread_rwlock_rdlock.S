@@ -1,4 +1,4 @@
-/* Copyright (C) 2002, 2003, 2005, 2007, 2009 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@redhat.com>, 2002.
 
@@ -21,7 +21,7 @@
 #include <lowlevelrwlock.h>
 #include <pthread-errnos.h>
 #include <kernel-features.h>
-
+#include <stap-probe.h>
 
 	.text
 
@@ -30,6 +30,9 @@
 	.align	16
 __pthread_rwlock_rdlock:
 	cfi_startproc
+
+	LIBC_PROBE (rdlock_entry, 1, %rdi)
+
 	xorq	%r10, %r10
 
 	/* Get the lock.  */
@@ -170,8 +173,5 @@ __pthread_rwlock_rdlock:
 	cfi_endproc
 	.size	__pthread_rwlock_rdlock,.-__pthread_rwlock_rdlock
 
-	.globl	pthread_rwlock_rdlock
-pthread_rwlock_rdlock = __pthread_rwlock_rdlock
-
-	.globl	__pthread_rwlock_rdlock_internal
-__pthread_rwlock_rdlock_internal = __pthread_rwlock_rdlock
+strong_alias (__pthread_rwlock_rdlock, pthread_rwlock_rdlock)
+hidden_def (__pthread_rwlock_rdlock)
