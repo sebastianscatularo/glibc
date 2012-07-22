@@ -1757,6 +1757,7 @@ GLIBC_2.16
  __getshmlba F
  __poll_chk F
  __ppoll_chk F
+ __sendmmsg F
  _sys_errlist D 0x220
  _sys_nerr D 0x4
  aligned_alloc F

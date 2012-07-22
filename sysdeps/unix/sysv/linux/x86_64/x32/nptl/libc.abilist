@@ -376,6 +376,7 @@ GLIBC_2.16
  __secure_getenv F
  __select F
  __send F
+ __sendmmsg F
  __setmntent F
  __setpgid F
  __sigaction F
