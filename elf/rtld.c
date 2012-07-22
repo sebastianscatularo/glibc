@@ -161,6 +161,7 @@ struct rtld_global_ro _rtld_global_ro attribute_relro =
     ._dl_fpu_control = _FPU_DEFAULT,
     ._dl_pointer_guard = 1,
     ._dl_pagesize = /* EXEC_PAGESIZE */ 4096,
+    ._dl_inhibit_cache = 0,
 
     /* Function pointers.  */
     ._dl_debug_printf = _dl_debug_printf,
@@ -973,6 +974,13 @@ dl_main (const ElfW(Phdr) *phdr,
 	    --_dl_argc;
 	    ++INTUSE(_dl_argv);
 	  }
+	else if (! strcmp (INTUSE(_dl_argv)[1], "--inhibit-cache"))
+	  {
+	    GLRO(dl_inhibit_cache) = 1;
+	    ++_dl_skip_args;
+	    --_dl_argc;
+	    ++INTUSE(_dl_argv);
+	  }
 	else if (! strcmp (INTUSE(_dl_argv)[1], "--library-path")
 		 && _dl_argc > 2)
 	  {
@@ -1022,6 +1030,7 @@ of this helper program; chances are you did not intend to run this program.\n\
   --list                list all dependencies and how they are resolved\n\
   --verify              verify that given object really is a dynamically linked\n\
 			object we can handle\n\
+  --inhibit-cache       Do not use " LD_SO_CACHE "\n\
   --library-path PATH   use given PATH instead of content of the environment\n\
 			variable LD_LIBRARY_PATH\n\
   --inhibit-rpath LIST  ignore RUNPATH and RPATH information in object names\n\
@@ -1423,7 +1432,7 @@ of this helper program; chances are you did not intend to run this program.\n\
 #endif
 
 #ifdef DL_SYSDEP_OSCHECK
-  DL_SYSDEP_OSCHECK (dl_fatal);
+  DL_SYSDEP_OSCHECK (_dl_fatal_printf);
 #endif
 
   /* Initialize the data structures for the search paths for shared
@@ -1967,7 +1976,12 @@ ERROR: ld.so: object '%s' cannot be loaded as audit interface: %s; ignored.\n",
 	      if (dyn->d_tag == DT_NEEDED)
 		{
 		  l = l->l_next;
-
+#if defined NEED_DL_SYSINFO || defined NEED_DL_SYSINFO_DSO
+		  /* Skip the VDSO since it's not part of the list
+		     of objects we brought in via DT_NEEDED entries.  */
+		  if (l == GLRO(dl_sysinfo_map))
+		    l = l->l_next;
+#endif
 		  if (!l->l_used)
 		    {
 		      if (first)
@@ -2278,6 +2292,8 @@ ERROR: ld.so: object '%s' cannot be loaded as audit interface: %s; ignored.\n",
 	      lnp->dont_free = 1;
 	      lnp = lnp->next;
 	    }
+	  /* Also allocated with the fake malloc().  */
+	  l->l_free_initfini = 0;
 
 	  if (l != &GL(dl_rtld_map))
 	    _dl_relocate_object (l, l->l_scope, GLRO(dl_lazy) ? RTLD_LAZY : 0,
@@ -2498,6 +2514,14 @@ warning: debug option `%s' unknown; try LD_DEBUG=help\n", copy);
 	}
 
       ++dl_debug;
+    }
+
+  if (GLRO(dl_debug_mask) & DL_DEBUG_UNUSED)
+    {
+      /* In order to get an accurate picture of whether a particular
+	 DT_NEEDED entry is actually used we have to process both
+	 the PLT and non-PLT relocation entries.  */
+      GLRO(dl_lazy) = 0;
     }
 
   if (GLRO(dl_debug_mask) & DL_DEBUG_HELP)
