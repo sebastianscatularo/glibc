@@ -5,7 +5,6 @@ t/tlsdesc.sym
 t/bits_atomic.h_multiple_threads
 t/bits_stdio-lock.h
 t/ptrmangle
-t/check_native
 t/_dl_random
 t/gscope
 t/socket_flags
