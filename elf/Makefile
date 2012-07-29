@@ -71,6 +71,8 @@ others		= sprof sln pldd
 install-bin	= sprof pldd
 others-static   = sln
 install-rootsbin = sln
+sln-modules	:= static-stubs
+extra-objs	+= $(sln-modules:=.o)
 
 ifeq (yes,$(use-ldconfig))
 ifeq (yes,$(build-shared))
@@ -78,7 +80,7 @@ others-static	+= ldconfig
 others		+= ldconfig
 install-rootsbin += ldconfig
 
-ldconfig-modules := cache readlib xmalloc xstrdup chroot_canon
+ldconfig-modules := cache readlib xmalloc xstrdup chroot_canon static-stubs
 extra-objs	+= $(ldconfig-modules:=.o)
 endif
 endif
@@ -410,6 +412,8 @@ $(objpfx)ldd: ldd.bash.in $(common-objpfx)soversions.mk \
 	mv -f $@.new $@
 
 $(objpfx)sprof: $(libdl)
+
+$(objpfx)sln: $(sln-modules:%=$(objpfx)%.o)
 
 $(objpfx)ldconfig: $(ldconfig-modules:%=$(objpfx)%.o)
 
@@ -943,15 +947,6 @@ $(all-built-dso:=.jmprel): %.jmprel: % Makefile
 	mv -f $@T $@
 common-generated += $(all-built-dso:$(common-objpfx)%=%.jmprel)
 
-check-data := $(firstword $(wildcard \
-		$(foreach D,$(add-ons) scripts,\
-			  $(patsubst %,$(..)$D/data/localplt-%.data,\
-				     $(abi-name) \
-				     $(addsuffix -$(config-os),\
-						 $(config-machine) \
-						 $(base-machine)) \
-			   generic))))
-
 tests: $(objpfx)check-localplt.out
 
 localplt-built-dso := $(addprefix $(common-objpfx),\
@@ -966,12 +961,14 @@ ifeq ($(have-thread-library),yes)
 localplt-built-dso += $(filter-out %_nonshared.a, $(shared-thread-library))
 endif
 
+vpath localplt.data $(+sysdep_dirs)
+
 $(objpfx)check-localplt.out: $(..)scripts/check-localplt.awk \
 			     $(..)scripts/localplt.awk \
 			     $(localplt-built-dso:=.jmprel) \
-			     $(check-data)
-	LC_ALL=C $(AWK) -f $(filter-out $< $(check-data),$^) | \
-	  LC_ALL=C $(AWK) -f $< $(check-data) - \
+			     localplt.data
+	LC_ALL=C $(AWK) -f $(filter-out $< %localplt.data,$^) | \
+	  LC_ALL=C $(AWK) -f $< $(filter %localplt.data,$^) - \
 	  > $@
 endif
 
