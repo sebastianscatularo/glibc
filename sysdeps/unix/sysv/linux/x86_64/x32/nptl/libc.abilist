@@ -2079,3 +2079,6 @@ GLIBC_2.16
  xencrypt F
  xprt_register F
  xprt_unregister F
+GLIBC_2.17
+ GLIBC_2.17 A
+ secure_getenv F
