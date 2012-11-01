@@ -58,7 +58,7 @@ libm-calls = e_acos e_acosh e_asin e_atan2 e_atanh e_cosh e_exp e_fmod	\
 	     s_catan s_casin s_ccos s_csin s_ctan s_ctanh s_cacos	\
 	     s_casinh s_cacosh s_catanh s_csqrt s_cpow s_cproj s_clog10 \
 	     s_fma s_lrint s_llrint s_lround s_llround e_exp10 w_log2	\
-	     s_isinf_ns $(calls:s_%=m_%)
+	     s_isinf_ns $(calls:s_%=m_%) x2y2m1
 
 include ../Makeconfig
 
@@ -126,6 +126,9 @@ CFLAGS-test-float.c = -fno-inline -ffloat-store -fno-builtin -frounding-math
 CFLAGS-test-double.c = -fno-inline -ffloat-store -fno-builtin -frounding-math
 CFLAGS-test-ldouble.c = -fno-inline -ffloat-store -fno-builtin -frounding-math
 CFLAGS-test-tgmath.c = -fno-builtin
+# The following testcase uses very long lines (>3 million), so it may take a
+# while to compile it. See: http://llvm.org/bugs/show_bug.cgi?id=14106 and
+# http://gcc.gnu.org/bugzilla/show_bug.cgi?id=54402
 CFLAGS-test-tgmath2.c = -fno-builtin
 CFLAGS-test-tgmath-ret.c = -fno-builtin
 CFLAGS-test-powl.c = -fno-builtin
