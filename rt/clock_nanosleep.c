@@ -1,5 +1,5 @@
 /* High-resolution sleep with the specified clock.  Stub version.
-   Copyright (C) 2000 Free Software Foundation, Inc.
+   Copyright (C) 2000-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -17,8 +17,7 @@
    <http://www.gnu.org/licenses/>.  */
 
 #include <errno.h>
-#include <sys/time.h>
-
+#include <time.h>
 
 int
 clock_nanosleep (clockid_t clock_id, int flags, const struct timespec *req,
@@ -34,5 +33,6 @@ clock_nanosleep (clockid_t clock_id, int flags, const struct timespec *req,
   /* Not implemented.  */
   return ENOSYS;
 }
+strong_alias (clock_nanosleep, __clock_nanosleep)
 stub_warning (clock_nanosleep)
 #include <stub-tag.h>
