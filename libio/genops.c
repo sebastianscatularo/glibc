@@ -45,15 +45,15 @@ static int _IO_list_all_stamp;
 
 static _IO_FILE *run_fp;
 
+#ifdef _IO_MTSAFE_IO
 static void
 flush_cleanup (void *not_used)
 {
   if (run_fp != NULL)
     _IO_funlockfile (run_fp);
-#ifdef _IO_MTSAFE_IO
   _IO_lock_unlock (list_all_lock);
-#endif
 }
+#endif
 
 void
 _IO_un_link (fp)
@@ -952,6 +952,7 @@ _IO_unbuffer_write (void)
 	  /* Iff stream is un-orientated, it wasn't used. */
 	  && fp->_mode != 0)
 	{
+#ifdef _IO_MTSAFE_IO
 	  int cnt;
 #define MAXTRIES 2
 	  for (cnt = 0; cnt < MAXTRIES; ++cnt)
@@ -961,6 +962,7 @@ _IO_unbuffer_write (void)
 	      /* Give the other thread time to finish up its use of the
 		 stream.  */
 	      __sched_yield ();
+#endif
 
 	  if (! dealloc_buffers && !(fp->_flags & _IO_USER_BUF))
 	    {
@@ -974,8 +976,10 @@ _IO_unbuffer_write (void)
 
 	  _IO_SETBUF (fp, NULL, 0);
 
+#ifdef _IO_MTSAFE_IO
 	  if (cnt < MAXTRIES && fp->_lock != NULL)
 	    _IO_lock_unlock (*fp->_lock);
+#endif
 	}
 
       /* Make sure that never again the wide char functions can be
