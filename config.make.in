@@ -44,6 +44,7 @@ config-cflags-nofma = @libc_cv_cc_nofma@
 config-asflags-i686 = @libc_cv_as_i686@
 
 defines = @DEFINES@
+sysheaders = @sysheaders@
 sysincludes = @SYSINCLUDES@
 c++-sysincludes = @CXX_SYSINCLUDES@
 all-warnings = @all_warnings@
@@ -54,7 +55,6 @@ have-Bgroup = @libc_cv_Bgroup@
 with-fp = @with_fp@
 old-glibc-headers = @old_glibc_headers@
 unwind-find-fde = @libc_cv_gcc_unwind_find_fde@
-have-cpp-asm-debuginfo = @libc_cv_cpp_asm_debuginfo@
 have-forced-unwind = @libc_cv_forced_unwind@
 have-fpie = @libc_cv_fpie@
 have-mfma4 = @libc_cv_cc_fma4@
@@ -99,6 +99,8 @@ sysdeps-add-ons = @sysdeps_add_ons@
 cross-compiling = @cross_compiling@
 force-install = @force_install@
 link-obsolete-rpc = @link_obsolete_rpc@
+build-nscd = @build_nscd@
+use-nscd = @use_nscd@
 
 # Build tools.
 CC = @CC@
@@ -109,6 +111,7 @@ CPPFLAGS-config = @CPPFLAGS@
 CPPUNDEFS = @CPPUNDEFS@
 ASFLAGS-config = @ASFLAGS_config@
 AR = @AR@
+NM = @NM@
 MAKEINFO = @MAKEINFO@
 AS = $(CC) -c
 MIG = @MIG@

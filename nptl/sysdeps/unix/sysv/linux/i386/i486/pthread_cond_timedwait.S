@@ -122,10 +122,6 @@ __pthread_cond_timedwait:
 	leal	4(%esp), %ecx
 	movl	$__NR_clock_gettime, %eax
 	ENTER_KERNEL
-# ifndef __ASSUME_POSIX_TIMERS
-	cmpl	$-ENOSYS, %eax
-	je	19f
-# endif
 	movl	%edx, %ebx
 
 	/* Compute relative timeout.  */
@@ -204,9 +200,11 @@ __pthread_cond_timedwait:
 42:	leal	(%ebp), %esi
 	movl	28(%esp), %edx
 	addl	$cond_futex, %ebx
+.Ladd_cond_futex_pi:
 	movl	$SYS_futex, %eax
 	ENTER_KERNEL
 	subl	$cond_futex, %ebx
+.Lsub_cond_futex_pi:
 	movl	%eax, %esi
 	/* Set the pi-requeued flag only if the kernel has returned 0. The
 	   kernel does not hold the mutex on ETIMEDOUT or any other error.  */
@@ -214,8 +212,23 @@ __pthread_cond_timedwait:
 	sete	24(%esp)
 	je	41f
 
-	/* Normal and PI futexes dont mix. Use normal futex functions only
-	   if the kernel does not support the PI futex functions.  */
+	/* When a futex syscall with FUTEX_WAIT_REQUEUE_PI returns
+	   successfully, it has already locked the mutex for us and the
+	   pi_flag (24(%esp)) is set to denote that fact.  However, if another
+	   thread changed the futex value before we entered the wait, the
+	   syscall may return an EAGAIN and the mutex is not locked.  We go
+	   ahead with a success anyway since later we look at the pi_flag to
+	   decide if we got the mutex or not.  The sequence numbers then make
+	   sure that only one of the threads actually wake up.  We retry using
+	   normal FUTEX_WAIT only if the kernel returned ENOSYS, since normal
+	   and PI futexes don't mix.
+
+	   Note that we don't check for EAGAIN specifically; we assume that the
+	   only other error the futex function could return is EAGAIN (barring
+	   the ETIMEOUT of course, for the timeout case in futex) since
+	   anything else would mean an error in our function.  It is too
+	   expensive to do that check for every call (which is  quite common in
+	   case of a large number of threads), so it has been skipped.  */
 	cmpl	$-ENOSYS, %eax
 	jne	41f
 	xorl	%ecx, %ecx
@@ -275,9 +288,24 @@ __pthread_cond_timedwait:
 	jne	9f
 
 15:	cmpl	$-ETIMEDOUT, %esi
-	jne	8b
+	je	28f
 
-	addl	$1, wakeup_seq(%ebx)
+	/* We need to go back to futex_wait.  If we're using requeue_pi, then
+	   release the mutex we had acquired and go back.  */
+	movl	24(%esp), %edx
+	test	%edx, %edx
+	jz	8b
+
+	/* Adjust the mutex values first and then unlock it.  The unlock
+	   should always succeed or else the kernel did not lock the mutex
+	   correctly.  */
+	movl	dep_mutex(%ebx), %eax
+	call	__pthread_mutex_cond_lock_adjust
+	xorl	%edx, %edx
+	call	__pthread_mutex_unlock_usercnt
+	jmp	8b
+
+28:	addl	$1, wakeup_seq(%ebx)
 	adcl	$0, wakeup_seq+4(%ebx)
 	addl	$1, cond_futex(%ebx)
 	movl	$ETIMEDOUT, %esi
@@ -482,30 +510,6 @@ __pthread_cond_timedwait:
 	call	__lll_unlock_wake
 	jmp	11b
 
-#if defined __NR_clock_gettime && !defined __ASSUME_POSIX_TIMERS
-	/* clock_gettime not available.  */
-19:	leal	4(%esp), %ebx
-	xorl	%ecx, %ecx
-	movl	$__NR_gettimeofday, %eax
-	ENTER_KERNEL
-	movl	%edx, %ebx
-
-	/* Compute relative timeout.  */
-	movl	8(%esp), %eax
-	movl	$1000, %edx
-	mul	%edx		/* Milli seconds to nano seconds.  */
-	movl	(%ebp), %ecx
-	movl	4(%ebp), %edx
-	subl	4(%esp), %ecx
-	subl	%eax, %edx
-	jns	20f
-	addl	$1000000000, %edx
-	subl	$1, %ecx
-20:	testl	%ecx, %ecx
-	movl	$-ETIMEDOUT, %esi
-	js	6b
-	jmp	21b
-#endif
 	.size	__pthread_cond_timedwait, .-__pthread_cond_timedwait
 versioned_symbol (libpthread, __pthread_cond_timedwait, pthread_cond_timedwait,
 		  GLIBC_2_3_2)
@@ -645,10 +649,27 @@ __condvar_tw_cleanup:
 	movl	$0x7fffffff, %edx
 	ENTER_KERNEL
 
+	/* Lock the mutex only if we don't own it already.  This only happens
+	   in case of PI mutexes, if we got cancelled after a successful
+	   return of the futex syscall and before disabling async
+	   cancellation.  */
 5:	movl	24+FRAME_SIZE(%esp), %eax
-	call	__pthread_mutex_cond_lock
+	movl	MUTEX_KIND(%eax), %ebx
+	andl	$(ROBUST_BIT|PI_BIT), %ebx
+	cmpl	$PI_BIT, %ebx
+	jne	8f
 
-	movl	%esi, (%esp)
+	movl	(%eax), %ebx
+	andl	$TID_MASK, %ebx
+	cmpl	%ebx, %gs:TID
+	jne	8f
+	/* We managed to get the lock.  Fix it up before returning.  */
+	call	__pthread_mutex_cond_lock_adjust
+	jmp	9f
+
+8:	call	__pthread_mutex_cond_lock
+
+9:	movl	%esi, (%esp)
 .LcallUR:
 	call	_Unwind_Resume
 	hlt
@@ -666,7 +687,15 @@ __condvar_tw_cleanup:
 	.uleb128 .Lcstend-.Lcstbegin
 .Lcstbegin:
 	.long	.LcleanupSTART-.LSTARTCODE
-	.long	.Ladd_cond_futex-.LcleanupSTART
+	.long	.Ladd_cond_futex_pi-.LcleanupSTART
+	.long	__condvar_tw_cleanup-.LSTARTCODE
+	.uleb128  0
+	.long	.Ladd_cond_futex_pi-.LSTARTCODE
+	.long	.Lsub_cond_futex_pi-.Ladd_cond_futex_pi
+	.long	__condvar_tw_cleanup2-.LSTARTCODE
+	.uleb128  0
+	.long	.Lsub_cond_futex_pi-.LSTARTCODE
+	.long	.Ladd_cond_futex-.Lsub_cond_futex_pi
 	.long	__condvar_tw_cleanup-.LSTARTCODE
 	.uleb128  0
 	.long	.Ladd_cond_futex-.LSTARTCODE
