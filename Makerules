@@ -880,11 +880,11 @@ install-lib.so-unversioned := $(filter-out $(versioned), $(install-lib.so))
 #	$(inst_libdir)/libfoo.so	-- for linking, symlink or ld script
 #	$(inst_slibdir)/libfoo.so.NN	-- for loading by SONAME, symlink
 #	$(inst_slibdir)/libfoo-X.Y.Z.so -- the real shared object file
-V := $(firstword $($(subdir)-version) $(version))
+lib-version := $(firstword $($(subdir)-version) $(version))
 install-lib-nosubdir: $(install-lib.so-unversioned:%=$(inst_slibdir)/%) \
 		      $(foreach L,$(install-lib.so-versioned),\
 				$(inst_libdir)/$L \
-				$(inst_slibdir)/$(L:.so=)-$V.so \
+				$(inst_slibdir)/$(L:.so=)-$(lib-version).so \
 				$(inst_slibdir)/$L$($L-version))
 
 # Install all the unversioned shared libraries.
@@ -1188,7 +1188,7 @@ ifeq ($(versioning),yes)
 	mv -f $@T $@
 
 %.dynsym: %.so
-	$(OBJDUMP) --dynamic-syms $< > $@T
+	LC_ALL=C $(OBJDUMP) --dynamic-syms $< > $@T
 	mv -f $@T $@
 
 vpath %.abilist $(+sysdep_dirs)
