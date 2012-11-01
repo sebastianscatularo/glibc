@@ -1,4 +1,4 @@
-# Copyright (C) 1996-2000, 2002-2004, 2012 Free Software Foundation, Inc.
+# Copyright (C) 1996-2012 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -50,7 +50,7 @@ generated-dirs = de
 
 tst-catgets-ENV = NLSPATH="$(objpfx)%l/%N.cat" LANG=de
 
-ifneq ($(cross-compiling),yes)
+ifeq ($(run-built-tests),yes)
 tests: $(objpfx)de/libc.cat $(objpfx)test1.cat $(objpfx)test2.cat \
        $(objpfx)test-gencat.out
 # This test just checks whether the program produces any error or not.
@@ -75,7 +75,7 @@ $(objpfx)de.msg: xopen-msg.awk $(..)po/de.po
 
 $(objpfx)test-gencat.out: test-gencat.sh $(objpfx)test-gencat \
 			  $(objpfx)sample.SJIS.cat
-	$(SHELL) -e $< $(common-objpfx) '$(built-program-cmd)'
+	$(SHELL) $< $(common-objpfx) '$(built-program-cmd)'
 
 $(objpfx)sample.SJIS.cat: sample.SJIS $(objpfx)gencat
 	GCONV_PATH=$(common-objpfx)iconvdata LC_ALL=C \
