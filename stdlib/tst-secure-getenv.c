@@ -18,7 +18,7 @@
 /* Test that secure_getenv works by invoking the test as a SGID
    program with a group ID from the supplementary group list.  This
    test can fail spuriously if the user is not a member of a suitable
-   supplementary group. */
+   supplementary group.  */
 
 #include <errno.h>
 #include <fcntl.h>
@@ -36,7 +36,7 @@ static char MAGIC_ARGUMENT[] = "run-actual-test";
 static const char *test_dir;
 
 /* Return a GID which is not our current GID, but is present in the
-   supplementary group list. */
+   supplementary group list.  */
 static gid_t
 choose_gid (void)
 {
@@ -45,7 +45,7 @@ choose_gid (void)
   int ret = getgroups (count, groups);
   if (ret < 0)
     {
-      perror ("getgroups");
+      printf ("getgroups: %m\n");
       exit (1);
     }
   gid_t current = getgid ();
@@ -60,7 +60,7 @@ choose_gid (void)
 
 /* Copies the executable into a restricted directory, so that we can
    safely make it SGID with the TARGET group ID.  Then runs the
-   executable. */
+   executable.  */
 static int
 run_executable_sgid (gid_t target)
 {
@@ -72,29 +72,29 @@ run_executable_sgid (gid_t target)
   if (asprintf (&dirname, "%s/secure-getenv.%jd",
 		test_dir, (intmax_t) getpid ()) < 0)
     {
-      perror ("asprintf");
+      printf ("asprintf: %m\n");
       goto err;
     }
   if (mkdir (dirname, 0700) < 0)
     {
-      perror ("mkdir");
+      printf ("mkdir: %m\n");
       goto err;
     }
   if (asprintf (&execname, "%s/bin", dirname) < 0)
     {
-      perror ("asprintf");
+      printf ("asprintf: %m\n");
       goto err;
     }
   infd = open ("/proc/self/exe", O_RDONLY);
   if (infd < 0)
     {
-      perror ("open");
+      printf ("open (/proc/self/exe): %m\n");
       goto err;
     }
   outfd = open (execname, O_WRONLY | O_CREAT | O_EXCL, 0700);
   if (outfd < 0)
     {
-      perror ("open");
+      printf ("open (%s): %m\n", execname);
       goto err;
     }
   char buf[4096];
@@ -103,7 +103,7 @@ run_executable_sgid (gid_t target)
       ssize_t rdcount = read (infd, buf, sizeof (buf));
       if (rdcount < 0)
 	{
-	  perror ("read");
+	  printf ("read: %m\n");
 	  goto err;
 	}
       if (rdcount == 0)
@@ -117,7 +117,7 @@ run_executable_sgid (gid_t target)
 	    errno = ENOSPC;
 	  if (wrcount <= 0)
 	    {
-	      perror ("write");
+	      printf ("write: %m\n");
 	      goto err;
 	    }
 	  p += wrcount;
@@ -125,49 +125,49 @@ run_executable_sgid (gid_t target)
     }
   if (fchown (outfd, getuid (), target) < 0)
     {
-      perror ("fchown");
+      printf ("fchown (%s): %m\n", execname);
       goto err;
     }
   if (fchmod (outfd, 02750) < 0)
     {
-      perror ("fchmod");
+      printf ("fchmod (%s): %m\n", execname);
       goto err;
     }
   if (close (outfd) < 0)
     {
-      perror ("close");
+      printf ("close (outfd): %m\n");
       goto err;
     }
   if (close (infd) < 0)
     {
-      perror ("close");
+      printf ("close (infd): %m\n");
       goto err;
     }
 
   int kid = fork ();
   if (kid < 0)
     {
-      perror ("fork");
+      printf ("fork: %m\n");
       goto err;
     }
   if (kid == 0)
     {
-      /* Child process. */
+      /* Child process.  */
       char *args[] = { execname, MAGIC_ARGUMENT, NULL };
       execve (execname, args, environ);
-      perror ("execve");
+      printf ("execve (%s): %m\n", execname);
       _exit (1);
     }
   int status;
   if (waitpid (kid, &status, 0) < 0)
     {
-      perror ("waitpid");
+      printf ("waitpid: %m\n");
       goto err;
     }
   if (!WIFEXITED (status) || WEXITSTATUS (status) != MAGIC_STATUS)
     {
-      fprintf (stderr, "Unexpected exit status %d from child process\n",
-	       status);
+      printf ("Unexpected exit status %d from child process\n",
+	      status);
       goto err;
     }
   ret = 0;
@@ -195,27 +195,28 @@ do_test (void)
 {
   if (getenv ("PATH") == NULL)
     {
-      fprintf (stderr, "PATH not set\n");
+      printf ("PATH not set\n");
       exit (1);
     }
   if (secure_getenv ("PATH") == NULL)
     {
-      fprintf (stderr, "PATH not set according to secure_getenv\n");
+      printf ("PATH not set according to secure_getenv\n");
       exit (1);
     }
   if (strcmp (getenv ("PATH"), secure_getenv ("PATH")) != 0)
     {
-      fprintf (stderr, "PATH mismatch (%s, %s)\n",
-	       getenv ("PATH"), secure_getenv ("PATH"));
+      printf ("PATH mismatch (%s, %s)\n",
+	      getenv ("PATH"), secure_getenv ("PATH"));
       exit (1);
     }
 
   gid_t target = choose_gid ();
   if (target == 0)
     {
-      fprintf (stderr, "Could not find a suitable GID user %jd\n",
+      fprintf (stderr,
+	       "Could not find a suitable GID for user %jd, skipping test\n",
 	       (intmax_t) getuid ());
-      exit (1);
+      exit (0);
     }
   return run_executable_sgid (target);
 }
@@ -227,18 +228,19 @@ alternative_main (int argc, char **argv)
     {
       if (getgid () == getegid ())
 	{
+	  /* This can happen if the file system is mounted nosuid.  */
 	  fprintf (stderr, "SGID failed: GID and EGID match (%jd)\n",
-		   (intmax_t) getgid ());
-	  exit (2);
+		  (intmax_t) getgid ());
+	  exit (MAGIC_STATUS);
 	}
       if (getenv ("PATH") == NULL)
 	{
-	  fprintf (stderr, "PATH variable not present\n");
+	  printf ("PATH variable not present\n");
 	  exit (3);
 	}
       if (secure_getenv ("PATH") != NULL)
 	{
-	  fprintf (stderr, "PATH variable not filtered out\n");
+	  printf ("PATH variable not filtered out\n");
 	  exit (4);
 	}
       exit (MAGIC_STATUS);

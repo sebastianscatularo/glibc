@@ -49,15 +49,17 @@ strop-tests	:= memchr memcmp memcpy memmove mempcpy memset memccpy	\
 		   stpcpy stpncpy strcat strchr strcmp strcpy strcspn	\
 		   strlen strncmp strncpy strpbrk strrchr strspn memmem	\
 		   strstr strcasestr strnlen strcasecmp strncasecmp	\
-		   strncat rawmemchr strchrnul
+		   strncat rawmemchr strchrnul bcopy bzero
 tests		:= tester inl-tester noinl-tester testcopy test-ffs	\
 		   tst-strlen stratcliff tst-svc tst-inlcall		\
 		   bug-strncat1 bug-strspn1 bug-strpbrk1 tst-bswap	\
 		   tst-strtok tst-strxfrm bug-strcoll1 tst-strfry	\
 		   bug-strtok1 $(addprefix test-,$(strop-tests))	\
 		   bug-envz1 tst-strxfrm2 tst-endian tst-svc2		\
-		   bug-strstr1 bug-strchr1 tst-strtok_r
+		   tst-strtok_r
 
+tests-ifunc := $(strop-tests:%=test-%-ifunc)
+tests += $(tests-ifunc)
 
 include ../Rules
 
@@ -74,8 +76,9 @@ CFLAGS-stratcliff.c = -fno-builtin
 CFLAGS-test-ffs.c = -fno-builtin
 CFLAGS-tst-inlcall.c = -fno-builtin
 CFLAGS-bug-strstr1.c = -fno-builtin
+CFLAGS-bug-strcasestr1.c = -fno-builtin
 
-ifeq ($(cross-compiling),no)
+ifeq ($(run-built-tests),yes)
 tests: $(objpfx)tst-svc.out
 $(objpfx)tst-svc.out: tst-svc.input $(objpfx)tst-svc
 	GCONV_PATH=$(common-objpfx)iconvdata LC_ALL=C \

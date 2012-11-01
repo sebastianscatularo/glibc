@@ -1,5 +1,5 @@
 /* Malloc implementation for multiple threads without lock contention.
-   Copyright (C) 1996-2009, 2010, 2011, 2012 Free Software Foundation, Inc.
+   Copyright (C) 1996-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Wolfram Gloger <wg@malloc.de>
    and Doug Lea <dl@cs.oswego.edu>, 2001.
@@ -1075,9 +1075,10 @@ static void*   realloc_check(void* oldmem, size_t bytes,
 			       const void *caller);
 static void*   memalign_check(size_t alignment, size_t bytes,
 				const void *caller);
-/* These routines are never needed in this configuration.  */
+#ifndef NO_THREADS
 static void*   malloc_atfork(size_t sz, const void *caller);
 static void      free_atfork(void* mem, const void *caller);
+#endif
 
 
 /* ------------- Optional versions of memcopy ---------------- */
@@ -2857,21 +2858,10 @@ __libc_malloc(size_t bytes)
     return 0;
   victim = _int_malloc(ar_ptr, bytes);
   if(!victim) {
-    /* Maybe the failure is due to running out of mmapped areas. */
-    if(ar_ptr != &main_arena) {
-      (void)mutex_unlock(&ar_ptr->mutex);
-      ar_ptr = &main_arena;
-      (void)mutex_lock(&ar_ptr->mutex);
+    ar_ptr = arena_get_retry(ar_ptr, bytes);
+    if (__builtin_expect(ar_ptr != NULL, 1)) {
       victim = _int_malloc(ar_ptr, bytes);
       (void)mutex_unlock(&ar_ptr->mutex);
-    } else {
-      /* ... or sbrk() has failed and there is still a chance to mmap() */
-      ar_ptr = arena_get2(ar_ptr->next ? ar_ptr : 0, bytes);
-      (void)mutex_unlock(&main_arena.mutex);
-      if(ar_ptr) {
-	victim = _int_malloc(ar_ptr, bytes);
-	(void)mutex_unlock(&ar_ptr->mutex);
-      }
     }
   } else
     (void)mutex_unlock(&ar_ptr->mutex);
@@ -3035,22 +3025,10 @@ __libc_memalign(size_t alignment, size_t bytes)
     return 0;
   p = _int_memalign(ar_ptr, alignment, bytes);
   if(!p) {
-    /* Maybe the failure is due to running out of mmapped areas. */
-    if(ar_ptr != &main_arena) {
-      (void)mutex_unlock(&ar_ptr->mutex);
-      ar_ptr = &main_arena;
-      (void)mutex_lock(&ar_ptr->mutex);
+    ar_ptr = arena_get_retry (ar_ptr, bytes);
+    if (__builtin_expect(ar_ptr != NULL, 1)) {
       p = _int_memalign(ar_ptr, alignment, bytes);
       (void)mutex_unlock(&ar_ptr->mutex);
-    } else {
-      /* ... or sbrk() has failed and there is still a chance to mmap() */
-      mstate prev = ar_ptr->next ? ar_ptr : 0;
-      (void)mutex_unlock(&ar_ptr->mutex);
-      ar_ptr = arena_get2(prev, bytes);
-      if(ar_ptr) {
-	p = _int_memalign(ar_ptr, alignment, bytes);
-	(void)mutex_unlock(&ar_ptr->mutex);
-      }
     }
   } else
     (void)mutex_unlock(&ar_ptr->mutex);
@@ -3083,23 +3061,14 @@ __libc_valloc(size_t bytes)
   if(!ar_ptr)
     return 0;
   p = _int_valloc(ar_ptr, bytes);
-  (void)mutex_unlock(&ar_ptr->mutex);
   if(!p) {
-    /* Maybe the failure is due to running out of mmapped areas. */
-    if(ar_ptr != &main_arena) {
-      ar_ptr = &main_arena;
-      (void)mutex_lock(&ar_ptr->mutex);
+    ar_ptr = arena_get_retry (ar_ptr, bytes);
+    if (__builtin_expect(ar_ptr != NULL, 1)) {
       p = _int_memalign(ar_ptr, pagesz, bytes);
       (void)mutex_unlock(&ar_ptr->mutex);
-    } else {
-      /* ... or sbrk() has failed and there is still a chance to mmap() */
-      ar_ptr = arena_get2(ar_ptr->next ? ar_ptr : 0, bytes);
-      if(ar_ptr) {
-	p = _int_memalign(ar_ptr, pagesz, bytes);
-	(void)mutex_unlock(&ar_ptr->mutex);
-      }
     }
-  }
+  } else
+    (void)mutex_unlock (&ar_ptr->mutex);
   assert(!p || chunk_is_mmapped(mem2chunk(p)) ||
 	 ar_ptr == arena_for_chunk(mem2chunk(p)));
 
@@ -3127,24 +3096,14 @@ __libc_pvalloc(size_t bytes)
 
   arena_get(ar_ptr, bytes + 2*pagesz + MINSIZE);
   p = _int_pvalloc(ar_ptr, bytes);
-  (void)mutex_unlock(&ar_ptr->mutex);
   if(!p) {
-    /* Maybe the failure is due to running out of mmapped areas. */
-    if(ar_ptr != &main_arena) {
-      ar_ptr = &main_arena;
-      (void)mutex_lock(&ar_ptr->mutex);
+    ar_ptr = arena_get_retry (ar_ptr, bytes + 2*pagesz + MINSIZE);
+    if (__builtin_expect(ar_ptr != NULL, 1)) {
       p = _int_memalign(ar_ptr, pagesz, rounded_bytes);
       (void)mutex_unlock(&ar_ptr->mutex);
-    } else {
-      /* ... or sbrk() has failed and there is still a chance to mmap() */
-      ar_ptr = arena_get2(ar_ptr->next ? ar_ptr : 0,
-			  bytes + 2*pagesz + MINSIZE);
-      if(ar_ptr) {
-	p = _int_memalign(ar_ptr, pagesz, rounded_bytes);
-	(void)mutex_unlock(&ar_ptr->mutex);
-      }
     }
-  }
+  } else
+    (void)mutex_unlock(&ar_ptr->mutex);
   assert(!p || chunk_is_mmapped(mem2chunk(p)) ||
 	 ar_ptr == arena_for_chunk(mem2chunk(p)));
 
@@ -3209,30 +3168,19 @@ __libc_calloc(size_t n, size_t elem_size)
 #endif
   mem = _int_malloc(av, sz);
 
-  /* Only clearing follows, so we can unlock early. */
-  (void)mutex_unlock(&av->mutex);
 
   assert(!mem || chunk_is_mmapped(mem2chunk(mem)) ||
 	 av == arena_for_chunk(mem2chunk(mem)));
 
   if (mem == 0) {
-    /* Maybe the failure is due to running out of mmapped areas. */
-    if(av != &main_arena) {
-      (void)mutex_lock(&main_arena.mutex);
-      mem = _int_malloc(&main_arena, sz);
-      (void)mutex_unlock(&main_arena.mutex);
-    } else {
-      /* ... or sbrk() has failed and there is still a chance to mmap() */
-      (void)mutex_lock(&main_arena.mutex);
-      av = arena_get2(av->next ? av : 0, sz);
-      (void)mutex_unlock(&main_arena.mutex);
-      if(av) {
-	mem = _int_malloc(av, sz);
-	(void)mutex_unlock(&av->mutex);
-      }
+    av = arena_get_retry (av, sz);
+    if (__builtin_expect(av != NULL, 1)) {
+      mem = _int_malloc(av, sz);
+      (void)mutex_unlock(&av->mutex);
     }
     if (mem == 0) return 0;
-  }
+  } else
+    (void)mutex_unlock(&av->mutex);
   p = mem2chunk(mem);
 
   /* Two optional cases in which clearing not necessary */
@@ -4502,7 +4450,7 @@ static int mtrim(mstate av, size_t pad)
 		       content.  */
 		    memset (paligned_mem, 0x89, size & ~psm1);
 #endif
-		    madvise (paligned_mem, size & ~psm1, MADV_DONTNEED);
+		    __madvise (paligned_mem, size & ~psm1, MADV_DONTNEED);
 
 		    result = 1;
 		  }
@@ -4551,6 +4499,9 @@ musable(void* mem)
   mchunkptr p;
   if (mem != 0) {
     p = mem2chunk(mem);
+
+    if (__builtin_expect(using_malloc_checking == 1, 0))
+      return malloc_check_get_size(p);
     if (chunk_is_mmapped(p))
       return chunksize(p) - 2*SIZE_SZ;
     else if (inuse(p))
@@ -4754,13 +4705,15 @@ int __libc_mallopt(int param_number, int value)
     if((unsigned long)value > HEAP_MAX_SIZE/2)
       res = 0;
     else
-      mp_.mmap_threshold = value;
-      mp_.no_dyn_threshold = 1;
+      {
+	mp_.mmap_threshold = value;
+	mp_.no_dyn_threshold = 1;
+      }
     break;
 
   case M_MMAP_MAX:
-      mp_.n_mmaps_max = value;
-      mp_.no_dyn_threshold = 1;
+    mp_.n_mmaps_max = value;
+    mp_.no_dyn_threshold = 1;
     break;
 
   case M_CHECK_ACTION:
@@ -4946,8 +4899,7 @@ malloc_printerr(int action, const char *str, void *ptr)
       while (cp > buf)
 	*--cp = '0';
 
-      __libc_message (action & 2,
-		      "*** glibc detected *** %s: %s: 0x%s ***\n",
+      __libc_message (action & 2, "*** Error in `%s': %s: 0x%s ***\n",
 		      __libc_argv[0] ?: "<unknown>", str, cp);
     }
   else if (action & 2)
