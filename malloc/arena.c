@@ -1,6 +1,5 @@
 /* Malloc implementation for multiple threads without lock contention.
-   Copyright (C) 2001,2002,2003,2004,2005,2006,2007,2009,2010,2011,2012
-   Free Software Foundation, Inc.
+   Copyright (C) 2001-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Wolfram Gloger <wg@malloc.de>, 2001.
 
@@ -19,6 +18,9 @@
    not, see <http://www.gnu.org/licenses/>.  */
 
 #include <stdbool.h>
+
+/* Get the implementation for check_may_shrink_heap.  */
+#include <malloc-sysdep.h>
 
 /* Compile-time constants.  */
 
@@ -120,14 +122,14 @@ int __malloc_initialized = -1;
   if(ptr) \
     (void)mutex_lock(&ptr->mutex); \
   else \
-    ptr = arena_get2(ptr, (size)); \
+    ptr = arena_get2(ptr, (size), NULL); \
 } while(0)
 #else
 # define arena_lock(ptr, size) do { \
   if(ptr && !mutex_trylock(&ptr->mutex)) { \
     THREAD_STAT(++(ptr->stat_lock_direct)); \
   } else \
-    ptr = arena_get2(ptr, (size)); \
+    ptr = arena_get2(ptr, (size), NULL); \
 } while(0)
 #endif
 
@@ -140,6 +142,8 @@ int __malloc_initialized = -1;
 
 
 /**************************************************************************/
+
+#ifndef NO_THREADS
 
 /* atfork support.  */
 
@@ -276,7 +280,7 @@ ptmalloc_unlock_all (void)
   (void)mutex_unlock(&list_lock);
 }
 
-#ifdef __linux__
+# ifdef __linux__
 
 /* In NPTL, unlocking a mutex in the child process after a
    fork() is currently unsafe, whereas re-initializing it is safe and
@@ -311,11 +315,13 @@ ptmalloc_unlock_all2 (void)
   atfork_recursive_cntr = 0;
 }
 
-#else
+# else
 
-#define ptmalloc_unlock_all2 ptmalloc_unlock_all
+#  define ptmalloc_unlock_all2 ptmalloc_unlock_all
 
-#endif
+# endif
+
+#endif  /* !NO_THREADS */
 
 /* Initialization routine. */
 #include <string.h>
@@ -618,9 +624,9 @@ shrink_heap(heap_info *h, long diff)
   new_size = (long)h->size - diff;
   if(new_size < (long)sizeof(*h))
     return -1;
-  /* Try to re-map the extra heap space freshly to save memory, and
-     make it inaccessible. */
-  if (__builtin_expect (__libc_enable_secure, 0))
+  /* Try to re-map the extra heap space freshly to save memory, and make it
+     inaccessible.  See malloc-sysdep.h to know when this is true.  */
+  if (__builtin_expect (check_may_shrink_heap (), 0))
     {
       if((char *)MMAP((char *)h + new_size, diff, PROT_NONE,
 		      MAP_FIXED) == (char *) MAP_FAILED)
@@ -628,7 +634,7 @@ shrink_heap(heap_info *h, long diff)
       h->mprotect_size = new_size;
     }
   else
-    madvise ((char *)h + new_size, diff, MADV_DONTNEED);
+    __madvise ((char *)h + new_size, diff, MADV_DONTNEED);
   /*fprintf(stderr, "shrink %p %08lx\n", h, new_size);*/
 
   h->size = new_size;
@@ -652,15 +658,19 @@ heap_trim(heap_info *heap, size_t pad)
   unsigned long pagesz = GLRO(dl_pagesize);
   mchunkptr top_chunk = top(ar_ptr), p, bck, fwd;
   heap_info *prev_heap;
-  long new_size, top_size, extra;
+  long new_size, top_size, extra, prev_size, misalign;
 
   /* Can this heap go away completely? */
   while(top_chunk == chunk_at_offset(heap, sizeof(*heap))) {
     prev_heap = heap->prev;
-    p = chunk_at_offset(prev_heap, prev_heap->size - (MINSIZE-2*SIZE_SZ));
+    prev_size = prev_heap->size - (MINSIZE-2*SIZE_SZ);
+    p = chunk_at_offset(prev_heap, prev_size);
+    /* fencepost must be properly aligned.  */
+    misalign = ((long) p) & MALLOC_ALIGN_MASK;
+    p = chunk_at_offset(prev_heap, prev_size - misalign);
     assert(p->size == (0|PREV_INUSE)); /* must be fencepost */
     p = prev_chunk(p);
-    new_size = chunksize(p) + (MINSIZE-2*SIZE_SZ);
+    new_size = chunksize(p) + (MINSIZE-2*SIZE_SZ) + misalign;
     assert(new_size>0 && new_size<(long)(2*MINSIZE));
     if(!prev_inuse(p))
       new_size += p->prev_size;
@@ -778,9 +788,11 @@ get_free_list (void)
   return result;
 }
 
-
+/* Lock and return an arena that can be reused for memory allocation.
+   Avoid AVOID_ARENA as we have already failed to allocate memory in
+   it and it is currently locked.  */
 static mstate
-reused_arena (void)
+reused_arena (mstate avoid_arena)
 {
   mstate result;
   static mstate next_to_use;
@@ -797,6 +809,11 @@ reused_arena (void)
     }
   while (result != next_to_use);
 
+  /* Avoid AVOID_ARENA as we have already failed to allocate memory
+     in that arena and it is currently locked.   */
+  if (result == avoid_arena)
+    result = result->next;
+
   /* No arena available.  Wait for the next in line.  */
   (void)mutex_lock(&result->mutex);
 
@@ -811,7 +828,7 @@ reused_arena (void)
 
 static mstate
 internal_function
-arena_get2(mstate a_tsd, size_t size)
+arena_get2(mstate a_tsd, size_t size, mstate avoid_arena)
 {
   mstate a;
 
@@ -856,7 +873,7 @@ arena_get2(mstate a_tsd, size_t size)
 	    catomic_decrement (&narenas);
 	}
       else
-	a = reused_arena ();
+	a = reused_arena (avoid_arena);
     }
 #else
   if(!a_tsd)
@@ -905,6 +922,27 @@ arena_get2(mstate a_tsd, size_t size)
 #endif
 
   return a;
+}
+
+/* If we don't have the main arena, then maybe the failure is due to running
+   out of mmapped areas, so we can try allocating on the main arena.
+   Otherwise, it is likely that sbrk() has failed and there is still a chance
+   to mmap(), so try one of the other arenas.  */
+static mstate
+arena_get_retry (mstate ar_ptr, size_t bytes)
+{
+  if(ar_ptr != &main_arena) {
+    (void)mutex_unlock(&ar_ptr->mutex);
+    ar_ptr = &main_arena;
+    (void)mutex_lock(&ar_ptr->mutex);
+  } else {
+    /* Grab ar_ptr->next prior to releasing its lock.  */
+    mstate prev = ar_ptr->next ? ar_ptr : 0;
+    (void)mutex_unlock(&ar_ptr->mutex);
+    ar_ptr = arena_get2(prev, bytes, ar_ptr);
+  }
+
+  return ar_ptr;
 }
 
 #ifdef PER_THREAD

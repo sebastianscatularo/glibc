@@ -51,7 +51,6 @@
 #define __USECONDS_T_TYPE	__U32_TYPE
 #define __SUSECONDS_T_TYPE	__SLONGWORD_TYPE
 #define __DADDR_T_TYPE		__S32_TYPE
-#define __SWBLK_T_TYPE		__S32_TYPE
 #define __KEY_T_TYPE		__S32_TYPE
 #define __CLOCKID_T_TYPE	__S32_TYPE
 #define __TIMER_T_TYPE		__S32_TYPE
@@ -60,6 +59,11 @@
 #define __SSIZE_T_TYPE		__SWORD_TYPE
 #define __SYSCALL_SLONG_TYPE	__SLONGWORD_TYPE
 #define __SYSCALL_ULONG_TYPE	__ULONGWORD_TYPE
+
+
+/* Tell the libc code that off_t and off64_t are actually the same type.  */
+#define __OFF_T_MATCHES_OFF64_T	1
+
 
 /* Number of descriptors that can fit in an `fd_set'.  */
 #define	__FD_SETSIZE		1024
