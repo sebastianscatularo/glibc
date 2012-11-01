@@ -28,7 +28,7 @@ extra-libs-others := $(extra-libs)
 libcrypt-routines := crypt-entry md5-crypt sha256-crypt sha512-crypt crypt \
 		     crypt_util
 
-tests := cert md5c-test sha256c-test sha512c-test
+tests := cert md5c-test sha256c-test sha512c-test badsalttest
 
 include ../Makeconfig
 
@@ -46,7 +46,12 @@ libcrypt-routines += md5 sha256 sha512
 
 tests += md5test sha256test sha512test
 
+# The test md5test-giant uses up to 400 MB of RSS and runs on a fast
+# machine over a minute.
+xtests = md5test-giant
+
 $(objpfx)md5test: $(objpfx)md5.o
+$(objpfx)md5test-giant: $(objpfx)md5.o
 $(objpfx)sha256test: $(objpfx)sha256.o
 $(objpfx)sha512test: $(objpfx)sha512.o
 endif
