@@ -22,30 +22,54 @@ id:"87a9zubdm9.fsf@schwinge.name"
 	* sysdeps/unix/sysv/linux/Makefile [subdir=socket]
 	(sysdep_routines): Move recvmmsg and sendmmsg...
 	* socket/Makefile (routines): ... here.
-	* socket/Versions (GLIBC_2.16): Add __sendmmsg, recvmmsg, and
+	* socket/Versions (GLIBC_2.17): Add __sendmmsg, recvmmsg, and
 	sendmmsg.
 	* include/sys/socket.h (__recvmmsg, __sendmmsg): Add declarations.
 	* resolv/res_send.c (send_dg): Invoke __sendmmsg instead of
 	sendmmsg.
-	* sysdeps/unix/sysv/linux/i386/nptl/libc.abilist (GLIBC_2.16): Add
+	* sysdeps/unix/sysv/linux/i386/nptl/libc.abilist (GLIBC_2.17): Add
 	__sendmmsg.
 	* sysdeps/unix/sysv/linux/powerpc/powerpc32/fpu/nptl/libc.abilist
-	(GLIBC_2.16): Likewise.
+	(GLIBC_2.17): Likewise.
 	* sysdeps/unix/sysv/linux/powerpc/powerpc64/nptl/libc.abilist
-	(GLIBC_2.16): Likewise.
+	(GLIBC_2.17): Likewise.
 	* sysdeps/unix/sysv/linux/s390/s390-32/nptl/libc.abilist
-	(GLIBC_2.16): Likewise.
+	(GLIBC_2.17): Likewise.
 	* sysdeps/unix/sysv/linux/s390/s390-64/nptl/libc.abilist
-	(GLIBC_2.16): Likewise.
-	* sysdeps/unix/sysv/linux/sh/nptl/libc.abilist (GLIBC_2.16):
+	(GLIBC_2.17): Likewise.
+	* sysdeps/unix/sysv/linux/sh/nptl/libc.abilist (GLIBC_2.17):
 	Likewise.
 	* sysdeps/unix/sysv/linux/sparc/sparc32/nptl/libc.abilist
-	(GLIBC_2.16): Likewise.
+	(GLIBC_2.17): Likewise.
 	* sysdeps/unix/sysv/linux/sparc/sparc64/nptl/libc.abilist
-	(GLIBC_2.16): Likewise.
+	(GLIBC_2.17): Likewise.
 	* sysdeps/unix/sysv/linux/x86_64/64/nptl/libc.abilist
-	(GLIBC_2.16): Likewise.
+	(GLIBC_2.17): Likewise.
 	* sysdeps/unix/sysv/linux/x86_64/x32/nptl/libc.abilist
-	(GLIBC_2.16): Likewise.
+	(GLIBC_2.17): Likewise.
 
-TODO: 2.17 versions.
+ports/
+	* sysdeps/unix/sysv/linux/alpha/nptl/libc.abilist (GLIBC_2.17):
+	Add __sendmmsg.
+	* sysdeps/unix/sysv/linux/arm/nptl/libc.abilist (GLIBC_2.17):
+	Likewise.
+	* sysdeps/unix/sysv/linux/ia64/nptl/libc.abilist (GLIBC_2.17):
+	Likewise.
+	* sysdeps/unix/sysv/linux/m68k/coldfire/nptl/libc.abilist
+	(GLIBC_2.17): Likewise.
+	* sysdeps/unix/sysv/linux/m68k/m680x0/nptl/libc.abilist
+	(GLIBC_2.17): Likewise.
+	* sysdeps/unix/sysv/linux/mips/mips32/nptl/libc.abilist
+	(GLIBC_2.17): Likewise.
+	* sysdeps/unix/sysv/linux/mips/mips64/n32/nptl/libc.abilist
+	(GLIBC_2.17): Likewise.
+	* sysdeps/unix/sysv/linux/mips/mips64/n64/nptl/libc.abilist
+	(GLIBC_2.17): Likewise.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc32/nofpu/nptl/libc.abilist
+	(GLIBC_2.17): Likewise.
+	* sysdeps/unix/sysv/linux/tile/tilegx/tilegx32/nptl/libc.abilist
+	(GLIBC_2.17): Likewise.
+	* sysdeps/unix/sysv/linux/tile/tilegx/tilegx64/nptl/libc.abilist
+	(GLIBC_2.17): Likewise.
+	* sysdeps/unix/sysv/linux/tile/tilepro/nptl/libc.abilist
+	(GLIBC_2.17): Likewise.
