@@ -1,3 +1,361 @@
+2012-10-30  Aurelien Jarno  <aurelien@aurel32.net>
+	    Joseph Myers  <joseph@codesourcery.com>
+
+	* Makefile (tst-cancel7-ARGS): Use exec in --command argument.
+
+2012-10-28  David S. Miller  <davem@davemloft.net>
+
+	* sysdeps/unix/sysv/linux/sparc/lowlevellock.h (BUSY_WAIT_NOP):
+	Define when we have v9 instructions available.
+	* sysdeps/unix/sysv/linux/sparc/sparc64/cpu_relax.S: New file.
+	* sysdeps/unix/sysv/linux/sparc/sparc32/sparcv9/cpu_relax.S: New
+	file.
+	* sysdeps/unix/sysv/linux/sparc/sparc32/sparcv9/Makefile: New
+	file.
+	* sysdeps/unix/sysv/linux/sparc/sparc64/Makefile: Add cpu_relax
+	to libpthread-routines.
+
+2012-10-25  Roland McGrath  <roland@hack.frob.com>
+
+	* tst-cond-except.c (TEST_FUNCTION): New macro.
+
+2012-10-25  Joseph Myers  <joseph@codesourcery.com>
+
+	* Makefile ($(objpfx)tst-tls6.out): Use $(BASH) not $(SHELL) to
+	run tst-tls6.sh.
+	* tst-tls6.sh: Use /bin/bash not /bin/sh.
+
+2012-10-25  Roland McGrath  <roland@hack.frob.com>
+
+	* tst-basic2.c (do_test): Return RESULT, not always zero.
+
+	* tst-cond25.c: Include <stdint.h>
+	(waiter): Add casts to uintptr_t between casting integer<->pointer.
+	(timed_waiter): Likewise.
+	(do_test_wait): Likewise.
+	* tst-cond-except.c (thr): Likewise.
+	(do_test): Use prototype definition.
+
+2012-10-24  Joseph Myers  <joseph@codesourcery.com>
+	    Jim Blandy  <jimb@codesourcery.com>
+
+	* Makefile ($(objpfx)tst-tls6.out): Pass $(test-wrapper-env) to
+	tst-tls6.sh.
+	* tst-tls6.sh (test_wrapper_env): New variable.  Use it to run
+	programs with LD_PRELOAD set.
+
+2012-10-24  Roland McGrath  <roland@hack.frob.com>
+
+	* Makefile ($(objpfx)tst-cond11, $(objpfx)tst-cond19): Targets removed.
+	($(objpfx)tst-sem5, $(objpfx)tst-cancel18): Likewise.
+	((objpfx)tst-cancelx18, $(objpfx)tst-clock2): Likewise.
+	($(objpfx)tst-rwlock14): Likewise.
+
+2012-10-24  Joseph Myers  <joseph@codesourcery.com>
+
+	* Makefile (tests): Remove tst-oddstacklimit.
+	(test-srcs): New variable.
+	(tst-oddstacklimit-ENV): Remove.
+	[$(run-built-tests) = yes] (tests): Depend on
+	$(objpfx)tst-oddstacklimit.out.
+	[$(run-built-tests) = yes] ($(objpfx)tst-oddstacklimit.out): New
+	target.
+	* tst-oddstacklimit.c: Do not include "tst-basic1.c".  Use
+	setrlimit before executing tst-basic1 test passed to --command.
+
+2012-10-23  Joseph Myers  <joseph@codesourcery.com>
+
+	* Makefile [$(cross-compiling) = no]: Change condition to
+	[$(run-built-tests) = yes].
+
+2012-10-23  Jim Blandy  <jimb@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
+
+	* Makefile (tst-cancel7-ARGS): Use $(host-built-program-cmd).
+	(tst-exec4-ARGS): Likewise.
+	(tst-stackguard1-ARGS): Likewise.
+
+2012-10-21  Jim Blandy  <jimb@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
+
+	* Makefile ($(objpfx)tst-cancel-wrappers.out): Pass $(NM) to
+	tst-cancel-wrappers.sh.
+	* tst-cancel-wrappers.sh: Use nm program given as first argument,
+	not hardcoded "nm".
+
+2012-10-17  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* tst-cond25.c (do_test_wait): Don't check for return value from
+	pthread_cancel.
+
+2012-10-16  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	[BZ #14652]
+	* sysdeps/unix/sysv/linux/i386/i486/pthread_cond_timedwait.S
+	(__condvar_tw_cleanup):  Adjust the mutex data structure if it
+	was locked by FUTEX_WAIT_REQUEUE_PI.
+	* sysdeps/unix/sysv/linux/i386/i486/pthread_cond_wait
+	(__condvar_w_cleanup): Likewise.
+	* sysdeps/unix/sysv/linux/x86_64/pthread_cond_timedwait.S
+	(__condvar_cleanup2): Likewise.
+	* sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S
+	(__condvar_cleanup1): Likewise.
+
+2012-10-10  Carlos O'Donell  <carlos@systemhalted.org>
+
+	* sysdeps/pthread/pthread.h [!(defined __GNUC__ &&
+	defined __EXCEPTIONS) && defined __USE_GNU]
+	(pthread_cleanup_push_defer_np): Fix formatting.
+
+2012-10-10  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	[BZ #14652]
+	* Makefile (tests): New test case tst-cond25.
+	(LDFLAGS-tst-cond25): Link tst-cond25 against librt.
+	* sysdeps/unix/sysv/linux/i386/i486/pthread_cond_timedwait.S
+	(__condvar_tw_cleanup): Lock mutex only if we don't already
+	own it.
+	* sysdeps/unix/sysv/linux/i386/i486/pthread_cond_wait.S
+	(__condvar_w_cleanup): Likewise.
+	* sysdeps/unix/sysv/linux/pthread-pi-defines.sym: Add TID_MASK.
+	* sysdeps/unix/sysv/linux/x86_64/pthread_cond_timedwait.S
+	(__condvar_cleanup2): Lock mutex only if we don't already
+	own it.
+	* sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S
+	(__condvar_cleanup1): Likewise.
+	* tst-cond25.c: New test case.
+
+2012-10-09  Roland McGrath  <roland@hack.frob.com>
+
+	* sysdeps/pthread/configure: Regenerated.
+	* sysdeps/x86_64/configure: Regenerated.
+
+2012-10-05  David S. Miller  <davem@davemloft.net>
+
+	[BZ #14568]
+	* sysdeps/sparc/tls.h (DB_THREAD_SELF_INCLUDE): Delete.
+	(DB_THREAD_SELF): Use constants for the register offsets.  Correct
+	the case of a 64-bit debugger with a 32-bit inferior.
+
+2012-10-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	[BZ #14557]
+	* Makefile (tests-static): Add tst-cancel24-static,
+	tst-cond8-static tst-mutex8-static, tst-mutexpi8-static,
+	tst-sem11-static and tst-sem12-static.
+	(tests): Likewise.
+	(LDLIBS-tst-cancel24-static): New macro.
+	* tst-cancel24-static.cc: New file.
+	* tst-cond8-static.c: Likewise.
+	* tst-mutex8-static.c: Likewise.
+	* tst-mutexpi8-static.c: Likewise.
+	* tst-sem11-static.c: Likewise.
+	* tst-sem12-static.c: Likewise.
+
+2012-10-05  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	[BZ #14417]
+	* Makefile (tests): New test case tst-cond24.
+	(LDFLAGS-tst-cond24): Link tst-cond24 against librt.
+	* sysdeps/unix/sysv/linux/i386/i486/pthread_cond_timedwait.S
+	(__pthread_cond_timedwait): Unlock mutex before going back to
+	wait in PI case.
+	* sysdeps/unix/sysv/linux/i386/i486/pthread_cond_wait.S
+	(__pthread_cond_wait): Likewise.  Revert handling of EAGAIN
+	return from futex_wait.
+	* sysdeps/unix/sysv/linux/x86_64/pthread_cond_timedwait.S
+	(__pthread_cond_timedwait): Unlock mutex before going back to
+	wait in PI case.  Set requeue_pi flag only if wait returned 0.
+	* sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S
+	(__pthread_cond_wait): Likewise.  Revert handling of EAGAIN
+	return from futex_wait.
+	* tst-cond24.c: New test case.
+
+2012-10-04  Roland McGrath  <roland@hack.frob.com>
+
+	* pthread_create.c (start_thread): Use __madvise, not madvise.
+
+2012-10-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* sysdeps/i386/tls.h: Update copyright years.
+
+2012-10-02  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* pthread_create.c (start_thread): Fix clone flag name in
+	comment to CLONE_CHILD_CLEARTID.
+	* sysdeps/unix/sysv/linux/i386/lowlevellock.h: Likewise.
+	* sysdeps/unix/sysv/linux/powerpc/lowlevellock.h: Likewise.
+	* sysdeps/unix/sysv/linux/s390/lowlevellock.h: Likewise.
+	* sysdeps/unix/sysv/linux/sh/lowlevellock.h: Likewise.
+	* sysdeps/unix/sysv/linux/sparc/lowlevellock.h: Likewise.
+	* sysdeps/unix/sysv/linux/x86_64/lowlevellock.h: Likewise.
+
+2012-10-01  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	[BZ #14477]
+	* Makefile (tests): Add tst-cond-except.
+	* sysdeps/unix/sysv/linux/i386/i486/pthread_cond_timedwait.S
+	(__pthread_cond_timedwait): Mark instructions where %ebx is
+	incremented in PI case.
+	(.gcc_except_table): Add entry to jump to __condvar_tw_cleanup2
+	for the marked PI case instructions.
+	* sysdeps/unix/sysv/linux/i386/i486/pthread_cond_wait.S
+	(__pthread_cond_wait): Mark instructions where %ebx is
+	incremented in PI case.
+	(.gcc_except_table): Add entry to jump to __condvar_w_cleanup2
+	for the marked PI case instructions.
+	* tst-cond-except.c: New test case.
+
+2012-09-24  Dmitry V. Levin  <ldv@altlinux.org>
+
+	* tst-tls6.sh: Add "set -e".
+	* Makefile: Do not specify -e option when running testsuite
+	shell scripts.
+
+	* tst-tls6.sh: Add copyright header.
+
+2012-09-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* sysdeps/x86_64/tls.h (THREAD_SETMEM): Add "()" when casting
+	to uint64_t for 64-bit store.
+	(THREAD_SETMEM_NC): Likewise.
+
+2012-09-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* sysdeps/i386/tls.h (THREAD_SETMEM): Cast to uint64_t for
+	64-bit store.
+	(THREAD_SETMEM_NC): Likewise.
+
+2012-09-14  Jeff Law  <law@redhat.com>
+
+	[BZ #14583]
+	* sysdeps/pthread/pthread.h: Fix prototype of __sigsetjmp.
+
+2012-09-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	[BZ #14576]
+	* sysdeps/pthread/bits/libc-lockP.h (__rtld_lock_init_recursive):
+	Removed.
+
+2012-09-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile (LDFLAGS-tst-cancel24): Renamed to ...
+	(LDLIBS-tst-cancel24): This.
+
+2012-09-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	[BZ #14545]
+	* Makefile (tests-static): Add tst-cancel21-static.
+	(tests): Likewise.
+	* tst-cancel21-static.c: New file.
+
+2012-09-01  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/pthread_getcpuclockid.c
+	[!__ASSUME_POSIX_CPU_TIMERS]: Remove conditional code.
+	[__NR_clock_getres]: Make code unconditional.
+	(pthread_getcpuclockid): Remove code left unreachable by removal
+	of conditionals.
+
+2012-08-31  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #14532]
+	* sysdeps/unix/sysv/linux/sem_post.c (__new_sem_post): Use
+	atomic_compare_and_exchange_bool_rel.
+	* tst-sem14.c: New file.
+	* Makefile (tests): Add tst-sem14.
+
+2012-08-15  Roland McGrath  <roland@hack.frob.com>
+
+	* Makefile (CFLAGS-flockfile.c): Use $(libio-mtsafe) instead
+	of -D_IO_MTSAFE_IO.
+	(CFLAGS-ftrylockfile.c, CFLAGS-funlockfile.c): Likewise.
+	* sysdeps/unix/sysv/linux/Makefile (CFLAGS-fork.c): Likewise.
+
+2012-08-16  Joseph Myers  <joseph@codesourcery.com>
+
+	* pthread_cond_timedwait.c (__pthread_cond_timedwait)
+	[!__ASSUME_POSIX_TIMERS]: Remove conditional code.
+	* pthread_condattr_setclock.c (pthread_condattr_setclock)
+	[!__ASSUME_POSIX_TIMERS]: Likewise.
+	* sysdeps/unix/sysv/linux/i386/i486/pthread_cond_timedwait.S
+	(__pthread_cond_timedwait) [!__ASSUME_POSIX_TIMERS]: Likewise.
+	* sysdeps/unix/sysv/linux/pthread_getcpuclockid.c
+	[!__ASSUME_POSIX_TIMERS]: Likewise.
+	* sysdeps/unix/sysv/linux/sh/pthread_cond_timedwait.S
+	(__pthread_cond_timedwait) [!__ASSUME_POSIX_TIMERS]: Likewise.
+	* sysdeps/unix/sysv/linux/timer_create.c [__NR_timer_create]: Make
+	code unconditional.
+	[!__NR-timer_create]: Remove conditional code.
+	(timer_create) [!__ASSUME_POSIX_TIMERS]: Likewise.
+	* sysdeps/unix/sysv/linux/timer_delete.c [__NR_timer_delete]: Make
+	code unconditional.
+	[!__NR_timer_delete]: Remove conditional code.
+	(timer_delete) [!__ASSUME_POSIX_TIMERS]: Likewise.
+	* sysdeps/unix/sysv/linux/timer_getoverr.c
+	[__NR_timer_getoverrun]: Make code unconditional.
+	[!__NR_timer_getoverrun]: Remove conditional code.
+	(timer_getoverrun) [!__ASSUME_POSIX_TIMERS]: Likewise.
+	* sysdeps/unix/sysv/linux/timer_gettime.c [__NR_timer_gettime]:
+	Make code unconditional.
+	[!__NR_timer_gettime]: Remove conditional code.
+	(timer_gettime) [!__ASSUME_POSIX_TIMERS]: Likewise.
+	* sysdeps/unix/sysv/linux/timer_routines.c [__NR_timer_create]:
+	Make code unconditional.
+	[!__ASSUME_POSIX_TIMERS]: Remove conditional code.
+	* sysdeps/unix/sysv/linux/timer_settime.c [__NR_timer_settime]:
+	Make code unconditional.
+	[!__NR_timer_settime]: Remove conditional code.
+	(timer_settime) [!__ASSUME_POSIX_TIMERS]: Likewise.
+	* sysdeps/unix/sysv/linux/x86_64/pthread_cond_timedwait.S
+	(__pthread_cond_timedwait) [!__ASSUME_POSIX_TIMERS]: Remove
+	conditional code.
+
+2012-08-15  Tom de Vries  <vries@codesourcery.com>
+	    Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* sysdeps/pthread/bits/libc-lockP.h (__libc_lock_lock)
+	(__libc_lock_trylock): Allow pre-existing definitions.
+
+2012-08-15  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* pthread_spin_lock.c: New file.
+	* pthread_spin_trylock.c: New file.
+
+2012-08-08  Joseph Myers  <joseph@codesourcery.com>
+
+	* allocatestack.c (setxid_signal_thread) [__ASSUME_TGKILL]: Make
+	code unconditional.
+	(setxid_signal_thread) [!__ASSUME_TGKILL]: Remove conditional code.
+	* pthread_cancel.c (pthread_cancel) [__ASSUME_TGKILL]: Make code
+	unconditional.
+	(pthread_cancel) [!__ASSUME_TGKILL]: Remove conditional code.
+	* sysdeps/pthread/createthread.c (do_clone) [__ASSUME_TGKILL]:
+	Make code unconditional.
+	(do_clone) [!__ASSUME_TGKILL]: Remove conditional code.
+	* sysdeps/unix/sysv/linux/pt-raise.c (raise) [__ASSUME_TGKILL ||
+	__NR_tgkill]: Make code unconditional.
+	(raise) [__ASSUME_TGKILL]: Likewise.
+	(raise) [!__ASSUME_TGKILL]: Remove conditional code.
+	* sysdeps/unix/sysv/linux/pthread_kill.c (__pthread_kill)
+	[__ASSUME_TGKILL]: Make code unconditional.
+	(__pthread_kill) [!__ASSUME_TGKILL]: Remove conditional code.
+	* sysdeps/unix/sysv/linux/raise.c (raise) [__ASSUME_TGKILL ||
+	__NR_tgkill]: Make code unconditional.
+	(raise) [__ASSUME_TGKILL]: Likewise.
+	(raise) [!__ASSUME_TGKILL]: Remove conditional code.
+
+2012-08-07  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/pthread/createthread.c (create_thread)
+	[!__ASSUME_NO_CLONE_DETACHED]: Remove conditional code.
+
+2012-08-03  Joseph Myers  <joseph@codesourcery.com>
+
+	* nptl-init.c (sigcancel_handler) [__ASSUME_CORRECT_SI_PID]: Make
+	code unconditional.
+	(sighandler_setxid) [__ASSUME_CORRECT_SI_PID]: Likewise.
+
 2012-07-28  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
 	* tst-pthread-getattr.c (MAX_STACK_SIZE): New macro.
