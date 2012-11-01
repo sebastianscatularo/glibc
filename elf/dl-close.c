@@ -486,7 +486,7 @@ _dl_close_worker (struct link_map *map)
 	/* Speed up removing most recently added objects.  */
 	j = cnt;
       else
- 	for (i = 0; i < cnt; i++)
+	for (i = 0; i < cnt; i++)
 	  if (ns_msl->r_list[i]->l_removed == 0)
 	    {
 	      if (i != j)
@@ -642,6 +642,10 @@ _dl_close_worker (struct link_map *map)
 	      assert (nsid != LM_ID_BASE);
 #endif
 	      ns->_ns_loaded = imap->l_next;
+
+	      /* Update the pointer to the head of the list
+		 we leave for debuggers to examine.  */
+	      r->r_map = (void *) ns->_ns_loaded;
 	    }
 
 	  --ns->_ns_nloaded;
