@@ -101,7 +101,7 @@ extern struct __gconv_trans_data __libio_translit attribute_hidden;
    to _IO_buf_base, though not necessarily if we have switched from
    get mode to put mode.  (The reason is to maintain the invariant
    that _IO_read_end corresponds to the external file position.)
-   _IO_write_base is non-NULL and usually equal to _IO_base_base.
+   _IO_write_base is non-NULL and usually equal to _IO_buf_base.
    We also have _IO_write_end == _IO_buf_end, but only in fully buffered mode.
    The un-flushed character are those between _IO_write_base and _IO_write_ptr.
 
@@ -635,7 +635,7 @@ libc_hidden_ver (_IO_new_file_underflow, _IO_file_underflow)
 static int
 mmap_remap_check (_IO_FILE *fp)
 {
-  struct _G_stat64 st;
+  struct stat64 st;
 
   if (_IO_SYSSTAT (fp, &st) == 0
       && S_ISREG (st.st_mode) && st.st_size != 0
@@ -671,13 +671,8 @@ mmap_remap_check (_IO_FILE *fp)
 #else
 	  (void) __munmap (fp->_IO_buf_base,
 			   fp->_IO_buf_end - fp->_IO_buf_base);
-# ifdef _G_MMAP64
-	  p = _G_MMAP64 (NULL, st.st_size, PROT_READ, MAP_SHARED,
-			 fp->_fileno, 0);
-# else
-	  p = __mmap (NULL, st.st_size, PROT_READ, MAP_SHARED,
-		      fp->_fileno, 0);
-# endif
+	  p = __mmap64 (NULL, st.st_size, PROT_READ, MAP_SHARED,
+			fp->_fileno, 0);
 	  if (p == MAP_FAILED)
 	    goto punt;
 #endif
@@ -704,13 +699,8 @@ mmap_remap_check (_IO_FILE *fp)
 
       if (fp->_offset < fp->_IO_buf_end - fp->_IO_buf_base)
 	{
-	  if (
-# ifdef _G_LSEEK64
-	      _G_LSEEK64
-# else
-	      __lseek
-# endif
-	      (fp->_fileno, fp->_IO_buf_end - fp->_IO_buf_base, SEEK_SET)
+	  if (__lseek64 (fp->_fileno, fp->_IO_buf_end - fp->_IO_buf_base,
+			 SEEK_SET)
 	      != fp->_IO_buf_end - fp->_IO_buf_base)
 	    fp->_flags |= _IO_ERR_SEEN;
 	  else
@@ -763,7 +753,7 @@ decide_maybe_mmap (_IO_FILE *fp)
      file descriptors are for mmap-able objects and on 32-bit
      machines we don't want to map files which are too large since
      this would require too much virtual memory.  */
-  struct _G_stat64 st;
+  struct stat64 st;
 
   if (_IO_SYSSTAT (fp, &st) == 0
       && S_ISREG (st.st_mode) && st.st_size != 0
@@ -775,24 +765,14 @@ decide_maybe_mmap (_IO_FILE *fp)
       /* Try to map the file.  */
       void *p;
 
-# ifdef _G_MMAP64
-      p = _G_MMAP64 (NULL, st.st_size, PROT_READ, MAP_SHARED, fp->_fileno, 0);
-# else
-      p = __mmap (NULL, st.st_size, PROT_READ, MAP_SHARED, fp->_fileno, 0);
-# endif
+      p = __mmap64 (NULL, st.st_size, PROT_READ, MAP_SHARED, fp->_fileno, 0);
       if (p != MAP_FAILED)
 	{
 	  /* OK, we managed to map the file.  Set the buffer up and use a
 	     special jump table with simplified underflow functions which
 	     never tries to read anything from the file.  */
 
-	  if (
-# ifdef _G_LSEEK64
-	      _G_LSEEK64
-# else
-	      __lseek
-# endif
-	      (fp->_fileno, st.st_size, SEEK_SET) != st.st_size)
+	  if (__lseek64 (fp->_fileno, st.st_size, SEEK_SET) != st.st_size)
 	    {
 	      (void) __munmap (p, st.st_size);
 	      fp->_offset = _IO_pos_BAD;
@@ -944,13 +924,8 @@ _IO_file_sync_mmap (_IO_FILE *fp)
       if (_IO_in_backup (fp))
 	delta -= eGptr () - Gbase ();
 #endif
-      if (
-# ifdef _G_LSEEK64
-	  _G_LSEEK64
-# else
-	  __lseek
-# endif
-	  (fp->_fileno, fp->_IO_read_ptr - fp->_IO_buf_base, SEEK_SET)
+      if (__lseek64 (fp->_fileno, fp->_IO_read_ptr - fp->_IO_buf_base,
+		     SEEK_SET)
 	  != fp->_IO_read_ptr - fp->_IO_buf_base)
 	{
 	  fp->_flags |= _IO_ERR_SEEN;
@@ -978,20 +953,21 @@ _IO_new_file_seekoff (fp, offset, dir, mode)
   int must_be_exact = (fp->_IO_read_base == fp->_IO_read_end
 		       && fp->_IO_write_base == fp->_IO_write_ptr);
 
+  bool was_writing = (fp->_IO_write_ptr > fp->_IO_write_base
+		      || _IO_in_put_mode (fp));
+
   if (mode == 0)
     dir = _IO_seek_cur, offset = 0; /* Don't move any pointers. */
 
   /* Flush unwritten characters.
      (This may do an unneeded write if we seek within the buffer.
      But to be able to switch to reading, we would need to set
-     egptr to ptr.  That can't be done in the current design,
+     egptr to pptr.  That can't be done in the current design,
      which assumes file_ptr() is eGptr.  Anyway, since we probably
      end up flushing when we close(), it doesn't make much difference.)
-     FIXME: simulate mem-papped files. */
-
-  if (fp->_IO_write_ptr > fp->_IO_write_base || _IO_in_put_mode (fp))
-    if (_IO_switch_to_get_mode (fp))
-      return EOF;
+     FIXME: simulate mem-mapped files. */
+  else if (was_writing && _IO_switch_to_get_mode (fp))
+    return EOF;
 
   if (fp->_IO_buf_base == NULL)
     {
@@ -1010,7 +986,17 @@ _IO_new_file_seekoff (fp, offset, dir, mode)
     {
     case _IO_seek_cur:
       /* Adjust for read-ahead (bytes is buffer). */
-      offset -= fp->_IO_read_end - fp->_IO_read_ptr;
+      if (mode != 0 || !was_writing)
+	offset -= fp->_IO_read_end - fp->_IO_read_ptr;
+      else
+	{
+	  /* _IO_read_end coincides with fp._offset, so the actual file position
+	     is fp._offset - (_IO_read_end - new_write_ptr).  This is fine
+	     even if fp._offset is not set, since fp->_IO_read_end is then at
+	     _IO_buf_base and this adjustment is for unbuffered output.  */
+	  offset -= fp->_IO_read_end - fp->_IO_write_ptr;
+	}
+
       if (fp->_offset == _IO_pos_BAD)
 	{
 	  if (mode != 0)
@@ -1038,7 +1024,7 @@ _IO_new_file_seekoff (fp, offset, dir, mode)
       break;
     case _IO_seek_end:
       {
-	struct _G_stat64 st;
+	struct stat64 st;
 	if (_IO_SYSSTAT (fp, &st) == 0 && S_ISREG (st.st_mode))
 	  {
 	    offset += st.st_size;
@@ -1225,11 +1211,7 @@ _IO_file_seek (fp, offset, dir)
      _IO_off64_t offset;
      int dir;
 {
-#ifdef _G_LSEEK64
-  return _G_LSEEK64 (fp->_fileno, offset, dir);
-#else
-  return lseek (fp->_fileno, offset, dir);
-#endif
+  return __lseek64 (fp->_fileno, offset, dir);
 }
 libc_hidden_def (_IO_file_seek)
 
@@ -1238,11 +1220,7 @@ _IO_file_stat (fp, st)
      _IO_FILE *fp;
      void *st;
 {
-#ifdef _G_FSTAT64
-  return _G_FSTAT64 (fp->_fileno, (struct _G_stat64 *) st);
-#else
-  return fstat (fp->_fileno, (struct stat *) st);
-#endif
+  return __fxstat64 (_STAT_VER, fp->_fileno, (struct stat64 *) st);
 }
 libc_hidden_def (_IO_file_stat)
 
