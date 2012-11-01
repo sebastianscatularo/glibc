@@ -1,4 +1,4 @@
-# Copyright (C) 1998-2001,2004-2008, 2009, 2011, 2012 Free Software Foundation, Inc.
+# Copyright (C) 1998-2012 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -48,32 +48,32 @@ routines  = backtrace backtracesyms backtracesymsfd noophooks \
 static-only-routines := warning-nop stack_chk_fail_local
 
 CFLAGS-backtrace.c = -fno-omit-frame-pointer
-CFLAGS-sprintf_chk.c = -D_IO_MTSAFE_IO
-CFLAGS-snprintf_chk.c = -D_IO_MTSAFE_IO
-CFLAGS-vsprintf_chk.c = -D_IO_MTSAFE_IO
-CFLAGS-vsnprintf_chk.c = -D_IO_MTSAFE_IO
-CFLAGS-asprintf_chk.c = -D_IO_MTSAFE_IO
-CFLAGS-vasprintf_chk.c = -D_IO_MTSAFE_IO
-CFLAGS-obprintf_chk.c = -D_IO_MTSAFE_IO
-CFLAGS-dprintf_chk.c = -D_IO_MTSAFE_IO $(exceptions)
-CFLAGS-vdprintf_chk.c = -D_IO_MTSAFE_IO $(exceptions)
-CFLAGS-printf_chk.c = -D_IO_MTSAFE_IO $(exceptions)
-CFLAGS-fprintf_chk.c = -D_IO_MTSAFE_IO $(exceptions)
-CFLAGS-vprintf_chk.c = -D_IO_MTSAFE_IO $(exceptions)
-CFLAGS-vfprintf_chk.c = -D_IO_MTSAFE_IO $(exceptions)
-CFLAGS-gets_chk.c = -D_IO_MTSAFE_IO $(exceptions)
-CFLAGS-fgets_chk.c = -D_IO_MTSAFE_IO $(exceptions)
-CFLAGS-fgets_u_chk.c = -D_IO_MTSAFE_IO $(exceptions)
-CFLAGS-fread_chk.c = -D_IO_MTSAFE_IO $(exceptions)
-CFLAGS-fread_u_chk.c = -D_IO_MTSAFE_IO $(exceptions)
-CFLAGS-swprintf_chk.c = -D_IO_MTSAFE_IO
-CFLAGS-vswprintf_chk.c = -D_IO_MTSAFE_IO
-CFLAGS-wprintf_chk.c = -D_IO_MTSAFE_IO $(exceptions)
-CFLAGS-fwprintf_chk.c = -D_IO_MTSAFE_IO $(exceptions)
-CFLAGS-vwprintf_chk.c = -D_IO_MTSAFE_IO $(exceptions)
-CFLAGS-vfwprintf_chk.c = -D_IO_MTSAFE_IO $(exceptions)
-CFLAGS-fgetws_chk.c = -D_IO_MTSAFE_IO $(exceptions)
-CFLAGS-fgetws_u_chk.c = -D_IO_MTSAFE_IO $(exceptions)
+CFLAGS-sprintf_chk.c = $(libio-mtsafe)
+CFLAGS-snprintf_chk.c = $(libio-mtsafe)
+CFLAGS-vsprintf_chk.c = $(libio-mtsafe)
+CFLAGS-vsnprintf_chk.c = $(libio-mtsafe)
+CFLAGS-asprintf_chk.c = $(libio-mtsafe)
+CFLAGS-vasprintf_chk.c = $(libio-mtsafe)
+CFLAGS-obprintf_chk.c = $(libio-mtsafe)
+CFLAGS-dprintf_chk.c = $(libio-mtsafe) $(exceptions)
+CFLAGS-vdprintf_chk.c = $(libio-mtsafe) $(exceptions)
+CFLAGS-printf_chk.c = $(libio-mtsafe) $(exceptions)
+CFLAGS-fprintf_chk.c = $(libio-mtsafe) $(exceptions)
+CFLAGS-vprintf_chk.c = $(libio-mtsafe) $(exceptions)
+CFLAGS-vfprintf_chk.c = $(libio-mtsafe) $(exceptions)
+CFLAGS-gets_chk.c = $(libio-mtsafe) $(exceptions)
+CFLAGS-fgets_chk.c = $(libio-mtsafe) $(exceptions)
+CFLAGS-fgets_u_chk.c = $(libio-mtsafe) $(exceptions)
+CFLAGS-fread_chk.c = $(libio-mtsafe) $(exceptions)
+CFLAGS-fread_u_chk.c = $(libio-mtsafe) $(exceptions)
+CFLAGS-swprintf_chk.c = $(libio-mtsafe)
+CFLAGS-vswprintf_chk.c = $(libio-mtsafe)
+CFLAGS-wprintf_chk.c = $(libio-mtsafe) $(exceptions)
+CFLAGS-fwprintf_chk.c = $(libio-mtsafe) $(exceptions)
+CFLAGS-vwprintf_chk.c = $(libio-mtsafe) $(exceptions)
+CFLAGS-vfwprintf_chk.c = $(libio-mtsafe) $(exceptions)
+CFLAGS-fgetws_chk.c = $(libio-mtsafe) $(exceptions)
+CFLAGS-fgetws_u_chk.c = $(libio-mtsafe) $(exceptions)
 CFLAGS-read_chk.c = -fexceptions -fasynchronous-unwind-tables
 CFLAGS-pread_chk.c = -fexceptions -fasynchronous-unwind-tables
 CFLAGS-pread64_chk.c = -fexceptions -fasynchronous-unwind-tables
@@ -114,17 +114,20 @@ tst-lfschk3-ENV = LOCPATH=$(common-objpfx)localedata
 tst-lfschk4-ENV = LOCPATH=$(common-objpfx)localedata
 tst-lfschk5-ENV = LOCPATH=$(common-objpfx)localedata
 tst-lfschk6-ENV = LOCPATH=$(common-objpfx)localedata
-LDFLAGS-tst-chk4 = -lstdc++
-LDFLAGS-tst-chk5 = -lstdc++
-LDFLAGS-tst-chk6 = -lstdc++
-LDFLAGS-tst-lfschk4 = -lstdc++
-LDFLAGS-tst-lfschk5 = -lstdc++
-LDFLAGS-tst-lfschk6 = -lstdc++
+LDLIBS-tst-chk4 = -lstdc++
+LDLIBS-tst-chk5 = -lstdc++
+LDLIBS-tst-chk6 = -lstdc++
+LDLIBS-tst-lfschk4 = -lstdc++
+LDLIBS-tst-lfschk5 = -lstdc++
+LDLIBS-tst-lfschk6 = -lstdc++
 
 tests = backtrace-tst tst-longjmp_chk tst-chk1 tst-chk2 tst-chk3 \
 	tst-lfschk1 tst-lfschk2 tst-lfschk3 test-strcpy_chk test-stpcpy_chk \
 	tst-chk4 tst-chk5 tst-chk6 tst-lfschk4 tst-lfschk5 tst-lfschk6 \
 	tst-longjmp_chk2
+
+tests-ifunc := $(stpcpy_chk strcpy_chk:%=test-%-ifunc)
+tests += $(tests-ifunc)
 
 extra-libs = libSegFault libpcprofile
 extra-libs-others = $(extra-libs)
