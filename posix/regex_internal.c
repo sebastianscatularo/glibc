@@ -17,11 +17,6 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
-#include "regex_internal.h"
-
-#include <sys/param.h>
-
-
 static void re_string_construct_common (const char *str, int len,
 					re_string_t *pstr,
 					RE_TRANSLATE_TYPE trans, int icase,
