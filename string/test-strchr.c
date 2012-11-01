@@ -1,5 +1,5 @@
 /* Test and measure STRCHR functions.
-   Copyright (C) 1999, 2002, 2003, 2011 Free Software Foundation, Inc.
+   Copyright (C) 1999-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Written by Jakub Jelinek <jakub@redhat.com>, 1999.
    Added wcschr support by Liubov Dmitrieva <liubov.dmitrieva@gmail.com>, 2011
@@ -19,6 +19,15 @@
    <http://www.gnu.org/licenses/>.  */
 
 #define TEST_MAIN
+#ifndef WIDE
+# ifdef USE_FOR_STRCHRNUL
+#  define TEST_NAME "strchrnul"
+# else
+#  define TEST_NAME "strchr"
+# endif
+#else
+# define TEST_NAME "wcschr"
+#endif
 #include "test-string.h"
 
 #ifndef WIDE
@@ -79,8 +88,8 @@ IMPL (stupid_STRCHR, 0)
 IMPL (simple_STRCHR, 0)
 IMPL (STRCHR, 1)
 
-static void
-do_one_test (impl_t *impl, const CHAR *s, int c, const CHAR *exp_res)
+static int
+check_result (impl_t *impl, const CHAR *s, int c, const CHAR *exp_res)
 {
   CHAR *res = CALL (impl, s, c);
   if (res != exp_res)
@@ -88,8 +97,16 @@ do_one_test (impl_t *impl, const CHAR *s, int c, const CHAR *exp_res)
       error (0, 0, "Wrong result in function %s %#x %p %p", impl->name,
 	     c, res, exp_res);
       ret = 1;
-      return;
+      return -1;
     }
+  return 0;
+}
+
+static void
+do_one_test (impl_t *impl, const CHAR *s, int c, const CHAR *exp_res)
+{
+  if (check_result (impl, s, c, exp_res) < 0)
+    return;
 
   if (HP_TIMING_AVAIL)
     {
@@ -224,12 +241,25 @@ do_random_tests (void)
     }
 }
 
+static void
+check1 (void)
+{
+  char s[] __attribute__((aligned(16))) = "\xff";
+  char c = '\xfe';
+  char *exp_result = stupid_STRCHR (s, c);
+
+  FOR_EACH_IMPL (impl, 0)
+    check_result (impl, s, c, exp_result);
+}
+
 int
 test_main (void)
 {
   size_t i;
 
   test_init ();
+
+  check1 ();
 
   printf ("%20s", "");
   FOR_EACH_IMPL (impl, 0)
