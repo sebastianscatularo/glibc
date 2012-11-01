@@ -1,5 +1,5 @@
 /* Load a shared object at runtime, relocate it, and run its initializer.
-   Copyright (C) 1996-2007, 2009-2012 Free Software Foundation, Inc.
+   Copyright (C) 1996-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -33,6 +33,7 @@
 #include <sysdep-cancel.h>
 #include <tls.h>
 #include <stap-probe.h>
+#include <atomic.h>
 
 #include <dl-dst.h>
 
@@ -188,9 +189,11 @@ dl_open_worker (void *a)
     {
       const void *caller_dlopen = args->caller_dlopen;
 
+#ifdef SHARED
       /* We have to find out from which object the caller is calling.
 	 By default we assume this is the main application.  */
       call_map = GL(dl_ns)[LM_ID_BASE]._ns_loaded;
+#endif
 
       struct link_map *l;
       for (Lmid_t ns = 0; ns < GL(dl_nns); ++ns)
@@ -653,8 +656,8 @@ no more namespaces available for dlmopen()"));
   int errcode = _dl_catch_error (&objname, &errstring, &malloced,
 				 dl_open_worker, &args);
 
-#ifndef MAP_COPY
-  /* We must munmap() the cache file.  */
+#if defined USE_LDCONFIG && !defined MAP_COPY
+  /* We must unmap the cache file.  */
   _dl_unload_cache ();
 #endif
 
