@@ -1,3 +1,160 @@
+2012-10-31  Steve Ellcey  <sellcey@mips.com>
+
+	* sysdeps/mips/memcpy.S: Add prefetching and more unrolling, make
+	it work in 32 or 64 bit modes.
+	* sysdeps/mips/mips64/memcpy.S: Remove.
+
+2012-10-30  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #14047]
+	* sysdeps/mips/tininess.h: New file.
+
+2012-10-29  Steve Ellcey  <sellcey@mips.com>
+
+	* sysdeps/unix/sysv/linux/mips/mips32/Makefile: Remove.
+	* sysdeps/unix/sysv/linux/mips/mips64/n32/Makefile: Remove.
+	* sysdeps/unix/sysv/linux/mips/mips64/n64/Makefile: Remove.
+	* sysdeps/unix/sysv/linux/mips/configure.in: Create default_abi.make.
+	* sysdeps/unix/sysv/linux/mips/configure: Regenerate.
+	* sysdeps/unix/sysv/linux/mips/Makefile: Include default_abi.make.
+	(abi-variants): Add hard and soft float versions.
+	(abi-o32-options): Remove.
+	(abi-o32-condition): Remove.
+	(abi-n32-options): Remove.
+	(abi-n32-condition): Remove.
+	(abi-n64-options): Remove.
+	(abi-n64-condition): Remove.
+	(abi-o32_soft-options): New.
+	(abi-o32_soft-condition): New.
+	(abi-o32_hard-options): New.
+	(abi-o32_hard-condition): New.
+	(abi-n32_soft-options): New.
+	(abi-n32_soft-condition): New.
+	(abi-n32_hard-options): New.
+	(abi-n32_hard-condition): New.
+	(abi-n64_soft-options): New.
+	(abi-n64_soft-condition): New.
+	(abi-n64_hard-options): New.
+	(abi-n64_hard-condition): New.
+
+2012-10-19  Roland McGrath  <roland@hack.frob.com>
+
+	* sysdeps/unix/sysv/linux/mips/mips32/nptl/libc.abilist
+	(GLIBC_2.17): Add clock_* symbols.
+	* sysdeps/unix/sysv/linux/mips/mips64/n64/nptl/libc.abilist: Likewise.
+
+2012-10-24  Andreas Jaeger  <aj@suse.de>
+
+	* sysdeps/unix/sysv/linux/mips/bits/fcntl.h: Remove all
+	definitions and declarations that are provided by
+	<bits/fcntl-linux.h> and include <bits/fcntl-linux.h>.
+
+2012-10-03  Steve Ellcey  <sellcey@mips.com>
+
+	* sysdeps/mips/ieee754.h: Move to...
+	* sysdeps/mips/ieee754/ieee754.h: Here.
+	* sysdeps/mips/mips32/Implies: Add mips/ieee754.
+	* sysdeps/mips/mips64/Implies: Ditto.
+	* sysdeps/mips/mips64/n32/Implies: Ditto.
+	* sysdeps/mips/mips64/n64/Implies: Ditto.
+
+2012-10-02  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* sysdeps/unix/sysv/linux/mips/nptl/lowlevellock.h: Fix clone
+	flag name in comment to CLONE_CHILD_CLEARTID.
+
+2012-09-28  Roland McGrath  <roland@hack.frob.com>
+
+	* sysdeps/mips/init-first.c: File removed.
+
+2012-09-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* sysdeps/mips/dl-trampoline.c (VERSYMIDX): Removed.
+
+2012-08-27  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/mips/kernel-features.h
+	(__ASSUME_STAT64_SYSCALL): Remove.
+
+2012-08-27  Guido Guenther  <agx@sigxcpu.org>
+
+	* sysdeps/mips/fpu_control.h (_FPU_RESERVED): Set bit 23.
+
+2012-08-22  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/mips/kernel-features.h [_MIPS_SIM ==
+	_ABIO32] (__ASSUME_STAT64_SYSCALL): Define.
+	* sysdeps/unix/sysv/linux/mips/mips64/fxstat64.c: New file.  Based
+	on version from ../sysdeps/unix/sysv/linux/.
+	* sysdeps/unix/sysv/linux/mips/mips64/lxstat64.c: Likewise.
+	* sysdeps/unix/sysv/linux/mips/mips64/xstat64.c: Likewise.
+
+2012-08-16  Carlos O'Donell  <carlos_odonell@mentor.com>
+
+	* sysdeps/mips/ldsodefs.h (ARCH_PLTENTER_MEMBERS)
+	<mips_o32_gnu_pltenter, mips_n32_gnu_pltenter, mips_n64_gnu_pltenter>:
+	struct La_mips_32_regs and struct La_mips_64_regs are not constant.
+
+2012-08-15  Tom de Vries  <vries@codesourcery.com>
+	    Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/mips/nptl/lowlevellock.h (__libc_lock_lock)
+	(__libc_lock_trylock): Define versions optimized for MIPS.
+
+2012-08-15  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* sysdeps/mips/nptl/pthread_spin_lock.S: Remove, use generic version.
+	* sysdeps/mips/nptl/pthread_spin_lock.c: New file.
+	* sysdeps/mips/nptl/pthread_spin_trylock.S: Remove, use generic version.
+
+2012-08-15  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/mips/dl-lookup.c: Update from generic version.
+
+2012-08-13  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+        [__GNUC_PREREQ (4, 8)]
+        (atomic_exchange_and_add): Split into ...
+        (atomic_exchange_and_add_acq, atomic_exchange_and_add_rel): ... these.
+        New atomic macros.
+        [!__GNUC_PREREQ (4, 8)]
+        (atomic_exchange_and_add): Split into ...
+        (atomic_exchange_and_add_acq, atomic_exchange_and_add_rel): ... these.
+        New atomic macros.
+
+2012-08-09  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/mips/kernel-features.h
+	(__ASSUME_UTIMES): Define.
+
+2012-08-07  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/mips/configure.in (arch_minimum_kernel):
+	Remove.
+	* sysdeps/unix/sysv/linux/mips/configure: Regenerated.
+
+2012-08-01  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/mips/kernel-features.h
+	(__ASSUME_FCNTL64): Remove.
+
+2012-08-01  Steve Ellcey  <sellcey@mips.com>
+
+	* sysdeps/mips/sys/asm.h [_MIPS_ISA != _MIPS_ISA_MIPS4 &&
+	_MIPS_ISA != _MIPS_ISA_MIPS5 && _MIPS_ISA != _MIPS_ISA_MIPS32 &&
+	_MIPS_ISA != _MIPS_ISA_MIPS64] (PREF): Define as function-like
+	macro.
+	(PREFX): Likewise.
+
+2012-07-31  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/mips/fcntl.c: Remove.
+	* sysdeps/unix/sysv/linux/mips/lockf64.c: Likewise.
+	* sysdeps/unix/sysv/linux/mips/mips32/fcntl.c: New file.
+	* sysdeps/unix/sysv/linux/mips/mips32/lockf64.c: Likewise.
+	* sysdeps/unix/sysv/linux/mips/mips64/n32/fcntl.c: Likewise.
+	* sysdeps/unix/sysv/linux/mips/mips64/n32/lockf64.c: Likewise.
+
 2012-07-27  Joseph Myers  <joseph@codesourcery.com>
 
 	* sysdeps/unix/sysv/linux/mips/mips64/syscalls.list (mmap): New.
