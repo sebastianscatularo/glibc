@@ -22,6 +22,7 @@
 #include <fenv.h>
 #include <ieee754.h>
 #include <math_private.h>
+#include <tininess.h>
 
 /* This implementation uses rounding to odd to avoid problems with
    double rounding.  See a paper by Boldo and Melquiond:
@@ -49,6 +50,11 @@ __fma (double x, double y, double z)
 	  && u.ieee.exponent != 0x7ff
 	  && v.ieee.exponent != 0x7ff)
 	return (z + x) + y;
+      /* If z is zero and x are y are nonzero, compute the result
+	 as x * y to avoid the wrong sign of a zero result if x * y
+	 underflows to 0.  */
+      if (z == 0 && x != 0 && y != 0)
+	return x * y;
       /* If x or y or z is Inf/NaN, or if fma will certainly overflow,
 	 or if x * y is less than half of DBL_DENORM_MIN,
 	 compute as x * y + z.  */
@@ -128,6 +134,11 @@ __fma (double x, double y, double z)
       y = v.d;
       z = w.d;
     }
+
+  /* Ensure correct sign of exact 0 + 0.  */
+  if (__builtin_expect ((x == 0 || y == 0) && z == 0, 0))
+    return x * y + z;
+
   /* Multiplication m1 + m2 = x * y using Dekker's algorithm.  */
 #define C ((1 << (DBL_MANT_DIG + 1) / 2) + 1)
   double x1 = x * C;
@@ -198,22 +209,27 @@ __fma (double x, double y, double z)
 	 for proper rounding.  */
       if (v.ieee.exponent == 106)
 	{
+	  /* If the exponent would be in the normal range when
+	     rounding to normal precision with unbounded exponent
+	     range, the exact result is known and spurious underflows
+	     must be avoided on systems detecting tininess after
+	     rounding.  */
+	  if (TININESS_AFTER_ROUNDING)
+	    {
+	      w.d = a1 + u.d;
+	      if (w.ieee.exponent == 107)
+		return w.d * 0x1p-106;
+	    }
 	  /* v.ieee.mantissa1 & 2 is LSB bit of the result before rounding,
 	     v.ieee.mantissa1 & 1 is the round bit and j is our sticky
-	     bit.  In round-to-nearest 001 rounds down like 00,
-	     011 rounds up, even though 01 rounds down (thus we need
-	     to adjust), 101 rounds down like 10 and 111 rounds up
-	     like 11.  */
-	  if ((v.ieee.mantissa1 & 3) == 1)
-	    {
-	      v.d *= 0x1p-106;
-	      if (v.ieee.negative)
-		return v.d - 0x1p-1074 /* __DBL_DENORM_MIN__ */;
-	      else
-		return v.d + 0x1p-1074 /* __DBL_DENORM_MIN__ */;
-	    }
-	  else
-	    return v.d * 0x1p-106;
+	     bit.  */
+	  w.d = 0.0;
+	  w.ieee.mantissa1 = ((v.ieee.mantissa1 & 3) << 1) | j;
+	  w.ieee.negative = v.ieee.negative;
+	  v.ieee.mantissa1 &= ~3U;
+	  v.d *= 0x1p-106;
+	  w.d *= 0x1p-2;
+	  return v.d + w.d;
 	}
       v.ieee.mantissa1 |= j;
       return v.d * 0x1p-106;
