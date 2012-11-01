@@ -1,4 +1,4 @@
-# Copyright (C) 1992-2003,2005-2008,2011,2012 Free Software Foundation, Inc.
+# Copyright (C) 1992-2012 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -98,10 +98,9 @@ test-stat2-ARGS = Makefile . $(objpfx)test-stat2
 
 tst-statvfs-ARGS = $(objpfx)tst-statvfs tst-statvfs.c /tmp
 
-ifeq ($(cross-compiling),no)
+ifeq ($(run-built-tests),yes)
 tests: $(objpfx)ftwtest.out
 
-$(objpfx)ftwtest.out: $(objpfx)ftwtest
-	$(SHELL) -e ftwtest-sh $(shell cd $(common-objpfx). && pwd)/ \
-		 $(shell cd $(<D) && pwd)/$(<F) > $@
+$(objpfx)ftwtest.out: ftwtest-sh $(objpfx)ftwtest
+	$(SHELL) $< $(common-objpfx) '$(built-program-cmd)' > $@
 endif
