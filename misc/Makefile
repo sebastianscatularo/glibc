@@ -25,7 +25,8 @@ headers	:= sys/uio.h bits/uio.h sys/ioctl.h bits/ioctls.h bits/ioctl-types.h \
 	   sys/ptrace.h sys/file.h sys/dir.h sys/cdefs.h \
 	   ar.h a.out.h libgen.h stab.h bits/stab.def sgtty.h \
 	   ttyent.h paths.h sys/reboot.h \
-	   sys/mman.h sys/param.h fstab.h mntent.h search.h err.h error.h \
+	   sys/mman.h sys/param.h bits/param.h \
+	   fstab.h mntent.h search.h err.h error.h \
 	   sys/queue.h sysexits.h syscall.h sys/syscall.h sys/swap.h \
 	   sys/select.h ustat.h sys/ustat.h bits/ustat.h sys/sysinfo.h \
 	   regexp.h bits/select.h bits/mman.h sys/xattr.h \
@@ -64,7 +65,7 @@ routines := brk sbrk sstk ioctl \
 	    getloadavg getclktck \
 	    fgetxattr flistxattr fremovexattr fsetxattr getxattr \
 	    listxattr lgetxattr llistxattr lremovexattr lsetxattr \
-	    removexattr setxattr getauxval
+	    removexattr setxattr getauxval ifunc-impl-list
 
 generated := tst-error1.mtrace tst-error1-mem
 
@@ -76,7 +77,7 @@ gpl2lgpl := error.c error.h
 
 tests := tst-dirname tst-tsearch tst-fdset tst-efgcvt tst-mntent tst-hsearch \
 	 tst-error1 tst-pselect tst-insremque tst-mntent2 bug-hsearch1
-ifeq (no,$(cross-compiling))
+ifeq ($(run-built-tests),yes)
 tests: $(objpfx)tst-error1-mem
 endif
 
@@ -95,7 +96,6 @@ CFLAGS-getsysstats.c = -fexceptions
 CFLAGS-getusershell.c = -fexceptions
 CFLAGS-err.c = -fexceptions
 CFLAGS-tst-tsearch.c = $(stack-align-test-flags)
-CFLAGS-mntent_r.c = -D_IO_MTSAFE_IO
 
 include ../Rules
 

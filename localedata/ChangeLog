@@ -1,3 +1,64 @@
+2012-10-23  Joseph Myers  <joseph@codesourcery.com>
+
+	* Makefile [$(cross-compiling) = no]: Change condition to
+	[$(run-built-tests) = yes].
+
+2012-10-22  Jim Blandy  <jimb@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
+
+	* tst-fmon.sh: Redirect test program stdin in loop from /dev/null.
+	* tst-numeric.sh: Likewise.
+	* tst-rpmatch.sh: Likewise.
+
+2012-10-19  Jim Blandy  <jimb@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
+
+	* tst-wctype.sh (run_program_prefix): Remove variable.
+	(tst_wctype): New variable.  Use it directly to run test program
+	instead of passing test program name as argument.
+
+2012-10-19  Florian Pritz  <bluewind@xinu.at>
+
+	[BZ #13758]
+	* locales/de_AT (LC_TIME): Change month name from "FebruAr" to
+	"Februar".
+
+2012-10-19  Pravin Satpute  <psatpute@redhat.com>
+
+	[BZ #14694]
+	* locales/mr_IN: Fix Wednesday in DAY and August, September and
+	October in ABMON and MON.
+
+2012-09-24  Dmitry V. Levin  <ldv@altlinux.org>
+
+	* gen-locale.sh: Add "set -e".
+	* sort-test.sh: Likewise.
+	* tst-ctype.sh: Likewise.
+	* tst-fmon.sh: Likewise.
+	* tst-langinfo.sh: Likewise.
+	* tst-locale.sh: Likewise.
+	* tst-mbswcs.sh: Likewise.
+	* tst-numeric.sh: Likewise.
+	* tst-rpmatch.sh: Likewise.
+	* tst-trans.sh: Likewise.
+	* tst-wctype.sh: Likewise.
+	* Makefile: Do not specify -e option when running testsuite
+	shell scripts.
+
+	* sort-test.sh: Add copyright header.
+
+2012-09-05  Jeff Law  <law@redhat.com>
+
+	[BZ#14510]
+	* locales/es_DO: Fix LC_NUMERIC decimal_point and thousands_sep.
+	* locales/es_GT: Likewise.
+	* locales/es_HN: Likewise.
+	* locales/es_MX: Likewise.
+	* locales/es_NI: Likewise.
+	* locales/es_PA: Likewise.
+	* locales/es_PR: Likewise.
+	* locales/es_SV: Likewise.
+
 2012-06-20  Petr Baudis  <pasky@ucw.cz>
 
 	* locales/mag_IN: Fix comment character.
