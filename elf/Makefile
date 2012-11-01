@@ -19,6 +19,8 @@
 
 subdir		:= elf
 
+include ../Makeconfig
+
 headers		= elf.h bits/elfclass.h link.h bits/link.h
 routines	= $(dl-routines) dl-support dl-iteratephdr \
 		  dl-addr enbl-secure dl-profstub \
@@ -26,10 +28,13 @@ routines	= $(dl-routines) dl-support dl-iteratephdr \
 
 # The core dynamic linking functions are in libc for the static and
 # profiled libraries.
-dl-routines	= $(addprefix dl-,load cache lookup object reloc deps \
+dl-routines	= $(addprefix dl-,load lookup object reloc deps hwcaps \
 				  runtime error init fini debug misc \
 				  version profile conflict tls origin scope \
 				  execstack caller open close trampoline)
+ifeq (yes,$(use-ldconfig))
+dl-routines += dl-cache
+endif
 all-dl-routines = $(dl-routines) $(sysdep-dl-routines)
 # But they are absent from the shared libc, because that code is in ld.so.
 elide-routines.os = $(all-dl-routines) dl-support enbl-secure dl-origin \
@@ -44,8 +49,6 @@ all-rtld-routines = $(rtld-routines) $(sysdep-rtld-routines)
 CFLAGS-dl-runtime.c = -fexceptions -fasynchronous-unwind-tables
 CFLAGS-dl-lookup.c = -fexceptions -fasynchronous-unwind-tables
 CFLAGS-dl-iterate-phdr.c = $(uses-callbacks)
-
-include ../Makeconfig
 
 ifeq ($(unwind-find-fde),yes)
 routines += unwind-dw2-fde-glibc
@@ -112,18 +115,14 @@ $(inst_auditdir)/sotruss-lib.so: $(objpfx)sotruss-lib.so $(+force)
 	$(do-install-program)
 endif
 
-tests = tst-tls1 tst-tls2 tst-tls9 tst-leaks1
-ifeq (yes,$(have-initfini-array))
-tests += tst-array1 tst-array2 tst-array3 tst-array4 tst-array5
-endif
-tests-static = tst-tls1-static tst-tls2-static tst-stackguard1-static
+tests = tst-tls1 tst-tls2 tst-tls9 tst-leaks1 \
+	tst-array1 tst-array2 tst-array3 tst-array4 tst-array5
+tests-static = tst-tls1-static tst-tls2-static tst-stackguard1-static \
+	       tst-leaks1-static tst-array1-static tst-array5-static
 ifeq (yes,$(build-shared))
 tests-static += tst-tls9-static
 tst-tls9-static-ENV = \
        LD_LIBRARY_PATH=$(objpfx):$(common-objpfx):$(common-objpfx)dlfcn
-endif
-ifeq (yes,$(have-initfini-array))
-tests-static += tst-array1-static tst-array5-static
 endif
 tests += $(tests-static)
 ifeq (yes,$(build-shared))
@@ -157,8 +156,9 @@ tests += tst-audit6 tst-audit7
 endif
 endif
 endif
-ifeq ($(cross-compiling),no)
-tests: $(objpfx)tst-leaks1-mem $(objpfx)noload-mem
+ifeq ($(run-built-tests),yes)
+tests: $(objpfx)tst-leaks1-mem $(objpfx)tst-leaks1-static-mem \
+       $(objpfx)noload-mem
 endif
 tlsmod17a-suffixes = 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
 tlsmod18a-suffixes = 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
@@ -210,10 +210,8 @@ modules-names = testobj1 testobj2 testobj3 testobj4 testobj5 testobj6 \
 		tst-initordera3 tst-initordera4 \
 		tst-initorder2a tst-initorder2b tst-initorder2c \
 		tst-initorder2d \
-		tst-relsort1mod1 tst-relsort1mod2
-ifeq (yes,$(have-initfini-array))
-modules-names += tst-array2dep tst-array5dep
-endif
+		tst-relsort1mod1 tst-relsort1mod2 tst-array2dep \
+		tst-array5dep
 ifeq (yesyes,$(have-fpie)$(build-shared))
 modules-names += tst-piemod1
 tests += tst-pie1
@@ -433,8 +431,8 @@ test-modules = $(addprefix $(objpfx),$(addsuffix .so,$(strip $(modules-names))))
 generated += $(addsuffix .so,$(strip $(modules-names)))
 
 ifeq (yes,$(build-shared))
-ifeq ($(cross-compiling),no)
-tests: $(objpfx)tst-pathopt.out
+ifeq ($(run-built-tests),yes)
+tests: $(objpfx)tst-pathopt.out $(objpfx)tst-rtld-load-self.out
 endif
 endif
 
@@ -639,6 +637,7 @@ $(objpfx)circlemod2a.so: $(objpfx)circlemod3a.so
 $(objpfx)order: $(addprefix $(objpfx),dep4.so dep3.so dep2.so dep1.so)
 
 $(objpfx)order.out: $(objpfx)order
+	$(test-wrapper) \
 	$(elf-objpfx)$(rtld-installed-name) \
 	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
 	  $(objpfx)order > $@
@@ -705,7 +704,10 @@ $(objpfx)lateglobal.out: $(objpfx)ltglobmod1.so $(objpfx)ltglobmod2.so
 $(objpfx)tst-pathopt: $(libdl)
 $(objpfx)tst-pathopt.out: tst-pathopt.sh $(objpfx)tst-pathopt \
 			  $(objpfx)pathoptobj.so
-	$(SHELL) -e $< $(common-objpfx)
+	$(SHELL) $< $(common-objpfx) '$(test-wrapper-env)'
+
+$(objpfx)tst-rtld-load-self.out: tst-rtld-load-self.sh $(objpfx)ld.so
+	$(SHELL) $^ '$(test-wrapper)' '$(test-wrapper-env)' > $@
 
 $(objpfx)initfirst: $(libdl)
 $(objpfx)initfirst.out: $(objpfx)firstobj.so
@@ -844,45 +846,37 @@ LDFLAGS-tst-execstack-needed = -Wl,-z,noexecstack
 LDFLAGS-tst-execstack-prog = -Wl,-z,execstack
 endif
 
-$(objpfx)tst-array1.out: $(objpfx)tst-array1
-	$(elf-objpfx)$(rtld-installed-name) \
-	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
-	  $(objpfx)tst-array1 > $@
+$(objpfx)tst-array1.out: tst-array1.exp $(objpfx)tst-array1
+	$(built-program-cmd) > $@
 	cmp $@ tst-array1.exp > /dev/null
 
-$(objpfx)tst-array1-static.out: $(objpfx)tst-array1-static
-	$(objpfx)tst-array1-static > $@
+$(objpfx)tst-array1-static.out: tst-array1.exp $(objpfx)tst-array1-static
+	$(built-program-cmd) > $@
 	cmp $@ tst-array1.exp > /dev/null
 
 $(objpfx)tst-array2: $(objpfx)tst-array2dep.so
-$(objpfx)tst-array2.out: $(objpfx)tst-array2
-	$(elf-objpfx)$(rtld-installed-name) \
-	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
-	  $(objpfx)tst-array2 > $@
+$(objpfx)tst-array2.out: tst-array2.exp $(objpfx)tst-array2
+	$(built-program-cmd) > $@
 	cmp $@ tst-array2.exp > /dev/null
 
-$(objpfx)tst-array3.out: $(objpfx)tst-array3
-	$(elf-objpfx)$(rtld-installed-name) \
-	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
-	  $(objpfx)tst-array3 > $@
+$(objpfx)tst-array3.out: tst-array1.exp $(objpfx)tst-array3
+	$(built-program-cmd) > $@
 	cmp $@ tst-array1.exp > /dev/null
 
 $(objpfx)tst-array4: $(libdl)
-$(objpfx)tst-array4.out: $(objpfx)tst-array4 $(objpfx)tst-array2dep.so
-	$(elf-objpfx)$(rtld-installed-name) \
-	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
-	  $< > $@
+$(objpfx)tst-array4.out: tst-array4.exp $(objpfx)tst-array4 \
+			 $(objpfx)tst-array2dep.so
+	$(built-program-cmd) > $@
 	cmp $@ tst-array4.exp > /dev/null
 
 $(objpfx)tst-array5: $(objpfx)tst-array5dep.so
-$(objpfx)tst-array5.out: $(objpfx)tst-array5
-	$(elf-objpfx)$(rtld-installed-name) \
-	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
-	  $(objpfx)tst-array5 > $@
+$(objpfx)tst-array5.out: tst-array5.exp $(objpfx)tst-array5
+	$(built-program-cmd) > $@
 	cmp $@ tst-array5.exp > /dev/null
 
-$(objpfx)tst-array5-static.out: $(objpfx)tst-array5-static
-	$(objpfx)tst-array5-static > $@
+$(objpfx)tst-array5-static.out: tst-array5-static.exp \
+				$(objpfx)tst-array5-static
+	$(built-program-cmd) > $@
 	cmp $@ tst-array5-static.exp > /dev/null
 
 CFLAGS-tst-pie1.c += $(pie-ccflag)
@@ -1027,6 +1021,7 @@ $(objpfx)tst-global1.out: $(objpfx)testobj6.so $(objpfx)testobj2.so
 $(objpfx)order2: $(libdl)
 $(objpfx)order2.out: $(objpfx)order2 $(objpfx)order2mod1.so \
 		     $(objpfx)order2mod2.so
+	$(test-wrapper) \
 	$(elf-objpfx)$(rtld-installed-name) \
 	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
 	  $(objpfx)order2 > $@
@@ -1038,14 +1033,19 @@ order2mod2.so-no-z-defs = yes
 LDFLAGS-order2mod1.so = $(no-as-needed)
 LDFLAGS-order2mod2.so = $(no-as-needed)
 
-tst-stackguard1-ARGS = --command "$(built-program-cmd) --child"
+tst-stackguard1-ARGS = --command "$(host-built-program-cmd) --child"
 tst-stackguard1-static-ARGS = --command "$(objpfx)tst-stackguard1-static --child"
 
 $(objpfx)tst-leaks1: $(libdl)
 $(objpfx)tst-leaks1-mem: $(objpfx)tst-leaks1.out
 	$(common-objpfx)malloc/mtrace $(objpfx)tst-leaks1.mtrace > $@
 
+$(objpfx)tst-leaks1-static: $(common-objpfx)dlfcn/libdl.a
+$(objpfx)tst-leaks1-static-mem: $(objpfx)tst-leaks1-static.out
+	$(common-objpfx)malloc/mtrace $(objpfx)tst-leaks1-static.mtrace > $@
+
 tst-leaks1-ENV = MALLOC_TRACE=$(objpfx)tst-leaks1.mtrace
+tst-leaks1-static-ENV = MALLOC_TRACE=$(objpfx)tst-leaks1-static.mtrace
 
 $(objpfx)tst-addr1: $(libdl)
 
@@ -1116,6 +1116,7 @@ $(objpfx)tst-unique3.out: $(objpfx)tst-unique3lib2.so
 $(objpfx)tst-unique4: $(objpfx)tst-unique4lib.so
 
 $(objpfx)tst-initorder.out: $(objpfx)tst-initorder
+	$(test-wrapper) \
 	$(elf-objpfx)${rtld-installed-name} \
 	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
 	  $< > $@
@@ -1137,6 +1138,7 @@ object-suffixes-left := a b c d
 include $(o-iterator)
 
 $(objpfx)tst-initorder2.out: $(objpfx)tst-initorder2
+	$(test-wrapper) \
 	$(elf-objpfx)${rtld-installed-name} \
 	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
 	  $< > $@
@@ -1161,11 +1163,12 @@ $(objpfx)tst-relsort1mod2.so: $(libm)
 $(objpfx)tst-relsort1.out: $(objpfx)tst-relsort1mod1.so \
 			   $(objpfx)tst-relsort1mod2.so
 
-ifeq ($(cross-compiling),no)
+ifeq ($(run-built-tests),yes)
 tests: $(objpfx)tst-unused-dep.out
 endif
 
 $(objpfx)tst-unused-dep.out: $(objpfx)testobj1.so
+	$(test-wrapper-env) \
 	LD_TRACE_LOADED_OBJECTS=1 \
 	LD_DEBUG=unused \
 	LD_PRELOAD= \
