@@ -33,31 +33,6 @@ ifdef subdir
 .. := ../
 endif
 
-# If config.make exists, the source directory was configured,
-# so don't try to be clever and find another directory to build in.
-ifneq (,$(wildcard $(..)config.make))
-ARCH =
-machine =
-else	# Not configured.
-ifndef ARCH
-ifdef machine
-ARCH = $(machine)
-endif # machine
-endif # ARCH
-endif # config.make
-
-# Directory for object files and libc.a.  If this is not defined, the
-# object files live in the subdirectories where their sources live, and
-# libc.a lives in the parent directory (this probably doesn't work any
-# more).
-ifdef ARCH
-ifeq ($(filter /%,$(ARCH)),)
-objdir := $(..)$(ARCH)
-else
-objdir = $(ARCH)
-endif
-endif
-
 # $(common-objdir) is the place to put objects and
 # such that are not specific to a single subdir.
 ifdef objdir
@@ -65,15 +40,7 @@ objpfx := $(patsubst %//,%/,$(objdir)/$(subdir)/)
 common-objpfx = $(objdir)/
 common-objdir = $(objdir)
 else
-objpfx :=
-ifdef ..
-common-objpfx = $(..)
-common-objdir = ..
-else
-# This is a kludge.  make wizards might grok.
-common-objpfx = sysdeps/../
-common-objdir = .
-endif
+objdir must be defined by the build-directory Makefile.
 endif
 
 # Root of the sysdeps tree.
@@ -88,10 +55,6 @@ uses-callbacks = $(exceptions)
 
 # What flags to give to tests which test stack alignment
 stack-align-test-flags =
-
-# We have a special subdir for each binary format.
-# For now, only ELF is fully supported.
-binfmt-subdir = elf
 
 # Complete path to sysdep dirs.
 # `configure' writes a definition of `config-sysdirs' in `config.make'.
@@ -415,22 +378,6 @@ LDFLAGS.so += $(hashstyle-LDFLAGS)
 LDFLAGS-rtld += $(hashstyle-LDFLAGS)
 endif
 
-# Commands for linking programs with the C library.
-ifndef +link
-+link-before-libc = $(CC) -nostdlib -nostartfiles -o $@ \
-	      $(sysdep-LDFLAGS) $(config-LDFLAGS) $(LDFLAGS) $(LDFLAGS-$(@F)) \
-	      $(combreloc-LDFLAGS) $(relro-LDFLAGS) $(hashstyle-LDFLAGS) \
-	      $(addprefix $(csu-objpfx),$(start-installed-name)) \
-	      $(+preinit) $(+prector) \
-	      $(filter-out $(addprefix $(csu-objpfx),start.o \
-						     $(start-installed-name))\
-			   $(+preinit) $(link-extra-libs) \
-			   $(common-objpfx)libc% $(+postinit),$^) \
-	      $(link-extra-libs)
-+link-after-libc = $(+postctor) $(+postinit)
-+link = $(+link-before-libc) $(link-libc) $(+link-after-libc)
-+link-tests = $(+link-before-libc) $(link-libc-tests) $(+link-after-libc)
-endif
 # Command for linking PIE programs with the C library.
 ifndef +link-pie
 +link-pie = $(CC) -pie -Wl,-O1 -nostdlib -nostartfiles -o $@ \
@@ -449,29 +396,50 @@ ifndef +link-static
 +link-static-before-libc = $(CC) -nostdlib -nostartfiles -static -o $@ \
 	      $(sysdep-LDFLAGS) $(LDFLAGS) $(LDFLAGS-$(@F))  \
 	      $(addprefix $(csu-objpfx),$(static-start-installed-name)) \
-	      $(+preinit) $(+prector) \
+	      $(+preinit) $(+prectorT) \
 	      $(filter-out $(addprefix $(csu-objpfx),start.o \
 						     $(start-installed-name))\
 			   $(+preinit) $(link-extra-libs-static) \
 			   $(common-objpfx)libc% $(+postinit),$^) \
-	      $(link-extra-libs-static) $(link-libc-static)
-+link-static-after-libc = $(+postctor) $(+postinit)
+	      $(link-extra-libs-static)
++link-static-after-libc = $(+postctorT) $(+postinit)
 +link-static = $(+link-static-before-libc) $(link-libc-static) \
 	       $(+link-static-after-libc)
 +link-static-tests = $(+link-static-before-libc) $(link-libc-static-tests) \
 		     $(+link-static-after-libc)
+endif
+# Commands for linking programs with the C library.
+ifndef +link
+ifeq (yes,$(build-shared))
++link-before-libc = $(CC) -nostdlib -nostartfiles -o $@ \
+	      $(sysdep-LDFLAGS) $(config-LDFLAGS) $(LDFLAGS) $(LDFLAGS-$(@F)) \
+	      $(combreloc-LDFLAGS) $(relro-LDFLAGS) $(hashstyle-LDFLAGS) \
+	      $(addprefix $(csu-objpfx),$(start-installed-name)) \
+	      $(+preinit) $(+prector) \
+	      $(filter-out $(addprefix $(csu-objpfx),start.o \
+						     $(start-installed-name))\
+			   $(+preinit) $(link-extra-libs) \
+			   $(common-objpfx)libc% $(+postinit),$^) \
+	      $(link-extra-libs)
++link-after-libc = $(+postctor) $(+postinit)
++link = $(+link-before-libc) $(link-libc) $(+link-after-libc)
++link-tests = $(+link-before-libc) $(link-libc-tests) $(+link-after-libc)
+else
++link = $(+link-static)
++link-tests = $(+link-static-tests)
+endif
 endif
 # Command for statically linking bounded-pointer programs with the C library.
 ifndef +link-bounded
 +link-bounded = $(CC) -nostdlib -nostartfiles -static -fbounded-pointers -o $@ \
 	      $(sysdep-LDFLAGS) $(LDFLAGS)  \
 	      $(addprefix $(csu-objpfx),b$(static-start-installed-name)) \
-	      $(+preinit) $(+prector) \
+	      $(+preinit) $(+prectorT) \
 	      $(filter-out $(addprefix $(csu-objpfx),start.ob \
 						     $(start-installed-name))\
 			   $(+preinit) $(link-extra-libs-bounded) \
 			   $(common-objpfx)libc% $(+postinit),$^) \
-	      $(link-extra-libs-bounded) $(link-libc-bounded) $(+postctor) $(+postinit)
+	      $(link-extra-libs-bounded) $(link-libc-bounded) $(+postctorT) $(+postinit)
 endif
 ifndef config-LDFLAGS
 ifeq (yes,$(build-shared))
@@ -493,14 +461,13 @@ link-libc-tests = $(link-libc-before-gnulib) $(gnulib-tests)
 rpath-dirs = math elf dlfcn nss nis rt resolv crypt
 rpath-link = \
 $(common-objdir):$(subst $(empty) ,:,$(patsubst ../$(subdir),.,$(rpath-dirs:%=$(common-objpfx)%)))
-elfobjdir := $(patsubst ../$(subdir),.,$(common-objpfx)elf)
 else
-nssobjdir := $(patsubst ../$(subdir),.,$(common-objpfx)nss)
-resolvobjdir := $(patsubst ../$(subdir),.,$(common-objpfx)resolv)
 link-libc = $(common-objpfx)libc.a $(otherlibs) $(gnulib) $(common-objpfx)libc.a $(gnulib)
 link-libc-tests = $(common-objpfx)libc.a $(otherlibs) $(gnulib-tests) $(common-objpfx)libc.a $(gnulib-tests)
 endif
 endif
+
+elfobjdir := $(patsubst ../$(subdir),.,$(common-objpfx)elf)
 
 # Differences in the linkers on the various platforms.
 LDFLAGS-rpath-ORIGIN = -Wl,-rpath,'$$ORIGIN'
@@ -572,7 +539,14 @@ gnulib-arch =
 gnulib = -lgcc $(gnulib-arch)
 gnulib-tests := -lgcc $(libgcc_eh)
 static-gnulib-arch =
+# By default, elf/static-stubs.o, instead of -lgcc_eh, is used to
+# statically link programs.  When --disable-shared is used, we use
+# -lgcc_eh since elf/static-stubs.o isn't sufficient.
+ifeq (yes,$(build-shared))
 static-gnulib = -lgcc $(static-gnulib-arch)
+else
+static-gnulib = -lgcc -lgcc_eh $(static-gnulib-arch)
+endif
 static-gnulib-tests := -lgcc -lgcc_eh $(libunwind)
 libc.so-gnulib := -lgcc
 endif
@@ -583,9 +557,33 @@ endif
 # Variants of the two previous definitions for linking PIE programs.
 +prectorS = `$(CC) $(sysdep-LDFLAGS) --print-file-name=crtbeginS.o`
 +postctorS = `$(CC) $(sysdep-LDFLAGS) --print-file-name=crtendS.o`
+# Variants of the two previous definitions for statically linking programs.
++prectorT = `$(CC) $(sysdep-LDFLAGS) --print-file-name=crtbeginT.o`
++postctorT = `$(CC) $(sysdep-LDFLAGS) --print-file-name=crtend.o`
 +interp = $(addprefix $(elf-objpfx),interp.os)
 csu-objpfx = $(common-objpfx)csu/
 elf-objpfx = $(common-objpfx)elf/
+
+# A command that, prepended to the name and arguments of a program,
+# and run on the build system, causes that program with those
+# arguments to be run on the host for which the library is built.
+ifndef test-wrapper
+test-wrapper =
+endif
+# Likewise, but the name of the program is preceded by
+# <variable>=<value> assignments for environment variables.
+ifndef test-wrapper-env
+test-wrapper-env = $(test-wrapper) env
+endif
+
+# Whether to run test programs built for the library's host system.
+ifndef run-built-tests
+ifeq (yes|,$(cross-compiling)|$(test-wrapper))
+run-built-tests = no
+else
+run-built-tests = yes
+endif
+endif
 
 # How to run a program we just linked with our library.
 # The program binary is assumed to be $(word 2,$^).
@@ -596,17 +594,36 @@ sysdep-library-path = \
 $(subst $(empty) ,:,$(strip $(patsubst -Wl$(comma)-rpath-link=%, %,\
 				       $(filter -Wl$(comma)-rpath-link=%,\
 						$(sysdep-LDFLAGS)))))
-run-program-prefix = $(if $(filter $(notdir $(built-program-file)),\
-				   $(tests-static) $(xtests-static)),, \
-			  $(elf-objpfx)$(rtld-installed-name) \
-			  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)))
+# $(run-via-rtld-prefix) is a command that, when prepended to the name
+# of a program built with the newly built library, produces a command
+# that, executed on the host for which the library is built, runs that
+# program.  For the statically-linked %-bp test programs, and for
+# tests listed in tests-static or xtests-static, it is empty.
+run-via-rtld-prefix =							      \
+  $(if $(strip $(filter $(notdir $(built-program-file)),		      \
+			$(tests-static) $(xtests-static))		      \
+	       $(filter %-bp,$(built-program-file))),,			      \
+       $(elf-objpfx)$(rtld-installed-name)				      \
+	 --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)))
 else
-run-program-prefix =
+run-via-rtld-prefix =
 endif
-# Never use $(run-program-prefix) for the statically-linked %-bp test programs
-built-program-cmd = $(patsubst %,$(run-program-prefix),\
-			$(filter-out %-bp,$(built-program-file))) \
-		    $(built-program-file)
+# $(run-program-prefix) is a command that, when prepended to the name
+# of a program built with the newly built library, produces a command
+# that, executed on the build system on which "make" is run, runs that
+# program.
+run-program-prefix = $(test-wrapper) $(run-via-rtld-prefix)
+# $(built-program-cmd) is a command that, executed on the build system
+# on which "make" is run, runs the newly built program that is the
+# second dependency of the makefile target in which
+# $(built-program-cmd) is used.
+built-program-cmd = $(test-wrapper) \
+		    $(run-via-rtld-prefix) $(built-program-file)
+# $(host-built-program-cmd) is a command that, executed on the host
+# for which the library is built, runs the newly built program that is
+# the second dependency of the makefile target in which
+# $(host-built-program-cmd) is used.
+host-built-program-cmd = $(run-via-rtld-prefix) $(built-program-file)
 
 ifndef LD
 LD := ld -X
@@ -802,11 +819,7 @@ endif
 
 # The assembler can generate debug information too.
 ifndef ASFLAGS
-ifeq ($(have-cpp-asm-debuginfo),yes)
 ASFLAGS := $(filter -g% -fdebug-prefix-map=%,$(CFLAGS))
-else
-ASFLAGS :=
-endif
 endif
 ASFLAGS += $(ASFLAGS-config) $(asflags-cpu)
 
@@ -955,7 +968,6 @@ endif
 endif # build-shared
 
 
-dlfcn = dlfcn
 ifeq ($(build-shared),yes)
 libdl = $(common-objpfx)dlfcn/libdl.so$(libdl.so-version)
 else
@@ -976,7 +988,7 @@ all-subdirs = csu assert ctype locale intl catgets math setjmp signal	    \
 	      grp pwd posix io termios resource misc socket sysvipc gmon    \
 	      gnulib iconv iconvdata wctype manual shadow gshadow po argp   \
 	      crypt nss localedata timezone rt conform debug		    \
-	      $(add-on-subdirs) $(dlfcn) $(binfmt-subdir)
+	      $(add-on-subdirs) dlfcn elf
 
 ifndef avoid-generated
 all-Depend-files := $(wildcard $(foreach dir,$(all-subdirs),\
@@ -1009,6 +1021,13 @@ endif
 # Compute just the target patterns.  Makeconfig has set sysd-rules-patterns.
 sysd-rules-targets := $(sort $(foreach p,$(sysd-rules-patterns),\
 					 $(firstword $(subst :, ,$p))))
+
+# A sysdeps Makeconfig fragment may set libc-reentrant to yes.
+ifeq (yes,$(libc-reentrant))
+defines += -D_LIBC_REENTRANT
+
+libio-mtsafe = -D_IO_MTSAFE_IO
+endif
 
 endif # Makeconfig not yet included
 
