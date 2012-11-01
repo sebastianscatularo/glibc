@@ -1,4 +1,4 @@
-# Copyright (C) 1991-2009, 2011, 2012 Free Software Foundation, Inc.
+# Copyright (C) 1991-2012 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -69,7 +69,8 @@ tests		:= tst-strtol tst-strtod testmb testrand testsort testdiv   \
 		   tst-makecontext tst-strtod4 tst-strtod5 tst-qsort2	    \
 		   tst-makecontext2 tst-strtod6 tst-unsetenv1		    \
 		   tst-makecontext3 bug-getcontext bug-fmtmsg1		    \
-		   tst-secure-getenv
+		   tst-secure-getenv tst-strtod-overflow tst-strtod-round   \
+		   tst-tininess tst-strtod-underflow
 tests-static	:= tst-secure-getenv
 
 include ../Makeconfig
@@ -100,10 +101,8 @@ CFLAGS-system.c = -fexceptions
 CFLAGS-system.os = -fomit-frame-pointer
 CFLAGS-fmtmsg.c = -fexceptions
 
-ifneq (,$(filter %REENTRANT, $(defines)))
-CFLAGS-strfmon.c = -D_IO_MTSAFE_IO
-CFLAGS-strfmon_l.c = -D_IO_MTSAFE_IO
-endif
+CFLAGS-strfmon.c = $(libio-mtsafe)
+CFLAGS-strfmon_l.c = $(libio-mtsafe)
 
 CFLAGS-tst-bsearch.c = $(stack-align-test-flags)
 CFLAGS-tst-qsort.c = $(stack-align-test-flags)
@@ -124,7 +123,7 @@ bug-fmtmsg1-ENV = SEV_LEVEL=foo,11,newsev
 # Run a test on the header files we use.
 tests: $(objpfx)isomac.out
 
-ifeq (no,$(cross-compiling))
+ifeq ($(run-built-tests),yes)
 tests: $(objpfx)tst-fmtmsg.out
 endif
 
@@ -137,7 +136,7 @@ $(objpfx)isomac: isomac.c
 	$(native-compile)
 
 $(objpfx)tst-fmtmsg.out: tst-fmtmsg.sh $(objpfx)tst-fmtmsg
-	$(SHELL) -e $< $(common-objpfx) '$(run-program-prefix)' $(common-objpfx)stdlib/
+	$(SHELL) $< $(common-objpfx) '$(run-program-prefix)' $(common-objpfx)stdlib/
 
 $(objpfx)tst-putenv: $(objpfx)tst-putenvmod.so
 LDFLAGS-tst-putenv = $(no-as-needed)
@@ -152,3 +151,6 @@ else
 link-libm = $(common-objpfx)math/libm.a
 endif
 $(objpfx)bug-getcontext: $(link-libm)
+$(objpfx)tst-strtod-round: $(link-libm)
+$(objpfx)tst-tininess: $(link-libm)
+$(objpfx)tst-strtod-underflow: $(link-libm)
