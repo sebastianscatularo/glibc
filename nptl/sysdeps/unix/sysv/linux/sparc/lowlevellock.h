@@ -50,6 +50,11 @@
 #define LLL_PRIVATE	0
 #define LLL_SHARED	FUTEX_PRIVATE_FLAG
 
+#ifndef __sparc32_atomic_do_lock
+/* Delay in spinlock loop.  */
+extern void __cpu_relax(void);
+#define BUSY_WAIT_NOP	__cpu_relax()
+#endif
 
 #if !defined NOT_IN_libc || defined IS_IN_rtld
 /* In libc.so or ld.so all futexes are private.  */
@@ -268,7 +273,7 @@ __lll_robust_timedlock (int *futex, const struct timespec *abstime,
 #define LLL_LOCK_INITIALIZER		(0)
 #define LLL_LOCK_INITIALIZER_LOCKED	(1)
 
-/* The kernel notifies a process with uses CLONE_CLEARTID via futex
+/* The kernel notifies a process which uses CLONE_CHILD_CLEARTID via futex
    wakeup when the clone terminates.  The memory location contains the
    thread ID while the clone is running and is reset to zero
    afterwards.	*/
