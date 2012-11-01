@@ -376,7 +376,6 @@ GLIBC_2.16
  __secure_getenv F
  __select F
  __send F
- __sendmmsg F
  __setmntent F
  __setpgid F
  __sigaction F
@@ -2081,4 +2080,10 @@ GLIBC_2.16
  xprt_unregister F
 GLIBC_2.17
  GLIBC_2.17 A
+ __sendmmsg F
+ clock_getcpuclockid F
+ clock_getres F
+ clock_gettime F
+ clock_nanosleep F
+ clock_settime F
  secure_getenv F

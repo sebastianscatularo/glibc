@@ -78,7 +78,6 @@ GLIBC_2.16
  __getshmlba F
  __poll_chk F
  __ppoll_chk F
- __sendmmsg F
  _sys_errlist D 0x440
  _sys_nerr D 0x4
  aligned_alloc F
@@ -92,6 +91,12 @@ GLIBC_2.16
  timespec_get F
 GLIBC_2.17
  GLIBC_2.17 A
+ __sendmmsg F
+ clock_getcpuclockid F
+ clock_getres F
+ clock_gettime F
+ clock_nanosleep F
+ clock_settime F
  secure_getenv F
 GLIBC_2.2
  GLIBC_2.2 A

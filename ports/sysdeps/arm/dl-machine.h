@@ -1,6 +1,5 @@
 /* Machine-dependent ELF dynamic relocation inline functions.  ARM version.
-   Copyright (C) 1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,
-	2006, 2009, 2010, 2011 Free Software Foundation, Inc.
+   Copyright (C) 1995-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -27,8 +26,9 @@
 #include <dl-tlsdesc.h>
 #include <dl-irel.h>
 
-#define CLEAR_CACHE(BEG,END)						\
-  INTERNAL_SYSCALL_ARM (cacheflush, , 3, (BEG), (END), 0)
+#ifndef CLEAR_CACHE
+# error CLEAR_CACHE definition required to handle TEXTREL
+#endif
 
 /* Return nonzero iff ELF header is compatible with the running host.  */
 static inline int __attribute__ ((unused))
@@ -70,7 +70,7 @@ elf_machine_dynamic (void)
 static inline Elf32_Addr __attribute__ ((unused))
 elf_machine_load_address (void)
 {
-  extern void __dl_start asm ("_dl_start");
+  extern Elf32_Addr internal_function __dl_start (void *) asm ("_dl_start");
   Elf32_Addr got_addr = (Elf32_Addr) &__dl_start;
   Elf32_Addr pcrel_addr;
 #ifdef __thumb__
@@ -302,36 +302,56 @@ elf_machine_plt_value (struct link_map *map, const Elf32_Rel *reloc,
 #define ARCH_LA_PLTEXIT arm_gnu_pltexit
 
 #ifdef RESOLVE_MAP
-
-/* Deal with an out-of-range PC24 reloc.  */
-auto Elf32_Addr
-fix_bad_pc24 (Elf32_Addr *const reloc_addr, Elf32_Addr value)
+/* Handle a PC24 reloc, including the out-of-range case.  */
+auto void
+relocate_pc24 (struct link_map *map, Elf32_Addr value,
+               Elf32_Addr *const reloc_addr, Elf32_Sword addend)
 {
-  static void *fix_page;
-  static unsigned int fix_offset;
-  static size_t pagesize;
-  Elf32_Word *fix_address;
+  Elf32_Addr new_value;
 
-  if (! fix_page)
+  /* Set NEW_VALUE based on V, and return true iff it overflows 24 bits.  */
+  inline bool set_new_value (Elf32_Addr v)
+  {
+    new_value = v + addend - (Elf32_Addr) reloc_addr;
+    Elf32_Addr topbits = new_value & 0xfe000000;
+    return topbits != 0xfe000000 && topbits != 0x00000000;
+  }
+
+  if (set_new_value (value))
     {
-      if (! pagesize)
-	pagesize = getpagesize ();
-      fix_page = mmap (NULL, pagesize, PROT_READ | PROT_WRITE | PROT_EXEC,
-		       MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-      if (! fix_page)
-	assert (! "could not map page for fixup");
-      fix_offset = 0;
+      /* The PC-relative address doesn't fit in 24 bits!  */
+
+      static void *fix_page;
+      static size_t fix_offset;
+      if (fix_page == NULL)
+        {
+          void *new_page = __mmap (NULL, GLRO(dl_pagesize),
+                                   PROT_READ | PROT_WRITE | PROT_EXEC,
+                                   MAP_PRIVATE | MAP_ANON, -1, 0);
+          if (new_page == MAP_FAILED)
+            _dl_signal_error (0, map->l_name, NULL,
+                              "could not map page for fixup");
+          fix_page = new_page;
+          assert (fix_offset == 0);
+        }
+
+      Elf32_Word *fix_address = fix_page + fix_offset;
+      fix_address[0] = 0xe51ff004;	/* ldr pc, [pc, #-4] */
+      fix_address[1] = value;
+
+      fix_offset += sizeof fix_address[0] * 2;
+      if (fix_offset >= GLRO(dl_pagesize))
+        {
+          fix_page = NULL;
+          fix_offset = 0;
+        }
+
+      if (set_new_value ((Elf32_Addr) fix_address))
+        _dl_signal_error (0, map->l_name, NULL,
+                          "R_ARM_PC24 relocation out of range");
     }
 
-  fix_address = (Elf32_Word *)(fix_page + fix_offset);
-  fix_address[0] = 0xe51ff004;	/* ldr pc, [pc, #-4] */
-  fix_address[1] = value;
-
-  fix_offset += 8;
-  if (fix_offset >= pagesize)
-    fix_page = NULL;
-
-  return (Elf32_Addr)fix_address;
+  *reloc_addr = (*reloc_addr & 0xff000000) | ((new_value >> 2) & 0x00ffffff);
 }
 
 /* Perform the relocation specified by RELOC and SYM (which is fully resolved).
@@ -413,6 +433,10 @@ elf_machine_rel (struct link_map *map, const Elf32_Rel *reloc,
 	  break;
 	case R_ARM_ABS32:
 	  {
+	    struct unaligned
+	      {
+		Elf32_Addr x;
+	      } __attribute__ ((packed, may_alias));
 # ifndef RTLD_BOOTSTRAP
 	   /* This is defined in rtld.c, but nowhere in the static
 	      libc.a; make the reference weak so static programs can
@@ -431,7 +455,8 @@ elf_machine_rel (struct link_map *map, const Elf32_Rel *reloc,
 		 used while loading those libraries.  */
 	      value -= map->l_addr + refsym->st_value;
 # endif
-	    *reloc_addr += value;
+	    /* Support relocations on mis-aligned offsets.  */
+	    ((struct unaligned *) reloc_addr)->x += value;
 	    break;
 	  }
 	case R_ARM_TLS_DESC:
@@ -468,30 +493,11 @@ elf_machine_rel (struct link_map *map, const Elf32_Rel *reloc,
 	    }
 	    break;
 	case R_ARM_PC24:
-	  {
-	     Elf32_Sword addend;
-	     Elf32_Addr newvalue, topbits;
-
-	     addend = *reloc_addr & 0x00ffffff;
-	     if (addend & 0x00800000) addend |= 0xff000000;
-
-	     newvalue = value - (Elf32_Addr)reloc_addr + (addend << 2);
-	     topbits = newvalue & 0xfe000000;
-	     if (topbits != 0xfe000000 && topbits != 0x00000000)
-	       {
-		 newvalue = fix_bad_pc24(reloc_addr, value)
-		   - (Elf32_Addr)reloc_addr + (addend << 2);
-		 topbits = newvalue & 0xfe000000;
-		 if (topbits != 0xfe000000 && topbits != 0x00000000)
-		   {
-		     _dl_signal_error (0, map->l_name, NULL,
-				       "R_ARM_PC24 relocation out of range");
-		   }
-	       }
-	     newvalue >>= 2;
-	     value = (*reloc_addr & 0xff000000) | (newvalue & 0x00ffffff);
-	     *reloc_addr = value;
-	  }
+          relocate_pc24 (map, value, reloc_addr,
+                         /* Sign-extend the 24-bit addend in the
+                            instruction (which counts instructions), and
+                            then shift it up two so as to count bytes.  */
+                         (((Elf32_Sword) *reloc_addr << 8) >> 8) << 2);
 	  break;
 #if !defined RTLD_BOOTSTRAP
 	case R_ARM_TLS_DTPMOD32:
@@ -584,26 +590,7 @@ elf_machine_rela (struct link_map *map, const Elf32_Rela *reloc,
 	  *reloc_addr = value + reloc->r_addend;
 	  break;
 	case R_ARM_PC24:
-	  {
-	     Elf32_Addr newvalue, topbits;
-
-	     newvalue = value + reloc->r_addend - (Elf32_Addr)reloc_addr;
-	     topbits = newvalue & 0xfe000000;
-	     if (topbits != 0xfe000000 && topbits != 0x00000000)
-	       {
-		 newvalue = fix_bad_pc24(reloc_addr, value)
-		   - (Elf32_Addr)reloc_addr + (reloc->r_addend << 2);
-		 topbits = newvalue & 0xfe000000;
-		 if (topbits != 0xfe000000 && topbits != 0x00000000)
-		   {
-		     _dl_signal_error (0, map->l_name, NULL,
-				       "R_ARM_PC24 relocation out of range");
-		   }
-	       }
-	     newvalue >>= 2;
-	     value = (*reloc_addr & 0xff000000) | (newvalue & 0x00ffffff);
-	     *reloc_addr = value;
-	  }
+          relocate_pc24 (map, value, reloc_addr, reloc->r_addend);
 	  break;
 #if !defined RTLD_BOOTSTRAP
 	case R_ARM_TLS_DTPMOD32:

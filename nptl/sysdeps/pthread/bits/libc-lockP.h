@@ -146,18 +146,6 @@ typedef pthread_key_t __libc_key_t;
   __libc_maybe_call (__pthread_rwlock_init, (&(NAME), NULL), 0)
 #endif
 
-#define __rtld_lock_init_recursive(NAME) \
-  do {									      \
-    if (__pthread_mutex_init != NULL)					      \
-      {									      \
-	pthread_mutexattr_t __attr;					      \
-	__pthread_mutexattr_init (&__attr);				      \
-	__pthread_mutexattr_settype (&__attr, PTHREAD_MUTEX_RECURSIVE_NP);    \
-	__pthread_mutex_init (&(NAME).mutex, &__attr);			      \
-	__pthread_mutexattr_destroy (&__attr);				      \
-      }									      \
-  } while (0)
-
 /* Finalize the named lock variable, which must be locked.  It cannot be
    used again until __libc_lock_init is called again on it.  This must be
    called on a lock variable before the containing storage is reused.  */
@@ -176,9 +164,12 @@ typedef pthread_key_t __libc_key_t;
 
 /* Lock the named lock variable.  */
 #if !defined NOT_IN_libc || defined IS_IN_libpthread
-# define __libc_lock_lock(NAME) \
+# ifndef __libc_lock_lock
+#  define __libc_lock_lock(NAME) \
   ({ lll_lock (NAME, LLL_PRIVATE); 0; })
+# endif
 #else
+# undef __libc_lock_lock
 # define __libc_lock_lock(NAME) \
   __libc_maybe_call (__pthread_mutex_lock, (&(NAME)), 0)
 #endif
@@ -189,9 +180,12 @@ typedef pthread_key_t __libc_key_t;
 
 /* Try to lock the named lock variable.  */
 #if !defined NOT_IN_libc || defined IS_IN_libpthread
-# define __libc_lock_trylock(NAME) \
+# ifndef __libc_lock_trylock
+#  define __libc_lock_trylock(NAME) \
   lll_trylock (NAME)
+# endif
 #else
+# undef __libc_lock_trylock
 # define __libc_lock_trylock(NAME) \
   __libc_maybe_call (__pthread_mutex_trylock, (&(NAME)), 0)
 #endif

@@ -73,7 +73,6 @@ GLIBC_2.16
  __getauxval F
  __poll_chk F
  __ppoll_chk F
- __sendmmsg F
  aligned_alloc F
  c16rtomb F
  c32rtomb F
@@ -83,6 +82,12 @@ GLIBC_2.16
  timespec_get F
 GLIBC_2.17
  GLIBC_2.17 A
+ __sendmmsg F
+ clock_getcpuclockid F
+ clock_getres F
+ clock_gettime F
+ clock_nanosleep F
+ clock_settime F
  secure_getenv F
 GLIBC_2.2.5
  GLIBC_2.2.5 A
