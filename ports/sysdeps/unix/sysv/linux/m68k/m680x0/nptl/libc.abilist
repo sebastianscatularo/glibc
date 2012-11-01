@@ -1769,6 +1769,7 @@ GLIBC_2.16
  timespec_get F
 GLIBC_2.17
  GLIBC_2.17 A
+ __sendmmsg F
  clock_getcpuclockid F
  clock_getres F
  clock_gettime F
