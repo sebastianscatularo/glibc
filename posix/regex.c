@@ -60,6 +60,7 @@
 #include <sys/param.h>
 
 #include <regex.h>
+#include "regex_internal.h"
 
 #include "regex_internal.c"
 #include "regcomp.c"
