@@ -1,4 +1,5 @@
-/* Copyright (C) 2012 Free Software Foundation, Inc.
+/* Send multiple messages on a socket.  Stub version.
+   Copyright (C) 2011-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -27,7 +28,5 @@ __sendmmsg (int fd, struct mmsghdr *vmessages, unsigned int vlen, int flags)
   return -1;
 }
 libc_hidden_def (__sendmmsg)
-
 weak_alias (__sendmmsg, sendmmsg)
-
 stub_warning (sendmmsg)
