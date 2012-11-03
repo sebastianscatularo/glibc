@@ -13,9 +13,8 @@ ELF extensions. We need to accept loading such binaries on hurd-i386 too.
         * sysdeps/unix/sysv/linux/ldsodefs.h (VALID_ELF_OSABI,
         VALID_ELF_ABIVERSION, MORE_ELF_HEADER_DATA): Use ELFOSABI_GNU instead of
         ELFOSABI_LINUX.
-        * sysdeps/mach/hurd/powerpc/init-first.c (_dl_non_dynamic_init): Remove
+	* sysdeps/mach/hurd/i386/init-first.c (_dl_non_dynamic_init): Remove
         declaration.
-	* sysdeps/mach/hurd/i386/init-first.c (_dl_non_dynamic_init): Likewise.
 
 ---
 
