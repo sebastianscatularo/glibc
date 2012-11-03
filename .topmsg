@@ -17,8 +17,6 @@ TLS support.
 	(MACHINE_THREAD_STATE_FLAVOR): Define to i386_REGS_SEGS_STATE instead
 	of i386_THREAD_STATE.
 	(MACHINE_THREAD_STATE_FIX_NEW): New macro, reads segments.
-	* sysdeps/mach/powerpc/thread_state.h (MACHINE_NEW_THREAD_STATE_FLAVOR):
-	New macro, defined to PPC_THREAD_STATE.
 
 	* sysdeps/mach/hurd/i386/trampoline.c (_hurd_setup_sighandler): Use
 	i386_REGS_SEGS_STATE instead of i386_THREAD_STATE.
