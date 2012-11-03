@@ -1,4 +1,5 @@
-/* Copyright (C) 2012 Free Software Foundation, Inc.
+/* Receive multiple messages on a socket.  Stub version.
+   Copyright (C) 2010-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -21,14 +22,10 @@
 /* Receive up to VLEN messages as described by VMESSAGES from socket FD.
    Returns the number of bytes read or -1 for errors.  */
 int
-__recvmmsg (int fd, struct mmsghdr *vmessages, unsigned int vlen, int flags,
-	    const struct timespec *tmo)
+recvmmsg (int fd, struct mmsghdr *vmessages, unsigned int vlen, int flags,
+	  const struct timespec *tmo)
 {
   __set_errno (ENOSYS);
   return -1;
 }
-libc_hidden_def (__recvmmsg)
-
-weak_alias (__recvmmsg, recvmmsg)
-
 stub_warning (recvmmsg)
