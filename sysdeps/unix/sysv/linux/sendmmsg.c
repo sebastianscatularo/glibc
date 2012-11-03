@@ -40,7 +40,6 @@ __sendmmsg (int fd, struct mmsghdr *vmessages, unsigned int vlen, int flags)
   return result;
 }
 libc_hidden_def (__sendmmsg)
-
 weak_alias (__sendmmsg, sendmmsg)
 #elif defined __NR_socketcall
 # ifndef __ASSUME_SENDMMSG
@@ -85,7 +84,6 @@ __sendmmsg (int fd, struct mmsghdr *vmessages, unsigned int vlen, int flags)
   return -1;
 }
 libc_hidden_def (__sendmmsg)
-
 weak_alias (__sendmmsg, sendmmsg)
 # else
 /* When __ASSUME_SENDMMSG sendmmsg is defined in internal_sendmmsg.S.  */

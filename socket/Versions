@@ -35,9 +35,9 @@ libc {
     accept4;
   }
   GLIBC_2.17 {
-    # functions used in other libraries
-    __sendmmsg;
-
     recvmmsg; sendmmsg;
+  }
+  GLIBC_PRIVATE {
+    __sendmmsg;
   }
 }

@@ -2,14 +2,13 @@
 #include <sys/syscall.h>
 #if !defined __NR_recvmmsg && defined __NR_socketcall
 # define socket	recvmmsg
-# ifndef __ASSUME_RECVMMSG
+# ifdef __ASSUME_RECVMMSG
+#  define __socket recvmmsg
+# else
 #  define __socket __internal_recvmmsg
-#  define NO_WEAK_ALIAS
 # endif
 # define NARGS 5
 # define NEED_CANCELLATION
+# define NO_WEAK_ALIAS
 # include <socket.S>
-# ifdef __ASSUME_RECVMMSG
-libc_hidden_def (__recvmmsg)
-# endif
 #endif
