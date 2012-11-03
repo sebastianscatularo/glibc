@@ -1,4 +1,5 @@
-/* Copyright (C) 2002 Free Software Foundation, Inc.
+/* Floating-point inline functions for stdlib.h.
+   Copyright (C) 2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -15,15 +16,16 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
-#include <sysdep.h>
+#ifndef _STDLIB_H
+# error "Never use <bits/stdlib-float.h> directly; include <stdlib.h> instead."
+#endif
 
-ENTRY (syscall)
-	mr   r0,r3
-	mr   r3,r4
-	mr   r4,r5
-	mr   r5,r6
-	mr   r6,r7
-	mr   r7,r8
-	sc
-	blr
-END (syscall)
+#ifdef __USE_EXTERN_INLINES
+__BEGIN_NAMESPACE_STD
+__extern_inline double
+__NTH (atof (const char *__nptr))
+{
+  return strtod (__nptr, (char **) NULL);
+}
+__END_NAMESPACE_STD
+#endif /* Optimizing and Inlining.  */
