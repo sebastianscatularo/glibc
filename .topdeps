@@ -13,7 +13,6 @@ t/pipe2
 t/____longjmp_chk
 t/extern_inline
 t/grantpt
-posix/regex_internal.c/MAX_undefined
 t/master_backports
 t/cpuclock
 t/regenerate_errno.h
