@@ -38,3 +38,4 @@ t/hurdsig-global-dispositions-versions
 t/hooks
 t/libpthread_depends
 t/sendmmsg
+t/hurdsig-boot-fix
