@@ -1,12 +1,4 @@
-From: Jeremie Koenig <jk@jk.fr.eu.org>
-Subject: [PATCH] Global signal dispositions.
+2012-09-05  Richard Braun  <rbraun@sceen.net>
 
-Although they should not change the
-default behaviors of signals for cthread programs, these patches add
-new functions which can be used by libpthread to enable
-POSIX-conforming behavior of signals on a per-thread basis.
-
-    e407ae3 Hurd signals: implement global signal dispositions
-    38eb4b3 Hurd signals: provide a sigstate destructor
-    344dfd6 Hurd signals: fix sigwait() for global signals
-    fb055f2 Hurd signals: fix global untraced signals.
+       * hurd/hurdsig.c (sigstate_is_global_rcv): Do not return true
+       if _HURD_GLOBAL_SIGSTATE is null.
