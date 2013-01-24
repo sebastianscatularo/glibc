@@ -109,6 +109,8 @@ static void fmh(void) {
     else
       while (1) {
 	fmhs=max-fmha;
+	if (fmhs == 0)
+	  break;
 	err = __vm_map (__mach_task_self (),
 			&fmha, fmhs, 0, 0, MACH_PORT_NULL, 0, 1,
 			VM_PROT_NONE, VM_PROT_NONE, VM_INHERIT_COPY);
