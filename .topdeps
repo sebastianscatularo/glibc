@@ -40,3 +40,4 @@ t/libpthread_depends
 t/sendmmsg
 t/hurdsig-boot-fix
 t/setitimer
+t/single-select-timeout
