@@ -1,16 +1,9 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: Fix sbrk in PIE binaries
 
----
+In PIE mode, the program gets loaded at very low address, and thus _end is very
+low, just before libraries, and thus initializing the brk to it does not make
+sense, since there is no room left there. Hardcode the brk to 0x800000 for now
+as a workaround.
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
