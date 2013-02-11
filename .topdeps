@@ -42,3 +42,4 @@ t/hurdsig-boot-fix
 t/setitimer
 t/single-select-timeout
 t/select-EINTR
+t/pie-sbrk
