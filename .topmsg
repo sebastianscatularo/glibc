@@ -1,4 +1,3 @@
-From: Samuel Thibault <samuel.thibault@ens-lyon.org>
 Subject: Fix sbrk in PIE binaries
 
 In PIE mode, the program gets loaded at very low address, and thus _end is very
@@ -6,4 +5,17 @@ low, just before libraries, and thus initializing the brk to it does not make
 sense, since there is no room left there. Hardcode the brk to 0x8000000 for now
 as a workaround.
 
-Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
+id:"20130211040854.GN5926@type.youpi.perso.aquilenet.fr"
+
+<http://darnassus.sceen.net/~hurd-web/open_issues/gcc/pie/>
+
+YYYY-MM-DD  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+	    Thomas Schwinge  <thomas@codesourcery.com>
+
+	* sysdeps/mach/hurd/brk.c (init_brk): Fix for PIE executables.
+	* misc/tst-sbrk.c: New file.
+	* misc/tst-sbrk-pie.c: Likewise.
+	* misc/tst-sbrk-static.c: Likewise.
+	* misc/Makefile (tests): Add tst-sbrk, tst-sbrk-pie, tst-sbrk-static.
+	(tests-pie): Add tst-sbrk-pie.
+	(tests-static): Add tst-sbrk-static.
