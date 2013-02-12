@@ -39,3 +39,7 @@ t/hooks
 t/libpthread_depends
 t/sendmmsg
 t/hurdsig-boot-fix
+t/setitimer
+t/single-select-timeout
+t/select-EINTR
+t/pie-sbrk
