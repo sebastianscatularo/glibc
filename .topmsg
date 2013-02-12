@@ -3,7 +3,7 @@ Subject: Fix sbrk in PIE binaries
 
 In PIE mode, the program gets loaded at very low address, and thus _end is very
 low, just before libraries, and thus initializing the brk to it does not make
-sense, since there is no room left there. Hardcode the brk to 0x800000 for now
+sense, since there is no room left there. Hardcode the brk to 0x8000000 for now
 as a workaround.
 
 Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
