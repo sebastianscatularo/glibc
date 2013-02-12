@@ -97,6 +97,10 @@ CFLAGS-getusershell.c = -fexceptions
 CFLAGS-err.c = -fexceptions
 CFLAGS-tst-tsearch.c = $(stack-align-test-flags)
 
+tests += tst-sbrk tst-sbrk-pie tst-sbrk-static
+tests-pie += tst-sbrk-pie
+tests-static += tst-sbrk-static
+
 include ../Rules
 
 $(objpfx)libbsd-compat.a: $(dep-dummy-lib); $(make-dummy-lib)
