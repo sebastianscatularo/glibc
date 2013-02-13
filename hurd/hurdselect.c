@@ -160,7 +160,6 @@ _hurd_select (int nfds,
 	    /* Bogus descriptor, make it EBADF already.  */
 	    d[i].error = EBADF;
 	    d[i].type = SELECT_ERROR;
-	    break;
 	  }
 
       __mutex_unlock (&_hurd_dtable_lock);
