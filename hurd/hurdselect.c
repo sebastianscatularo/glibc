@@ -405,14 +405,18 @@ _hurd_select (int nfds,
 		    if (d[i].type
 			&& d[i].reply_port == msg.head.msgh_local_port)
 		      {
-			d[i].type &= msg.success.result;
 			if (msg.error.err)
 			  {
 			    d[i].error = msg.error.err;
-			    d[i].type |= SELECT_ERROR;
+			    d[i].type = SELECT_ERROR;
+			    ++ready;
 			  }
-			if (d[i].type)
-			  ++ready;
+			else
+			  {
+			    d[i].type &= msg.success.result;
+			    if (d[i].type)
+			      ++ready;
+			  }
 
 			d[i].type |= SELECT_RETURNED;
 			++got;
