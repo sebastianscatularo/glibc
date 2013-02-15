@@ -487,7 +487,7 @@ _hurd_select (int nfds,
 		revents = POLLHUP;
 		break;
 	      case EBADF:
-		revents = POLLNVAL
+		revents = POLLNVAL;
 		break;
 	      default:
 		revents = POLLERR;
