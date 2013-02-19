@@ -1,2 +1,17 @@
 From: Richard Braun <rbraun@sceen.net>
-Subject: Rework _hurd_select to use the new io_select_timeout RPC
+Subject: Fix timeout handling in _hurd_select
+    
+Rely on servers to implement timeouts, so that very short values (including
+0) don't make mach_msg return before valid replies can be received. The
+purpose of this scheme is to guarantee a full client-server round-trip,
+whatever the timeout value.
+
+This change depends on the new io_select_timeout RPC being implemented by
+servers.
+
+* hurd/Makefile (user-interfaces): Add io_reply and io_request.
+* hurd/hurdselect.c: Include <sys/time.h>, <hurd/io_request.h> and <limits.h
+(_hurd_select): Replace the call to __io_select with either __io_select_requ
+or __io_select_timeout_request, depending on the timeout. Count the number o
+ready descriptors (replies for which at least one type bit is set). Implemen
+the timeout locally when there is no file descriptor.
