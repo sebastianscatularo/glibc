@@ -98,17 +98,17 @@ _hurd_select (int nfds,
       if (err)
 	return -1;
 
-      td->sec = now.tv_sec + timeout->tv_sec;
-      td->nsec = now.tv_usec * 1000 + timeout->tv_nsec;
+      td[0].sec = now.tv_sec + timeout->tv_sec;
+      td[0].nsec = now.tv_usec * 1000 + timeout->tv_nsec;
 
-      if (td->nsec >= 1000000000)
+      if (td[0].nsec >= 1000000000)
 	{
-	  td->sec++;
-	  td->nsec -= 1000000000;
+	  td[0].sec++;
+	  td[0].nsec -= 1000000000;
 	}
 
-      if (td->sec < 0)
-	td->sec = LONG_MAX; /* XXX */
+      if (td[0].sec < 0)
+	td[0].sec = LONG_MAX; /* XXX */
 
       reply_msgid = IO_SELECT_TIMEOUT_REPLY_MSGID;
     }
