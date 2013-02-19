@@ -1,2 +1,30 @@
-From: Richard Braun <rbraun@sceen.net>
-Subject: Rework _hurd_select to use the new io_select_timeout RPC
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: Fix poll and select POSIX compliancy details about errors
+    
+This fixes the following:
+
+- Poll must not return immediately on error, including EBADF, and instead
+  report POLLHUP/POLLERR/POLLNVAL
+- Select must report EBADF if some set contains an invalid FD.
+
+The idea is to move error management to after all select calls, in the
+poll/select final treatment. The error is instead recorded in a new `error'
+field, and a new SELECT_ERROR bit set.
+
+Thanks Svante Signell for the initial version of the patch.
+
+* hurd/hurdselect.c (SELECT_ERROR): New macro.
+(_hurd_select):
+- Add `error' field to `d' structures array.
+- If a poll descriptor is bogus, set EBADF, but continue.
+- Go through the whole fd_set, not only until _hurd_dtablesize. Return EBADF
+there is any bit set above _hurd_dtablesize.
+- Do not request io_select on bogus descriptors (SELECT_ERROR).
+- On io_select request error, record the error.
+- On io_select bogus reply, use EIO error code.
+- On io_select bogus or error reply, record the error.
+- Do not destroy reply port for bogus FDs.
+- On error, make poll set POLLHUP in the EPIPE case, POLLNVAL in the EBADF
+case, or else POLLERR.
+- On error, make select simulated readiness.
+
