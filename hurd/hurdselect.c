@@ -161,6 +161,25 @@ _hurd_select (int nfds,
 	    /* Bogus descriptor, make it EBADF already.  */
 	    d[i].error = EBADF;
 	    d[i].type = SELECT_ERROR;
+
+	    /* And set timeout to 0.  */
+	    {
+	      struct timeval now;
+	      err = __gettimeofday(&now, NULL);
+	      if (err)
+		{
+		  err = errno;
+		  while (i-- > 0)
+		    if (d[i].type & ~SELECT_ERROR != 0)
+		      _hurd_port_free (&d[i].cell->port, &d[i].ulink,
+				       d[i].io_port);
+		  errno = err;
+		  return -1;
+		}
+	      td[0].sec = now.tv_sec;
+	      td[0].nsec = now.tv_usec * 1000;
+	      reply_msgid = IO_SELECT_TIMEOUT_REPLY_MSGID;
+	    }
 	  }
 
       __mutex_unlock (&_hurd_dtable_lock);
