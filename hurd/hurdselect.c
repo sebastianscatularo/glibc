@@ -317,6 +317,8 @@ _hurd_select (int nfds,
 	  }
     }
 
+  /* GOT is the number of replies (or errors), while READY is the number of
+     replies with at least one type bit set.  */
   ready = 0;
 
   /* Now wait for reply messages.  */
@@ -363,6 +365,8 @@ _hurd_select (int nfds,
       mach_msg_option_t options;
       error_t msgerr;
 
+      /* We rely on servers to implement the timeout, but when there are none,
+	 do it on the client side.  */
       if (timeout != NULL && firstfd == -1)
 	{
 	  options = MACH_RCV_TIMEOUT;
@@ -404,6 +408,8 @@ _hurd_select (int nfds,
 		  err = EINTR;
 		  goto poll;
 		}
+	      /* Keep in mind msg.success.result can be 0 if a timeout
+		 occurred.  */
 	      if (msg.error.err ||
 #ifdef MACH_MSG_TYPE_BIT
 		  msg.success.result_type.word != inttype.word ||
