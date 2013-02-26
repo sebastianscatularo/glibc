@@ -44,3 +44,4 @@ t/single-select-timeout
 t/select-EINTR
 t/pie-sbrk
 t/nfds-poll
+t/remap_getcwd
