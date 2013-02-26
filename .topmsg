@@ -1,16 +1,13 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] Allow unknown root directory.
 
----
+To be efficient, the remap translator simply returns ports from the underlying
+filesystem, and thus the root directory found through browsing '..' is the
+underlying root, not the remap root. This should not be a reason for getcwd to
+fail.
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
+* sysdeps/mach/hurd/getcwd.c (_hurd_canonicalize_directory_name_internal): Do
+not remove the heading slash if we got an unknown root directory.
+(__getcwd): Do not fail with EGRATUITOUS if we got an unknown root directory.
 
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
