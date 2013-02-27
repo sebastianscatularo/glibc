@@ -53,7 +53,7 @@ _hurd_select (int nfds,
   int firstfd, lastfd;
   mach_msg_id_t reply_msgid;
   mach_msg_timeout_t to;
-  time_data_t td;
+  struct timespec ts;
   struct
     {
       struct hurd_userlink ulink;
@@ -98,17 +98,17 @@ _hurd_select (int nfds,
       if (err)
 	return -1;
 
-      td[0].sec = now.tv_sec + timeout->tv_sec;
-      td[0].nsec = now.tv_usec * 1000 + timeout->tv_nsec;
+      ts.tv_sec = now.tv_sec + timeout->tv_sec;
+      ts.tv_nsec = now.tv_usec * 1000 + timeout->tv_nsec;
 
-      if (td[0].nsec >= 1000000000)
+      if (ts.tv_nsec >= 1000000000)
 	{
-	  td[0].sec++;
-	  td[0].nsec -= 1000000000;
+	  ts.tv_sec++;
+	  ts.tv_nsec -= 1000000000;
 	}
 
-      if (td[0].sec < 0)
-	td[0].sec = LONG_MAX; /* XXX */
+      if (ts.tv_sec < 0)
+	ts.tv_sec = LONG_MAX; /* XXX */
 
       reply_msgid = IO_SELECT_TIMEOUT_REPLY_MSGID;
     }
@@ -268,7 +268,7 @@ _hurd_select (int nfds,
 	      err = __io_select_request (d[i].io_port, d[i].reply_port, type);
 	    else
 	      err = __io_select_timeout_request (d[i].io_port, d[i].reply_port,
-						 td, type);
+						 ts, type);
 	    if (!err)
 	      {
 		if (firstfd == lastfd)
