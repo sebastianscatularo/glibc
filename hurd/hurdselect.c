@@ -176,8 +176,8 @@ _hurd_select (int nfds,
 		  errno = err;
 		  return -1;
 		}
-	      td[0].sec = now.tv_sec;
-	      td[0].nsec = now.tv_usec * 1000;
+	      ts.tv_sec = now.tv_sec;
+	      ts.tv_nsec = now.tv_usec * 1000;
 	      reply_msgid = IO_SELECT_TIMEOUT_REPLY_MSGID;
 	    }
 	  }
