@@ -45,3 +45,4 @@ t/select-EINTR
 t/pie-sbrk
 t/nfds-poll
 t/remap_getcwd
+t/poll_errors_fixes
