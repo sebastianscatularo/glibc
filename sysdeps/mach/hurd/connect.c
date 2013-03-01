@@ -22,7 +22,7 @@
 #include <hurd/socket.h>
 #include <sys/un.h>
 #include <hurd/ifsock.h>
-#include <string.h>
+#include "hurd/hurdsocket.h"
 
 /* Open a connection on socket FD to peer at ADDR (which LEN bytes long).
    For connectionless socket types, just set the default address to send to
@@ -37,7 +37,7 @@ __connect (int fd, __CONST_SOCKADDR_ARG addrarg, socklen_t len)
 
   if (addr->sun_family == AF_LOCAL)
     {
-      char *name = strndupa (addr->sun_path, len - offsetof (struct sockaddr_un, sun_path));
+      char *name = _hurd_sun_path_dupa (addr, len);
       /* For the local domain, we must look up the name as a file and talk
 	 to it with the ifsock protocol.  */
       file_t file = __file_name_lookup (name, 0, 0);
