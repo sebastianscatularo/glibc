@@ -22,6 +22,7 @@
 #include <hurd/fd.h>
 #include <hurd/ifsock.h>
 #include <hurd/socket.h>
+#include <string.h>
 
 /* Send N bytes of BUF on socket FD to peer at address ADDR (which is
    ADDR_LEN bytes long).  Returns the number sent, or -1 for errors.  */
@@ -47,9 +48,10 @@ __sendto (int fd,
 
       if (addr->sun_family == AF_LOCAL)
 	{
+	  char *name = strndupa (addr->sun_path, addr_len - offsetof (struct sockaddr_un, sun_path));
 	  /* For the local domain, we must look up the name as a file and talk
 	     to it with the ifsock protocol.  */
-	  file_t file = __file_name_lookup (addr->sun_path, 0, 0);
+	  file_t file = __file_name_lookup (name, 0, 0);
 	  if (file == MACH_PORT_NULL)
 	    return errno;
 	  err_port = __ifsock_getsockaddr (file, aport);
