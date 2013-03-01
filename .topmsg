@@ -1,16 +1,13 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] Fix connect/sendto/sendmsg into ignoring bytes beyond sockaddr length
 
----
+Thanks Tanaka Akira for the report.
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
+* sysdeps/mach/hurd/connect.c: Include <string.h>
+(__connect): Duplicate ADDR->sun_path with sockaddr length limitation before
+looking up the file name.
+* sysdeps/mach/hurd/sendmsg.c: Likewise.
+* sysdeps/mach/hurd/sendto.c: Likewise.
+* sysdeps/mach/hurd/bind.c: Call strndupa instead of implementing it by hand.
 
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>

@@ -104,9 +104,10 @@ __libc_sendmsg (int fd, const struct msghdr *message, int flags)
     {
       if (addr->sun_family == AF_LOCAL)
 	{
+	  char *name = strndupa (addr->sun_path, addr_len - offsetof (struct sockaddr_un, sun_path));
 	  /* For the local domain, we must look up the name as a file
 	     and talk to it with the ifsock protocol.  */
-	  file_t file = __file_name_lookup (addr->sun_path, 0, 0);
+	  file_t file = __file_name_lookup (name, 0, 0);
 	  if (file == MACH_PORT_NULL)
 	    {
 	      if (dealloc)
