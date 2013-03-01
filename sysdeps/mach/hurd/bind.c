@@ -25,7 +25,7 @@
 #include <stddef.h>
 #include <hurd/ifsock.h>
 #include <sys/un.h>
-#include <string.h>
+#include "hurd/hurdsocket.h"
 
 /* Give the socket FD the local address ADDR (which is LEN bytes long).  */
 int
@@ -37,7 +37,7 @@ __bind  (int fd, __CONST_SOCKADDR_ARG addrarg, socklen_t len)
 
   if (addr->sun_family == AF_LOCAL)
     {
-      char *name = strndupa (addr->sun_path, len - offsetof (struct sockaddr_un, sun_path));
+      char *name = _hurd_sun_path_dupa (addr, len);
       /* For the local domain, we must create a node in the filesystem
 	 using the ifsock translator and then fetch the address from it.  */
       file_t dir, node;
