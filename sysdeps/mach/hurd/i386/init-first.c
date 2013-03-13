@@ -179,12 +179,12 @@ init (int *data)
     ++envp;
   d = (void *) ++envp;
 
+#ifndef SHARED
   /* If we are the bootstrap task started by the kernel,
      then after the environment pointers there is no Hurd
      data block; the argument strings start there.  */
   if ((void *) d == argv[0])
     {
-#ifndef SHARED
       /* We may need to see our own phdrs, e.g. for TLS setup.
          Try the usual kludge to find the headers without help from
 	 the exec server.  */
@@ -193,18 +193,14 @@ init (int *data)
       _dl_phdr = (ElfW(Phdr) *) ((const void *) ehdr + ehdr->e_phoff);
       _dl_phnum = ehdr->e_phnum;
       assert (ehdr->e_phentsize == sizeof (ElfW(Phdr)));
-#endif
     }
   else
     {
-#ifndef SHARED
       _dl_phdr = (ElfW(Phdr) *) d->phdr;
       _dl_phnum = d->phdrsz / sizeof (ElfW(Phdr));
       assert (d->phdrsz % sizeof (ElfW(Phdr)) == 0);
-#endif
     }
 
-#ifndef SHARED
   /* We need to setup TLS before starting sigthread */
   extern void __pthread_initialize_minimal(void);
   __pthread_initialize_minimal();
