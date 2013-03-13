@@ -184,7 +184,7 @@ init (int *data)
   /* If we are the bootstrap task started by the kernel,
      then after the environment pointers there is no Hurd
      data block; the argument strings start there.  */
-  if ((void *) d == argv[0])
+  if ((void *) d == argv[0] || !d->phdr)
     {
       /* We may need to see our own phdrs, e.g. for TLS setup.
          Try the usual kludge to find the headers without help from
