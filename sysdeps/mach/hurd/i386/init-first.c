@@ -119,6 +119,10 @@ init1 (int argc, char *arg0, ...)
       return;
     }
 
+#ifndef SHARED
+  __libc_enable_secure = d->flags & EXEC_SECURE;
+#endif
+
   _hurd_init_dtable = d->dtable;
   _hurd_init_dtablesize = d->dtablesize;
 
@@ -194,8 +198,6 @@ init (int *data)
   else
     {
 #ifndef SHARED
-      __libc_enable_secure = d->flags & EXEC_SECURE;
-
       _dl_phdr = (ElfW(Phdr) *) d->phdr;
       _dl_phnum = d->phdrsz / sizeof (ElfW(Phdr));
       assert (d->phdrsz % sizeof (ElfW(Phdr)) == 0);
