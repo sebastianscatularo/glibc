@@ -26,6 +26,10 @@
 #include <mach/port.h>
 #include <mach/message.h>
 
+/* These options are implemented by the userspace side of the mach_msg call.
+   Don't make the kernel take the IPC slow paths because of their presence.  */
+#define MACH_USPACE_OPTIONS (MACH_SEND_INTERRUPT | MACH_RCV_INTERRUPT)
+
 #ifdef MACH_MSG_OVERWRITE
 /* In variants with this feature, the actual system call is
    __mach_msg_overwrite_trap.  */
@@ -38,9 +42,9 @@ __mach_msg_trap (mach_msg_header_t *msg,
 		 mach_msg_timeout_t timeout,
 		 mach_port_t notify)
 {
-  return __mach_msg_overwrite_trap (msg, option, send_size,
-				    rcv_size, rcv_name, timeout, notify,
-				    MACH_MSG_NULL, 0);
+  return __mach_msg_overwrite_trap (msg, option & ~MACH_USPACE_OPTIONS,
+				    send_size, rcv_size, rcv_name, timeout,
+				    notify, MACH_MSG_NULL, 0);
 }
 weak_alias (__mach_msg_trap, mach_msg_trap)
 
@@ -66,21 +70,22 @@ __mach_msg_overwrite (mach_msg_header_t *msg,
      3. RPC calls with interruptions in one/both halves.
   */
 
-  ret = __mach_msg_overwrite_trap (msg, option, send_size,
-				   rcv_size, rcv_name, timeout, notify,
-				   rcv_msg, rcv_msg_size);
+  ret = __mach_msg_overwrite_trap (msg, option & ~MACH_USPACE_OPTIONS,
+				   send_size, rcv_size, rcv_name, timeout,
+				   notify, rcv_msg, rcv_msg_size);
   if (ret == MACH_MSG_SUCCESS)
     return MACH_MSG_SUCCESS;
 
   if (!(option & MACH_SEND_INTERRUPT))
     while (ret == MACH_SEND_INTERRUPTED)
-      ret = __mach_msg_overwrite_trap (msg, option, send_size,
-				       rcv_size, rcv_name, timeout, notify,
-				       rcv_msg, rcv_msg_size);
+      ret = __mach_msg_overwrite_trap (msg, option & ~MACH_USPACE_OPTIONS,
+				       send_size, rcv_size, rcv_name, timeout,
+				       notify, rcv_msg, rcv_msg_size);
 
   if (!(option & MACH_RCV_INTERRUPT))
     while (ret == MACH_RCV_INTERRUPTED)
-      ret = __mach_msg_overwrite_trap (msg, option & ~MACH_SEND_MSG,
+      ret = __mach_msg_overwrite_trap (msg, option & ~(MACH_SEND_MSG
+						       | MACH_USPACE_OPTIONS),
 				       0, rcv_size, rcv_name, timeout, notify,
 				       rcv_msg, rcv_msg_size);
 
@@ -107,19 +112,20 @@ __mach_msg (mach_msg_header_t *msg,
      3. RPC calls with interruptions in one/both halves.
      */
 
-  ret = __mach_msg_trap (msg, option, send_size,
+  ret = __mach_msg_trap (msg, option & ~MACH_USPACE_OPTIONS, send_size,
 			 rcv_size, rcv_name, timeout, notify);
   if (ret == MACH_MSG_SUCCESS)
     return MACH_MSG_SUCCESS;
 
   if (!(option & MACH_SEND_INTERRUPT))
     while (ret == MACH_SEND_INTERRUPTED)
-      ret = __mach_msg_trap (msg, option, send_size,
+      ret = __mach_msg_trap (msg, option & ~MACH_USPACE_OPTIONS, send_size,
 			     rcv_size, rcv_name, timeout, notify);
 
   if (!(option & MACH_RCV_INTERRUPT))
     while (ret == MACH_RCV_INTERRUPTED)
-      ret = __mach_msg_trap (msg, option & ~MACH_SEND_MSG,
+      ret = __mach_msg_trap (msg, option & ~(MACH_SEND_MSG
+					     | MACH_USPACE_OPTIONS),
 			     0, rcv_size, rcv_name, timeout, notify);
 
   return ret;
