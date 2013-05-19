@@ -26,33 +26,17 @@ ENTRY(__setcontext)
 	/* Load address of the context data structure.  */
 	movl	4(%esp), %eax
 
-	/* Get the current signal mask.  Note that we preserve EBX in case
-	   the system call fails and we return from the function with an
-	   error.  */
-//	pushl	%ebx
-//	cfi_adjust_cfa_offset (4)
-//	xorl	%edx, %edx
-//	leal	oSIGMASK(%eax), %ecx
-//	movl	$SIG_SETMASK, %ebx
-//	cfi_rel_offset (ebx, 0)
-//	movl	$__NR_sigprocmask, %eax
-//	ENTER_KERNEL
-	subl	$16, %esp
-	cfi_adjust_cfa_offset (16)
-        movl    $0, 8(%esp)
-        leal	oSIGMASK(%eax), %eax
-        movl    %eax, 4(%esp)
+	/* Get the current signal mask.  */
+	subl	$12, %esp
+	cfi_adjust_cfa_offset (12)
+	movl	$0, 8(%esp)
+	leal	oSIGMASK(%eax), %eax
+	movl	%eax, 4(%esp)
 	movl	$SIG_SETMASK, (%esp)
-        call    sigprocmask
-//	popl	%ebx
-//	cfi_adjust_cfa_offset (-4)
-//	cfi_restore (ebx)
-	addl	$16, %esp
-	cfi_adjust_cfa_offset (-16)
-        
-//	cmpl	$-4095, %eax		/* Check %eax for error.  */
-//	jae	SYSCALL_ERROR_LABEL	/* Jump to error handler if error.  */
-        testl   %eax, %eax
+	call	HIDDEN_JUMPTARGET (__sigprocmask)
+	addl	$12, %esp
+	cfi_adjust_cfa_offset (-12)
+	testl	%eax, %eax
 	jne	L(pseudo_end)
 
 	/* EAX was modified, reload it.  */
@@ -60,7 +44,7 @@ ENTRY(__setcontext)
 
 	/* Restore the floating-point context.  Not the registers, only the
 	   rest.  */
-	movl	oFPREGS(%eax), %ecx
+	leal	oFPREGS(%eax), %ecx
 	fldenv	(%ecx)
 
 	/* Restore the FS segment register.  We don't touch the GS register

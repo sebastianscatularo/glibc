@@ -4,4 +4,6 @@ From: Thomas Schwinge <thomas@codesourcery.com>
 
 Adapted from the Linux x86 functions.
 
-Totally untested, and blocked (for thread-switching) on t/tls-threadvars.
+Not thoroughly tested, but manual testing as well as glibc tests look fine, and
+manual -lpthread testing also looks fine (within the given bounds for a new
+stack to be used with makecontext).

@@ -57,30 +57,17 @@ ENTRY(__getcontext)
 	fldenv	(%ecx)
 
 	/* Save the current signal mask.  */
-//	pushl	%ebx
-//	cfi_adjust_cfa_offset (4)
-//	cfi_rel_offset (ebx, 0)
-	subl	$16, %esp
-	cfi_adjust_cfa_offset (16)
-        leal	oSIGMASK(%eax), %eax
-        movl    %eax, 8(%esp)
-        movl    $0, 4(%esp)
+	subl	$12, %esp
+	cfi_adjust_cfa_offset (12)
+	leal	oSIGMASK(%eax), %eax
+	movl	%eax, 8(%esp)
+	movl	$0, 4(%esp)
 	movl	$SIG_BLOCK, (%esp)
-        call    sigprocmask
-//	popl	%ebx
-//	cfi_adjust_cfa_offset (-4)
-//	cfi_restore (ebx)
-	addl	$16, %esp
-	cfi_adjust_cfa_offset (-16)
+	call	HIDDEN_JUMPTARGET (__sigprocmask)
+	addl	$12, %esp
+	cfi_adjust_cfa_offset (-12)
+	/* Propagate %eax (and errno, in case).  */
 
-//	cmpl	$-4095, %eax		/* Check %eax for error.  */
-//	jae	SYSCALL_ERROR_LABEL	/* Jump to error handler if error.  */
-
-//	/* All done, return 0 for success.  */
-//	xorl	%eax, %eax
-        /* Propagate eas (and errno, in case).  */
-
-L(pseudo_end):
 	ret
 PSEUDO_END(__getcontext)
 

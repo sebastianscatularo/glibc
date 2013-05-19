@@ -24,6 +24,14 @@
 
 ENTRY(__makecontext)
 	movl	4(%esp), %eax
+	subl	$4, %esp
+	cfi_adjust_cfa_offset (4)
+	movl	%eax, (%esp)
+	call	HIDDEN_JUMPTARGET (__makecontext_helper)
+	addl	$4, %esp
+	cfi_adjust_cfa_offset (-4)
+
+	movl	4(%esp), %eax
 
 	/* Load the address of the function we are supposed to run.  */
 	movl	8(%esp), %ecx

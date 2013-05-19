@@ -55,27 +55,17 @@ ENTRY(__swapcontext)
 	movl	8(%esp), %ecx
 
 	/* Save the current signal mask and install the new one.  */
-//	pushl	%ebx
-//	leal	oSIGMASK(%eax), %edx
-//	leal	oSIGMASK(%ecx), %ecx
-//	movl	$SIG_SETMASK, %ebx
-//	movl	$__NR_sigprocmask, %eax
-//	ENTER_KERNEL
-	subl	$16, %esp
-	cfi_adjust_cfa_offset (16)
-        leal	oSIGMASK(%eax), %eax
-        movl    %eax, 8(%esp)
-        leal	oSIGMASK(%ecx), %eax
-        movl    %eax, 4(%esp)
+	subl	$12, %esp
+	cfi_adjust_cfa_offset (12)
+	leal	oSIGMASK(%eax), %eax
+	movl	%eax, 8(%esp)
+	leal	oSIGMASK(%ecx), %eax
+	movl	%eax, 4(%esp)
 	movl	$SIG_SETMASK, (%esp)
-        call    sigprocmask
-//	popl	%ebx
-	addl	$16, %esp
-	cfi_adjust_cfa_offset (-16)
-
-//	cmpl	$-4095, %eax		/* Check %eax for error.  */
-//	jae	SYSCALL_ERROR_LABEL	/* Jump to error handler if error.  */
-        testl   %eax, %eax
+	call	HIDDEN_JUMPTARGET (__sigprocmask)
+	addl	$12, %esp
+	cfi_adjust_cfa_offset (-12)
+	testl	%eax, %eax
 	jne	L(pseudo_end)
 
 	/* EAX was modified, reload it.  */
@@ -83,7 +73,7 @@ ENTRY(__swapcontext)
 
 	/* Restore the floating-point context.  Not the registers, only the
 	   rest.  */
-	movl	oFPREGS(%eax), %ecx
+	leal	oFPREGS(%eax), %ecx
 	fldenv	(%ecx)
 
 	/* Restore the FS segment register.  We don't touch the GS register
