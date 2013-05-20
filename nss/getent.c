@@ -1,4 +1,4 @@
-/* Copyright (c) 1998-2011, 2012 Free Software Foundation, Inc.
+/* Copyright (c) 1998-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Thorsten Kukuk <kukuk@suse.de>, 1998.
 
@@ -82,12 +82,12 @@ static int idn_flags = AI_IDN | AI_CANONIDN;
 static void
 print_version (FILE *stream, struct argp_state *state)
 {
-  fprintf (stream, "getent (GNU %s) %s\n", PACKAGE, VERSION);
+  fprintf (stream, "getent %s%s\n", PKGVERSION, VERSION);
   fprintf (stream, gettext ("\
 Copyright (C) %s Free Software Foundation, Inc.\n\
 This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
-"), "2012");
+"), "2013");
   fprintf (stream, gettext ("Written by %s.\n"), "Thorsten Kukuk");
 }
 
@@ -962,9 +962,9 @@ more_help (int key, const char *text, void *input)
 
 	  fputs ("\n\n", fp);
 
-	  fputs (gettext ("\
+	  fprintf (fp, gettext ("\
 For bug reporting instructions, please see:\n\
-<http://www.gnu.org/software/libc/bugs.html>.\n"), fp);
+%s.\n"), REPORT_BUGS_TO);
 
 	  if (fclose (fp) == 0)
 	    return doc;
