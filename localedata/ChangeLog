@@ -1,3 +1,167 @@
+2013-02-01  Andreas Jaeger  <aj@suse.de>
+
+	* CHECKSUMS: Remove file.
+
+2013-01-14  Joseph Myers  <joseph@codesourcery.com>
+
+	* Makefile (bug-setlocale1-ARGS): Use $(host-test-program-cmd),
+	not $(test-program-cmd).
+
+2013-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile ($(objpfx)sort-test.out): Replace
+	$(run-program-prefix) with $(test-program-prefix).
+	($(objpfx)tst-numeric.out): Likewise.
+	($(objpfx)tst-mbswcs.out): Likewise.
+	($(objpfx)tst-fmon.out): Add $(test-program-prefix).
+	($(objpfx)tst-trans.out): Likewise.
+	($(objpfx)tst-rpmatch.out): Replace $(built-program-cmd) with
+	$(test-program-cmd).
+	($(objpfx)tst-ctype.out): Likewise.
+	($(objpfx)tst-wctype.out): Likewise.
+	($(objpfx)tst-langinfo.out): Likewise.
+	(bug-setlocale1-ARGS): Replace $(built-program-cmd) with
+	$(test-program-cmd).
+	* sort-test.sh (run_program_prefix): Renamed to ...
+	(test_program_prefix): This.
+	* tst-mbswcs.sh: Likewise.
+	* tst-numeric.sh: Likewise.
+	* tst-wctype.sh: Likewise.
+	* tst-fmon.sh (test_program_prefix): New. Replace
+	${run_program_prefix} with ${test_program_prefix} when running.
+	tst-fmon.
+	* tst-trans.sh: (test_program_prefix): New.  Replace
+	${run_program_prefix} with ${test_program_prefix} when running
+	tst-trans.
+
+2013-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile (tests-static): New variable.
+	(tests): Add $(tests-static).
+	(bug-setlocale1-ARGS): Set to -- $(built-program-cmd).
+	(bug-setlocale1-static-ENV): New variable.
+	(bug-setlocale1-static-ARGS): Likewise.
+	* bug-setlocale1.c (do_test): Support run directly.  Check env[1]
+	instead of newargv[0].
+	* bug-setlocale1-static.c: New file.
+
+2013-01-03  Chris Leonard  <cjl@sugarlabs.org>
+
+	[BZ #14982]
+	* locales/dz_BT: Add new contact information for dz-BT maintainer.
+
+	[BZ #13951]
+	* locales/dz_BT: Correct LC_ADDRESS countryname for Bhutan in
+	Dzongkha.
+
+2013-01-02  Joseph Myers  <joseph@codesourcery.com>
+
+	* All files with FSF copyright notices: Update copyright dates
+	using scripts/update-copyrights.
+
+2012-12-06  Joseph Myers  <joseph@codesourcery.com>
+
+	* README: Use sourceware.org in Bugzilla URL.
+	* locales/si_LK (email): Use sourceware.org in email address.
+
+2012-12-03  Ashish Shah  <ashishks@redhat.com>
+
+	* locales/uk_UA (currency_symbol): Fix.
+
+2012-12-03  Rakesh Pandit  <rakesh@fedoraproject.org>
+
+	* locales/ks_IN@devanagari: Fix week day names.
+
+2012-12-03  Jeff Law  <law@redhat.com>
+
+	* locales/zh_CH (abmon): Remove whitespace.
+
+2012-11-26  Nik Kalach  <nikka@fedoraproject.org>
+
+	* locales/ia_FR (abmon): Fix December.
+
+	[BZ#14879]
+	* locales/ia_FR : New file.
+	* SUPPORTED (SUPPORTED-LOCALES): Add appropriate entry.
+
+2012-11-22  Andreas Jaeger  <aj@suse.de>
+
+	* locales/niu_NU: Fix comment.
+
+2012-11-21  Andreas Jaeger  <aj@suse.de>
+
+	* locales/szl_PL (LC_COLLATE): Fix syntax error.
+
+	* SUPPORTED (SUPPORTED-LOCALES): Fix typo for ayc_PE entry.
+
+2012-11-21  Chris Leonard  <cjl@sugarlabs.org>
+
+	[BZ #14863]
+	* SUPPORTED: Add niu_NU and niu_NZ.
+	* locales/niu_NU: Add Niuean (Vagahau Niue) locale for Niue,
+	contributed by Chris Leonard <cjl@sugarlabs.org> and Emani
+	Fakaotimanava-Lui <emani@niue.nu>.
+	* locales/niu_NZ: Add Niuean (Vagahau Niue) locale for New
+	Zealand, contributed by Chris Leonard <cjl@sugarlabs.org> and Emani
+	Fakaotimanava-Lui <emani@niue.nu>.
+
+2012-11-19  Eagle Burkut  <eagle.burkut@gmail.com>
+
+	[BZ #13759]
+	* locales/ug_CN (LC_COLLATE, LC_TIME, LC_MESSAGES): Fix entries.
+
+2012-11-16  Andreas Jaeger  <aj@suse.de>
+
+	[BZ #14368]
+	* locales/szl_PL: New Silesian Language Locale for Poland.
+	Contributed by Przemyslaw Buczkowski <przemub@yahoo.pl>.
+	* localedata/SUPPORTED (SUPPORTED-LOCALES): Add szl_PL.
+
+	[BZ # 14828]
+	* locales/ayc_PE: Add Aymara locale for Peru
+	contributed by Chris Leonard <cjl@sugarlabs.org> and
+	Amos Batto <amosbatto@yahoo.com>.
+	* SUPPORTED (SUPPORTED-LOCALES): Add ayc_PE.
+
+	[BZ # 14501]
+	* locales/nhn_MX: Add Central Nahuatl locale for Mexico,
+	contributed by Jorge Becerril <jrbecster@gmail.com>.
+	* SUPPORTED (SUPPORTED-LOCALES): Add nhn_MX.
+
+2012-11-15  Chris Leonard  <cjlhomeaddress@gmail.com>
+
+	[BZ #13952]
+	* locales/km_KH: Correct country-name and lang-name.
+
+2012-11-15  Andreas Jaeger  <aj@suse.de>
+
+	[BZ #13603]
+	[BZ #13604]
+	[BZ #13698]
+	* locales/doi_IN: New file, contributed by Pravin Satpute
+	<psatpute@redhat.com> and Sushil Badyal <badyalsk@gmail.com>.
+	* locales/mni_IN: New file, contributed by Pravin Satpute
+	<psatpute@redhat.com> and Rebika Devi <rebika_srd@rediffmail.com>.
+	* locales/sat_IN: New file, contributed by Pravin Satpute
+	<psatpute@redhat.com> and Thakur Prasad Murmu <tp_murmu@yahoo.com>.
+	* SUPPORTED (SUPPORTED-LOCALES): Add doi_IN, mni_IN, sat_IN.
+
+2012-11-15  Chris Leonard  <cjlhomeaddress@gmail.com>
+
+	[BZ #13950]
+	* locales/bo_CN (LC_NAME, LC_ADDRESS): Remove some FIXMEs with
+	proper content, disable others.
+	* locales/bo_IN (LC_NAME, LC_ADDRESS): Likewise.
+
+2012-11-07  Dmitry V. Levin  <ldv@altlinux.org>
+
+	[BZ#14807]
+	* locales/ru_RU (abmon): Change back from genitive to nominative,
+	apply fixed three-letter abbreviation form, remove trailing dots.
+
+	[BZ#10873]
+	* locales/ru_RU (abday): Remove trailing dots.
+
 2012-11-02  Marko Myllynen  <myllynen@redhat.com>
 
 	[BZ #14669]
