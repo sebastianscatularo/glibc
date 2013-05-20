@@ -1,4 +1,4 @@
-/* Copyright (C) 1997,1998,2000,2002,2003,2004, 2005 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -52,7 +52,7 @@ do_sigwaitinfo (const sigset_t *set, siginfo_t *info)
 
   /* XXX The size argument hopefully will have to be changed to the
      real size of the user-level sigset_t.  */
-  int result = INLINE_SYSCALL (rt_sigtimedwait, 4, CHECK_SIGSET (set),
+  int result = INLINE_SYSCALL (rt_sigtimedwait, 4, set,
 			       CHECK_1 (info), NULL, _NSIG / 8);
 
   /* The kernel generates a SI_TKILL code in si_code in case tkill is
