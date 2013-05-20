@@ -1,4 +1,26 @@
+2013-01-31  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #13550]
+	* sysdeps/unix/sysv/linux/ia64/sigpending.c: Don't include
+	<bp-checks.h>.
+	(sigpending): Don't use CHECK_SIGSET.
+	* sysdeps/unix/sysv/linux/ia64/sigprocmask.c: Don't include
+	<bp-checks.h>.
+	(__sigprocmask): Don't use CHECK_SIGSET and CHECK_SIGSET_NULL_OK.
+
+2013-01-02  Joseph Myers  <joseph@codesourcery.com>
+
+	* All files with FSF copyright notices: Update copyright dates
+	using scripts/update-copyrights.
+
+2012-11-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* sysdeps/unix/sysv/linux/ia64/clock_getcpuclockid.c: Delete.
+
 2012-11-03  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/ia64/fpu/fclrexcpt.c (feclearexcept): Add
+	libm_hidden_def.
 
 	[BZ #3439]
 	* sysdeps/ia64/bits/fenv.h (FE_INEXACT): Define macro to integer
