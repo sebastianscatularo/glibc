@@ -1,5 +1,5 @@
 /* Definition for thread-local data handling.  nptl/i386 version.
-   Copyright (C) 2002-2012 Free Software Foundation, Inc.
+   Copyright (C) 2002-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -26,6 +26,7 @@
 # include <stdint.h>
 # include <stdlib.h>
 # include <sysdep.h>
+# include <libc-internal.h>
 # include <kernel-features.h>
 
 
@@ -343,7 +344,7 @@ union user_desc_init
 									      \
 	 asm volatile ("movl %%eax,%%gs:%P1\n\t"			      \
 		       "movl %%edx,%%gs:%P2" :				      \
-		       : "A" ((uint64_t) (value)),			      \
+		       : "A" ((uint64_t) cast_to_integer (value)),	      \
 			 "i" (offsetof (struct pthread, member)),	      \
 			 "i" (offsetof (struct pthread, member) + 4));	      \
        }})
@@ -370,7 +371,7 @@ union user_desc_init
 									      \
 	 asm volatile ("movl %%eax,%%gs:%P1(,%2,8)\n\t"			      \
 		       "movl %%edx,%%gs:4+%P1(,%2,8)" :			      \
-		       : "A" ((uint64_t) (value)),			      \
+		       : "A" ((uint64_t) cast_to_integer (value)),	      \
 			 "i" (offsetof (struct pthread, member)),	      \
 			 "r" (idx));					      \
        }})
