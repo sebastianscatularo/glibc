@@ -1,4 +1,4 @@
-# Copyright (C) 1995-2012 Free Software Foundation, Inc.
+# Copyright (C) 1995-2013 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -108,7 +108,10 @@ $(objpfx)sotruss: sotruss.ksh $(common-objpfx)config.make
 	sed -e 's%@KSH@%$(KSH)%g' \
 	    -e 's%@VERSION@%$(version)%g' \
 	    -e 's%@TEXTDOMAINDIR@%$(msgcatdir)%g' \
-	    -e 's%@PREFIX@%$(prefix)%g' < $< > $@.new
+	    -e 's%@PREFIX@%$(prefix)%g' \
+	    -e 's|@PKGVERSION@|$(PKGVERSION)|g' \
+	    -e 's|@REPORT_BUGS_TO@|$(REPORT_BUGS_TO)|g' \
+	    < $< > $@.new
 	chmod 555 $@.new
 	mv -f $@.new $@
 $(inst_auditdir)/sotruss-lib.so: $(objpfx)sotruss-lib.so $(+force)
@@ -139,7 +142,7 @@ tests += loadtest restest1 preloadtest loadfail multiload origtest resolvfail \
 	 tst-dlmodcount tst-dlopenrpath tst-deep1 \
 	 tst-dlmopen1 tst-dlmopen2 tst-dlmopen3 \
 	 unload3 unload4 unload5 unload6 unload7 unload8 tst-global1 order2 \
-	 tst-audit1 tst-audit2 \
+	 tst-audit1 tst-audit2 tst-audit8 \
 	 tst-stackguard1 tst-addr1 tst-thrlock \
 	 tst-unique1 tst-unique2 tst-unique3 tst-unique4 \
 	 tst-initorder tst-initorder2 tst-relsort1
@@ -333,7 +336,7 @@ $(objpfx)ld.so: $(objpfx)librtld.os $(ld-map)
 		  $(filter-out $(map-file),$^) $(load-map-file)		\
 		  -Wl,-soname=$(rtld-installed-name)			\
 		  -Wl,-defsym=_begin=0
-	readelf -s $@ \
+	$(READELF) -s $@ \
 	  | $(AWK) '($$7 ~ /^UND(|EF)$$/ && $$1 != "0:" && $$4 != "REGISTER") { print; p=1 } END { exit p != 0 }'
 
 # interp.c exists just to get this string into the libraries.
@@ -381,7 +384,9 @@ endif
 
 
 common-ldd-rewrite = -e 's%@RTLD@%$(slibdir)/$(rtld-installed-name)%g' \
-		     -e 's%@VERSION@%$(version)%g'
+		     -e 's%@VERSION@%$(version)%g' \
+		     -e 's|@PKGVERSION@|$(PKGVERSION)|g' \
+		     -e 's|@REPORT_BUGS_TO@|$(REPORT_BUGS_TO)|g'
 sh-ldd-rewrite = $(common-ldd-rewrite) -e 's%@BASH@%/bin/sh%g;s/\$$"/"/g'
 bash-ldd-rewrite = $(common-ldd-rewrite) -e 's%@BASH@%$(BASH)%g' \
 		   -e 's%@TEXTDOMAINDIR@%$(msgcatdir)%g'
@@ -637,9 +642,7 @@ $(objpfx)circlemod2a.so: $(objpfx)circlemod3a.so
 $(objpfx)order: $(addprefix $(objpfx),dep4.so dep3.so dep2.so dep1.so)
 
 $(objpfx)order.out: $(objpfx)order
-	$(test-wrapper) \
-	$(elf-objpfx)$(rtld-installed-name) \
-	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
+	$(test-program-prefix) \
 	  $(objpfx)order > $@
 	(echo "0123456789" | cmp $@ -) > /dev/null
 
@@ -846,37 +849,40 @@ LDFLAGS-tst-execstack-needed = -Wl,-z,noexecstack
 LDFLAGS-tst-execstack-prog = -Wl,-z,execstack
 endif
 
+LDFLAGS-tst-array2 = $(no-as-needed)
+LDFLAGS-tst-array5 = $(no-as-needed)
+
 $(objpfx)tst-array1.out: tst-array1.exp $(objpfx)tst-array1
-	$(built-program-cmd) > $@
+	$(test-program-cmd) > $@
 	cmp $@ tst-array1.exp > /dev/null
 
 $(objpfx)tst-array1-static.out: tst-array1.exp $(objpfx)tst-array1-static
-	$(built-program-cmd) > $@
+	$(test-program-cmd) > $@
 	cmp $@ tst-array1.exp > /dev/null
 
 $(objpfx)tst-array2: $(objpfx)tst-array2dep.so
 $(objpfx)tst-array2.out: tst-array2.exp $(objpfx)tst-array2
-	$(built-program-cmd) > $@
+	$(test-program-cmd) > $@
 	cmp $@ tst-array2.exp > /dev/null
 
 $(objpfx)tst-array3.out: tst-array1.exp $(objpfx)tst-array3
-	$(built-program-cmd) > $@
+	$(test-program-cmd) > $@
 	cmp $@ tst-array1.exp > /dev/null
 
 $(objpfx)tst-array4: $(libdl)
 $(objpfx)tst-array4.out: tst-array4.exp $(objpfx)tst-array4 \
 			 $(objpfx)tst-array2dep.so
-	$(built-program-cmd) > $@
+	$(test-program-cmd) > $@
 	cmp $@ tst-array4.exp > /dev/null
 
 $(objpfx)tst-array5: $(objpfx)tst-array5dep.so
 $(objpfx)tst-array5.out: tst-array5.exp $(objpfx)tst-array5
-	$(built-program-cmd) > $@
+	$(test-program-cmd) > $@
 	cmp $@ tst-array5.exp > /dev/null
 
 $(objpfx)tst-array5-static.out: tst-array5-static.exp \
 				$(objpfx)tst-array5-static
-	$(built-program-cmd) > $@
+	$(test-program-cmd) > $@
 	cmp $@ tst-array5-static.exp > /dev/null
 
 CFLAGS-tst-pie1.c += $(pie-ccflag)
@@ -1015,15 +1021,17 @@ $(objpfx)tst-audit7: $(objpfx)tst-auditmod7a.so
 $(objpfx)tst-audit7.out: $(objpfx)tst-auditmod7b.so
 tst-audit7-ENV = LD_AUDIT=$(objpfx)tst-auditmod7b.so
 
+$(objpfx)tst-audit8: $(common-objpfx)math/libm.so
+$(objpfx)tst-audit8.out: $(objpfx)tst-auditmod1.so
+tst-audit8-ENV = LD_AUDIT=$(objpfx)tst-auditmod1.so
+
 $(objpfx)tst-global1: $(libdl)
 $(objpfx)tst-global1.out: $(objpfx)testobj6.so $(objpfx)testobj2.so
 
 $(objpfx)order2: $(libdl)
 $(objpfx)order2.out: $(objpfx)order2 $(objpfx)order2mod1.so \
 		     $(objpfx)order2mod2.so
-	$(test-wrapper) \
-	$(elf-objpfx)$(rtld-installed-name) \
-	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
+	$(test-program-prefix) \
 	  $(objpfx)order2 > $@
 	(echo "12345" | cmp $@ -) > /dev/null
 $(objpfx)order2mod1.so: $(objpfx)order2mod4.so
@@ -1033,7 +1041,7 @@ order2mod2.so-no-z-defs = yes
 LDFLAGS-order2mod1.so = $(no-as-needed)
 LDFLAGS-order2mod2.so = $(no-as-needed)
 
-tst-stackguard1-ARGS = --command "$(host-built-program-cmd) --child"
+tst-stackguard1-ARGS = --command "$(host-test-program-cmd) --child"
 tst-stackguard1-static-ARGS = --command "$(objpfx)tst-stackguard1-static --child"
 
 $(objpfx)tst-leaks1: $(libdl)
@@ -1116,9 +1124,7 @@ $(objpfx)tst-unique3.out: $(objpfx)tst-unique3lib2.so
 $(objpfx)tst-unique4: $(objpfx)tst-unique4lib.so
 
 $(objpfx)tst-initorder.out: $(objpfx)tst-initorder
-	$(test-wrapper) \
-	$(elf-objpfx)${rtld-installed-name} \
-	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
+	$(test-program-prefix) \
 	  $< > $@
 	cmp $@ tst-initorder.exp > /dev/null
 
@@ -1138,9 +1144,7 @@ object-suffixes-left := a b c d
 include $(o-iterator)
 
 $(objpfx)tst-initorder2.out: $(objpfx)tst-initorder2
-	$(test-wrapper) \
-	$(elf-objpfx)${rtld-installed-name} \
-	  --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)) \
+	$(test-program-prefix) \
 	  $< > $@
 	cmp $@ tst-initorder2.exp > /dev/null
 
