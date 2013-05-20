@@ -1,4 +1,4 @@
-/* Copyright (C) 1995,1997,1998,1999,2000,2002 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@gnu.ai.mit.edu>, August 1995.
 
@@ -23,7 +23,6 @@
 #include <sysdep.h>
 #include <unistd.h>
 #include <sys/syscall.h>
-#include <bp-checks.h>
 
 /* Attach the shared memory segment associated with SHMID to the data
    segment of the calling process.  SHMADDR and SHMFLG determine how
@@ -58,5 +57,5 @@ shmat (shmid, shmaddr, shmflg)
       return (void *) -1l;
     }
 
-  return BOUNDED_N (raddr, length);
+  return raddr;
 }
