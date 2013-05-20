@@ -1,4 +1,4 @@
-# Copyright (C) 1991-2012 Free Software Foundation, Inc.
+# Copyright (C) 1991-2013 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -409,19 +409,15 @@ static-only-routines =
 endif
 endif
 
-# Bounded pointer thunks are only built for *.ob
-elide-bp-thunks = $(addprefix $(bppfx),$(bp-thunks))
-
 elide-routines.oS += $(filter-out $(static-only-routines),\
-				  $(routines) $(aux) $(sysdep_routines)) \
-		     $(elide-bp-thunks)
-elide-routines.os += $(static-only-routines) $(elide-bp-thunks)
+				  $(routines) $(aux) $(sysdep_routines))
+elide-routines.os += $(static-only-routines)
 
 # If we have versioned code we don't need the old versions in any of the
 # static libraries.
-elide-routines.o  += $(shared-only-routines) $(elide-bp-thunks)
-elide-routines.op += $(shared-only-routines) $(elide-bp-thunks)
-elide-routines.og += $(shared-only-routines) $(elide-bp-thunks)
+elide-routines.o  += $(shared-only-routines)
+elide-routines.op += $(shared-only-routines)
+elide-routines.og += $(shared-only-routines)
 elide-routines.ob += $(shared-only-routines)
 
 # Shared library building.
@@ -447,7 +443,7 @@ lib%.so: lib%_pic.a $(+preinit) $(+postinit) $(+interp)
 
 define build-shlib-helper
 $(LINK.o) -shared $(static-libgcc) -Wl,-O1 $(sysdep-LDFLAGS) \
-	  $(if $($(@F)-no-z-defs)$(no-z-defs),,-Wl,-z,defs) $(config-LDFLAGS) \
+	  $(if $($(@F)-no-z-defs)$(no-z-defs),,-Wl,-z,defs) $(rtld-LDFLAGS) \
 	  $(extra-B-$(@F:lib%.so=%).so) -B$(csu-objpfx) \
 	  $(extra-B-$(@F:lib%.so=%).so) $(load-map-file) \
 	  -Wl,-soname=lib$(libprefix)$(@F:lib%.so=%).so$($(@F)-version) \
@@ -465,7 +461,7 @@ else
 $(common-objpfx)shlib.lds: $(common-objpfx)config.make $(..)Makerules
 	$(LINK.o) -shared -Wl,-O1 \
 		  -nostdlib -nostartfiles \
-		  $(sysdep-LDFLAGS) $(config-LDFLAGS) $(LDFLAGS.so) \
+		  $(sysdep-LDFLAGS) $(rtld-LDFLAGS) $(LDFLAGS.so) \
 		  -Wl,--verbose 2>&1 | \
 	  sed > $@T \
 	      -e '/^=========/,/^=========/!d;/^=========/d' \
@@ -544,7 +540,7 @@ $(build-shlib-helper) -o $@ $(shlib-lds-flags) \
 endef
 
 define build-module-helper
-$(LINK.o) -shared $(static-libgcc) $(sysdep-LDFLAGS) $(config-LDFLAGS) \
+$(LINK.o) -shared $(static-libgcc) $(sysdep-LDFLAGS) $(rtld-LDFLAGS) \
 	  $(if $($(@F)-no-z-defs)$(no-z-defs),,-Wl,-z,defs) \
 	  -B$(csu-objpfx) $(load-map-file) \
 	  $(LDFLAGS.so) $(LDFLAGS-$(@F:%.so=%).so) \
@@ -640,11 +636,7 @@ headers := $(headers) $(sysdep_headers)
 
 # This is the list of all object files, gotten by
 # replacing every ".c" in `sources' with a ".o".
-# We also add bounded-pointer thunks, which are later
-# elided for all suffixes except for `.ob'.
-override objects := $(addprefix $(objpfx),$(sources:.c=.o) \
-		      $(patsubst %,$(bppfx)%.o,\
-			$(filter $(routines) $(sysdep_routines),$(bp-thunks))))
+override objects := $(addprefix $(objpfx),$(sources:.c=.o))
 
 
 # The makefile may define $(extra-libs) with `libfoo libbar'
@@ -948,7 +940,7 @@ $(common-objpfx)format.lds: $(..)scripts/output-format.sed \
 ifneq (unknown,$(output-format))
 	echo > $@.new 'OUTPUT_FORMAT($(output-format))'
 else
-	$(LINK.o) -shared $(sysdep-LDFLAGS) $(config-LDFLAGS) $(LDFLAGS.so) \
+	$(LINK.o) -shared $(sysdep-LDFLAGS) $(rtld-LDFLAGS) $(LDFLAGS.so) \
 		  -x c /dev/null -o $@.so -Wl,--verbose -v 2>&1 \
 	| sed -n -f $< > $@.new
 	test -s $@.new
@@ -1349,9 +1341,7 @@ common-clean: common-mostlyclean
 	-rm -f $(gen-as-const-headers:%.sym=$(common-objpfx)%.h)
 
 # Produce a file `stubs' which contains `#define __stub_FUNCTION'
-# for each function which is a stub.  We grovel over all the .d files
-# looking for references to <stub-tag.h>.  Then we grovel over each
-# referenced source file to see what stub function it defines.
+# for each function which is a stub.
 
 ifdef objpfx
 .PHONY: stubs # The parent Makefile calls this target.
