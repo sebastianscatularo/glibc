@@ -1,4 +1,4 @@
-/* Copyright (C) 1998, 2001 Free Software Foundation, Inc.
+/* Copyright (C) 1998-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Zack Weinberg <zack@rabi.phys.columbia.edu>, 1998.
 
@@ -41,4 +41,3 @@ weak_alias (__posix_openpt, posix_openpt)
 
 stub_warning (getpt)
 stub_warning (posix_openpt)
-#include <stub-tag.h>
