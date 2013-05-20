@@ -165,3 +165,79 @@ then
   done
   AC_MSG_RESULT()
 fi])
+
+# These two macros are taken from GCC's config/acx.m4.
+dnl Support the --with-pkgversion configure option.
+dnl ACX_PKGVERSION(default-pkgversion)
+AC_DEFUN([ACX_PKGVERSION],[
+  AC_ARG_WITH(pkgversion,
+    AS_HELP_STRING([--with-pkgversion=PKG],
+                   [Use PKG in the version string in place of "$1"]),
+    [case "$withval" in
+      yes) AC_MSG_ERROR([package version not specified]) ;;
+      no)  PKGVERSION= ;;
+      *)   PKGVERSION="($withval) " ;;
+     esac],
+    PKGVERSION="($1) "
+  )
+  PKGVERSION_TEXI=`echo "$PKGVERSION" | sed 's/@/@@/g'`
+  AC_SUBST(PKGVERSION)
+  AC_SUBST(PKGVERSION_TEXI)
+])
+
+dnl Support the --with-bugurl configure option.
+dnl ACX_BUGURL(default-bugurl)
+AC_DEFUN([ACX_BUGURL],[
+  AC_ARG_WITH(bugurl,
+    AS_HELP_STRING([--with-bugurl=URL],
+                   [Direct users to URL to report a bug]),
+    [case "$withval" in
+      yes) AC_MSG_ERROR([bug URL not specified]) ;;
+      no)  BUGURL=
+	   ;;
+      *)   BUGURL="$withval"
+	   ;;
+     esac],
+     BUGURL="$1"
+  )
+  case ${BUGURL} in
+  "")
+    REPORT_BUGS_TO=
+    REPORT_BUGS_TEXI=
+    ;;
+  *)
+    REPORT_BUGS_TO="<$BUGURL>"
+    REPORT_BUGS_TEXI=@uref{`echo "$BUGURL" | sed 's/@/@@/g'`}
+    ;;
+  esac;
+  AC_SUBST(REPORT_BUGS_TO)
+  AC_SUBST(REPORT_BUGS_TEXI)
+])
+
+dnl Check linker option support.
+dnl LIBC_LINKER_FEATURE([ld_option], [cc_option], [action-if-true], [action-if-false])
+AC_DEFUN([LIBC_LINKER_FEATURE],
+[AC_MSG_CHECKING([for linker that supports $1])
+libc_linker_feature=no
+if test x"$gnu_ld" = x"yes"; then
+  libc_linker_check=`$LD -v --help 2>/dev/null | grep "\$1"`
+  if test -n "$libc_linker_check"; then
+    cat > conftest.c <<EOF
+int _start (void) { return 42; }
+EOF
+    if AC_TRY_COMMAND([${CC-cc} $CFLAGS $CPPFLAGS $LDFLAGS
+				$2 -nostdlib -nostartfiles
+				-fPIC -shared -o conftest.so conftest.c
+				1>&AS_MESSAGE_LOG_FD])
+    then
+      libc_linker_feature=yes
+    fi
+    rm -f conftest*
+  fi
+fi
+if test $libc_linker_feature = yes; then
+  $3
+else
+  $4
+fi
+AC_MSG_RESULT($libc_linker_feature)])
