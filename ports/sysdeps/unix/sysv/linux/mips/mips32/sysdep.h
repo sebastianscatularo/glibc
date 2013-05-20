@@ -1,5 +1,4 @@
-/* Copyright (C) 2000, 2002, 2003, 2004, 2005,
-   2009, 2012 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -60,13 +59,13 @@
      result_var; })
 
 #undef INTERNAL_SYSCALL_DECL
-#define INTERNAL_SYSCALL_DECL(err) long err
+#define INTERNAL_SYSCALL_DECL(err) long err __attribute__ ((unused))
 
 #undef INTERNAL_SYSCALL_ERROR_P
-#define INTERNAL_SYSCALL_ERROR_P(val, err)   ((long) (err))
+#define INTERNAL_SYSCALL_ERROR_P(val, err)   ((void) (val), (long) (err))
 
 #undef INTERNAL_SYSCALL_ERRNO
-#define INTERNAL_SYSCALL_ERRNO(val, err)     (val)
+#define INTERNAL_SYSCALL_ERRNO(val, err)     ((void) (err), val)
 
 #undef INTERNAL_SYSCALL
 #define INTERNAL_SYSCALL(name, err, nr, args...) \
@@ -104,7 +103,7 @@
 									\
 	{								\
 	register long __v0 asm("$2") ncs_init;				\
-	register long __a0 asm("$4") = (long) arg1;			\
+	register long __a0 asm("$4") = (long) (arg1);			\
 	register long __a3 asm("$7");					\
 	__asm__ volatile (						\
 	".set\tnoreorder\n\t"						\
@@ -126,8 +125,8 @@
 									\
 	{								\
 	register long __v0 asm("$2") ncs_init;				\
-	register long __a0 asm("$4") = (long) arg1;			\
-	register long __a1 asm("$5") = (long) arg2;			\
+	register long __a0 asm("$4") = (long) (arg1);			\
+	register long __a1 asm("$5") = (long) (arg2);			\
 	register long __a3 asm("$7");					\
 	__asm__ volatile (						\
 	".set\tnoreorder\n\t"						\
@@ -149,9 +148,9 @@
 									\
 	{								\
 	register long __v0 asm("$2") ncs_init;				\
-	register long __a0 asm("$4") = (long) arg1;			\
-	register long __a1 asm("$5") = (long) arg2;			\
-	register long __a2 asm("$6") = (long) arg3;			\
+	register long __a0 asm("$4") = (long) (arg1);			\
+	register long __a1 asm("$5") = (long) (arg2);			\
+	register long __a2 asm("$6") = (long) (arg3);			\
 	register long __a3 asm("$7");					\
 	__asm__ volatile (						\
 	".set\tnoreorder\n\t"						\
@@ -173,10 +172,10 @@
 									\
 	{								\
 	register long __v0 asm("$2") ncs_init;				\
-	register long __a0 asm("$4") = (long) arg1;			\
-	register long __a1 asm("$5") = (long) arg2;			\
-	register long __a2 asm("$6") = (long) arg3;			\
-	register long __a3 asm("$7") = (long) arg4;			\
+	register long __a0 asm("$4") = (long) (arg1);			\
+	register long __a1 asm("$5") = (long) (arg2);			\
+	register long __a2 asm("$6") = (long) (arg3);			\
+	register long __a3 asm("$7") = (long) (arg4);			\
 	__asm__ volatile (						\
 	".set\tnoreorder\n\t"						\
 	cs_init								\
@@ -205,10 +204,10 @@
 	FORCE_FRAME_POINTER;						\
 	{								\
 	register long __v0 asm("$2") ncs_init;				\
-	register long __a0 asm("$4") = (long) arg1;			\
-	register long __a1 asm("$5") = (long) arg2;			\
-	register long __a2 asm("$6") = (long) arg3;			\
-	register long __a3 asm("$7") = (long) arg4;			\
+	register long __a0 asm("$4") = (long) (arg1);			\
+	register long __a1 asm("$5") = (long) (arg2);			\
+	register long __a2 asm("$6") = (long) (arg3);			\
+	register long __a3 asm("$7") = (long) (arg4);			\
 	__asm__ volatile (						\
 	".set\tnoreorder\n\t"						\
 	"subu\t$29, 32\n\t"						\
@@ -219,7 +218,7 @@
 	".set\treorder"						\
 	: "=r" (__v0), "+r" (__a3)					\
 	: input, "r" (__a0), "r" (__a1), "r" (__a2),			\
-	  "r" ((long)arg5)						\
+	  "r" ((long) (arg5))						\
 	: __SYSCALL_CLOBBERS);						\
 	err = __a3;							\
 	_sys_result = __v0;						\
@@ -234,10 +233,10 @@
 	FORCE_FRAME_POINTER;						\
 	{								\
 	register long __v0 asm("$2") ncs_init;				\
-	register long __a0 asm("$4") = (long) arg1;			\
-	register long __a1 asm("$5") = (long) arg2;			\
-	register long __a2 asm("$6") = (long) arg3;			\
-	register long __a3 asm("$7") = (long) arg4;			\
+	register long __a0 asm("$4") = (long) (arg1);			\
+	register long __a1 asm("$5") = (long) (arg2);			\
+	register long __a2 asm("$6") = (long) (arg3);			\
+	register long __a3 asm("$7") = (long) (arg4);			\
 	__asm__ volatile (						\
 	".set\tnoreorder\n\t"						\
 	"subu\t$29, 32\n\t"						\
@@ -249,7 +248,7 @@
 	".set\treorder"						\
 	: "=r" (__v0), "+r" (__a3)					\
 	: input, "r" (__a0), "r" (__a1), "r" (__a2),			\
-	  "r" ((long)arg5), "r" ((long)arg6)				\
+	  "r" ((long) (arg5)), "r" ((long) (arg6))			\
 	: __SYSCALL_CLOBBERS);						\
 	err = __a3;							\
 	_sys_result = __v0;						\
@@ -264,10 +263,10 @@
 	FORCE_FRAME_POINTER;						\
 	{								\
 	register long __v0 asm("$2") ncs_init;				\
-	register long __a0 asm("$4") = (long) arg1;			\
-	register long __a1 asm("$5") = (long) arg2;			\
-	register long __a2 asm("$6") = (long) arg3;			\
-	register long __a3 asm("$7") = (long) arg4;			\
+	register long __a0 asm("$4") = (long) (arg1);			\
+	register long __a1 asm("$5") = (long) (arg2);			\
+	register long __a2 asm("$6") = (long) (arg3);			\
+	register long __a3 asm("$7") = (long) (arg4);			\
 	__asm__ volatile (						\
 	".set\tnoreorder\n\t"						\
 	"subu\t$29, 32\n\t"						\
@@ -280,7 +279,7 @@
 	".set\treorder"						\
 	: "=r" (__v0), "+r" (__a3)					\
 	: input, "r" (__a0), "r" (__a1), "r" (__a2),			\
-	  "r" ((long)arg5), "r" ((long)arg6), "r" ((long)arg7)		\
+	  "r" ((long) (arg5)), "r" ((long) (arg6)), "r" ((long) (arg7))	\
 	: __SYSCALL_CLOBBERS);						\
 	err = __a3;							\
 	_sys_result = __v0;						\
