@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Written by Per Bothner <bothner@cygnus.com>.
 
@@ -155,21 +155,13 @@ int
 _IO_new_file_close_it (fp)
      _IO_FILE *fp;
 {
+  int write_status;
   if (!_IO_file_is_open (fp))
     return EOF;
 
-  int write_status;
-  if (_IO_in_put_mode (fp))
+  if ((fp->_flags & _IO_NO_WRITES) == 0
+      && (fp->_flags & _IO_CURRENTLY_PUTTING) != 0)
     write_status = _IO_do_flush (fp);
-  else if (fp->_offset != _IO_pos_BAD && fp->_IO_read_base != NULL
-	   && !_IO_in_backup (fp))
-    {
-      off64_t o = _IO_SEEKOFF (fp, 0, _IO_seek_cur, 0);
-      if (o == WEOF)
-	write_status = EOF;
-      else
-	write_status = _IO_SYSSEEK (fp, o, SEEK_SET) < 0 ? EOF : 0;
-    }
   else
     write_status = 0;
 
@@ -1253,12 +1245,13 @@ _IO_new_file_write (f, data, n)
      _IO_ssize_t n;
 {
   _IO_ssize_t to_do = n;
+  _IO_ssize_t count = 0;
   while (to_do > 0)
     {
-      _IO_ssize_t count = (__builtin_expect (f->_flags2
-					     & _IO_FLAGS2_NOTCANCEL, 0)
-			   ? write_not_cancel (f->_fileno, data, to_do)
-			   : write (f->_fileno, data, to_do));
+      count = (__builtin_expect (f->_flags2
+				 & _IO_FLAGS2_NOTCANCEL, 0)
+	       ? write_not_cancel (f->_fileno, data, to_do)
+	       : write (f->_fileno, data, to_do));
       if (count < 0)
 	{
 	  f->_flags |= _IO_ERR_SEEN;
@@ -1270,7 +1263,7 @@ _IO_new_file_write (f, data, n)
   n -= to_do;
   if (f->_offset >= 0)
     f->_offset += n;
-  return n;
+  return count < 0 ? count : n;
 }
 
 _IO_size_t
@@ -1330,9 +1323,10 @@ _IO_new_file_xsputn (f, data, n)
       _IO_size_t block_size, do_write;
       /* Next flush the (full) buffer. */
       if (_IO_OVERFLOW (f, EOF) == EOF)
-	/* If nothing else has to be written we must not signal the
-	   caller that everything has been written.  */
-	return to_do == 0 ? EOF : n - to_do;
+	/* If nothing else has to be written or nothing has been written, we
+	   must not signal the caller that the call was even partially
+	   successful.  */
+	return (to_do == 0 || to_do == n) ? EOF : n - to_do;
 
       /* Try to maintain alignment: write a whole number of blocks.
 	 dont_write is what gets left over. */
