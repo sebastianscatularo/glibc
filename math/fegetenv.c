@@ -1,5 +1,5 @@
 /* Store current floating-point environment.
-   Copyright (C) 1997, 1999, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1997-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@cygnus.com>, 1997.
 
@@ -35,4 +35,3 @@ libm_hidden_ver (__fegetenv, fegetenv)
 versioned_symbol (libm, BP_SYM (__fegetenv), BP_SYM (fegetenv), GLIBC_2_2);
 
 stub_warning (fegetenv)
-#include <stub-tag.h>
