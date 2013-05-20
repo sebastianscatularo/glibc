@@ -1,4 +1,184 @@
+2013-01-31  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #13550]
+	* sysdeps/unix/sysv/linux/mips/mips64/semctl.c: Don't include
+	<bp-checks.h> and <bp-semctl.h>.
+	(__semctl): Don't use CHECK_SEMCTL.
+
+2013-01-29  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/mips/mips64/n32/sysdep.h: Correct
+	whitespace damage throughout.
+	* sysdeps/unix/sysv/linux/mips/mips64/n64/sysdep.h: Likewise.
+
+2013-01-25  Steve Ellcey  <sellcey@mips.com>
+
+	* sysdeps/mips/memmove.c: Remove.
+
+2013-01-10  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/mips/bits/sigcontext.h (struct
+	sigcontext): Use __extension__ with long long in all definitions.
+
+2013-01-08  Steve Ellcey  <sellcey@mips.com>
+
+	* sysdeps/mips/memcpy.S: Change prefetch hint, reorder partial
+	loads and stores, set and use MAX_PREFETCH_SIZE.
+
+2013-01-08  Andreas Jaeger  <aj@suse.de>
+
+	[BZ# 14985]
+	* sysdeps/unix/sysv/linux/mips/bits/epoll.h (EPOLL_NONBLOCK): Remove.
+
+2013-01-02  Joseph Myers  <joseph@codesourcery.com>
+
+	* All files with FSF copyright notices: Update copyright dates
+	using scripts/update-copyrights.
+
+2013-01-01  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/mips/bits/dlfcn.h: Reformat copyright notice.
+	* sysdeps/mips/bits/mathdef.h: Likewise.
+	* sysdeps/mips/bits/setjmp.h: Likewise.
+	* sysdeps/mips/ieee754/ieee754.h: Likewise.
+	* sysdeps/mips/machine-gmon.h: Likewise.
+	* sysdeps/mips/mips64/bsd-_setjmp.S: Likewise.
+	* sysdeps/mips/mips64/setjmp.S: Likewise.
+	* sysdeps/mips/start.S: Likewise.
+	* sysdeps/unix/mips/mips64/n32/sysdep.h: Likewise.
+	* sysdeps/unix/mips/mips64/n64/sysdep.h: Likewise.
+	* sysdeps/unix/sysv/linux/mips/bits/sigaction.h: Likewise.
+	* sysdeps/unix/sysv/linux/mips/sys/procfs.h: Likewise.
+
+2012-12-04  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/mips/fpu_control.h [__mips_soft_float] (_FPU_GETCW):
+	Define to set cw to 0, not just to plain "0" as a statement.
+	[__mips_soft_float] (_FPU_SETCW): Define to (void) (cw), rather
+	than doing nothing with cw.
+
+2012-11-30  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/mips/mips32/libm-test-ulps: Update.
+	* sysdeps/mips/mips64/libm-test-ulps: Likewise.
+
+2012-11-29  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #14893]
+	* sysdeps/mips/mips64/n32/_itoa.h: New file.
+	* sysdeps/unix/sysv/linux/mips/register-dump.h: Include
+	<sgidefs.h>.
+	(CTX_TYPE): New macro.
+	(CTX_REG): Likewise.
+	(CTX_PC): Likewise.
+	(CTX_MDHI): Likewise.
+	(CTX_MDLO): Likewise.
+	(REG_HEX_SIZE): Likewise.
+	(hexvalue): Take _ITOA_WORD_TYPE argument.
+	(register_dump): Use these macros instead of hardcoding struct
+	sigcontext * type and accesses and 8-byte textual output for
+	registers.
+
+2012-11-22  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #14822]
+	* sysdeps/unix/sysv/linux/mips/mips64/n64/syscalls.list
+	(sendfile): New syscall entry.
+	* sysdeps/unix/sysv/linux/mips/mips64/n64/sendfile64.c: New file.
+	Copy of ../sysdeps/unix/sysv/linux/wordsize-64/sendfile64.c.
+
+2012-11-21  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/mips/jmpbuf-unwind.h (_jmpbuf_sp): Cast regs[0].__sp to
+	uintptr_t.
+
+	* sysdeps/mips/sotruss-lib.c: New file.
+
+2012-11-20  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/mips/mips32/sysdep.h
+	(internal_syscall1): Use parentheses around macro arguments.
+	(internal_syscall2): Likewise.
+	(internal_syscall3): Likewise.
+	(internal_syscall4): Likewise.
+	(internal_syscall5): Likewise.
+	(internal_syscall6): Likewise.
+	(internal_syscall7): Likewise.
+	* sysdeps/unix/sysv/linux/mips/mips64/n64/sysdep.h
+	(internal_syscall1): Likewise.
+	(internal_syscall2): Likewise.
+	(internal_syscall3): Likewise.
+	(internal_syscall4): Likewise.
+	(internal_syscall5): Likewise.
+	(internal_syscall6): Likewise.
+
+	* sysdeps/mips/jmpbuf-unwind.h (_JMPBUF_CFA_UNWINDS_ADJ): Cast
+	_Unwind_GetCFA return to _Unwind_Ptr before casting to a pointer
+	type.
+	* sysdeps/unix/sysv/linux/mips/____longjmp_chk.c (CHECK_SP): Cast
+	ss_sp to long before casting to sp_type.
+	* sysdeps/unix/sysv/linux/mips/sigcontextinfo.h [_MIPS_SIM ==
+	_ABIO32] (GET_PC): Cast to unsigned long before casting to a
+	pointer type.
+	[_MIPS_SIM == _ABIO32] (GET_FRAME): Likewise.
+	[_MIPS_SIM == _ABIO32] (GET_STACK): Likewise.
+	[_MIPS_SIM != _ABIO32] (GET_PC): Likewise.
+	[_MIPS_SIM != _ABIO32] (GET_FRAME): Likewise.
+	[_MIPS_SIM != _ABIO32] (GET_STACK): Likewise.
+
+	* sysdeps/mips/bits/atomic.h [!__GNUC_PREREQ (4, 8)]
+	(__arch_compare_and_exchange_xxx_8_int): Separate assignments to
+	__prev and __cmp.  Cast __cmp to void.
+	[!__GNUC_PREREQ (4, 8)] (__arch_compare_and_exchange_xxx_16_int):
+	Likewise.
+	[!__GNUC_PREREQ (4, 8) && _MIPS_SIM == _ABIO32]
+	(__arch_compare_and_exchange_xxx_64_int): Likewise.
+
+2012-11-19  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/mips/dl-machine.h (RESOLVE_GOTSYM): Declare VERSION
+	variable with __attribute__ ((unused)).
+
+	* sysdeps/unix/sysv/linux/mips/mips32/sysdep.h
+	(INTERNAL_SYSCALL_DECL): Use __attribute__ ((unused)).
+	(INTERNAL_SYSCALL_ERROR_P): Cast val to void.
+	(INTERNAL_SYSCALL_ERRNO): Cast err to void.
+	* sysdeps/unix/sysv/linux/mips/mips64/n32/sysdep.h
+	(INTERNAL_SYSCALL_DECL): Use __attribute__ ((unused)).
+	(INTERNAL_SYSCALL_ERROR_P): Cast val to void.
+	(INTERNAL_SYSCALL_ERRNO): Cast err to void.
+	* sysdeps/unix/sysv/linux/mips/mips64/n64/sysdep.h
+	(INTERNAL_SYSCALL_DECL): Use __attribute__ ((unused)).
+	(INTERNAL_SYSCALL_ERROR_P): Cast val to void.
+	(INTERNAL_SYSCALL_ERRNO): Cast err to void.
+
+2012-11-17  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/mips/bits/atomic.h
+	(__arch_compare_and_exchange_bool_8_int): Mark __PREV variable
+	with __attribute__ ((unused)).
+	(__arch_compare_and_exchange_bool_16_int): Likewise.
+	(__arch_compare_and_exchange_bool_32_int): Likewise.
+	(__arch_compare_and_exchange_bool_64_int): Likewise.
+
+2012-11-06  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+        * sysdeps/mips/memmove.c: New file.  Use memcpy for forward memmove.
+
+2012-11-05  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/mips/nptl/lowlevellock.h
+	(lll_futex_timed_wait_bitset): New macro.
+
+2012-11-04  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/mips/mips32/sync_file_range.c: Don't
+	include <stub-tag.h>.
+
 2012-11-03  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/mips/fpu/fclrexcpt.c (feclearexcept): Add
+	libm_hidden_def.
 
 	[BZ #3439]
 	* sysdeps/mips/bits/fenv.h (FE_INEXACT): Define macro to integer
