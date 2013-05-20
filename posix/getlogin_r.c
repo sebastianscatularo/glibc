@@ -1,5 +1,5 @@
 /* Reentrant function to return the current login name.  Stub version.
-   Copyright (C) 1996, 2002 Free Software Foundation, Inc.
+   Copyright (C) 1996-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -33,4 +33,3 @@ getlogin_r (name, name_len)
 libc_hidden_def (getlogin_r)
 
 stub_warning (getlogin_r)
-#include <stub-tag.h>
