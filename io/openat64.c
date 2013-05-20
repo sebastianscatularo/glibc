@@ -1,4 +1,4 @@
-/* Copyright (C) 2005, 2006, 2007 Free Software Foundation, Inc.
+/* Copyright (C) 2005-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -81,5 +81,3 @@ __openat64_2 (fd, file, oflag)
   return __openat64 (fd, file, oflag);
 }
 stub_warning (__openat_2)
-
-#include <stub-tag.h>
