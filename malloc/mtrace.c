@@ -1,5 +1,5 @@
 /* More debugging hooks for `malloc'.
-   Copyright (C) 1991-2012 Free Software Foundation, Inc.
+   Copyright (C) 1991-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 		 Written April 2, 1991 by John Gilmore of Cygnus Support.
 		 Based on mcheck.c by Mike Haertel.
@@ -219,8 +219,13 @@ tr_reallochook (ptr, size, caller)
 
   tr_where (caller, info);
   if (hdr == NULL)
-    /* Failed realloc.  */
-    fprintf (mallstream, "! %p %#lx\n", ptr, (unsigned long int) size);
+    {
+      if (size != 0)
+	/* Failed realloc.  */
+	fprintf (mallstream, "! %p %#lx\n", ptr, (unsigned long int) size);
+      else
+	fprintf (mallstream, "- %p\n", ptr);
+    }
   else if (ptr == NULL)
     fprintf (mallstream, "+ %p %#lx\n", hdr, (unsigned long int) size);
   else
@@ -364,11 +369,16 @@ muntrace ()
   if (mallstream == NULL)
     return;
 
-  fprintf (mallstream, "= End\n");
-  fclose (mallstream);
+  /* Do the reverse of what done in mtrace: first reset the hooks and
+     MALLSTREAM, and only after that write the trailer and close the
+     file.  */
+  FILE *f = mallstream;
   mallstream = NULL;
   __free_hook = tr_old_free_hook;
   __malloc_hook = tr_old_malloc_hook;
   __realloc_hook = tr_old_realloc_hook;
   __memalign_hook = tr_old_memalign_hook;
+
+  fprintf (f, "= End\n");
+  fclose (f);
 }
