@@ -50,3 +50,4 @@ t/af_local_strlen
 t/nice
 t/exec-static
 t/EIEIO-fr
+t/context_functions
