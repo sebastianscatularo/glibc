@@ -1,5 +1,5 @@
 /* PLT trampolines.  m68k version.
-   Copyright (C) 2005, 2011, 2012 Free Software Foundation, Inc.
+   Copyright (C) 2005-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -130,7 +130,7 @@ _dl_runtime_profile:
 #ifdef __mcoldfire__
 	tst.l %d1
 	beq 2f
-1:	move.l (%a0)+, (%a1)+
+1:	move.l (%a1)+, (%a0)+
 	subq.l #4,%d1
 	bne 1b
 2:
