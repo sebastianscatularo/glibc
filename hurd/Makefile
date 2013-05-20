@@ -38,7 +38,8 @@ user-interfaces		:= $(addprefix hurd/,\
 				       process process_request \
 				       msg msg_reply msg_request \
 				       exec exec_startup crash interrupt \
-				       fs fsys io term tioctl socket ifsock \
+				       fs fsys io io_reply io_request \
+				       term tioctl socket ifsock \
 				       login password pfinet \
 				       )
 server-interfaces	:= hurd/msg faultexc
@@ -59,6 +60,7 @@ routines = hurdstartup hurdinit \
 	   vpprintf \
 	   ports-get ports-set hurdports hurdmsg \
 	   errno-loc \
+	   sysvshm \
 	   $(sig) $(dtable) $(inlines) port-cleanup report-wait xattr
 sig	= hurdsig hurdfault siginfo hurd-raise preempt-sig \
 	  trampoline longjmp-ts catch-exc exc2signal hurdkill sigunwind \

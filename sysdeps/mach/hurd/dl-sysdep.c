@@ -61,6 +61,8 @@ void *__libc_stack_end;
 hp_timing_t _dl_cpuclock_offset;
 #endif
 
+/* TODO: this is never properly initialized in here.  */
+void *_dl_random attribute_relro = NULL;
 
 struct hurd_startup_data *_dl_hurd_data;
 
@@ -104,12 +106,28 @@ static void fmh(void) {
 	max=a; break;}
       fmha=a+=fmhs;}
     if (err) assert(err==KERN_NO_SPACE);
-    if (!fmha)fmhs=0;else{
-    fmhs=max-fmha;
-    err = __vm_map (__mach_task_self (),
-		    &fmha, fmhs, 0, 0, MACH_PORT_NULL, 0, 1,
-		    VM_PROT_NONE, VM_PROT_NONE, VM_INHERIT_COPY);
-    assert_perror(err);}
+    if (!fmha)
+      fmhs=0;
+    else
+      while (1) {
+	fmhs=max-fmha;
+	if (fmhs == 0)
+	  break;
+	err = __vm_map (__mach_task_self (),
+			&fmha, fmhs, 0, 0, MACH_PORT_NULL, 0, 1,
+			VM_PROT_NONE, VM_PROT_NONE, VM_INHERIT_COPY);
+	if (!err)
+	  break;
+	if (err != KERN_INVALID_ADDRESS && err != KERN_NO_SPACE)
+	  assert_perror(err);
+	vm_address_t new_max = (max - 1) & 0xf0000000U;
+	if (new_max >= max) {
+	  fmhs = 0;
+	  fmha = 0;
+	  break;
+	}
+	max = new_max;
+      }
   }
 /* XXX loser kludge for vm_map kernel bug */
 #endif

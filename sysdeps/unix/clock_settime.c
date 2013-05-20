@@ -21,6 +21,9 @@
 #include <libc-internal.h>
 #include <ldsodefs.h>
 
+/* TODO */
+#include <sysdeps/unix/sysv/linux/kernel-posix-cpu-timers.h>
+
 
 #if HP_TIMING_AVAIL && !defined HANDLED_CPUTIME
 /* Clock frequency of the processor.  We make it a 64-bit variable

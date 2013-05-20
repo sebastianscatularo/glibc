@@ -36,9 +36,6 @@ extern void __init_misc (int, char **, char **);
 #ifdef USE_NONOPTION_FLAGS
 extern void __getopt_clean_environment (char **);
 #endif
-#ifndef SHARED
-extern void _dl_non_dynamic_init (void) internal_function;
-#endif
 extern void __libc_global_ctors (void);
 
 unsigned int __hurd_threadvar_max;
@@ -106,10 +103,6 @@ init1 (int argc, char *arg0, ...)
   char **argv = &arg0;
   char **envp = &argv[argc + 1];
   struct hurd_startup_data *d;
-#ifndef SHARED
-  extern ElfW(Phdr) *_dl_phdr;
-  extern size_t _dl_phnum;
-#endif
 
   while (*envp)
     ++envp;
@@ -120,25 +113,11 @@ init1 (int argc, char *arg0, ...)
      data block; the argument strings start there.  */
   if ((void *) d == argv[0])
     {
-#ifndef SHARED
-      /* We may need to see our own phdrs, e.g. for TLS setup.
-	 Try the usual kludge to find the headers without help from
-	 the exec server.  */
-      extern const void _start;
-      const ElfW(Ehdr) *const ehdr = &_start;
-      _dl_phdr = (ElfW(Phdr) *) ((const void *) ehdr + ehdr->e_phoff);
-      _dl_phnum = ehdr->e_phnum;
-      assert (ehdr->e_phentsize == sizeof (ElfW(Phdr)));
-#endif
       return;
     }
 
 #ifndef SHARED
   __libc_enable_secure = d->flags & EXEC_SECURE;
-
-  _dl_phdr = (ElfW(Phdr) *) d->phdr;
-  _dl_phnum = d->phdrsz / sizeof (ElfW(Phdr));
-  assert (d->phdrsz % sizeof (ElfW(Phdr)) == 0);
 #endif
 
   _hurd_init_dtable = d->dtable;
@@ -174,13 +153,16 @@ init (int *data)
   char **envp = &argv[argc + 1];
   struct hurd_startup_data *d;
   unsigned long int threadvars[_HURD_THREADVAR_MAX];
+#ifndef SHARED
+  extern ElfW(Phdr) *_dl_phdr;
+  extern size_t _dl_phnum;
+#endif
 
   /* Provide temporary storage for thread-specific variables on the
      startup stack so the cthreads initialization code can use them
      for malloc et al, or so we can use malloc below for the real
      threadvars array.  */
   memset (threadvars, 0, sizeof threadvars);
-  threadvars[_HURD_THREADVAR_LOCALE] = (unsigned long int) &_nl_global_locale;
   __hurd_threadvar_stack_offset = (unsigned long int) threadvars;
 
   /* Since the cthreads initialization code uses malloc, and the
@@ -193,6 +175,33 @@ init (int *data)
   while (*envp)
     ++envp;
   d = (void *) ++envp;
+
+#ifndef SHARED
+  /* If we are the bootstrap task started by the kernel,
+     then after the environment pointers there is no Hurd
+     data block; the argument strings start there.  */
+  if ((void *) d == argv[0] || !d->phdr)
+    {
+      /* We may need to see our own phdrs, e.g. for TLS setup.
+         Try the usual kludge to find the headers without help from
+	 the exec server.  */
+      extern const void __executable_start;
+      const ElfW(Ehdr) *const ehdr = &__executable_start;
+      _dl_phdr = (ElfW(Phdr) *) ((const void *) ehdr + ehdr->e_phoff);
+      _dl_phnum = ehdr->e_phnum;
+      assert (ehdr->e_phentsize == sizeof (ElfW(Phdr)));
+    }
+  else
+    {
+      _dl_phdr = (ElfW(Phdr) *) d->phdr;
+      _dl_phnum = d->phdrsz / sizeof (ElfW(Phdr));
+      assert (d->phdrsz % sizeof (ElfW(Phdr)) == 0);
+    }
+
+  /* We need to setup TLS before starting sigthread */
+  extern void __pthread_initialize_minimal(void);
+  __pthread_initialize_minimal();
+#endif
 
   /* The user might have defined a value for this, to get more variables.
      Otherwise it will be zero on startup.  We must make sure it is set

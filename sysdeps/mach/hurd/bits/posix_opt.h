@@ -68,8 +68,8 @@
 /* X/Open thread realtime support is not supported.  */
 #undef _XOPEN_REALTIME_THREADS
 
-/* XPG4.2 shared memory is not supported.  */
-#undef	_XOPEN_SHM
+/* XPG4.2 shared memory is supported.  */
+#define _XOPEN_SHM      1
 
 /* We do not have the POSIX threads interface.  */
 #define _POSIX_THREADS	-1

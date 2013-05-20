@@ -458,6 +458,7 @@ __fork (void)
 	 function, accounted for by mach_port_names (and which will thus be
 	 accounted for in the child below).  This extra right gets consumed
 	 in the child by the store into _hurd_sigthread in the child fork.  */
+      /* XXX consumed? (_hurd_sigthread is no more) */
       if (thread_refs > 1 &&
 	  (err = __mach_port_mod_refs (newtask, ss->thread,
 				       MACH_PORT_RIGHT_SEND,
@@ -522,6 +523,11 @@ __fork (void)
 #endif
       MACHINE_THREAD_STATE_SET_PC (&state,
 				   (unsigned long int) _hurd_msgport_receive);
+
+      /* Do special thread setup for TLS if needed.  */
+      if (err = _hurd_tls_fork (sigthread, _hurd_msgport_thread, &state))
+	LOSE;
+
       if (err = __thread_set_state (sigthread, MACHINE_THREAD_STATE_FLAVOR,
 				    (natural_t *) &state, statecount))
 	LOSE;
@@ -532,7 +538,7 @@ __fork (void)
       _hurd_longjmp_thread_state (&state, env, 1);
 
       /* Do special thread setup for TLS if needed.  */
-      if (err = _hurd_tls_fork (thread, &state))
+      if (err = _hurd_tls_fork (thread, ss->thread, &state))
 	LOSE;
 
       if (err = __thread_set_state (thread, MACHINE_THREAD_STATE_FLAVOR,
@@ -615,10 +621,6 @@ __fork (void)
       for (i = 0; i < _hurd_nports; ++i)
 	__spin_unlock (&_hurd_ports[i].lock);
 
-      /* We are one of the (exactly) two threads in this new task, we
-	 will take the task-global signals.  */
-      _hurd_sigthread = ss->thread;
-
       /* Claim our sigstate structure and unchain the rest: the
 	 threads existed in the parent task but don't exist in this
 	 task (the child process).  Delay freeing them until later
@@ -638,6 +640,25 @@ __fork (void)
       ss->next = NULL;
       _hurd_sigstates = ss;
       __mutex_unlock (&_hurd_siglock);
+      /* Earlier on, the global sigstate may have been tainted and now needs to
+         be reinitialized.  Nobody is interested in its present state anymore:
+         we're not, the signal thread will be restarted, and there are no other
+         threads.
+
+         We can't simply allocate a fresh global sigstate here, as
+         _hurd_thread_sigstate will call malloc and that will deadlock trying
+         to determine the current thread's sigstate.  */
+#if 0
+      _hurd_thread_sigstate_init (_hurd_global_sigstate, MACH_PORT_NULL);
+#else
+      /* Only reinitialize the lock -- otherwise we might have to do additional
+         setup as done in hurdsig.c:_hurdsig_init.  */
+      __spin_lock_init (&_hurd_global_sigstate->lock);
+#endif
+
+      /* We are one of the (exactly) two threads in this new task, we
+	 will take the task-global signals.  */
+      _hurd_sigstate_set_global_rcv (ss);
 
       /* Fetch our new process IDs from the proc server.  No need to
 	 refetch our pgrp; it is always inherited from the parent (so
@@ -646,8 +667,10 @@ __fork (void)
       err = __USEPORT (PROC, __proc_getpids (port, &_hurd_pid, &_hurd_ppid,
 					     &_hurd_orphaned));
 
-      /* Forking clears the trace flag.  */
+      /* Forking clears the trace flag and pending masks.  */
       __sigemptyset (&_hurdsig_traced);
+      __sigemptyset (&_hurd_global_sigstate->pending);
+      __sigemptyset (&ss->pending);
 
       /* Run things that want to run in the child task to set up.  */
       RUN_HOOK (_hurd_fork_child_hook, ());

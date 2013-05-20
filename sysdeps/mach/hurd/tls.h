@@ -1,5 +1,7 @@
 /* Definitions for thread-local data handling.  Hurd version.
-   Copyright (C) 2003, 2005, 2007, 2011 Free Software Foundation, Inc.
+
+   Copyright (C) 2003, 2005, 2007, 2009, 2011 Free Software Foundation, Inc.
+
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -22,7 +24,9 @@
 #ifndef __ASSEMBLER__
 
 # include <stddef.h>
+# include <stdint.h>
 # include <stdbool.h>
+# include <sysdep.h>
 # include <mach/mig_errors.h>
 # include <mach.h>
 
@@ -72,5 +76,18 @@ typedef struct
 
 #endif /* !ASSEMBLER */
 
+#ifndef __ASSEMBLER__
+#include <mach/mach_traps.h>
+#include <atomic.h>
+/* Temporary poor-man's global scope switch support: just busy-waits */
+#define THREAD_GSCOPE_SET_FLAG() \
+	asm volatile ("lock incl %0":"=m"(GL(dl_thread_gscope_count)))
+#define THREAD_GSCOPE_RESET_FLAG() \
+	asm volatile ("lock decl %0":"=m"(GL(dl_thread_gscope_count)))
+#define THREAD_GSCOPE_WAIT() \
+  while (GL(dl_thread_gscope_count)) { \
+    __swtch_pri (0); \
+  }
+#endif
 
 #endif /* tls.h */

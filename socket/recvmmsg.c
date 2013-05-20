@@ -1,5 +1,5 @@
-/* libc-internal interface for thread-specific data.  Hurd version.
-   Copyright (C) 1998,2002,2008 Free Software Foundation, Inc.
+/* Receive multiple messages on a socket.  Stub version.
+   Copyright (C) 2010-2012 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -16,19 +16,16 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
-#ifndef _BITS_LIBC_TSD_H
-#define _BITS_LIBC_TSD_H 1
+#include <errno.h>
+#include <sys/socket.h>
 
-#include <hurd/threadvar.h>
-
-#define __libc_tsd_define(CLASS, TYPE, KEY) /* nothing, always have threadvars */
-
-#define __libc_tsd_address(TYPE, KEY) \
-  ((TYPE *) __hurd_threadvar_location (_HURD_THREADVAR_##KEY))
-
-#define __libc_tsd_get(TYPE, KEY) \
-  (*__libc_tsd_address (TYPE, KEY))
-#define __libc_tsd_set(TYPE, KEY, VALUE) \
-  (*__libc_tsd_address (TYPE, KEY) = (VALUE))
-
-#endif	/* bits/libc-tsd.h */
+/* Receive up to VLEN messages as described by VMESSAGES from socket FD.
+   Returns the number of bytes read or -1 for errors.  */
+int
+recvmmsg (int fd, struct mmsghdr *vmessages, unsigned int vlen, int flags,
+	  const struct timespec *tmo)
+{
+  __set_errno (ENOSYS);
+  return -1;
+}
+stub_warning (recvmmsg)

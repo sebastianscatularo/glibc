@@ -2285,7 +2285,8 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 
 
 
-# Glibc should not depend on any header files
+# Do not make decisions based on the host system's C library, as we must be
+# independent of it.
 
 
 

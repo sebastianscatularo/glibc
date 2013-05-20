@@ -51,7 +51,6 @@ hurd_thread_cancel (thread_t thread)
       return 0;
     }
 
-  assert (! __spin_lock_locked (&ss->critical_section_lock));
   __spin_lock (&ss->critical_section_lock);
   __spin_lock (&ss->lock);
   err = __thread_suspend (thread);
