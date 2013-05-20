@@ -1,4 +1,4 @@
-# Copyright (C) 2002,2003,2009,2012 Free Software Foundation, Inc.
+# Copyright (C) 2002-2013 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -60,6 +60,6 @@ $(objpfx)libthread_db.so: $(common-objpfx)libc.so \
 tests: $(objpfx)db-symbols.out
 $(objpfx)db-symbols.out: $(objpfx)db-symbols.v.i \
 			 $(common-objpfx)nptl/libpthread.so
-	LC_ALL=C readelf -W -s $(filter %.so,$^) | $(AWK) -f $< > $@
+	LC_ALL=C $(READELF) -W -s $(filter %.so,$^) | $(AWK) -f $< > $@
 
 $(objpfx)db-symbols.v.i: db-symbols.awk

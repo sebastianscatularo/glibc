@@ -1,4 +1,4 @@
-# Copyright (C) 1998-2012 Free Software Foundation, Inc.
+# Copyright (C) 1998-2013 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -121,10 +121,22 @@ LDLIBS-tst-lfschk4 = -lstdc++
 LDLIBS-tst-lfschk5 = -lstdc++
 LDLIBS-tst-lfschk6 = -lstdc++
 
+# backtrace_symbols only works if we link with -rdynamic.  backtrace
+# requires unwind tables on most architectures.
+CFLAGS-tst-backtrace2.c += -funwind-tables
+CFLAGS-tst-backtrace3.c += -funwind-tables
+CFLAGS-tst-backtrace4.c += -funwind-tables
+CFLAGS-tst-backtrace5.c += -funwind-tables
+LDFLAGS-tst-backtrace2 = -rdynamic
+LDFLAGS-tst-backtrace3 = -rdynamic
+LDFLAGS-tst-backtrace4 = -rdynamic
+LDFLAGS-tst-backtrace5 = -rdynamic
+
 tests = backtrace-tst tst-longjmp_chk tst-chk1 tst-chk2 tst-chk3 \
 	tst-lfschk1 tst-lfschk2 tst-lfschk3 test-strcpy_chk test-stpcpy_chk \
 	tst-chk4 tst-chk5 tst-chk6 tst-lfschk4 tst-lfschk5 tst-lfschk6 \
-	tst-longjmp_chk2
+	tst-longjmp_chk2 tst-backtrace2 tst-backtrace3 tst-backtrace4 \
+	tst-backtrace5
 
 tests-ifunc := $(stpcpy_chk strcpy_chk:%=test-%-ifunc)
 tests += $(tests-ifunc)
@@ -156,7 +168,9 @@ sLIBdir := $(shell echo $(slibdir) | sed 's,lib\(\|64\)$$,\\\\$$LIB,')
 $(objpfx)catchsegv: catchsegv.sh $(common-objpfx)soversions.mk \
 		    $(common-objpfx)config.make
 	slibpfx=`echo $(slibdir)|sed 's/lib\(64\|\)$$/\\\\\\\\$$LIB/'`; \
-	sed -e 's|@VERSION@|$(version)|' -e "s|@SLIB@|$$slibpfx|" $< > $@.new
+	sed -e 's|@VERSION@|$(version)|' -e "s|@SLIB@|$$slibpfx|" \
+	    -e 's|@PKGVERSION@|$(PKGVERSION)|' \
+	    -e 's|@REPORT_BUGS_TO@|$(REPORT_BUGS_TO)|' $< > $@.new
 	chmod 555 $@.new
 	mv -f $@.new $@
 
@@ -165,7 +179,9 @@ $(objpfx)pcprofiledump: $(objpfx)pcprofiledump.o
 $(objpfx)xtrace: xtrace.sh
 	rm -f $@.new
 	sed -e 's|@BASH@|$(BASH)|' -e 's|@VERSION@|$(version)|' \
-	    -e 's|@SLIBDIR@|$(sLIBdir)|' -e 's|@BINDIR@|$(bindir)|' $^ > $@.new \
+	    -e 's|@SLIBDIR@|$(sLIBdir)|' -e 's|@BINDIR@|$(bindir)|' \
+	    -e 's|@PKGVERSION@|$(PKGVERSION)|' \
+	    -e 's|@REPORT_BUGS_TO@|$(REPORT_BUGS_TO)|' $^ > $@.new \
 	&& rm -f $@ && mv $@.new $@ && chmod +x $@
 
 # Depend on libc.so so a DT_NEEDED is generated in the shared objects.
