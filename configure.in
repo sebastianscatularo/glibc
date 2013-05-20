@@ -5,10 +5,39 @@ AC_CONFIG_SRCDIR([include/features.h])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([scripts])
 
+ACX_PKGVERSION([GNU libc])
+ACX_BUGURL([http://www.gnu.org/software/libc/bugs.html])
+AC_DEFINE_UNQUOTED([PKGVERSION], ["$PKGVERSION"],
+		   [Package description])
+AC_DEFINE_UNQUOTED([REPORT_BUGS_TO], ["$REPORT_BUGS_TO"],
+		   [Bug reporting address])
+
 # Glibc should not depend on any header files
 AC_DEFUN([_AC_INCLUDES_DEFAULT_REQUIREMENTS],
   [m4_divert_text([DEFAULTS],
     [ac_includes_default='/* none */'])])
+
+# We require GCC, and by default use its preprocessor.  Override AC_PROG_CPP
+# here to work around the Autoconf issue discussed in
+# <http://sourceware.org/ml/libc-alpha/2013-01/msg00721.html>.
+AC_DEFUN([AC_PROG_CPP],
+[AC_REQUIRE([AC_PROG_CC])dnl
+AC_ARG_VAR([CPP],      [C preprocessor])dnl
+_AC_ARG_VAR_CPPFLAGS()dnl
+# On Suns, sometimes $CPP names a directory.
+if test -n "$CPP" && test -d "$CPP"; then
+  CPP=
+fi
+if test -z "$CPP"; then
+  CPP="$CC -E"
+fi
+AC_SUBST(CPP)dnl
+])# AC_PROG_CPP
+
+# We require GCC.  Override _AC_PROG_CC_C89 here to work around the Autoconf
+# issue discussed in
+# <http://sourceware.org/ml/libc-alpha/2013-01/msg00757.html>.
+AC_DEFUN([_AC_PROG_CC_C89], [[$1]])
 
 dnl This is here so we can set $subdirs directly based on configure fragments.
 AC_CONFIG_SUBDIRS()
@@ -138,6 +167,13 @@ else
   AC_DEFINE_UNQUOTED(GLIBC_OLDEST_ABI, "$oldest_abi")
 fi
 AC_SUBST(oldest_abi)
+
+AC_ARG_ENABLE([hardcoded-path-in-tests],
+	      AC_HELP_STRING([--enable-hardcoded-path-in-tests],
+			     [hardcode newly built glibc path in tests @<:@default=no@:>@]),
+	      [hardcoded_path_in_tests=$enableval],
+	      [hardcoded_path_in_tests=no])
+AC_SUBST(hardcoded_path_in_tests)
 
 AC_ARG_ENABLE([stackguard-randomization],
 	      AC_HELP_STRING([--enable-stackguard-randomization],
@@ -570,7 +606,7 @@ fi
 # For the multi-arch option we need support in the assembler & linker.
 AC_CACHE_CHECK([for assembler and linker STT_GNU_IFUNC support],
 	       libc_cv_ld_gnu_indirect_function, [dnl
-cat > conftest.s <<EOF
+cat > conftest.S <<EOF
 .type foo,%gnu_indirect_function
 foo:
 .globl _start
@@ -578,12 +614,16 @@ _start:
 .globl __start
 __start:
 .data
+#ifdef _LP64
+.quad foo
+#else
 .long foo
+#endif
 EOF
 libc_cv_ld_gnu_indirect_function=no
 if ${CC-cc} $CFLAGS $CPPFLAGS $LDFLAGS \
 	    -nostartfiles -nostdlib \
-	    -o conftest conftest.s 1>&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD; then
+	    -o conftest conftest.S 1>&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD; then
   # Do a link to see if the backend supports IFUNC relocs.
   $READELF -r conftest 1>&AS_MESSAGE_LOG_FD
   LC_ALL=C $READELF -r conftest | grep 'no relocations' >/dev/null || {
@@ -615,6 +655,7 @@ if test x"$libc_cv_ld_gnu_indirect_function" != xyes; then
     multi_arch=no
   fi
 fi
+multi_arch_d=
 if test x"$multi_arch" != xno; then
   multi_arch_d=/multiarch
 fi
@@ -668,11 +709,16 @@ while m=`echo $tail | sed 's@^\(.*\)/\([^/]*\)$@& \1@'`; test -n "$m"; do
   set $m
   # Prepend the machine's FPU directory unless --without-fp.
   if test "$with_fp" = yes; then
-    mach="$mach /$1/fpu"
+    maybe_fpu=/fpu
   else
-    mach="$mach /$1/nofpu"
+    maybe_fpu=/nofpu
   fi
-  mach="$mach /$1"
+  # For each machine term, try it with and then without /multiarch.
+  for try_fpu in $maybe_fpu ''; do
+    for try_multi in $multi_arch_d ''; do
+      mach="$mach /$1$try_fpu$try_multi"
+    done
+  done
   tail="$2"
 done
 
@@ -688,15 +734,16 @@ for b in $base ''; do
       test "$v" = / && continue
       for o in /$ostry ''; do
 	test "$o" = / && continue
-	for m in $multi_arch_d $mach ''; do
+	for m in $mach ''; do
 	  for d in $add_ons_pfx ''; do
 	    for a in $add_ons_sfx ''; do
-	      if test -n "$m0$m0sub$b$v$o$m$msub"; then
+	      try_suffix="$m0$b$v$o$m"
+	      if test -n "$try_suffix"; then
 		try_srcdir="${srcdir}/"
 		case "$d" in
 		/*) try_srcdir= ;;
 		esac
-		try="${d}sysdeps$m0$m0sub$b$v$o$m$msub$a"
+		try="${d}sysdeps$try_suffix$a"
 		test -n "$enable_debug_configure" &&
 		echo "$0 [DEBUG]: try $try" >&2
 		if test -d "$try_srcdir$try"; then
@@ -984,12 +1031,11 @@ if test -n "$sysheaders"; then
 -isystem `echo $sysheaders | sed 's/:/ -isystem /g'`"
   if test -n "$CXX"; then
     CXX_SYSINCLUDES=
-    cxxmachine=`$CXX -dumpmachine 2>&AS_MESSAGE_LOG_FD` &&
-    cxxheaders=`$CXX -v -S -x c++ /dev/null -o /dev/null 2>&1 \
-	| sed -n -e '1,/#include/d' -e '/^ \//{p;q;}' | sed 's/ //'`
-    test "x$cxxheaders" != x && test "x$i" != "x$cxxheaders" &&
-    CXX_SYSINCLUDES="$CXX_SYSINCLUDES -isystem $cxxheaders \
--isystem $cxxheaders/$cxxmachine -isystem $cxxheaders/backward"
+    for cxxheaders in `$CXX -v -S -x c++ /dev/null -o /dev/null 2>&1 \
+    | sed -n -e '1,/#include/d' -e 's/^ \(\/.*\/[cg]++\)/\1/p'`; do
+      test "x$cxxheaders" != x &&
+      CXX_SYSINCLUDES="$CXX_SYSINCLUDES -isystem $cxxheaders"
+    done
   fi
 fi
 AC_SUBST(SYSINCLUDES)
@@ -1398,53 +1444,17 @@ if test $libc_cv_cc_with_libunwind = yes; then
   AC_DEFINE(HAVE_CC_WITH_LIBUNWIND)
 fi
 
-AC_CACHE_CHECK(for -z nodelete option,
-	       libc_cv_z_nodelete, [dnl
-cat > conftest.c <<EOF
-int _start (void) { return 42; }
-EOF
-if AC_TRY_COMMAND([${CC-cc} $CFLAGS $CPPFLAGS $LDFLAGS
-		   -fPIC -shared -o conftest.so conftest.c
-		   -nostartfiles -nostdlib
-		   -Wl,--enable-new-dtags,-z,nodelete 1>&AS_MESSAGE_LOG_FD])
-then
-  libc_cv_z_nodelete=yes
-else
-  AC_MSG_ERROR(linker with -z nodelete support required)
-fi
-rm -f conftest*])
+LIBC_LINKER_FEATURE([-z nodelete], [-Wl,--enable-new-dtags,-z,nodelete],
+		    [libc_cv_z_nodelete=yes],
+		    [AC_MSG_ERROR(linker with -z nodelete support required)])
 
-AC_CACHE_CHECK(for -z nodlopen option,
-	       libc_cv_z_nodlopen, [dnl
-cat > conftest.c <<EOF
-int _start (void) { return 42; }
-EOF
-if AC_TRY_COMMAND([${CC-cc} $CFLAGS $CPPFLAGS $LDFLAGS
-			-fPIC -shared -o conftest.so conftest.c
-			-nostartfiles -nostdlib
-			-Wl,--enable-new-dtags,-z,nodlopen 1>&AS_MESSAGE_LOG_FD])
-then
-  libc_cv_z_nodlopen=yes
-else
-  AC_MSG_ERROR(linker with -z nodlopen support required)
-fi
-rm -f conftest*])
+LIBC_LINKER_FEATURE([-z nodlopen], [-Wl,--enable-new-dtags,-z,nodlopen],
+		    [libc_cv_z_nodlopen=yes],
+		    [AC_MSG_ERROR(linker with -z nodlopen support required)])
 
-AC_CACHE_CHECK(for -z initfirst option,
-	       libc_cv_z_initfirst, [dnl
-cat > conftest.c <<EOF
-int _start (void) { return 42; }
-EOF
-if AC_TRY_COMMAND([${CC-cc} $CFLAGS $CPPFLAGS $LDFLAGS
-			-fPIC -shared -o conftest.so conftest.c
-			-nostartfiles -nostdlib
-			-Wl,--enable-new-dtags,-z,initfirst 1>&AS_MESSAGE_LOG_FD])
-then
-  libc_cv_z_initfirst=yes
-else
-  AC_MSG_ERROR(linker with -z initfirst support required)
-fi
-rm -f conftest*])
+LIBC_LINKER_FEATURE([-z initfirst], [-Wl,--enable-new-dtags,-z,initfirst],
+		    [libc_cv_z_initfirst=yes],
+		    [AC_MSG_ERROR(linker with -z initfirst support required)])
 
 # Add-on fragments can set these for other machines.
 libc_commonpagesize=${libc_commonpagesize:-no}
@@ -1582,21 +1592,8 @@ if test "$libc_cv_z_combreloc" = yes; then
 fi
 AC_SUBST(libc_cv_z_combreloc)
 
-AC_CACHE_CHECK(for -z execstack,
-	       libc_cv_z_execstack, [dnl
-cat > conftest.c <<EOF
-int _start (void) { return 42; }
-EOF
-if AC_TRY_COMMAND([${CC-cc} $CFLAGS $CPPFLAGS $LDFLAGS
-			    -fPIC -shared -o conftest.so conftest.c
-			    -Wl,-z,execstack -nostdlib
-			    1>&AS_MESSAGE_LOG_FD])
-then
-  libc_cv_z_execstack=yes
-else
-  libc_cv_z_execstack=no
-fi
-rm -f conftest*])
+LIBC_LINKER_FEATURE([-z execstack], [-Wl,-z,execstack],
+		    [libc_cv_z_execstack=yes], [libc_cv_z_execstack=no])
 AC_SUBST(libc_cv_z_execstack)
 
 AC_CACHE_CHECK(for -fpie, libc_cv_fpie, [dnl
