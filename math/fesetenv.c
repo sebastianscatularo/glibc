@@ -1,5 +1,5 @@
 /* Install given floating-point environment.
-   Copyright (C) 1997, 1999, 2000, 2002 Free Software Foundation, Inc.
+   Copyright (C) 1997-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@cygnus.com>, 1997.
 
@@ -34,4 +34,3 @@ libm_hidden_ver (__fesetenv, fesetenv)
 versioned_symbol (libm, __fesetenv, fesetenv, GLIBC_2_2);
 
 stub_warning (fesetenv)
-#include <stub-tag.h>
