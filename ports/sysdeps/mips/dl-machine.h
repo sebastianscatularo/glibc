@@ -1,5 +1,5 @@
 /* Machine-dependent ELF dynamic relocation inline functions.  MIPS version.
-   Copyright (C) 1996-2012 Free Software Foundation, Inc.
+   Copyright (C) 1996-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Kazumoto Kojima <kkojima@info.kanagawa-u.ac.jp>.
 
@@ -637,7 +637,7 @@ elf_machine_got_rel (struct link_map *map, int lazy)
 #define RESOLVE_GOTSYM(sym,vernum,sym_index,reloc)			  \
     ({									  \
       const ElfW(Sym) *ref = sym;					  \
-      const struct r_found_version *version				  \
+      const struct r_found_version *version __attribute__ ((unused))	  \
 	= vernum ? &map->l_versions[vernum[sym_index] & 0x7fff] : NULL;	  \
       struct link_map *sym_map;						  \
       sym_map = RESOLVE_MAP (&ref, version, reloc);			  \
