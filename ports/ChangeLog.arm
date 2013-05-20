@@ -1,4 +1,53 @@
+2013-01-02  Joseph Myers  <joseph@codesourcery.com>
+
+	* All files with FSF copyright notices: Update copyright dates
+	using scripts/update-copyrights.
+
+2012-12-04  Steve McIntyre  <steve.mcintyre@linaro.org>
+
+	* sysdeps/unix/sysv/linux/arm/dl-cache.h: New file.
+
+2012-12-04  Steve McIntyre  <steve.mcintyre@linaro.org>
+
+	* sysdeps/unix/sysv/linux/arm/ldconfig.h: New file.
+
+2012-12-04  Steve McIntyre  <steve.mcintyre@linaro.org>
+
+	* sysdeps/unix/sysv/linux/arm/readelflib.c: New file.
+
+2012-11-30  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/arm/libm-test-ulps: Update.
+
+2012-11-21  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/arm/configure.in: Generate default-abi.make with
+	definition of default-abi.
+	* sysdeps/arm/configure: Regenerated.
+	* sysdeps/unix/sysv/linux/arm/Makefile (default-abi-prog): Remove.
+	(default-abi): Likewise.
+	($(common-objpfx)default-abi.make): Include.
+
+	[BZ #14866]
+	* sysdeps/arm/fesetenv.c (__fesetenv): Test whether bits for
+	trapping exceptions were successfully set for FE_NOMASK_ENV.
+
+2012-11-14  Marcus Shawcroft  <marcus.shawcroft@linaro.org>
+
+	* sysdeps/unix/sysv/linux/arm/Makefile (libcrypt-sysdep_routines): Add
+	libc-do-syscall.
+
+2012-11-05  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/arm/nptl/lowlevellock.h
+	(lll_futex_timed_wait_bitset): New macro.
+
+	[BZ #14805]
+	* sysdeps/arm/bits/fenv.h (FE_DFL_ENV): Use cast to const fenv_t *.
+
 2012-11-03  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/arm/fclrexcpt.c (feclearexcept): Add libm_hidden_ver.
 
 	[BZ #3439]
 	* sysdeps/arm/bits/fenv.h (FE_INVALID): Define macro to integer

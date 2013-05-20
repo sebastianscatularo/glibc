@@ -1,5 +1,5 @@
 /* clock_getcpuclockid -- Get a clockid_t for process CPU time.  Linux version.
-   Copyright (C) 2004-2012 Free Software Foundation, Inc.
+   Copyright (C) 2004-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -21,10 +21,6 @@
 #include <unistd.h>
 #include <kernel-features.h>
 #include "kernel-posix-cpu-timers.h"
-
-#ifndef HAS_CPUCLOCK
-# define HAS_CPUCLOCK 1
-#endif
 
 int
 clock_getcpuclockid (pid_t pid, clockid_t *clock_id)
