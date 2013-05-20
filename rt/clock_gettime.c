@@ -1,5 +1,5 @@
 /* Get the current value of a clock.  Stub version.
-   Copyright (C) 1999-2012 Free Software Foundation, Inc.
+   Copyright (C) 1999-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -28,4 +28,3 @@ clock_gettime (clockid_t clock_id, struct timespec *tp)
 }
 strong_alias (clock_gettime, __clock_gettime)
 stub_warning (clock_gettime)
-#include <stub-tag.h>
