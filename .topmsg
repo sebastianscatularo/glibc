@@ -1,28 +1,9 @@
-Subject: [PATCH] t/sendmmsg
+Subject: [PATCH] `recvmmsg`/`sendmmsg`
 
-From: Thomas Schwinge <thomas@codesourcery.com>
-
-id:"87a9zubdm9.fsf@schwinge.name"
-
-	* sysdeps/unix/sysv/linux/bits/socket.h (struct mmsghdr, recvmmsg)
-	(sendmmsg): Move declarations...
-	* socket/sys/socket.h: ... here.
-	* sysdeps/unix/sysv/linux/recvmmsg.c [!defined __NR_recvmmsg &&
-	!defined __NR_socketcall] (recvmmsg): Move ENOSYS stub into and
-	include it from...
-	* socket/recvmmsg.c: ... this new file.
-	* sysdeps/unix/sysv/linux/internal_sendmmsg.S [__ASSUME_SENDMMSG]
-	(sendmmsg): Rename to __sendmmsg, create weak alias and make
-	definition of __sendmmsg hidden.
-	* sysdeps/unix/sysv/linux/sendmmsg.c (sendmmsg): Likewise.
-	[!defined __NR_sendmmsg && !defined __NR_socketcall] (sendmmsg):
-	Move ENOSYS stub into and include it from...
-	* socket/sendmmsg.c: ... this new file.
-	* sysdeps/unix/sysv/linux/Makefile [subdir=socket]
-	(sysdep_routines): Move recvmmsg and sendmmsg...
-	* socket/Makefile (routines): ... here.
-	* socket/Versions (GLIBC_2.17): Add recvmmsg and sendmmsg.
-	(GLIBC_PRIVATE): Add __sendmmsg.
-	* include/sys/socket.h (__sendmmsg): Add declarations.
-	* resolv/res_send.c (send_dg): Invoke __sendmmsg instead of
-	sendmmsg.
+From id:"20120625233206.C000A2C06F@topped-with-meat.com", Roland McGrath: »They
+are generally useful interfaces and there is nothing intrinsically Linuxoid
+about them.  At least when not given a timeout, they could be implemented in
+terms of sendmsg/recvmsg.  So perhaps we ought to have a sysdeps/posix
+implementation that the Hurd would use instead of stubs (and folks can consider
+adding new RPCs).  Then perhaps the Linux fallback case should be that instead
+of stubs, too.«
