@@ -1,4 +1,4 @@
-/* Copyright (C) 1998-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1998-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <ldsodefs.h>
-#include <bp-start.h>
 #include <bp-sym.h>
 
 extern void __libc_init_first (int argc, char **argv, char **envp);
@@ -140,7 +139,7 @@ LIBC_START_MAIN (int (*main) (int, char **, char ** MAIN_AUXVEC_DECL),
 #ifndef SHARED
   char *__unbounded *__unbounded ubp_ev = &ubp_av[argc + 1];
 
-  INIT_ARGV_and_ENVIRON;
+  __environ = ubp_ev;
 
   /* Store the lowest stack address.  This is done in ld.so if this is
      the code for the DSO.  */
@@ -274,7 +273,9 @@ LIBC_START_MAIN (int (*main) (int, char **, char ** MAIN_AUXVEC_DECL),
       result = 0;
 # ifdef SHARED
       unsigned int *ptr = __libc_pthread_functions.ptr_nthreads;
+#  ifdef PTR_DEMANGLE
       PTR_DEMANGLE (ptr);
+#  endif
 # else
       extern unsigned int __nptl_nthreads __attribute ((weak));
       unsigned int *const ptr = &__nptl_nthreads;

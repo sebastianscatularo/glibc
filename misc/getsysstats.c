@@ -1,5 +1,5 @@
 /* getsysstats - Determine various system internal values, stub version.
-   Copyright (C) 1996, 1997, 2001 Free Software Foundation, Inc.
+   Copyright (C) 1996-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@cygnus.com>, 1996.
 
@@ -65,4 +65,3 @@ __get_avphys_pages ()
 weak_alias (__get_avphys_pages, get_avphys_pages)
 
 stub_warning (get_avphys_pages)
-#include <stub-tag.h>
