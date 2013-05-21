@@ -1,8 +1,16 @@
-Subject: [PATCH] t/regenerate_errno.h
-
-	* sysdeps/mach/hurd/bits/errno.h: Regenerate.
+Subject: Baseline for our topic branches.
 
 ---
 
-The build system will regenerate the file itself, but keeping the in-tree file
-up-to-date avoids having spurious rebuilds due to that.
+This need not strictly be a TopGit branch, but it is for easy synchronization
+between different machines.
+
+As the baseline is merged into the topic branches, it is forward-only.
+
+To advance it:
+
+    $ echo [SHA1] > .topdeps
+    $ git commit -m Advance. -- .topdeps
+    $ tg update
+
+---
