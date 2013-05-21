@@ -1,5 +1,5 @@
 /* Low-level functions for atomic operations. Mips version.
-   Copyright (C) 2005-2012 Free Software Foundation, Inc.
+   Copyright (C) 2005-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -209,10 +209,10 @@ typedef uintmax_t uatomic_max_t;
    in which values are returned.  */
 
 # define __arch_compare_and_exchange_xxx_8_int(mem, newval, oldval, rel, acq) \
-  (abort (), __prev = __cmp = 0)
+  (abort (), __prev = 0, __cmp = 0, (void) __cmp)
 
 # define __arch_compare_and_exchange_xxx_16_int(mem, newval, oldval, rel, acq) \
-  (abort (), __prev = __cmp = 0)
+  (abort (), __prev = 0, __cmp = 0, (void) __cmp)
 
 # define __arch_compare_and_exchange_xxx_32_int(mem, newval, oldval, rel, acq) \
      __asm__ __volatile__ (						      \
@@ -236,7 +236,7 @@ typedef uintmax_t uatomic_max_t;
 # if _MIPS_SIM == _ABIO32
 /* We can't do an atomic 64-bit operation in O32.  */
 # define __arch_compare_and_exchange_xxx_64_int(mem, newval, oldval, rel, acq) \
-  (abort (), __prev = __cmp = 0)
+  (abort (), __prev = 0, __cmp = 0, (void) __cmp)
 # else
 # define __arch_compare_and_exchange_xxx_64_int(mem, newval, oldval, rel, acq) \
      __asm__ __volatile__ ("\n"						      \
@@ -261,22 +261,22 @@ typedef uintmax_t uatomic_max_t;
 /* For all "bool" routines, we return FALSE if exchange succesful.  */
 
 # define __arch_compare_and_exchange_bool_8_int(mem, new, old, rel, acq) \
-({ typeof (*mem) __prev; int __cmp;					\
+({ typeof (*mem) __prev __attribute__ ((unused)); int __cmp;		\
    __arch_compare_and_exchange_xxx_8_int(mem, new, old, rel, acq);	\
    !__cmp; })
 
 # define __arch_compare_and_exchange_bool_16_int(mem, new, old, rel, acq) \
-({ typeof (*mem) __prev; int __cmp;					\
+({ typeof (*mem) __prev __attribute__ ((unused)); int __cmp;		\
    __arch_compare_and_exchange_xxx_16_int(mem, new, old, rel, acq);	\
    !__cmp; })
 
 # define __arch_compare_and_exchange_bool_32_int(mem, new, old, rel, acq) \
-({ typeof (*mem) __prev; int __cmp;					\
+({ typeof (*mem) __prev __attribute__ ((unused)); int __cmp;		\
    __arch_compare_and_exchange_xxx_32_int(mem, new, old, rel, acq);	\
    !__cmp; })
 
 # define __arch_compare_and_exchange_bool_64_int(mem, new, old, rel, acq) \
-({ typeof (*mem) __prev; int __cmp;					\
+({ typeof (*mem) __prev __attribute__ ((unused)); int __cmp;		\
    __arch_compare_and_exchange_xxx_64_int(mem, new, old, rel, acq);	\
    !__cmp; })
 
