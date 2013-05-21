@@ -1,5 +1,5 @@
 /* Map in a shared object's segments from the file.
-   Copyright (C) 1995-2012 Free Software Foundation, Inc.
+   Copyright (C) 1995-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -1351,7 +1351,8 @@ cannot allocate TLS data structures for initial thread");
 	    && ((size_t) (c->mapend - c->mapstart + c->mapoff)
 		>= header->e_phoff + header->e_phnum * sizeof (ElfW(Phdr))))
 	  /* Found the program header in this segment.  */
-	  l->l_phdr = (void *) (c->mapstart + header->e_phoff - c->mapoff);
+	  l->l_phdr = (void *) (uintptr_t) (c->mapstart + header->e_phoff
+					    - c->mapoff);
 
 	if (c->allocend > c->dataend)
 	  {

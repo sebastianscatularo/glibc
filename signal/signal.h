@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2004,2007,2009,2010,2012 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -73,7 +73,9 @@ typedef __uid_t uid_t;
 /* We need `struct timespec' later on.  */
 # define __need_timespec
 # include <time.h>
+#endif
 
+#if defined __USE_POSIX199309 || defined __USE_XOPEN_EXTENDED
 /* Get the `siginfo_t' type plus the needed symbols.  */
 # include <bits/siginfo.h>
 #endif
