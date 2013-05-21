@@ -101,6 +101,7 @@ force-install = @force_install@
 link-obsolete-rpc = @link_obsolete_rpc@
 build-nscd = @build_nscd@
 use-nscd = @use_nscd@
+build-hardcoded-path-in-tests= @hardcoded_path_in_tests@
 
 # Build tools.
 CC = @CC@
@@ -138,5 +139,11 @@ PERL = @PERL@
 
 # Additional libraries.
 LIBGD = @LIBGD@
+
+# Package versions and bug reporting configuration.
+PKGVERSION = @PKGVERSION@
+PKGVERSION_TEXI = @PKGVERSION_TEXI@
+REPORT_BUGS_TO = @REPORT_BUGS_TO@
+REPORT_BUGS_TEXI = @REPORT_BUGS_TEXI@
 
 # More variables may be inserted below by configure.
