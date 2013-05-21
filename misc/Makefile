@@ -1,4 +1,4 @@
-# Copyright (C) 1991-2007, 2009, 2011, 2012 Free Software Foundation, Inc.
+# Copyright (C) 1991-2013 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -81,6 +81,7 @@ ifeq ($(run-built-tests),yes)
 tests: $(objpfx)tst-error1-mem
 endif
 
+CFLAGS-select.c = -fexceptions -fasynchronous-unwind-tables
 CFLAGS-tsearch.c = $(uses-callbacks)
 CFLAGS-lsearch.c = $(uses-callbacks)
 CFLAGS-pselect.c = -fexceptions
