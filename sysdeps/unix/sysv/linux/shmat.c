@@ -36,21 +36,12 @@ shmat (shmid, shmaddr, shmflg)
 {
   INTERNAL_SYSCALL_DECL(err);
   unsigned long resultvar;
-  void *__unbounded raddr;
-
-#if __BOUNDED_POINTERS__
-  size_t length = ~0;
-  struct shmid_ds shmds;
-  /* It's unfortunate that we need to make another system call to get
-     the shared memory segment length...  */
-  if (shmctl (shmid, IPC_STAT, &shmds) == 0)
-    length = shmds.shm_segsz;
-#endif
+  void *raddr;
 
   resultvar = INTERNAL_SYSCALL (ipc, err, 5, IPCOP_shmat,
 				shmid, shmflg,
-				(long int) __ptrvalue (&raddr),
-				__ptrvalue ((void *) shmaddr));
+				(long int) &raddr,
+				(void *) shmaddr);
   if (INTERNAL_SYSCALL_ERROR_P (resultvar, err))
     {
       __set_errno (INTERNAL_SYSCALL_ERRNO (resultvar, err));
