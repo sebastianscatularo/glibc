@@ -10,7 +10,7 @@ shared-only-routines += libc-aeabi_read_tp
 endif
 
 ifeq ($(subdir),elf)
-sysdep-rtld-routines += aeabi_read_tp
+sysdep-rtld-routines += aeabi_read_tp libc-do-syscall
 endif
 
 ifeq ($(subdir),misc)
@@ -69,9 +69,6 @@ LDFLAGS-tst-rfc3484 += $(common-objpfx)csu/libc-do-syscall.o
 LDFLAGS-tst-rfc3484-2 += $(common-objpfx)csu/libc-do-syscall.o
 LDFLAGS-tst-rfc3484-3 += $(common-objpfx)csu/libc-do-syscall.o
 endif
-
-# Get value of default-abi.
-include $(common-objpfx)default-abi.make
 
 abi-variants := soft hard
 
