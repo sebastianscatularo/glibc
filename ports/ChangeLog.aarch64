@@ -1,3 +1,40 @@
+2013-05-23  Venkataranmanan Kumar  <venkataramanan.kumar@linaro.org>
+
+	* sysdeps/aarch64/machine-gmon.h: Remove.
+
+2013-05-22  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/aarch64/libm-test-ulps: Update test names.
+
+2013-05-21  Andreas Schwab  <schwab@suse.de>
+
+	[BZ #15493]
+	* sysdeps/aarch64/setjmp.S (__sigsetjmp): Don't clobber register
+	x1.
+	[NOT_IN_libc && IS_IN_rtld]: Don't call __sigjmp_save.
+
+2013-05-21  Marcus Shawcroft  <marcus.shawcroft@linaro.org>
+
+	* sysdeps/aarch64/libm-test-ulps: Regenerate.
+
+2013-05-19  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/aarch64/libm-test-ulps: Update names of sincos tests.
+
+2013-05-16  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	[BZ #15442]
+	* sysdeps/aarch64/soft-fp/sfp-machine.h (_FP_QNANNEGATEDP): New
+	macro.
+
+2013-05-12  Marcus Shawcroft  <marcus.shawcroft@linaro.org>
+
+	* sysdeps/unix/sysv/linux/aarch64/clone.S (__clone):
+	Do not call sycall_error directly with a confitional branch.
+
+	* sysdeps/unix/sysv/linux/aarch64/ioctl.S (__ioctl):
+	Do not call sycall_error directly with a confitional branch.
+
 2013-03-19  Andreas Schwab  <schwab@suse.de>
 
 	* sysdeps/unix/sysv/linux/aarch64/configure.in: Set
