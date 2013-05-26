@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -15,17 +15,24 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
-#include <fcntl.h>
-#include <stdio.h>
+/* Testcase for BZ #15014 */
 
+#include <stdlib.h>
+#include <netdb.h>
+#include <errno.h>
 
-int
-__open64_2 (file, oflag)
-     const char *file;
-     int oflag;
+static int
+do_test (void)
 {
-  if (oflag & O_CREAT)
-    __fortify_fail ("invalid open64 call: O_CREAT without mode");
+  char buf[32];
+  struct hostent *result = NULL;
+  struct hostent ret;
+  int h_err = 0;
+  int err;
 
-  return __open64 (file, oflag);
+  err = gethostbyname_r ("1.2.3.4", &ret, buf, sizeof (buf), &result, &h_err);
+  return err == ERANGE && h_err == NETDB_INTERNAL ? EXIT_SUCCESS : EXIT_FAILURE;
 }
+
+#define TEST_FUNCTION do_test ()
+#include "../test-skeleton.c"
