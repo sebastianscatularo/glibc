@@ -1,3 +1,62 @@
+2013-05-22  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* sysdeps/unix/sysv/linux/mips/bits/siginfo.h (siginfo_t): Add
+	si_addr_lsb to _sifields.sifault.
+	(si_addr_lsb): Define new macro.
+	(BUS_MCEERR_AR, BUS_MCEERR_AO): Define new values.
+
+2013-05-22  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/mips/mips32/libm-test-ulps: Update test names.
+	* sysdeps/mips/mips64/libm-test-ulps: Likewise.
+
+2013-05-21  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #15506]
+	* sysdeps/unix/sysv/linux/mips/mips64/nptl/sysdep-cancel.h
+	[!__PIC__] (PSEUDO): Undefine and redefine.
+	(PSEUDO_END): Undefine and redefine unconditionally.
+	[!__PIC__] (STK_PAD): Define to 0.
+	[!__PIC__] (STKOFF_GP): Do not define.
+	[!__PIC__] (STKSPACE): Define to (STKOFF_SVMSK + SZREG).
+	(PSEUDO_JMP): Define depending on [__PIC__].
+	(CENABLE): Use PSEUDO_JMP in all definitions.
+	(CDISABLE): Likewise.
+	* sysdeps/unix/sysv/linux/mips/mips64/n32/sysdep.h
+	(SYSCALL_ERROR_LABEL): Define unconditionally.
+	* sysdeps/unix/sysv/linux/mips/mips64/n64/sysdep.h
+	(SYSCALL_ERROR_LABEL): Define unconditionally.
+
+2013-05-19  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/mips/mips32/libm-test-ulps: Update names of sincos
+	tests.
+	* sysdeps/mips/mips64/libm-test-ulps: Likewise.
+
+2013-05-16  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	[BZ #15442]
+	* sysdeps/mips/mips64/soft-fp/sfp-machine.h (_FP_QNANNEGATEDP):
+	New macro.
+	(_FP_NANFRAC_S): Don't set the quiet bit.
+	(_FP_NANFRAC_D): Likewise.
+	(_FP_NANFRAC_Q): Likewise.
+	* sysdeps/mips/soft-fp/sfp-machine.h (_FP_QNANNEGATEDP): New
+	macro.
+	(_FP_NANFRAC_S): Don't set the quiet bit.
+	(_FP_NANFRAC_D): Likewise.
+	(_FP_NANFRAC_Q): Likewise.
+
+2013-05-16  Ryan S. Arnold  <rsa@linux.vnet.ibm.com>
+
+	* sysdeps/unix/sysv/linux/mips/kernel_rt_sigframe.h: Add missing
+	#include <stdint.h> due to uint64_t or uint32_t usage.
+	* sysdeps/mips/bits/atomic.h: Likewise.
+
+2013-04-02  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* sysdeps/mips/math_private.h: New file.
+
 2013-03-20  Joseph Myers  <joseph@codesourcery.com>
 
 	* sysdeps/unix/sysv/linux/mips/configure.in (default-abi): Set
