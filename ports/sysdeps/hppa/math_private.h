@@ -1,4 +1,5 @@
-/* Copyright (C) 2007-2013 Free Software Foundation, Inc.
+/* Internal math stuff.  HPPA version.
+   Copyright (C) 2013 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -15,17 +16,12 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
-#include <fcntl.h>
-#include <stdio.h>
+#ifndef _MATH_PRIVATE_H
 
+/* One of the few architectures where the meaning of the quiet/signaling bit is
+   inverse to IEEE 754-2008 (as well as common practice for IEEE 754-1985).  */
+#define HIGH_ORDER_BIT_IS_SET_FOR_SNAN
 
-int
-__open_2 (file, oflag)
-     const char *file;
-     int oflag;
-{
-  if (oflag & O_CREAT)
-    __fortify_fail ("invalid open call: O_CREAT without mode");
+#include_next <math_private.h>
 
-  return __open (file, oflag);
-}
+#endif
