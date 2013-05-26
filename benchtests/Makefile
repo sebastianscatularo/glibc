@@ -17,43 +17,133 @@
 
 
 # Makefile for benchmark tests.  The only useful target here is `bench`.
-
-# Adding a new function `foo`:
-# ---------------------------
-
-# - Append the function name to the bench variable
-
-# - Define foo-ITER with the number of iterations you want to run.  Keep it
-#   high enough that the overhead of clock_gettime is only a small fraction of
-#   the total run time of the test.
-
-# - Define foo-ARGLIST as a colon separated list of types of the input
-#   arguments.  Use `void` if function does not take any inputs.  Put in quotes
-#   if the input argument is a pointer, e.g.:
-
-#      malloc-ARGLIST: "void *"
-
-# - Define foo-RET as the type the function returns.  Skip if the function
-#   returns void.  One could even skip foo-ARGLIST if the function does not
-#   take any inputs AND the function returns void.
-
-
-# - Make a file called `foo-inputs` with one input value per line, an input
-#   being a comma separated list of arguments to be passed into the function.
-#   See pow-inputs for an example.
+# Add benchmark functions in alphabetical order.
 
 subdir := benchtests
-bench := exp pow
+bench := acos acosh asin asinh atan atanh cos cosh exp log modf pow rint sin \
+	 sinh tan tanh
 
-exp-ITER = 100000
+acos-ARGLIST = double
+acos-RET = double
+LDFLAGS-bench-acos = -lm
+
+acosh-ARGLIST = double
+acosh-RET = double
+LDFLAGS-bench-acosh = -lm
+
+asin-ARGLIST = double
+asin-RET = double
+LDFLAGS-bench-asin = -lm
+
+asinh-ARGLIST = double
+asinh-RET = double
+LDFLAGS-bench-asinh = -lm
+
+atan-ARGLIST = double
+atan-RET = double
+LDFLAGS-bench-atan = -lm
+
+atanh-ARGLIST = double
+atanh-RET = double
+LDFLAGS-bench-atanh = -lm
+
+cos-ARGLIST = double
+cos-RET = double
+LDFLAGS-bench-cos = -lm
+
+cosh-ARGLIST = double
+cosh-RET = double
+LDFLAGS-bench-cosh = -lm
+
 exp-ARGLIST = double
 exp-RET = double
 LDFLAGS-bench-exp = -lm
 
-pow-ITER = 100000
+log-ARGLIST = double
+log-RET = double
+LDFLAGS-bench-log = -lm
+
 pow-ARGLIST = double:double
 pow-RET = double
 LDFLAGS-bench-pow = -lm
 
+rint-ARGLIST = double
+rint-RET = double
+LDFLAGS-bench-rint = -lm
+
+sin-ARGLIST = double
+sin-RET = double
+LDFLAGS-bench-sin = -lm
+
+sinh-ARGLIST = double
+sinh-RET = double
+LDFLAGS-bench-sinh = -lm
+
+tan-ARGLIST = double
+tan-RET = double
+LDFLAGS-bench-tan = -lm
+
+tanh-ARGLIST = double
+tanh-RET = double
+LDFLAGS-bench-tanh = -lm
+
+
+
+# Rules to build and execute the benchmarks.  Do not put any benchmark
+# parameters beyond this point.
+
 include ../Makeconfig
 include ../Rules
+
+binaries-bench := $(addprefix $(objpfx)bench-,$(bench))
+
+# The default duration: 10 seconds.
+ifndef BENCH_DURATION
+BENCH_DURATION := 10
+endif
+
+CPPFLAGS-nonlib = -DDURATION=$(BENCH_DURATION)
+
+# Use clock_gettime to measure performance of functions.  The default is to use
+# HP_TIMING if it is available.
+ifdef USE_CLOCK_GETTIME
+CPPFLAGS-nonlib += -DUSE_CLOCK_GETTIME
+endif
+
+# This makes sure CPPFLAGS-nonlib and CFLAGS-nonlib are passed
+# for all these modules.
+cpp-srcs-left := $(binaries-bench:=.c)
+lib := nonlib
+include $(patsubst %,$(..)cppflags-iterator.mk,$(cpp-srcs-left))
+
+bench-deps := bench-skeleton.c bench-timing.h Makefile
+
+run-bench = $(test-wrapper-env) \
+	    GCONV_PATH=$(common-objpfx)iconvdata LC_ALL=C \
+	    $($*-ENV) $(rtld-prefix) $${run}
+
+bench-clean:
+	rm -f $(binaries-bench) $(addsuffix .o,$(binaries-bench))
+
+bench: $(binaries-bench)
+	{ for run in $^; do \
+	  echo "Running $${run}" >&2; \
+	  $(run-bench); \
+	done; } > $(objpfx)bench.out-tmp; \
+	if [ -f $(objpfx)bench.out ]; then \
+	  mv -f $(objpfx)bench.out $(objpfx)bench.out.old; \
+	fi; \
+	mv -f $(objpfx)bench.out-tmp $(objpfx)bench.out
+
+$(binaries-bench): %: %.o \
+  $(sort $(filter $(common-objpfx)lib%,$(link-libc))) \
+  $(addprefix $(csu-objpfx),start.o) $(+preinit) $(+postinit)
+	$(+link)
+
+$(objpfx)bench-%.c: %-inputs $(bench-deps)
+	{ if [ -n "$($*-INCLUDE)" ]; then \
+	  cat $($*-INCLUDE); \
+	fi; \
+	$(..)scripts/bench.pl $(patsubst %-inputs,%,$<) \
+	  $($*-ARGLIST) $($*-RET); } > $@-tmp
+	mv -f $@-tmp $@
