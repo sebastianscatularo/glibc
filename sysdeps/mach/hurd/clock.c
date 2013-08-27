@@ -44,10 +44,10 @@ clock (void)
   if (err)
     return __hurd_fail (err);
 
-  total = bi.user_time.seconds * 1000000 + bi.user_time.microseconds;
-  total += tti.user_time.seconds * 1000000 + tti.user_time.microseconds;
-  total += bi.system_time.seconds * 1000000 + bi.system_time.microseconds;
-  total += tti.system_time.seconds * 1000000 + tti.system_time.microseconds;
+  total = bi.user_time.seconds * 100 + bi.user_time.microseconds / 10000;
+  total += tti.user_time.seconds * 100 + tti.user_time.microseconds / 10000;
+  total += bi.system_time.seconds * 100 + bi.system_time.microseconds / 10000;
+  total += tti.system_time.seconds * 100 + tti.system_time.microseconds / 10000;
 
   return total;
 }
