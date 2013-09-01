@@ -722,8 +722,8 @@ cannot create read-only descriptor for \"%s\"; no mmap"),
 cannot create read-only descriptor for \"%s\"; no mmap"),
 			   dbs[cnt].db_filename);
 
-		/* Before we create the header, initialiye the hash
-		   table.  So that if we get interrupted if writing
+		/* Before we create the header, initialize the hash
+		   table.  That way if we get interrupted while writing
 		   the header we can recognize a partially initialized
 		   database.  */
 		size_t ps = sysconf (_SC_PAGESIZE);
@@ -1779,7 +1779,7 @@ nscd_run_worker (void *p)
       else
 	{
 	  /* Get the key.  */
-	  char keybuf[MAXKEYLEN];
+	  char keybuf[MAXKEYLEN + 1];
 
 	  if (__builtin_expect (TEMP_FAILURE_RETRY (read (fd, keybuf,
 							  req.key_len))
@@ -1791,6 +1791,7 @@ nscd_run_worker (void *p)
 			 strerror_r (errno, buf, sizeof (buf)));
 	      goto close_and_out;
 	    }
+	  keybuf[req.key_len] = '\0';
 
 	  if (__builtin_expect (debug_level, 0) > 0)
 	    {
