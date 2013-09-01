@@ -1,3 +1,111 @@
+2013-08-30   Ondřej Bílka  <neleai@seznam.cz>
+
+	* sysdeps/mips/memcpy.S: Fix then/than typos.
+
+2013-08-30   Ondřej Bílka  <neleai@seznam.cz>
+
+	* sysdeps/mips/memcpy.S: Fix typos.
+
+2013-08-29  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/mips/ldsodefs.h (VALID_ELF_ABIVERSION):
+	Use ELFOSABI_GNU instead of ELFOSABI_LINUX.
+
+2013-08-29   Ondřej Bílka  <neleai@seznam.cz>
+
+	* sysdeps/mips/sys/asm.h: Fix typos.
+
+2013-08-22  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* sysdeps/mips/fpu_control.h: Document bits reserved for
+	architecture implementers.
+	(_FPU_RESERVED): Clear bit #21.
+	* sysdeps/mips/fpu/fedisblxcpt.c (fedisableexcept): Don't clear
+	reserved bits.
+	* sysdeps/mips/fpu/feenablxcpt.c (feenableexcept): Likewise.
+
+2013-07-02  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/mips/mips32/libm-test-ulps: Regenerated.
+	* sysdeps/mips/mips64/libm-test-ulps: Likewise.
+
+	[BZ #13304]
+	* sysdeps/mips/ieee754/s_fma.c: New file.
+	* sysdeps/mips/ieee754/s_fmaf.c: Likewise.
+	* sysdeps/mips/ieee754/s_fmal.c: Likewise.
+	* sysdeps/mips/mips32/Implies: Add mips/soft-fp.
+	* sysdeps/mips/mips64/n32/s_fma.c: Remove file.
+	* sysdeps/mips/mips64/n64/s_fma.c: Likewise.
+	* sysdeps/mips/mips64/soft-fp/sfp-machine.h (_FP_MUL_MEAT_DW_S):
+	New macro.
+	(_FP_MUL_MEAT_DW_D): Likewise.
+	(_FP_MUL_MEAT_DW_Q): Likewise.
+	* sysdeps/mips/soft-fp/sfp-machine.h (_FP_MUL_MEAT_DW_S): New
+	macro.
+	(_FP_MUL_MEAT_DW_D): Likewise.
+	(_FP_MUL_MEAT_DW_Q): Likewise.
+
+2013-06-28  Ryan S. Arnold  <rsa@linux.vnet.ibm.com>
+
+	* sysdeps/mips/dl-procinfo.h (_dl_procinfo): Add TYPE parameter
+	to macro prototype for AT_HWCAP2 support.
+
+2013-06-27  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/mips/dl-static.c: Do not include
+	<bits/libc-lock.h>.
+	(_dl_static_lock): Remove variable.
+	(_dl_static_init): Remove _dl_static_lock locking.
+
+2013-06-15  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* sysdeps/unix/sysv/linux/mips/mips32/nptl/libpthread.abilist:
+	Update.
+	* sysdeps/unix/sysv/linux/mips/mips64/n32/nptl/libpthread.abilist:
+	Likewise.
+	* sysdeps/unix/sysv/linux/mips/mips64/n64/nptl/libpthread.abilist:
+	Likewise.
+
+2013-06-14  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #14909]
+	* sysdeps/mips/bits/setjmp.h (struct __jmp_buf_internal_tag):
+	Rename __fpc_csr field to __glibc_reserved1.
+	* sysdeps/mips/setjmp_aux.c (__sigsetjmp_aux) [__mips_hard_float]:
+	Do not set __fpc_csr.
+	* sysdeps/mips/mips64/setjmp_aux.c (__sigsetjmp_aux)
+	[__mips_hard_float]: Likewise.
+	* sysdeps/mips/__longjmp.c (____longjmp) [__mips_hard_float]: Do
+	not use __fpc_csr.
+	* sysdeps/mips/mips64/__longjmp.c (__longjmp) [__mips_hard_float]:
+	Likewise.
+
+	* sysdeps/mips/math-tests.h: New file.
+
+2013-06-05  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/mips/fpu/fgetexcptflg.c: Remove trailing whitespace.
+	* sysdeps/mips/fpu/fraiseexcpt.c: Likewise.
+	* sysdeps/mips/memset.S: Likewise.
+	* sysdeps/mips/mips64/bsd-_setjmp.S: Likewise.
+	* sysdeps/mips/mips64/bsd-setjmp.S: Likewise.
+	* sysdeps/mips/mips64/memset.S: Likewise.
+	* sysdeps/mips/mips64/setjmp.S: Likewise.
+	* sysdeps/mips/start.S: Likewise.
+	* sysdeps/unix/mips/sysdep.S: Likewise.
+	* sysdeps/unix/sysv/linux/mips/dl-static.c: Likewise.
+	* sysdeps/unix/sysv/linux/mips/nptl/lowlevellock.h: Likewise.
+
+2013-05-29  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	[BZ #15465]
+	* sysdeps/mips/dl-lookup.c (do_lookup_x): Use DSO_FILENAME.
+	(add_dependency): Likewise.
+	(_dl_lookup_symbol_x): Likewise.
+	(_dl_debug_bindings): Likewise.
+	* sysdeps/mips/dl-machine.h (elf_machine_reloc): Use
+	RTLD_PROGNAME.
+
 2013-05-22  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 
 	* sysdeps/unix/sysv/linux/mips/bits/siginfo.h (siginfo_t): Add
@@ -79,8 +187,8 @@
 	* sysdeps/unix/sysv/linux/mips/bits/msq.h (MSG_COPY): Define.
 
 2013-02-27  Chung-Lin Tang  <cltang@codesourcery.com>
-            Maciej W. Rozycki  <macro@codesourcery.com>
-            Maxim Kuvyrkov  <maxim@codesourcery.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
+	    Maxim Kuvyrkov  <maxim@codesourcery.com>
 
 	* sysdeps/mips/abort-instr.h (ABORT_INSTRUCTION) [__mips16]:
 	New macro.
@@ -541,7 +649,7 @@
 
 2012-11-06  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
-        * sysdeps/mips/memmove.c: New file.  Use memcpy for forward memmove.
+	* sysdeps/mips/memmove.c: New file.  Use memcpy for forward memmove.
 
 2012-11-05  Joseph Myers  <joseph@codesourcery.com>
 
@@ -693,14 +801,14 @@
 
 2012-08-13  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
-        [__GNUC_PREREQ (4, 8)]
-        (atomic_exchange_and_add): Split into ...
-        (atomic_exchange_and_add_acq, atomic_exchange_and_add_rel): ... these.
-        New atomic macros.
-        [!__GNUC_PREREQ (4, 8)]
-        (atomic_exchange_and_add): Split into ...
-        (atomic_exchange_and_add_acq, atomic_exchange_and_add_rel): ... these.
-        New atomic macros.
+	[__GNUC_PREREQ (4, 8)]
+	(atomic_exchange_and_add): Split into ...
+	(atomic_exchange_and_add_acq, atomic_exchange_and_add_rel): ... these.
+	New atomic macros.
+	[!__GNUC_PREREQ (4, 8)]
+	(atomic_exchange_and_add): Split into ...
+	(atomic_exchange_and_add_acq, atomic_exchange_and_add_rel): ... these.
+	New atomic macros.
 
 2012-08-09  Joseph Myers  <joseph@codesourcery.com>
 
@@ -762,21 +870,21 @@
 	Likewise.
 
 2012-07-11  Tom de Vries  <vries@codesourcery.com>
-            Maxim Kuvyrkov  <maxim@codesourcery.com>
+	    Maxim Kuvyrkov  <maxim@codesourcery.com>
 
-        * sysdeps/mips/bits/atomic.h [__GNUC_PREREQ (4, 8)]
-        (__arch_compare_and_exchange_bool_32_int)
-        (__arch_compare_and_exchange_val_32_int)
-        (__arch_compare_and_exchange_bool_64_int)
-        (__arch_compare_and_exchange_val_64_int)
-        Define in terms of __atomic_compare_exchange_n.
-        [__GNUC_PREREQ (4, 8)]
-        (__arch_exchange_32_int, __arch_exchange_64_int):
-        Define in terms of __atomic_exchange_n.
-        [__GNUC_PREREQ (4, 8)]
-        (__arch_exchange_and_add_32_int, __arch_exchange_and_add_64_int):
-        Define in terms of __atomic_fetch_add.
-        [!__GNUC_PREREQ (4, 8)]: Update formatting.
+	* sysdeps/mips/bits/atomic.h [__GNUC_PREREQ (4, 8)]
+	(__arch_compare_and_exchange_bool_32_int)
+	(__arch_compare_and_exchange_val_32_int)
+	(__arch_compare_and_exchange_bool_64_int)
+	(__arch_compare_and_exchange_val_64_int)
+	Define in terms of __atomic_compare_exchange_n.
+	[__GNUC_PREREQ (4, 8)]
+	(__arch_exchange_32_int, __arch_exchange_64_int):
+	Define in terms of __atomic_exchange_n.
+	[__GNUC_PREREQ (4, 8)]
+	(__arch_exchange_and_add_32_int, __arch_exchange_and_add_64_int):
+	Define in terms of __atomic_fetch_add.
+	[!__GNUC_PREREQ (4, 8)]: Update formatting.
 
 2012-07-06  Petar Jovanovic  <petar.jovanovic@rt-rk.com>
 
