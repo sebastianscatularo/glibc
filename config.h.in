@@ -69,6 +69,9 @@
 /* Define if the compiler supports __builtin_memset.  */
 #undef	HAVE_BUILTIN_MEMSET
 
+/* Define if compiler accepts -ftree-loop-distribute-patterns.  */
+#undef  HAVE_CC_INHIBIT_LOOP_TO_LIBCALL
+
 /* Define if the regparm attribute shall be used for local functions
    (gcc on ix86 only).  */
 #undef	USE_REGPARMS
@@ -161,6 +164,9 @@
 /* Define if __stack_chk_guard canary should be randomized at program startup.  */
 #undef ENABLE_STACKGUARD_RANDOMIZE
 
+/* Define if lock elision should be enabled by default.  */
+#undef ENABLE_LOCK_ELISION
+
 /* Package description.  */
 #undef PKGVERSION
 
@@ -231,5 +237,8 @@
 
 /* The ARM hard-float ABI is being used.  */
 #undef HAVE_ARM_PCS_VFP
+
+/* The pt_chown binary is being built and used by grantpt.  */
+#undef HAVE_PT_CHOWN
 
 #endif
