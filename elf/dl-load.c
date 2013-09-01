@@ -324,7 +324,7 @@ _dl_dst_substitute (struct link_map *l, const char *name, char *result,
   const char *const start = name;
 
   /* Now fill the result path.  While copying over the string we keep
-     track of the start of the last path element.  When we come accross
+     track of the start of the last path element.  When we come across
      a DST we copy over the value or (if the value is not available)
      leave the entire path element out.  */
   char *wp = result;
@@ -342,13 +342,7 @@ _dl_dst_substitute (struct link_map *l, const char *name, char *result,
 	  if ((len = is_dst (start, name, "ORIGIN", is_path,
 			     INTUSE(__libc_enable_secure))) != 0)
 	    {
-#ifndef SHARED
-	      if (l == NULL)
-		repl = _dl_get_origin ();
-	      else
-#endif
-		repl = l->l_origin;
-
+	      repl = l->l_origin;
 	      check_for_trusted = (INTUSE(__libc_enable_secure)
 				   && l->l_type == lt_executable);
 	    }
@@ -1493,7 +1487,11 @@ cannot allocate TLS data structures for initial thread");
 	  if (__builtin_expect (p + s <= relro_end, 1))
 	    {
 	      /* The variable lies in the region protected by RELRO.  */
-	      __mprotect ((void *) p, s, PROT_READ|PROT_WRITE);
+	      if (__mprotect ((void *) p, s, PROT_READ|PROT_WRITE) < 0)
+		{
+		  errstring = N_("cannot change memory protections");
+		  goto call_lose_errno;
+		}
 	      __stack_prot |= PROT_READ|PROT_WRITE|PROT_EXEC;
 	      __mprotect ((void *) p, s, PROT_READ);
 	    }
@@ -1651,7 +1649,7 @@ print_search_path (struct r_search_path_elem **list,
 
   if (name != NULL)
     _dl_debug_printf_c ("\t\t(%s from file %s)\n", what,
-			name[0] ? name : rtld_progname);
+			DSO_FILENAME (name));
   else
     _dl_debug_printf_c ("\t\t(%s)\n", what);
 }
@@ -2124,8 +2122,7 @@ _dl_map_object (struct link_map *loader, const char *name,
     _dl_debug_printf ((mode & __RTLD_CALLMAP) == 0
 		      ? "\nfile=%s [%lu];  needed by %s [%lu]\n"
 		      : "\nfile=%s [%lu];  dynamically loaded by %s [%lu]\n",
-		      name, nsid, loader->l_name[0]
-		      ? loader->l_name : rtld_progname, loader->l_ns);
+		      name, nsid, DSO_FILENAME (loader->l_name), loader->l_ns);
 
 #ifdef SHARED
   /* Give the auditing libraries a chance to change the name before we
