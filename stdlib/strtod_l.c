@@ -42,11 +42,10 @@ extern unsigned long long int ____strtoull_l_internal (const char *, char **,
 # define SET_MANTISSA(flt, mant) \
   do { union ieee754_double u;						      \
        u.d = (flt);							      \
-       if ((mant & 0xfffffffffffffULL) == 0)				      \
-	 mant = 0x8000000000000ULL;					      \
-       u.ieee.mantissa0 = ((mant) >> 32) & 0xfffff;			      \
-       u.ieee.mantissa1 = (mant) & 0xffffffff;				      \
-       (flt) = u.d;							      \
+       u.ieee_nan.mantissa0 = (mant) >> 32;				      \
+       u.ieee_nan.mantissa1 = (mant);					      \
+       if ((u.ieee.mantissa0 | u.ieee.mantissa1) != 0)			      \
+	 (flt) = u.d;							      \
   } while (0)
 #endif
 /* End of configuration part.  */
@@ -976,7 +975,7 @@ ____STRTOF_INTERNAL (nptr, endptr, group, loc)
 		/* The exponent is too large/small to represent a valid
 		   number.  */
 		{
-	 	  FLOAT result;
+		  FLOAT result;
 
 		  /* We have to take care for special situation: a joker
 		     might have written "0.0e100000" which is in fact
@@ -1175,10 +1174,9 @@ ____STRTOF_INTERNAL (nptr, endptr, group, loc)
      really integer digits or belong to the fractional part; i.e. we normalize
      123e-2 to 1.23.  */
   {
-    register intmax_t incr = (exponent < 0
-			      ? MAX (-(intmax_t) int_no, exponent)
-			      : MIN ((intmax_t) dig_no - (intmax_t) int_no,
-				     exponent));
+    intmax_t incr = (exponent < 0
+		     ? MAX (-(intmax_t) int_no, exponent)
+		     : MIN ((intmax_t) dig_no - (intmax_t) int_no, exponent));
     int_no += incr;
     exponent -= incr;
   }
@@ -1499,7 +1497,7 @@ ____STRTOF_INTERNAL (nptr, endptr, group, loc)
 #define got_limb							      \
 	      if (bits == 0)						      \
 		{							      \
-		  register int cnt;					      \
+		  int cnt;						      \
 		  if (quot == 0)					      \
 		    cnt = BITS_PER_MP_LIMB;				      \
 		  else							      \
@@ -1651,7 +1649,7 @@ ____STRTOF_INTERNAL (nptr, endptr, group, loc)
 	  if (numsize < densize)
 	    {
 	      mp_size_t empty = densize - numsize;
-	      register int i;
+	      int i;
 
 	      if (bits <= 0)
 		exponent -= empty * BITS_PER_MP_LIMB;
@@ -1679,7 +1677,7 @@ ____STRTOF_INTERNAL (nptr, endptr, group, loc)
 		      used = MANT_DIG - bits;
 		      if (used >= BITS_PER_MP_LIMB)
 			{
-			  register int i;
+			  int i;
 			  (void) __mpn_lshift (&retval[used
 						       / BITS_PER_MP_LIMB],
 					       retval,
