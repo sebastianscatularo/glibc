@@ -125,6 +125,7 @@
 #include <string.h>
 #include <argp.h>
 #include <tininess.h>
+#include <math-tests.h>
 
 /* Structure for ulp data for a test, a function, or the real or
    imaginary part of a function.  */
@@ -269,8 +270,8 @@ static FLOAT max_error, real_max_error, imag_max_error;
 
 #define MANT_DIG CHOOSE ((LDBL_MANT_DIG-1), (DBL_MANT_DIG-1), (FLT_MANT_DIG-1),  \
 			 (LDBL_MANT_DIG-1), (DBL_MANT_DIG-1), (FLT_MANT_DIG-1))
-#define MAX_EXP CHOOSE ((LDBL_MAX_EXP-1), (DBL_MAX_EXP-1), (FLT_MAX_EXP-1),	\
-			(LDBL_MAX_EXP-1), (DBL_MAX_EXP-1), (FLT_MAX_EXP-1))
+#define MIN_EXP CHOOSE ((LDBL_MIN_EXP-1), (DBL_MIN_EXP-1), (FLT_MIN_EXP-1),	\
+			(LDBL_MIN_EXP-1), (DBL_MIN_EXP-1), (FLT_MIN_EXP-1))
 
 /* Compare KEY (a string, with the name of a test or a function) with
    ULP (a pointer to a struct ulp_data structure), returning a value
@@ -590,33 +591,37 @@ test_single_exception (const char *test_name,
 static void
 test_exceptions (const char *test_name, int exception)
 {
-  ++noExcTests;
+  if (EXCEPTION_TESTS (FLOAT))
+    {
+      ++noExcTests;
 #ifdef FE_DIVBYZERO
-  if ((exception & DIVIDE_BY_ZERO_EXCEPTION_OK) == 0)
-    test_single_exception (test_name, exception,
-			   DIVIDE_BY_ZERO_EXCEPTION, FE_DIVBYZERO,
-			   "Divide by zero");
+      if ((exception & DIVIDE_BY_ZERO_EXCEPTION_OK) == 0)
+	test_single_exception (test_name, exception,
+			       DIVIDE_BY_ZERO_EXCEPTION, FE_DIVBYZERO,
+			       "Divide by zero");
 #endif
 #ifdef FE_INVALID
-  if ((exception & INVALID_EXCEPTION_OK) == 0)
-    test_single_exception (test_name, exception, INVALID_EXCEPTION, FE_INVALID,
-			 "Invalid operation");
+      if ((exception & INVALID_EXCEPTION_OK) == 0)
+	test_single_exception (test_name, exception,
+			       INVALID_EXCEPTION, FE_INVALID,
+			       "Invalid operation");
 #endif
 #ifdef FE_OVERFLOW
-  if ((exception & OVERFLOW_EXCEPTION_OK) == 0)
-    test_single_exception (test_name, exception, OVERFLOW_EXCEPTION,
-			   FE_OVERFLOW, "Overflow");
+      if ((exception & OVERFLOW_EXCEPTION_OK) == 0)
+	test_single_exception (test_name, exception, OVERFLOW_EXCEPTION,
+			       FE_OVERFLOW, "Overflow");
 #endif
 #ifdef FE_UNDERFLOW
-  if ((exception & UNDERFLOW_EXCEPTION_OK) == 0)
-    test_single_exception (test_name, exception, UNDERFLOW_EXCEPTION,
-			   FE_UNDERFLOW, "Underflow");
+      if ((exception & UNDERFLOW_EXCEPTION_OK) == 0)
+	test_single_exception (test_name, exception, UNDERFLOW_EXCEPTION,
+			       FE_UNDERFLOW, "Underflow");
 #endif
 #ifdef FE_INEXACT
-  if ((exception & (INEXACT_EXCEPTION | NO_INEXACT_EXCEPTION)) != 0)
-    test_single_exception (test_name, exception, INEXACT_EXCEPTION,
-			   FE_INEXACT, "Inexact");
+      if ((exception & (INEXACT_EXCEPTION | NO_INEXACT_EXCEPTION)) != 0)
+	test_single_exception (test_name, exception, INEXACT_EXCEPTION,
+			       FE_INEXACT, "Inexact");
 #endif
+    }
   feclearexcept (FE_ALL_EXCEPT);
 }
 
@@ -680,7 +685,7 @@ ulp (FLOAT value)
 	/* Fall through...  */
       case FP_SUBNORMAL:
         /* The next closest subnormal value is a constant distance away.  */
-	ulp = FUNC(ldexp) (1.0, 1 - (MAX_EXP + MANT_DIG));
+	ulp = FUNC(ldexp) (1.0, MIN_EXP - MANT_DIG);
 	break;
 
       case FP_NORMAL:
@@ -1085,16 +1090,20 @@ struct test_fFF_11_data
 #define IF_ROUND_INIT_	/* Empty.  */
 #define IF_ROUND_INIT_FE_DOWNWARD		\
   int save_round_mode = fegetround ();		\
-  if (fesetround (FE_DOWNWARD) == 0)
+  if (ROUNDING_TESTS (FLOAT, FE_DOWNWARD)	\
+      && fesetround (FE_DOWNWARD) == 0)
 #define IF_ROUND_INIT_FE_TONEAREST		\
   int save_round_mode = fegetround ();		\
-  if (fesetround (FE_TONEAREST) == 0)
+  if (ROUNDING_TESTS (FLOAT, FE_TONEAREST)	\
+      && fesetround (FE_TONEAREST) == 0)
 #define IF_ROUND_INIT_FE_TOWARDZERO		\
   int save_round_mode = fegetround ();		\
-  if (fesetround (FE_TOWARDZERO) == 0)
+  if (ROUNDING_TESTS (FLOAT, FE_TOWARDZERO)	\
+      && fesetround (FE_TOWARDZERO) == 0)
 #define IF_ROUND_INIT_FE_UPWARD			\
   int save_round_mode = fegetround ();		\
-  if (fesetround (FE_UPWARD) == 0)
+  if (ROUNDING_TESTS (FLOAT, FE_UPWARD)		\
+      && fesetround (FE_UPWARD) == 0)
 #define ROUND_RESTORE_	/* Empty.  */
 #define ROUND_RESTORE_FE_DOWNWARD		\
   fesetround (save_round_mode)
@@ -3958,10 +3967,11 @@ static const struct test_c_c_data casin_test_data[] =
     TEST_c_c (casin, -0x1p-63L, 0x1p-63L, -1.084202172485504434007452800869941711422e-19L, 1.084202172485504434007452800869941711430e-19L),
     TEST_c_c (casin, -0x1p-63L, -0x1p-63L, -1.084202172485504434007452800869941711422e-19L, -1.084202172485504434007452800869941711430e-19L),
 #if defined TEST_LDOUBLE && LDBL_MIN_EXP <= -16381
-    TEST_c_c (casin, 0x1.fp-16385L, 0x1p-63L, 8.142593549724601460479922838826119584369e-4933L, 1.084202172485504434007452800869941711424e-19L, UNDERFLOW_EXCEPTION),
-    TEST_c_c (casin, 0x1.fp-16385L, -0x1p-63L, 8.142593549724601460479922838826119584369e-4933L, -1.084202172485504434007452800869941711424e-19L, UNDERFLOW_EXCEPTION),
-    TEST_c_c (casin, -0x1.fp-16385L, 0x1p-63L, -8.142593549724601460479922838826119584369e-4933L, 1.084202172485504434007452800869941711424e-19L, UNDERFLOW_EXCEPTION),
-    TEST_c_c (casin, -0x1.fp-16385L, -0x1p-63L, -8.142593549724601460479922838826119584369e-4933L, -1.084202172485504434007452800869941711424e-19L, UNDERFLOW_EXCEPTION),
+    /* Bug 15319: underflow exception may be missing.  */
+    TEST_c_c (casin, 0x1.fp-16385L, 0x1p-63L, 8.142593549724601460479922838826119584369e-4933L, 1.084202172485504434007452800869941711424e-19L, UNDERFLOW_EXCEPTION_OK),
+    TEST_c_c (casin, 0x1.fp-16385L, -0x1p-63L, 8.142593549724601460479922838826119584369e-4933L, -1.084202172485504434007452800869941711424e-19L, UNDERFLOW_EXCEPTION_OK),
+    TEST_c_c (casin, -0x1.fp-16385L, 0x1p-63L, -8.142593549724601460479922838826119584369e-4933L, 1.084202172485504434007452800869941711424e-19L, UNDERFLOW_EXCEPTION_OK),
+    TEST_c_c (casin, -0x1.fp-16385L, -0x1p-63L, -8.142593549724601460479922838826119584369e-4933L, -1.084202172485504434007452800869941711424e-19L, UNDERFLOW_EXCEPTION_OK),
     TEST_c_c (casin, 0x1p-63L, 0x1.fp-16385L, 1.084202172485504434007452800869941711428e-19L, 8.142593549724601460479922838826119584465e-4933L, UNDERFLOW_EXCEPTION),
     TEST_c_c (casin, -0x1p-63L, 0x1.fp-16385L, -1.084202172485504434007452800869941711428e-19L, 8.142593549724601460479922838826119584465e-4933L, UNDERFLOW_EXCEPTION),
     TEST_c_c (casin, 0x1p-63L, -0x1.fp-16385L, 1.084202172485504434007452800869941711428e-19L, -8.142593549724601460479922838826119584465e-4933L, UNDERFLOW_EXCEPTION),
@@ -4077,10 +4087,11 @@ static const struct test_c_c_data casin_test_data[] =
     TEST_c_c (casin, -0x1p-112L, 0x1p-112L, -1.925929944387235853055977942584927318538e-34L, 1.925929944387235853055977942584927318538e-34L),
     TEST_c_c (casin, -0x1p-112L, -0x1p-112L, -1.925929944387235853055977942584927318538e-34L, -1.925929944387235853055977942584927318538e-34L),
 #if defined TEST_LDOUBLE && LDBL_MIN_EXP <= -16381
-    TEST_c_c (casin, 0x1.fp-16385L, 0x1p-112L, 8.142593549724601460479922838826119584417e-4933L, 1.925929944387235853055977942584927318538e-34L, UNDERFLOW_EXCEPTION),
-    TEST_c_c (casin, 0x1.fp-16385L, -0x1p-112L, 8.142593549724601460479922838826119584417e-4933L, -1.925929944387235853055977942584927318538e-34L, UNDERFLOW_EXCEPTION),
-    TEST_c_c (casin, -0x1.fp-16385L, 0x1p-112L, -8.142593549724601460479922838826119584417e-4933L, 1.925929944387235853055977942584927318538e-34L, UNDERFLOW_EXCEPTION),
-    TEST_c_c (casin, -0x1.fp-16385L, -0x1p-112L, -8.142593549724601460479922838826119584417e-4933L, -1.925929944387235853055977942584927318538e-34L, UNDERFLOW_EXCEPTION),
+    /* Bug 15319: underflow exception may be missing.  */
+    TEST_c_c (casin, 0x1.fp-16385L, 0x1p-112L, 8.142593549724601460479922838826119584417e-4933L, 1.925929944387235853055977942584927318538e-34L, UNDERFLOW_EXCEPTION_OK),
+    TEST_c_c (casin, 0x1.fp-16385L, -0x1p-112L, 8.142593549724601460479922838826119584417e-4933L, -1.925929944387235853055977942584927318538e-34L, UNDERFLOW_EXCEPTION_OK),
+    TEST_c_c (casin, -0x1.fp-16385L, 0x1p-112L, -8.142593549724601460479922838826119584417e-4933L, 1.925929944387235853055977942584927318538e-34L, UNDERFLOW_EXCEPTION_OK),
+    TEST_c_c (casin, -0x1.fp-16385L, -0x1p-112L, -8.142593549724601460479922838826119584417e-4933L, -1.925929944387235853055977942584927318538e-34L, UNDERFLOW_EXCEPTION_OK),
     TEST_c_c (casin, 0x1p-112L, 0x1.fp-16385L, 1.925929944387235853055977942584927318538e-34L, 8.142593549724601460479922838826119584417e-4933L, UNDERFLOW_EXCEPTION),
     TEST_c_c (casin, -0x1p-112L, 0x1.fp-16385L, -1.925929944387235853055977942584927318538e-34L, 8.142593549724601460479922838826119584417e-4933L, UNDERFLOW_EXCEPTION),
     TEST_c_c (casin, 0x1p-112L, -0x1.fp-16385L, 1.925929944387235853055977942584927318538e-34L, -8.142593549724601460479922838826119584417e-4933L, UNDERFLOW_EXCEPTION),
@@ -4657,10 +4668,11 @@ static const struct test_c_c_data casinh_test_data[] =
     TEST_c_c (casinh, 0x1.fp-16385L, -0x1p-63L, 8.142593549724601460479922838826119584465e-4933L, -1.084202172485504434007452800869941711428e-19L, UNDERFLOW_EXCEPTION),
     TEST_c_c (casinh, -0x1.fp-16385L, 0x1p-63L, -8.142593549724601460479922838826119584465e-4933L, 1.084202172485504434007452800869941711428e-19L, UNDERFLOW_EXCEPTION),
     TEST_c_c (casinh, -0x1.fp-16385L, -0x1p-63L, -8.142593549724601460479922838826119584465e-4933L, -1.084202172485504434007452800869941711428e-19L, UNDERFLOW_EXCEPTION),
-    TEST_c_c (casinh, 0x1p-63L, 0x1.fp-16385L, 1.084202172485504434007452800869941711424e-19L, 8.142593549724601460479922838826119584369e-4933L, UNDERFLOW_EXCEPTION),
-    TEST_c_c (casinh, -0x1p-63L, 0x1.fp-16385L, -1.084202172485504434007452800869941711424e-19L, 8.142593549724601460479922838826119584369e-4933L, UNDERFLOW_EXCEPTION),
-    TEST_c_c (casinh, 0x1p-63L, -0x1.fp-16385L, 1.084202172485504434007452800869941711424e-19L, -8.142593549724601460479922838826119584369e-4933L, UNDERFLOW_EXCEPTION),
-    TEST_c_c (casinh, -0x1p-63L, -0x1.fp-16385L, -1.084202172485504434007452800869941711424e-19L, -8.142593549724601460479922838826119584369e-4933L, UNDERFLOW_EXCEPTION),
+    /* Bug 15319: underflow exception may be missing.  */
+    TEST_c_c (casinh, 0x1p-63L, 0x1.fp-16385L, 1.084202172485504434007452800869941711424e-19L, 8.142593549724601460479922838826119584369e-4933L, UNDERFLOW_EXCEPTION_OK),
+    TEST_c_c (casinh, -0x1p-63L, 0x1.fp-16385L, -1.084202172485504434007452800869941711424e-19L, 8.142593549724601460479922838826119584369e-4933L, UNDERFLOW_EXCEPTION_OK),
+    TEST_c_c (casinh, 0x1p-63L, -0x1.fp-16385L, 1.084202172485504434007452800869941711424e-19L, -8.142593549724601460479922838826119584369e-4933L, UNDERFLOW_EXCEPTION_OK),
+    TEST_c_c (casinh, -0x1p-63L, -0x1.fp-16385L, -1.084202172485504434007452800869941711424e-19L, -8.142593549724601460479922838826119584369e-4933L, UNDERFLOW_EXCEPTION_OK),
 #endif
     TEST_c_c (casinh, 0.0L, 0x1p-63L, 0.0L, 1.084202172485504434007452800869941711428e-19L),
     TEST_c_c (casinh, 0.0L, -0x1p-63L, 0.0L, -1.084202172485504434007452800869941711428e-19L),
@@ -4776,10 +4788,11 @@ static const struct test_c_c_data casinh_test_data[] =
     TEST_c_c (casinh, 0x1.fp-16385L, -0x1p-112L, 8.142593549724601460479922838826119584417e-4933L, -1.925929944387235853055977942584927318538e-34L, UNDERFLOW_EXCEPTION),
     TEST_c_c (casinh, -0x1.fp-16385L, 0x1p-112L, -8.142593549724601460479922838826119584417e-4933L, 1.925929944387235853055977942584927318538e-34L, UNDERFLOW_EXCEPTION),
     TEST_c_c (casinh, -0x1.fp-16385L, -0x1p-112L, -8.142593549724601460479922838826119584417e-4933L, -1.925929944387235853055977942584927318538e-34L, UNDERFLOW_EXCEPTION),
-    TEST_c_c (casinh, 0x1p-112L, 0x1.fp-16385L, 1.925929944387235853055977942584927318538e-34L, 8.142593549724601460479922838826119584417e-4933L, UNDERFLOW_EXCEPTION),
-    TEST_c_c (casinh, -0x1p-112L, 0x1.fp-16385L, -1.925929944387235853055977942584927318538e-34L, 8.142593549724601460479922838826119584417e-4933L, UNDERFLOW_EXCEPTION),
-    TEST_c_c (casinh, 0x1p-112L, -0x1.fp-16385L, 1.925929944387235853055977942584927318538e-34L, -8.142593549724601460479922838826119584417e-4933L, UNDERFLOW_EXCEPTION),
-    TEST_c_c (casinh, -0x1p-112L, -0x1.fp-16385L, -1.925929944387235853055977942584927318538e-34L, -8.142593549724601460479922838826119584417e-4933L, UNDERFLOW_EXCEPTION),
+    /* Bug 15319: underflow exception may be missing.  */
+    TEST_c_c (casinh, 0x1p-112L, 0x1.fp-16385L, 1.925929944387235853055977942584927318538e-34L, 8.142593549724601460479922838826119584417e-4933L, UNDERFLOW_EXCEPTION_OK),
+    TEST_c_c (casinh, -0x1p-112L, 0x1.fp-16385L, -1.925929944387235853055977942584927318538e-34L, 8.142593549724601460479922838826119584417e-4933L, UNDERFLOW_EXCEPTION_OK),
+    TEST_c_c (casinh, 0x1p-112L, -0x1.fp-16385L, 1.925929944387235853055977942584927318538e-34L, -8.142593549724601460479922838826119584417e-4933L, UNDERFLOW_EXCEPTION_OK),
+    TEST_c_c (casinh, -0x1p-112L, -0x1.fp-16385L, -1.925929944387235853055977942584927318538e-34L, -8.142593549724601460479922838826119584417e-4933L, UNDERFLOW_EXCEPTION_OK),
 #endif
     TEST_c_c (casinh, 0.0L, 0x1p-112L, 0.0L, 1.925929944387235853055977942584927318538e-34L),
     TEST_c_c (casinh, 0.0L, -0x1p-112L, 0.0L, -1.925929944387235853055977942584927318538e-34L),
@@ -5832,6 +5845,11 @@ static const struct test_f_f_data cbrt_test_data[] =
     TEST_f_f (cbrt, -27.0, -3.0),
     TEST_f_f (cbrt, 0.9921875L, 0.997389022060725270579075195353955217L),
     TEST_f_f (cbrt, 0.75L, 0.908560296416069829445605878163630251L),
+
+#if defined TEST_LDOUBLE && LDBL_MAX_EXP >= 16384
+    TEST_f_f (cbrt, 0x1p16383L, 0x1p5461L),
+    TEST_f_f (cbrt, 0x1p-16383L, 0x1p-5461L),
+#endif
   };
 
 static void
@@ -6180,7 +6198,8 @@ static const struct test_c_c_data cexp_test_data[] =
 
     TEST_c_c (cexp, plus_infty, qnan_value, plus_infty, qnan_value),
 
-    TEST_c_c (cexp, qnan_value, 0.0, qnan_value, qnan_value, INVALID_EXCEPTION_OK),
+    TEST_c_c (cexp, qnan_value, 0.0, qnan_value, 0.0),
+    TEST_c_c (cexp, qnan_value, minus_zero, qnan_value, minus_zero),
     TEST_c_c (cexp, qnan_value, 1.0, qnan_value, qnan_value, INVALID_EXCEPTION_OK),
 
     TEST_c_c (cexp, qnan_value, plus_infty, qnan_value, qnan_value, INVALID_EXCEPTION_OK),
@@ -7048,10 +7067,50 @@ static const struct test_c_c_data cproj_test_data[] =
 
     TEST_c_c (cproj, qnan_value, qnan_value, qnan_value, qnan_value, NO_INEXACT_EXCEPTION),
 
+    TEST_c_c (cproj, plus_zero, qnan_value, plus_zero, qnan_value, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, minus_zero, qnan_value, minus_zero, qnan_value, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, qnan_value, plus_zero, qnan_value, plus_zero, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, qnan_value, minus_zero, qnan_value, minus_zero, NO_INEXACT_EXCEPTION),
+
+    TEST_c_c (cproj, 1.0, qnan_value, 1.0, qnan_value, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, -1.0, qnan_value, -1.0, qnan_value, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, qnan_value, 1.0, qnan_value, 1.0, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, qnan_value, -1.0, qnan_value, -1.0, NO_INEXACT_EXCEPTION),
+
     TEST_c_c (cproj, plus_infty, plus_infty, plus_infty, 0.0, NO_INEXACT_EXCEPTION),
     TEST_c_c (cproj, plus_infty, minus_infty, plus_infty, minus_zero, NO_INEXACT_EXCEPTION),
     TEST_c_c (cproj, minus_infty, plus_infty, plus_infty, 0.0, NO_INEXACT_EXCEPTION),
     TEST_c_c (cproj, minus_infty, minus_infty, plus_infty, minus_zero, NO_INEXACT_EXCEPTION),
+
+    TEST_c_c (cproj, plus_infty, plus_zero, plus_infty, 0.0, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, plus_infty, minus_zero, plus_infty, minus_zero, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, minus_infty, plus_zero, plus_infty, 0.0, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, minus_infty, minus_zero, plus_infty, minus_zero, NO_INEXACT_EXCEPTION),
+
+    TEST_c_c (cproj, plus_zero, plus_infty, plus_infty, 0.0, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, plus_zero, minus_infty, plus_infty, minus_zero, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, minus_zero, plus_infty, plus_infty, 0.0, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, minus_zero, minus_infty, plus_infty, minus_zero, NO_INEXACT_EXCEPTION),
+
+    TEST_c_c (cproj, plus_infty, 1.0, plus_infty, 0.0, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, plus_infty, -1.0, plus_infty, minus_zero, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, minus_infty, 1.0, plus_infty, 0.0, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, minus_infty, -1.0, plus_infty, minus_zero, NO_INEXACT_EXCEPTION),
+
+    TEST_c_c (cproj, 1.0, plus_infty, plus_infty, 0.0, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, 1.0, minus_infty, plus_infty, minus_zero, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, -1.0, plus_infty, plus_infty, 0.0, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, -1.0, minus_infty, plus_infty, minus_zero, NO_INEXACT_EXCEPTION),
+
+    TEST_c_c (cproj, plus_infty, qnan_value, plus_infty, 0.0, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, plus_infty, -qnan_value, plus_infty, minus_zero, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, minus_infty, qnan_value, plus_infty, 0.0, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, minus_infty, -qnan_value, plus_infty, minus_zero, NO_INEXACT_EXCEPTION),
+
+    TEST_c_c (cproj, qnan_value, plus_infty, plus_infty, 0.0, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, qnan_value, minus_infty, plus_infty, minus_zero, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, -qnan_value, plus_infty, plus_infty, 0.0, NO_INEXACT_EXCEPTION),
+    TEST_c_c (cproj, -qnan_value, minus_infty, plus_infty, minus_zero, NO_INEXACT_EXCEPTION),
 
     TEST_c_c (cproj, 1.0, 0.0, 1.0, 0.0, NO_INEXACT_EXCEPTION),
     TEST_c_c (cproj, 2.0, 3.0, 2.0, 3.0, NO_INEXACT_EXCEPTION),
@@ -8086,33 +8145,37 @@ fabs_test (void)
 
 static const struct test_ff_f_data fdim_test_data[] =
   {
-    TEST_ff_f (fdim, 0, 0, 0, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, 9, 0, 9, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, 0, 9, 0, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, -9, 0, 0, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, 0, -9, 9, NO_INEXACT_EXCEPTION),
+    TEST_ff_f (fdim, 0, 0, 0, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, 9, 0, 9, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, 0, 9, 0, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, -9, 0, 0, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, 0, -9, 9, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
 
-    TEST_ff_f (fdim, plus_infty, 9, plus_infty, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, plus_infty, -9, plus_infty, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, minus_infty, 9, 0, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, minus_infty, -9, 0, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, 9, minus_infty, plus_infty, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, -9, minus_infty, plus_infty, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, 9, plus_infty, 0, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, -9, plus_infty, 0, NO_INEXACT_EXCEPTION),
+    TEST_ff_f (fdim, plus_infty, 9, plus_infty, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, plus_infty, -9, plus_infty, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, minus_infty, 9, 0, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, minus_infty, -9, 0, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, 9, minus_infty, plus_infty, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, -9, minus_infty, plus_infty, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, 9, plus_infty, 0, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, -9, plus_infty, 0, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
 
-    TEST_ff_f (fdim, 0, qnan_value, qnan_value, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, 9, qnan_value, qnan_value, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, -9, qnan_value, qnan_value, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, qnan_value, 9, qnan_value, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, qnan_value, -9, qnan_value, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, plus_infty, qnan_value, qnan_value, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, minus_infty, qnan_value, qnan_value, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, qnan_value, plus_infty, qnan_value, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, qnan_value, minus_infty, qnan_value, NO_INEXACT_EXCEPTION),
-    TEST_ff_f (fdim, qnan_value, qnan_value, qnan_value, NO_INEXACT_EXCEPTION),
+    TEST_ff_f (fdim, 0, qnan_value, qnan_value, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, 9, qnan_value, qnan_value, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, -9, qnan_value, qnan_value, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, qnan_value, 0, qnan_value, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, qnan_value, 9, qnan_value, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, qnan_value, -9, qnan_value, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, plus_infty, qnan_value, qnan_value, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, minus_infty, qnan_value, qnan_value, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, qnan_value, plus_infty, qnan_value, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, qnan_value, minus_infty, qnan_value, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, qnan_value, qnan_value, qnan_value, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
 
-    TEST_ff_f (fdim, plus_infty, plus_infty, 0, NO_INEXACT_EXCEPTION),
+    TEST_ff_f (fdim, plus_infty, plus_infty, 0, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, plus_infty, minus_infty, plus_infty, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, minus_infty, plus_infty, 0, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
+    TEST_ff_f (fdim, minus_infty, minus_infty, 0, NO_INEXACT_EXCEPTION|ERRNO_UNCHANGED),
   };
 
 static void
@@ -8473,6 +8536,7 @@ static const struct test_fff_f_data fma_test_data[] =
     TEST_fff_f (fma, 0x1.00000000000007ffffffffffffffp-9045L, -0x1.ffffffffffff80000001ffffffffp+4773L, -0x1.f8p-4316L, -0x1.00000000000f88000000fffffdffp-4271L),
     TEST_fff_f (fma, 0x1.4e922764c90701d4a2f21d01893dp-8683L, -0x1.955a12e2d7c9447c27fa022fc865p+212L, -0x1.e9634462eaef96528b90b6944578p-8521L, -0x1.08e1783184a371943d3598e10865p-8470L),
     TEST_fff_f (fma, 0x1.801181509c03bdbef10d6165588cp-15131L, 0x1.ad86f8e57d3d40bfa8007780af63p-368L, -0x1.6e9df0dab1c9f1d7a6043c390741p-15507L, 0x1.417c9b2b15e2ad57dc9e0e920844p-15498L),
+    TEST_fff_f (fma, 0x1.ffffffffffffffp0L, 0x1.000000000000008p0L, -0x1p-1000L, 0x1.ffffffffffffffffffffffffffffp0L),
     TEST_fff_f (fma, 0x1.4p-16382L, 0x1.0000000000000000000000000002p-1L, 0x1p-16384L, 0x1.c000000000000000000000000002p-16383L, UNDERFLOW_EXCEPTION),
     TEST_fff_f (fma, -0x1.4p-16382L, 0x1.0000000000000000000000000002p-1L, -0x1p-16384L, -0x1.c000000000000000000000000002p-16383L, UNDERFLOW_EXCEPTION),
     TEST_fff_f (fma, 0x1.fffffffffffffffffffffffffffcp-16382L, 0x1.0000000000000000000000000001p-1L, 0x1p-16494L, 0x1p-16382L, UNDERFLOW_EXCEPTION_BEFORE_ROUNDING),
@@ -14583,7 +14647,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
 void
 check_ulp (void)
 {
-   FLOAT ulps, value;
+   FLOAT ulps, ulpx, value;
    int i;
    /* Check ulp of zero is a subnormal value...  */
    ulps = ulp (0x0.0p0);
@@ -14599,30 +14663,45 @@ check_ulp (void)
        fprintf (stderr, "ulp (1.0L) is not FP_NORMAL\n");
        exit (EXIT_FAILURE);
      }
+
+   /* Compute the next subnormal value using nextafter to validate ulp.
+      We allow +/- 1 ulp around the represented value.  */
+   value = FUNC(nextafter) (0, 1);
+   ulps = ULPDIFF (value, 0);
+   ulpx = ulp (1.0L);
+   if (ulps < (1.0L - ulpx) || ulps > (1.0L + ulpx))
+     {
+       fprintf (stderr, "Value outside of 1 +/- 1ulp.\n");
+       exit (EXIT_FAILURE);
+     }
    /* Compute the nearest representable number from 10 towards 20.
-      The result is 10 + 1ulp.  We use this to check the ulp function.  */
+      The result is 10 + 1ulp.  We use this to check the ulp function.
+      We allow +/- 1 ulp around the represented value.  */
    value = FUNC(nextafter) (10, 20);
    ulps = ULPDIFF (value, 10);
-   if (ulps > 1.0L)
+   ulpx = ulp (1.0L);
+   if (ulps < (1.0L - ulpx) || ulps > (1.0L + ulpx))
      {
-       fprintf (stderr, "The value of ulp (10+1ulp,10) is greater than 1 ulp.\n");
+       fprintf (stderr, "Value outside of 1 +/- 1ulp.\n");
        exit (EXIT_FAILURE);
      }
    /* This gives one more ulp.  */
    value = FUNC(nextafter) (value, 20);
    ulps = ULPDIFF (value, 10);
-   if (ulps > 2.0L)
+   ulpx = ulp (2.0L);
+   if (ulps < (2.0L - ulpx) || ulps > (2.0L + ulpx))
      {
-       fprintf (stderr, "The value of ulp (10+2ulp,10) is greater than 2 ulp.\n");
+       fprintf (stderr, "Value outside of 2 +/- 1ulp.\n");
        exit (EXIT_FAILURE);
      }
    /* And now calculate 100 ulp.  */
    for (i = 2; i < 100; i++)
      value = FUNC(nextafter) (value, 20);
    ulps = ULPDIFF (value, 10);
-   if (ulps > 100.0L)
+   ulpx = ulp (100.0L);
+   if (ulps < (100.0L - ulpx) || ulps > (100.0L + ulpx))
      {
-       fprintf (stderr, "The value of ulp (10+100ulp,10) is greater than 100 ulp.\n");
+       fprintf (stderr, "Value outside of 100 +/- 1ulp.\n");
        exit (EXIT_FAILURE);
      }
 }
