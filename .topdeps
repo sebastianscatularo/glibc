@@ -15,7 +15,6 @@ t/extern_inline
 t/grantpt
 t/master_backports
 t/cpuclock
-t/elfosabi_gnu
 t/host-independency
 t/cancellation
 t/eglibc_backports
