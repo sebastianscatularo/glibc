@@ -145,7 +145,7 @@ tests += loadtest restest1 preloadtest loadfail multiload origtest resolvfail \
 	 tst-audit1 tst-audit2 tst-audit8 \
 	 tst-stackguard1 tst-addr1 tst-thrlock \
 	 tst-unique1 tst-unique2 tst-unique3 tst-unique4 \
-	 tst-initorder tst-initorder2 tst-relsort1
+	 tst-initorder tst-initorder2 tst-relsort1 tst-null-argv
 #	 reldep9
 test-srcs = tst-pathopt
 selinux-enabled := $(shell cat /selinux/enforce 2> /dev/null)
@@ -208,7 +208,7 @@ modules-names = testobj1 testobj2 testobj3 testobj4 testobj5 testobj6 \
 		tst-initorder2a tst-initorder2b tst-initorder2c \
 		tst-initorder2d \
 		tst-relsort1mod1 tst-relsort1mod2 tst-array2dep \
-		tst-array5dep
+		tst-array5dep tst-null-argv-lib
 ifeq (yesyes,$(have-fpie)$(build-shared))
 modules-names += tst-piemod1
 tests += tst-pie1
@@ -318,13 +318,16 @@ generated += librtld.map librtld.mk rtld-libc.a librtld.os.map
 z-now-yes = -Wl,-z,now
 
 $(objpfx)ld.so: $(objpfx)librtld.os $(ld-map)
-	$(LINK.o) -nostdlib -nostartfiles -shared -o $@			\
+# Link into a temporary file so that we don't touch $@ at all
+# if the sanity check below fails.
+	$(LINK.o) -nostdlib -nostartfiles -shared -o $@.new		\
 		  $(LDFLAGS-rtld) -Wl,-z,defs $(z-now-$(bind-now))	\
 		  $(filter-out $(map-file),$^) $(load-map-file)		\
 		  -Wl,-soname=$(rtld-installed-name)			\
 		  -Wl,-defsym=_begin=0
-	$(READELF) -s $@ \
+	$(READELF) -s $@.new \
 	  | $(AWK) '($$7 ~ /^UND(|EF)$$/ && $$1 != "0:" && $$4 != "REGISTER") { print; p=1 } END { exit p != 0 }'
+	mv -f $@.new $@
 
 # interp.c exists just to get this string into the libraries.
 CFLAGS-interp.c = -D'RUNTIME_LINKER="$(rtlddir)/$(rtld-installed-name)"' \
@@ -494,7 +497,9 @@ $(objpfx)tst-initorderb2.so: $(objpfx)tst-initorderb1.so $(objpfx)tst-initordera
 $(objpfx)tst-initordera3.so: $(objpfx)tst-initorderb2.so $(objpfx)tst-initorderb1.so
 $(objpfx)tst-initordera4.so: $(objpfx)tst-initordera3.so
 $(objpfx)tst-initorder: $(objpfx)tst-initordera4.so $(objpfx)tst-initordera1.so $(objpfx)tst-initorderb2.so
+$(objpfx)tst-null-argv: $(objpfx)tst-null-argv-lib.so
 
+tst-null-argv-ENV = LD_DEBUG=all LD_DEBUG_OUTPUT=$(objpfx)tst-null-argv.debug.out
 LDFLAGS-nodel2mod3.so = $(no-as-needed)
 LDFLAGS-reldepmod5.so = $(no-as-needed)
 LDFLAGS-reldep6mod1.so = $(no-as-needed)

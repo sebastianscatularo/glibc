@@ -36,9 +36,6 @@ extern void __init_misc (int, char **, char **);
 #ifdef USE_NONOPTION_FLAGS
 extern void __getopt_clean_environment (char **);
 #endif
-#ifndef SHARED
-extern void _dl_non_dynamic_init (void) internal_function;
-#endif
 extern void __libc_global_ctors (void);
 
 unsigned int __hurd_threadvar_max;
@@ -183,8 +180,8 @@ init (int *data)
   if ((void *) d == argv[0])
     {
       /* With a new enough linker (binutils-2.23 or better),
-         the magic __ehdr_start symbol will be available and
-         __libc_start_main will have done this that way already.  */
+	 the magic __ehdr_start symbol will be available and
+	 __libc_start_main will have done this that way already.  */
       if (_dl_phdr == NULL)
 	{
 	  /* We may need to see our own phdrs, e.g. for TLS setup.
