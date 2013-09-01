@@ -1,3 +1,62 @@
+2013-08-30   Ondřej Bílka  <neleai@seznam.cz>
+
+	* sysdeps/ia64/fpu/libm_reduce.S: Fix typos.
+	* sysdeps/ia64/fpu/s_erfcf.S: Likewise.
+	* sysdeps/ia64/fpu/s_erfcl.S: Likewise.
+	* sysdeps/ia64/fpu/s_erfc.S: Likewise.
+	* sysdeps/unix/sysv/linux/ia64/nptl/__sigstack_longjmp.c: Likewise.
+
+2013-08-29   Ondřej Bílka  <neleai@seznam.cz>
+
+	* sysdeps/ia64/fpu/e_acoshl.S: Fix typos.
+	* sysdeps/ia64/fpu/e_logf.S: Likewise.
+	* sysdeps/ia64/fpu/e_log.S: Likewise.
+	* sysdeps/ia64/fpu/libm_lgammaf.S: Likewise.
+	* sysdeps/ia64/fpu/libm_lgammal.S: Likewise.
+	* sysdeps/ia64/fpu/s_log1p.S: Likewise.
+	* sysdeps/ia64/fpu/w_tgammal.S: Likewise.
+
+2013-08-21   Ondřej Bílka  <neleai@seznam.cz>
+
+	* sysdeps/ia64/fpu/e_atanhl.S: Fix typos.
+	* sysdeps/ia64/fpu/e_log2l.S: Likewise.
+	* sysdeps/ia64/fpu/e_logl.S: Likewise.
+	* sysdeps/ia64/fpu/fraiseexcpt.c: Likewise.
+	* sysdeps/ia64/fpu/libm_lgammal.S: Likewise.
+	* sysdeps/ia64/fpu/s_log1pl.S: Likewise.
+
+2013-07-04  Andreas Jaeger  <aj@suse.de>
+
+	* sysdeps/unix/sysv/linux/ia64/sys/ptrace.h (PTRACE_LISTEN):
+	Add define.
+	(PTRACE_PEEKSIGINFO): Add new value from Linux 3.10.
+	(ptrace_peeksiginfo_args): Add.
+	(__ptrace_peeksiginfo_flags): Add.
+
+2013-06-27  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/ia64/dl-static.c: Do not include
+	<bits/libc-lock.h>.
+	(_dl_static_lock): Remove variable.
+	(_dl_static_init): Remove _dl_static_lock locking.
+
+2013-06-15  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* sysdeps/unix/sysv/linux/ia64/nptl/libpthread.abilist: Update.
+
+2013-06-08  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/ia64/getpagesize.c (__getpagesize): Use
+	(void) in function definition.
+
+2013-06-07  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/ia64/bits/byteswap-16.h [__GNUC__ && __GNUC__ >= 2]
+	(__bswap_16): Do not use "register".
+	* sysdeps/ia64/bits/byteswap.h [__GNUC__ && __GNUC__ >= 2]
+	(__bswap_32): Likewise.
+	[__GNUC__ && __GNUC__ >= 2] (__bswap_64): Likewise.
+
 2013-05-22  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 
 	* sysdeps/unix/sysv/linux/ia64/bits/siginfo.h (siginfo_t): Add
