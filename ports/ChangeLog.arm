@@ -1,3 +1,142 @@
+2013-08-30  Roland McGrath  <roland@hack.frob.com>
+
+	* sysdeps/arm/armv6t2/strlen.S: Use sfi_pld and sfi_breg macros.
+
+	* sysdeps/arm/armv6t2/strlen.S: Include <arm-features.h> first thing.
+	[NO_THUMB]: Adapt code for ARM mode.
+
+2013-08-30  Will Newton  <will.newton@linaro.org>
+
+	[BZ #15909]
+	* sysdeps/unix/sysv/linux/arm/clone.S (__clone): Use blx
+	instead of mov lr, pc.
+
+2013-08-30  Will Newton  <will.newton@linaro.org>
+
+	* sysdeps/arm/armv6t2/strlen.S: New file.
+
+2013-08-29  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/arm/ldsodefs.h (VALID_ELF_OSABI)
+	(MORE_ELF_HEADER_DATA): Use ELFOSABI_GNU instead of
+	ELFOSABI_LINUX.
+
+2013-08-28  Kyle McMartin  <kyle@redhat.com>
+	    Carlos O'Donell  <carlos@redhat.com>
+
+	[BZ #15905]
+	* sysdeps/arm/dl-machine [!RTLD_BOOTSTRAP] (elf_machine_rel):
+	Pass GLRO(dl_hwcap) to the IFUNC resolver.
+
+2013-07-03  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/arm/include/bits/setjmp.h [_ISOMAC] (JMP_BUF_REGLIST):
+	Do not define.
+	[_ISOMAC] (__JMP_BUF_SP): Likewise.
+
+2013-07-02  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/arm/libm-test-ulps: Regenerated.
+
+	[BZ #13304]
+	* sysdeps/arm/s_fma.c: New file.
+	* sysdeps/arm/s_fmaf.c: New file.
+	* sysdeps/arm/soft-fp/sfp-machine.h: New file.  Based on powerpc
+	version.
+	* sysdeps/arm/Implies: Add arm/soft-fp.
+
+2013-07-02  Will Newton  <will.newton@linaro.org>
+
+	* sysdeps/arm/dl-machine.h (elf_machine_rela): Pass dl_hwcap
+	to IFUNC resolver functions.
+
+2013-06-28  Ryan S. Arnold  <rsa@linux.vnet.ibm.com>
+
+	* sysdeps/unix/sysv/linux/arm/dl-procinfo.h (_dl_procinfo): Add
+	TYPE parameter to macro prototype for AT_HWCAP2 support.  Make WORD
+	unsigned long int rather than signed int.  Stub in handler for TYPE ==
+	AT_HWCAP2 to return -1 for unknown a_type display fallback.
+
+2013-06-18  Roland McGrath  <roland@hack.frob.com>
+
+	* sysdeps/arm/arm-mcount.S: Comment typo fix.
+
+	* sysdeps/arm/arm-features.h (ARM_BX_NINSNS): New macro.
+	* sysdeps/arm/armv7/multiarch/memcpy_impl.S: Macroize the
+	computed-jump dispatch sections.  Use sfi_breg throughout.
+	[ARM_ALWAYS_BX]: Define a different version of the dispatch macros
+	that uses bx rather than add-to-pc, and respects ARM_BX_ALIGN_LOG2.
+	[!USE_NEON] (D_l, D_h): Use r10, r11 rather than r8, r9.
+	(tmp2): Use r8 rather than r10.
+
+	* sysdeps/arm/armv7/multiarch/ifunc-impl-list.c (__libc_ifunc_impl_list)
+	[__ARM_NEON__]: Do not refer to HWCAP_ARM_NEON.
+	[!__SOFTFP__]: Do not refer to HWCAP_ARM_VFP.
+
+2013-06-18  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/arm/fpu_control.h [!(_LIBC && !_LIBC_TEST) &&
+	__SOFTFP__] (_FPU_GETCW): Define to (cw) = 0.
+	[!(_LIBC && !_LIBC_TEST) && __SOFTFP__] (_FPU_SETCW): Define to
+	(void) (cw).
+
+	* sysdeps/arm/fpu_control.h [!_LIBC && __SOFTFP__]: Change
+	condition to [!(_LIBC && !_LIBC_TEST) && __SOFTFP__].
+	* sysdeps/arm/test-fpucw.c: New file.
+
+2013-06-17  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #14907]
+	* sysdeps/arm/feenablxcpt.c (feenableexcept): Test whether all
+	requested exception traps were enabled and return -1 if not.
+
+2013-06-15  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* sysdeps/unix/sysv/linux/arm/nptl/libpthread.abilist: Update.
+
+2013-06-14  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #15492]
+	* sysdeps/arm/fpu_control.h [_LIBC || !__SOFTFP__]
+	(_FPU_RESERVED): Change value to 0x00086060.
+
+2013-06-11  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/arm/math-tests.h [__SOFTFP__] (EXCEPTION_TESTS_float):
+	Define to 0.
+	[__SOFTFP__] (EXCEPTION_TESTS_double): Likewise.
+	[__SOFTFP__] (EXCEPTION_TESTS_long_double): Likewise.
+
+2013-06-10  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/arm/math-tests.h: New file.
+
+2013-06-05  Richard Henderson  <rth@redhat.com>
+
+	[BZ #15583]
+	* sysdeps/arm/armv6/strcpy.S (strcpy): Fix register usage in
+	non ARCH_HAS_T2 case.
+
+2013-06-05  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/arm/machine-gmon.h: Remove trailing whitespace.
+	* sysdeps/unix/sysv/linux/arm/mmap.S: Likewise.
+	* sysdeps/unix/sysv/linux/arm/nptl/lowlevellock.h: Likewise.
+	* sysdeps/unix/sysv/linux/arm/swapcontext.S: Likewise.
+
+2013-05-31  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/arm/Makefile [$(subdir) = malloc]
+	($(objpfx)libmemusage.so): Remove dependency on libc_nonshared.
+	[$(subdir) = math] ($(objpfx)libm.so): Remove dependency on ld.so.
+
+2013-05-29  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	[BZ #15465]
+	* sysdeps/arm/dl-machine.h (elf_machine_rel): Use
+	RTLD_PROGNAME.
+	(elf_machine_rela): Likewise.
+
 2013-05-22  Joseph Myers  <joseph@codesourcery.com>
 
 	* sysdeps/arm/libm-test-ulps: Update test names.
