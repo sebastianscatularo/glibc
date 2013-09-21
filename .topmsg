@@ -1,16 +1,9 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] Add fork hooks for pthread_atfork
 
----
+* sysdeps/mach/hurd/fork.c (_hurd_atfork_prepare_hook, _hurd_atfork_child_hook,
+_hurd_atfork_parent_hook): New hooks.
+(__fork): Call _hurd_atfork_prepare_hook hooks before all locking, call
+_hurd_atfork_parent_hook or _hurd_atfork_child_hook after all unlocking.
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
