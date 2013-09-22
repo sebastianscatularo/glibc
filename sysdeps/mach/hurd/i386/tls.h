@@ -53,6 +53,7 @@
       | (((unsigned int) (tcb)) & 0xff000000) /* base 24..31 */		      \
     }
 
+extern int __libc_no_tls;
 
 static inline const char * __attribute__ ((unused))
 _hurd_tls_init (tcbhead_t *tcb, int secondcall)
@@ -110,6 +111,8 @@ _hurd_tls_init (tcbhead_t *tcb, int secondcall)
 	}
     }
 
+  __libc_no_tls = 0;
+
   return 0;
 }
 
@@ -125,6 +128,15 @@ _hurd_tls_init (tcbhead_t *tcb, int secondcall)
   ({ tcbhead_t *__tcb;							      \
      __asm__ ("movl %%gs:%c1,%0" : "=r" (__tcb)				      \
 	      : "i" (offsetof (tcbhead_t, tcb)));			      \
+     __tcb;})
+
+/* Return the TCB address of a thread given its state.  */
+# define THREAD_TCB(thread_state)					      \
+  ({ tcbhead_t *__tcb;							      \
+     __asm__ ("pushl %%gs; movl %k1,%%gs; movl %%gs:%c2,%0; popl %%gs"	      \
+	      : "=r" (__tcb)						      \
+	      : "r" ((unsigned short) thread_state->basic.gs),		      \
+	        "i" (offsetof (tcbhead_t, tcb)));			      \
      __tcb;})
 
 /* Install new dtv for current thread.  */

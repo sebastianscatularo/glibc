@@ -19,6 +19,10 @@
 #include <errno.h>
 #include <stdlib.h>
 
+int __libc_no_tls = 1;
+char __libc_lock_self0[0];
+__thread char __libc_lock_self[0];
+
 /* Placeholder for key creation routine from Hurd cthreads library.  */
 int
 weak_function
