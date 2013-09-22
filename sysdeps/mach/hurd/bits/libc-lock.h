@@ -24,7 +24,6 @@
 #include <tls.h>
 #endif
 #include <cthreads.h>
-#include <hurd/threadvar.h>
 
 typedef struct mutex __libc_lock_t;
 typedef struct
@@ -35,7 +34,10 @@ typedef struct
 } __libc_lock_recursive_t;
 typedef __libc_lock_recursive_t __rtld_lock_recursive_t;
 
-#define __libc_lock_owner_self() ((void *) __hurd_threadvar_location (0))
+extern int __libc_no_tls;
+extern char __libc_lock_self0[0];
+extern __thread char __libc_lock_self[0];
+#define __libc_lock_owner_self() (__libc_no_tls ? &__libc_lock_self0 : (void*) &__libc_lock_self)
 
 #else
 typedef struct __libc_lock_opaque__ __libc_lock_t;
