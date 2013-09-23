@@ -36,9 +36,6 @@ libc {
     __hurd_threadvar_max;
     __hurd_threadvar_stack_mask; __hurd_threadvar_stack_offset;
 
-    # functions used in macros & inline functions
-    __hurd_errno_location;
-
     # functions used in libmachuser and libhurduser
     _S_catch_exception_raise;
     _S_catch_exception_raise_state;
