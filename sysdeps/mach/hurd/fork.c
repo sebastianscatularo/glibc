@@ -704,7 +704,7 @@ __fork (void)
 
   if (!err)
     {
-      if (pid)
+      if (pid != 0)
 	RUN_HOOK (_hurd_atfork_parent_hook, ());
       else
 	RUN_HOOK (_hurd_atfork_child_hook, ());
