@@ -53,15 +53,12 @@
       | (((unsigned int) (tcb)) & 0xff000000) /* base 24..31 */		      \
     }
 
-/* TODO: clean this */
-//extern int __libc_no_tls;
-static inline int ___libc_no_tls(void)
+static inline int __libc_no_tls(void)
 {
   unsigned short ds, gs;
   asm ("movw %%ds,%w0; movw %%gs,%w1" : "=q" (ds), "=q" (gs));
   return ds == gs;
 }
-#define __libc_no_tls (___libc_no_tls())
 
 static inline const char * __attribute__ ((unused))
 _hurd_tls_init (tcbhead_t *tcb, int secondcall)
@@ -118,8 +115,6 @@ _hurd_tls_init (tcbhead_t *tcb, int secondcall)
 	    return "i386_set_gdt failed";
 	}
     }
-
-  __libc_no_tls = 0;
 
   return 0;
 }

@@ -34,10 +34,9 @@ typedef struct
 } __libc_lock_recursive_t;
 typedef __libc_lock_recursive_t __rtld_lock_recursive_t;
 
-extern int __libc_no_tls;
 extern char __libc_lock_self0[0];
 extern __thread char __libc_lock_self[0];
-#define __libc_lock_owner_self() (__libc_no_tls ? &__libc_lock_self0 : (void*) &__libc_lock_self)
+#define __libc_lock_owner_self() (__libc_no_tls() ? &__libc_lock_self0 : (void*) &__libc_lock_self)
 
 #else
 typedef struct __libc_lock_opaque__ __libc_lock_t;
