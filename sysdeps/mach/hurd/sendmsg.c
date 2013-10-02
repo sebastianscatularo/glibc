@@ -138,6 +138,7 @@ __libc_sendmsg (int fd, const struct msghdr *message, int flags)
 		     nports++;
 		   /* We pass the flags in the control data.  */
 		   fds[i] = descriptor->flags;
+		   err;
 		 }));
 
 	      if (err)
