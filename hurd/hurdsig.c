@@ -234,11 +234,11 @@ abort_thread (struct hurd_sigstate *ss, struct machine_thread_all_state *state,
    that this location can be set without faulting, or else return NULL.  */
 
 static mach_port_t *
-interrupted_reply_port_location (struct machine_thread_all_state *thread_state,
+interrupted_reply_port_location (thread_t thread,
+				 struct machine_thread_all_state *thread_state,
 				 int sigthread)
 {
-  mach_port_t *portloc = (mach_port_t *) __hurd_threadvar_location_from_sp
-    (_HURD_THREADVAR_MIG_REPLY, (void *) thread_state->basic.SP);
+  mach_port_t *portloc = &THREAD_TCB(thread, thread_state)->reply_port;
 
   if (sigthread && _hurdsig_catch_memory_fault (portloc))
     /* Faulted trying to read the stack.  */
@@ -323,7 +323,8 @@ _hurdsig_abort_rpcs (struct hurd_sigstate *ss, int signo, int sigthread,
 	   our nonzero return tells the trampoline code to finish the message
 	   receive operation before running the handler.  */
 
-	mach_port_t *reply = interrupted_reply_port_location (state,
+	mach_port_t *reply = interrupted_reply_port_location (ss->thread,
+							      state,
 							      sigthread);
 	error_t err = __interrupt_operation (intr_port, _hurdsig_interrupt_timeout);
 
@@ -835,7 +836,8 @@ _hurd_internal_post_signal (struct hurd_sigstate *ss,
 
 	    if (! machine_get_basic_state (ss->thread, &thread_state))
 	      goto sigbomb;
-	    loc = interrupted_reply_port_location (&thread_state, 1);
+	    loc = interrupted_reply_port_location (ss->thread,
+						   &thread_state, 1);
 	    if (loc && *loc != MACH_PORT_NULL)
 	      /* This is the reply port for the context which called
 		 sigreturn.  Since we are abandoning that context entirely
@@ -901,7 +903,8 @@ _hurd_internal_post_signal (struct hurd_sigstate *ss,
 	{
 	  /* Fetch the thread variable for the MiG reply port,
 	     and set it to MACH_PORT_NULL.  */
-	  mach_port_t *loc = interrupted_reply_port_location (&thread_state,
+	  mach_port_t *loc = interrupted_reply_port_location (ss->thread,
+							      &thread_state,
 							      1);
 	  if (loc)
 	    {

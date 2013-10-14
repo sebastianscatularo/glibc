@@ -20,6 +20,7 @@
 #define	_HURD_THREADVAR_H
 
 #include <features.h>
+#include <tls.h>
 
 /* The per-thread variables are found by ANDing this mask
    with the value of the stack pointer and then adding this offset.
@@ -112,5 +113,7 @@ __hurd_threadvar_location (enum __hurd_threadvar_index __index)
 					    __thread_stack_pointer ());
 }
 
+extern mach_port_t __hurd_reply_port0;
+#define __hurd_local_reply_port (*(__libc_no_tls() ? &__hurd_reply_port0 : &THREAD_SELF->reply_port))
 
 #endif	/* hurd/threadvar.h */
