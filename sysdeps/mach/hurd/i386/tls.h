@@ -53,6 +53,13 @@
       | (((unsigned int) (tcb)) & 0xff000000) /* base 24..31 */		      \
     }
 
+# define HURD_DESC_TLS(desc)						      \
+  ({									      \
+   (tcbhead_t *) (   (desc->low_word >> 16)				      \
+                  | ((desc->high_word & 0xff) << 16)			      \
+                  |  (desc->high_word & 0xff000000)			      \
+     );})
+
 static inline int __libc_no_tls(void)
 {
   unsigned short ds, gs;
@@ -134,13 +141,19 @@ _hurd_tls_init (tcbhead_t *tcb, int secondcall)
      __tcb;})
 
 /* Return the TCB address of a thread given its state.  */
-# define THREAD_TCB(thread_state)					      \
-  ({ tcbhead_t *__tcb;							      \
-     __asm__ ("pushl %%gs; movl %k1,%%gs; movl %%gs:%c2,%0; popl %%gs"	      \
-	      : "=r" (__tcb)						      \
-	      : "r" ((unsigned short) thread_state->basic.gs),		      \
-	        "i" (offsetof (tcbhead_t, tcb)));			      \
-     __tcb;})
+# define THREAD_TCB(thread, thread_state)				      \
+  ({ int __sel = (thread_state)->basic.gs;				      \
+     tcbhead_t *__tcb;							      \
+     struct descriptor __desc, *___desc = &__desc;			      \
+     unsigned int __count = 1;						      \
+     kern_return_t __err;						      \
+     if (__builtin_expect (__sel, 0x48) & 4) /* LDT selector */		      \
+       __err = __i386_get_ldt ((thread), __sel, 1, &___desc, &__count);	      \
+     else								      \
+       __err = __i386_get_gdt ((thread), __sel, &__desc);		      \
+     assert_perror (__err);						      \
+     assert (__count == 1);						      \
+     HURD_DESC_TLS(___desc);})
 
 /* Install new dtv for current thread.  */
 # define INSTALL_NEW_DTV(dtvp)						      \
