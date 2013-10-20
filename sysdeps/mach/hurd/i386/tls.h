@@ -60,12 +60,10 @@
                   |  (desc->high_word & 0xff000000)			      \
      );})
 
-static inline int __libc_no_tls(void)
-{
-  unsigned short ds, gs;
-  asm ("movw %%ds,%w0; movw %%gs,%w1" : "=q" (ds), "=q" (gs));
-  return ds == gs;
-}
+#define __LIBC_NO_TLS()							      \
+  ({ unsigned short ds, gs;						      \
+     asm ("movw %%ds,%w0; movw %%gs,%w1" : "=q" (ds), "=q" (gs));	      \
+     ds == gs; })
 
 static inline const char * __attribute__ ((unused))
 _hurd_tls_init (tcbhead_t *tcb, int secondcall)
