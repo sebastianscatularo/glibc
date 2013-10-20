@@ -114,6 +114,6 @@ __hurd_threadvar_location (enum __hurd_threadvar_index __index)
 }
 
 extern mach_port_t __hurd_reply_port0;
-#define __hurd_local_reply_port (*(__libc_no_tls() ? &__hurd_reply_port0 : &THREAD_SELF->reply_port))
+#define __hurd_local_reply_port (*(__LIBC_NO_TLS() ? &__hurd_reply_port0 : &THREAD_SELF->reply_port))
 
 #endif	/* hurd/threadvar.h */
