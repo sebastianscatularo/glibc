@@ -1,2 +1,3 @@
 t/tls
 t/extern_inline
+t/context_functions
