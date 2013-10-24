@@ -40,7 +40,6 @@
 #include <cthreads.h>		/* For `struct mutex'.  */
 #include <setjmp.h>		/* For `jmp_buf'.  */
 #include <spin-lock.h>
-#include <hurd/threadvar.h>	/* We cache sigstate in a threadvar.  */
 struct hurd_signal_preemptor;	/* <hurd/sigpreempt.h> */
 
 
@@ -155,7 +154,8 @@ extern void _hurd_sigstate_delete (thread_t thread);
 #define _HURD_SIGNAL_H_EXTERN_INLINE __extern_inline
 #endif
 
-#ifdef __USE_EXTERN_INLINES
+extern __thread struct hurd_sigstate *_hurd_sigstate;
+#if defined __USE_EXTERN_INLINES && defined _LIBC
 _HURD_SIGNAL_H_EXTERN_INLINE struct hurd_sigstate *
 _hurd_self_sigstate (void)
 {
@@ -186,7 +186,7 @@ extern int _hurd_core_limit;
 
 void *_hurd_critical_section_lock (void);
 
-#ifdef __USE_EXTERN_INLINES
+#if defined __USE_EXTERN_INLINES && defined _LIBC
 _HURD_SIGNAL_H_EXTERN_INLINE void *
 _hurd_critical_section_lock (void)
 {
@@ -222,7 +222,7 @@ _hurd_critical_section_lock (void)
 
 void _hurd_critical_section_unlock (void *our_lock);
 
-#ifdef __USE_EXTERN_INLINES
+#if defined __USE_EXTERN_INLINES && defined _LIBC
 _HURD_SIGNAL_H_EXTERN_INLINE void
 _hurd_critical_section_unlock (void *our_lock)
 {
