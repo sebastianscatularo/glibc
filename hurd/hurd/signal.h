@@ -130,6 +130,7 @@ extern struct hurd_sigstate *_hurd_self_sigstate (void)
 #endif
 
 extern __thread struct hurd_sigstate *_hurd_sigstate;
+#if defined __USE_EXTERN_INLINES && defined _LIBC
 _HURD_SIGNAL_H_EXTERN_INLINE struct hurd_sigstate *
 _hurd_self_sigstate (void)
 {
@@ -137,6 +138,7 @@ _hurd_self_sigstate (void)
     _hurd_sigstate = _hurd_thread_sigstate (__mach_thread_self ());
   return _hurd_sigstate;
 }
+#endif
 
 /* Thread listening on our message port; also called the "signal thread".  */
 
@@ -163,6 +165,9 @@ extern int _hurd_core_limit;
    interrupted lest the signal handler try to take the same lock and
    deadlock result.  */
 
+void *_hurd_critical_section_lock (void);
+
+#if defined __USE_EXTERN_INLINES && defined _LIBC
 _HURD_SIGNAL_H_EXTERN_INLINE void *
 _hurd_critical_section_lock (void)
 {
@@ -194,7 +199,11 @@ _hurd_critical_section_lock (void)
      _hurd_critical_section_unlock to unlock it.  */
   return ss;
 }
+#endif
 
+void _hurd_critical_section_unlock (void *our_lock);
+
+#if defined __USE_EXTERN_INLINES && defined _LIBC
 _HURD_SIGNAL_H_EXTERN_INLINE void
 _hurd_critical_section_unlock (void *our_lock)
 {
@@ -204,7 +213,7 @@ _hurd_critical_section_unlock (void *our_lock)
   else
     {
       /* It was us who acquired the critical section lock.  Unlock it.  */
-      struct hurd_sigstate *ss = our_lock;
+      struct hurd_sigstate *ss = (struct hurd_sigstate *) our_lock;
       sigset_t pending;
       __spin_lock (&ss->lock);
       __spin_unlock (&ss->critical_section_lock);
@@ -217,6 +226,7 @@ _hurd_critical_section_unlock (void *our_lock)
 	__msg_sig_post (_hurd_msgport, 0, 0, __mach_task_self ());
     }
 }
+#endif
 
 /* Convenient macros for simple uses of critical sections.
    These two must be used as a pair at the same C scoping level.  */
