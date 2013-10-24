@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include <cthreads.h>		/* For `struct mutex'.  */
+#include <pthread.h>
 #include <mach.h>
 #include <mach/thread_switch.h>
 
@@ -48,7 +49,6 @@ thread_t _hurd_sigthread;
 /* These are set up by _hurdsig_init.  */
 unsigned long int __hurd_sigthread_stack_base;
 unsigned long int __hurd_sigthread_stack_end;
-unsigned long int *__hurd_sigthread_variables;
 
 /* Per-thread signal state.  */
 __thread struct hurd_sigstate *_hurd_sigstate;
@@ -1261,7 +1261,11 @@ _hurdsig_init (const int *intarray, size_t intarraysize)
 
   /* Start the signal thread listening on the message port.  */
 
-  if (__hurd_threadvar_stack_mask == 0)
+#pragma weak cthread_fork
+#pragma weak cthread_detach
+#pragma weak pthread_getattr_np
+#pragma weak pthread_attr_getstack
+  if (!cthread_fork)
     {
       err = __thread_create (__mach_task_self (), &_hurd_msgport_thread);
       assert_perror (err);
@@ -1276,12 +1280,6 @@ _hurdsig_init (const int *intarray, size_t intarraysize)
       assert_perror (err);
 
       __hurd_sigthread_stack_end = __hurd_sigthread_stack_base + stacksize;
-      __hurd_sigthread_variables =
-	malloc (__hurd_threadvar_max * sizeof (unsigned long int));
-      if (__hurd_sigthread_variables == NULL)
-	__libc_fatal ("hurd: Can't allocate threadvars for signal thread\n");
-      memset (__hurd_sigthread_variables, 0,
-	      __hurd_threadvar_max * sizeof (unsigned long int));
 
       /* Reinitialize the MiG support routines so they will use a per-thread
 	 variable for the cached reply port.  */
@@ -1292,6 +1290,7 @@ _hurdsig_init (const int *intarray, size_t intarraysize)
     }
   else
     {
+      cthread_t thread;
       /* When cthreads is being used, we need to make the signal thread a
          proper cthread.  Otherwise it cannot use mutex_lock et al, which
          will be the cthreads versions.  Various of the message port RPC
@@ -1301,9 +1300,20 @@ _hurdsig_init (const int *intarray, size_t intarraysize)
          we'll let the signal thread's per-thread variables be found as for
          any normal cthread, and just leave the magic __hurd_sigthread_*
          values all zero so they'll be ignored.  */
-#pragma weak cthread_fork
-#pragma weak cthread_detach
-      cthread_detach (cthread_fork ((cthread_fn_t) &_hurd_msgport_receive, 0));
+      cthread_detach (thread = cthread_fork ((cthread_fn_t) &_hurd_msgport_receive, 0));
+
+      if (pthread_getattr_np)
+	{
+	  /* Record stack layout for fork() */
+	  pthread_attr_t attr;
+	  void *addr;
+	  size_t size;
+
+	  pthread_getattr_np ((pthread_t) thread, &attr);
+	  pthread_attr_getstack (&attr, &addr, &size);
+	  __hurd_sigthread_stack_base = (uintptr_t) addr;
+	  __hurd_sigthread_stack_end = __hurd_sigthread_stack_base + size;
+	}
 
       /* XXX We need the thread port for the signal thread further on
          in this thread (see hurdfault.c:_hurdsigfault_init).
