@@ -68,7 +68,7 @@ __sigreturn (struct sigcontext *scp)
 
   if (scp->sc_onstack)
     {
-      ss->sigaltstack.ss_flags &= ~SS_ONSTACK; /* XXX threadvars */
+      ss->sigaltstack.ss_flags &= ~SS_ONSTACK;
       /* XXX cannot unlock until off sigstack */
       abort ();
     }
