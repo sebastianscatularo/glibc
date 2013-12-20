@@ -59,7 +59,7 @@ before-compile  = $(objpfx)trusted-dirs.h
 generated	:= trusted-dirs.h trusted-dirs.st for-renamed/renamed.so
 generated-dirs	:= for-renamed
 
-ifeq ($(versioning),yes)
+ifeq ($(build-shared),yes)
 ld-map		= $(common-objpfx)ld.map
 endif
 
@@ -119,9 +119,11 @@ $(inst_auditdir)/sotruss-lib.so: $(objpfx)sotruss-lib.so $(+force)
 endif
 
 tests = tst-tls1 tst-tls2 tst-tls9 tst-leaks1 \
-	tst-array1 tst-array2 tst-array3 tst-array4 tst-array5
+	tst-array1 tst-array2 tst-array3 tst-array4 tst-array5 \
+	tst-auxv
 tests-static = tst-tls1-static tst-tls2-static tst-stackguard1-static \
-	       tst-leaks1-static tst-array1-static tst-array5-static
+	       tst-leaks1-static tst-array1-static tst-array5-static \
+	       tst-ptrguard1-static
 ifeq (yes,$(build-shared))
 tests-static += tst-tls9-static
 tst-tls9-static-ENV = \
@@ -145,7 +147,8 @@ tests += loadtest restest1 preloadtest loadfail multiload origtest resolvfail \
 	 tst-audit1 tst-audit2 tst-audit8 \
 	 tst-stackguard1 tst-addr1 tst-thrlock \
 	 tst-unique1 tst-unique2 tst-unique3 tst-unique4 \
-	 tst-initorder tst-initorder2 tst-relsort1 tst-null-argv
+	 tst-initorder tst-initorder2 tst-relsort1 tst-null-argv \
+	 tst-ptrguard1
 #	 reldep9
 test-srcs = tst-pathopt
 selinux-enabled := $(shell cat /selinux/enforce 2> /dev/null)
@@ -1015,6 +1018,12 @@ LDFLAGS-order2mod2.so = $(no-as-needed)
 
 tst-stackguard1-ARGS = --command "$(host-test-program-cmd) --child"
 tst-stackguard1-static-ARGS = --command "$(objpfx)tst-stackguard1-static --child"
+
+tst-ptrguard1-ARGS = --command "$(host-test-program-cmd) --child"
+# When built statically, the pointer guard interface uses
+# __pointer_chk_guard_local.
+CFLAGS-tst-ptrguard1-static.c = -DPTRGUARD_LOCAL
+tst-ptrguard1-static-ARGS = --command "$(objpfx)tst-ptrguard1-static --child"
 
 $(objpfx)tst-leaks1: $(libdl)
 $(objpfx)tst-leaks1-mem: $(objpfx)tst-leaks1.out
