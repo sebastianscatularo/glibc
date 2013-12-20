@@ -6,10 +6,10 @@ Before you do anything else, you should read the FAQ at
 and describes problems you may experience with compilation and
 installation.
 
-   Features can be added to the GNU C Library via "add-on" bundles.
-These are separate tar files, which you unpack into the top level of
-the source tree.  Then you give `configure' the `--enable-add-ons'
-option to activate them, and they will be compiled into the library.
+Features can be added to the GNU C Library via "add-on" bundles.  These
+are separate tar files, which you unpack into the top level of the
+source tree.  Then you give `configure' the `--enable-add-ons' option
+to activate them, and they will be compiled into the library.
 
    You will need recent versions of several GNU tools: definitely GCC
 and GNU Make, and possibly others.  *Note Tools for Compilation::,
@@ -110,11 +110,6 @@ will be used, and CFLAGS sets optimization options for the compiler.
 `--disable-profile'
      Don't build libraries with profiling information.  You may want to
      use this option if you don't plan to do profiling.
-
-`--disable-versioning'
-     Don't compile the shared libraries with symbol version information.
-     Doing this will make the resulting library incompatible with old
-     binaries, so it's not recommended.
 
 `--enable-static-nss'
      Compile static versions of the NSS (Name Service Switch) libraries.
@@ -290,14 +285,11 @@ dramatically improve performance with NIS+, and may help with DNS as
 well.
 
    One auxiliary program, `/usr/libexec/pt_chown', is installed setuid
-`root'.  This program is invoked by the `grantpt' function; it sets the
-permissions on a pseudoterminal so it can be used by the calling
-process.  This means programs like `xterm' and `screen' do not have to
-be setuid to get a pty.  (There may be other reasons why they need
-privileges.)  If you are using a Linux kernel with the `devptsfs' or
-`devfs' filesystems providing pty slaves, you don't need this program;
-otherwise you do.  The source for `pt_chown' is in
-`login/programs/pt_chown.c'.
+`root' if the `--enable-pt_chown' configuration option is used.  This
+program is invoked by the `grantpt' function; it sets the permissions
+on a pseudoterminal so it can be used by the calling process.  If you
+are using a Linux kernel with the `devpts' filesystem enabled and
+mounted at `/dev/pts', you don't need this program.
 
    After installation you might want to configure the timezone and
 locale installation of your system.  The GNU C Library comes with a
@@ -376,7 +368,7 @@ build the GNU C Library:
      should definitely upgrade `sed'.
 
 
-If you change any of the `configure.in' files you will also need
+If you change any of the `configure.ac' files you will also need
 
    * GNU `autoconf' 2.53 or higher
 
