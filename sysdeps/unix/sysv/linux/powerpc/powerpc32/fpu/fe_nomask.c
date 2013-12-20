@@ -23,13 +23,16 @@
 #include <sysdep.h>
 #include <sys/prctl.h>
 #include <kernel-features.h>
+#include <shlib-compat.h>
 
 const fenv_t *
-__fe_nomask_env (void)
+__fe_nomask_env_priv (void)
 {
   INTERNAL_SYSCALL_DECL (err);
   INTERNAL_SYSCALL (prctl, err, 2, PR_SET_FPEXC, PR_FP_EXC_PRECISE);
 
   return FE_ENABLED_ENV;
 }
-libm_hidden_def (__fe_nomask_env)
+#if SHLIB_COMPAT (libm, GLIBC_2_1, GLIBC_2_19)
+compat_symbol (libm, __fe_nomask_env_priv, __fe_nomask_env, GLIBC_2_1);
+#endif
