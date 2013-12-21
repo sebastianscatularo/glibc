@@ -18,6 +18,7 @@
 
 #include <hurd.h>
 #include <thread_state.h>
+#include <hurd/threadvar.h>
 #include <jmpbuf-unwind.h>
 #include <assert.h>
 #include <stdint.h>
