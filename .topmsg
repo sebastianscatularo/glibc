@@ -1,16 +1,12 @@
-Subject: Baseline for our topic branches.
+From: Richard Braun <rbraun@sceen.net>
+Subject: [PATCH] Hurd: fix sigstate locking
 
----
+It looks like _hurd_thread_sigstate used to return with the sigstate
+lock held long ago, but since that's no longer the case, don't unlock
+something that isn't locked.
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
+Note that it's unlikely this change fixes anything in practice since
+its current implementation (on i386) makes this call a nop.
 
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+* hurd/hurd/signal.h (_hurd_critical_section_lock): Don't unlock
+sigstate.
