@@ -51,3 +51,4 @@ t/exec-static
 t/EIEIO-fr
 t/context_functions
 t/pthread-atfork
+t/sigstate_locking
