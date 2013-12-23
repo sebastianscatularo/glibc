@@ -1,16 +1,10 @@
-Subject: Baseline for our topic branches.
+From: Richard Braun <rbraun@sceen.net>
+Subject: [PATCH] Hurd: fix port leak in TLS
 
----
+Depending on whether the thread is the main thread or not, the threading
+library can have trouble determining whether the thread reference in the
+TCB is valid. The simple solution is to let the threading library
+initialize the TCB, and use a temporary reference when initializing TLS.
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+* sysdeps/mach/hurd/i386/tls.h (_hurd_tls_init): Use a temporary thread
+reference.
