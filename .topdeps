@@ -53,3 +53,4 @@ t/context_functions
 t/pthread-atfork
 t/sigstate_locking
 t/sigstate_thread_reference
+t/tls_thread_leak
