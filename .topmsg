@@ -1,16 +1,18 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] Fix f?chflags prototypes, declare them and their flags.
 
----
+Although they are defined on GNU/Hurd, f?chflags were never declared. It
+seems the BSD prototype actually uses an unsigned long, so we can take
+the opportunity to fix the prototype, while adding an actual
+declaration.
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
+* misc/chflags.c (chflags): Set flags parameter type to unsigned long instead of
+int.
+* misc/fchflags.c (fchflags): Likewise.
+* sysdeps/mach/hurd/chflags.c (chflags): Likewise.
+* sysdeps/mach/hurd/fchflags.c (fchflags): Likewise.
+* sysdeps/mach/hurd/bits/stat.h (UF_SETTABLE, UF_NODUMP, UF_IMMUTABLE,
+UF_APPEND, UF_OPAQUE, UF_NOUNLINK, SF_SETTABLE, SF_ARCHIVED, SF_IMMUTABLE,
+SF_APPEND, SF_NOUNLINK, SF_SNAPSHOT): Declare macros.
+(chflags, fchflags): Declare functions.
 
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
