@@ -3,8 +3,8 @@ Subject: [PATCH] Hurd: fix port leak in TLS
 
 Depending on whether the thread is the main thread or not, the threading
 library can have trouble determining whether the thread reference in the
-TCB is valid. The simple solution is use a temporary reference when
-initializing TLS.
+TCB is valid. The simple solution is to let the threading library
+initialize the TCB, and use a temporary reference when initializing TLS.
 
 * sysdeps/mach/hurd/i386/tls.h (_hurd_tls_init): Use a temporary thread
 reference.

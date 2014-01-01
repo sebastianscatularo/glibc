@@ -67,9 +67,6 @@ _hurd_tls_init (tcbhead_t *tcb, int secondcall)
 	 from the TLS point of view.  */
       tcb->tcb = tcb;
 
-      /* Cache our thread port.  */
-      tcb->self = self;
-
       /* Get the first available selector.  */
       int sel = -1;
       error_t err = __i386_set_gdt (self, &sel, desc);
