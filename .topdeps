@@ -56,3 +56,4 @@ t/sigstate_thread_reference
 t/tls_thread_leak
 t/chflags
 t/sigstate_locking
+t/sigstate_thread_reference
