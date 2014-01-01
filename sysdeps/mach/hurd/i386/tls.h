@@ -168,6 +168,8 @@ _hurd_tls_fork (thread_t child, thread_t orig, struct i386_thread_state *state)
   else
     err = __i386_set_gdt (child, &sel, desc);
 
+  /* FIXME: we need to fix the value of tcb->self */
+
   state->gs = sel;
   return err;
 }
