@@ -1,16 +1,23 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] hurdselect: remove dead code.
 
----
+This removes code which actually never happens, and is already taken
+care of in the function.
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
+This is in the second part of select, when the __mach_msg() function
+over the portset has returned something else than MACH_MSG_SUCCESS. I
+guess in the past the value returned by __mach_msg() was stored in err,
+so this code was necessary to set back err to 0, but now it is stored in
+msgerr, so err is already still 0 by default. It can thus never contain
+MACH_RCV_TIMED_OUT, i.e. the code is dead. The first case mentioned in
+the comment is already handled: on time out with no message, err is
+already still the default 0. On time out due to poll, err would still be
+0, unless some of the io_select RPCs has returned EINTR, in which case
+it contains EINTR. If any other io_select RPCs had returned a proper
+answer, got!=0, and thus err is set to 0 just below. The code is thus
+indeed not useful any more.
 
-As the baseline is merged into the topic branches, it is forward-only.
+* hurd/hurdselect.c (_hurd_select): Remove unreachable check for
+MACH_RCV_TIMED_OUT.
 
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
