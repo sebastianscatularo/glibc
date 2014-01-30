@@ -102,12 +102,14 @@ getifaddrs (struct ifaddrs **ifap)
       storage[i].ia.ifa_addr = (struct sockaddr *) &storage[i].addr;
       sin = ((struct sockaddr_in *) &storage[i].addr);
       sin->sin_family = AF_INET;
+      sin->sin_len = sizeof(*sin);
       sin->sin_port = 0;
       sin->sin_addr.s_addr = htonl (INADDR_LOOPBACK);
 
       storage[i].ia.ifa_netmask = (struct sockaddr *) &storage[i].netmask;
       sin = ((struct sockaddr_in *) &storage[i].netmask);
       sin->sin_family = AF_INET;
+      sin->sin_len = sizeof(*sin);
       sin->sin_port = 0;
       sin->sin_addr.s_addr = htonl (IN_CLASSA_NET);
 
@@ -126,6 +128,7 @@ getifaddrs (struct ifaddrs **ifap)
       storage[i].ia.ifa_addr = (struct sockaddr *) &storage[i].addr;
       sin6 = ((struct sockaddr_in6 *) &storage[i].addr);
       sin6->sin6_family = AF_INET6;
+      sin6->sin6_len = sizeof(*sin6);
       sin6->sin6_port = 0;
       sin6->sin6_flowinfo = 0;
       inet_pton (AF_INET6, "::1", &sin6->sin6_addr);
@@ -134,6 +137,7 @@ getifaddrs (struct ifaddrs **ifap)
       storage[i].ia.ifa_netmask = (struct sockaddr *) &storage[i].netmask;
       sin6 = ((struct sockaddr_in6 *) &storage[i].netmask);
       sin6->sin6_family = AF_INET6;
+      sin6->sin6_len = sizeof(*sin6);
       sin6->sin6_port = 0;
       sin6->sin6_flowinfo = 0;
       inet_pton (AF_INET6, "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", &sin6->sin6_addr);
@@ -165,6 +169,7 @@ getifaddrs (struct ifaddrs **ifap)
 	      storage[i].ia.ifa_addr = (struct sockaddr *) &storage[i].addr;
 	      sin = ((struct sockaddr_in *) &storage[i].addr);
 	      sin->sin_family = AF_INET;
+	      sin->sin_len = sizeof(*sin);
 	      sin->sin_port = 0;
 	      inet_pton (AF_INET, addr, &sin->sin_addr);
 
@@ -183,12 +188,14 @@ getifaddrs (struct ifaddrs **ifap)
 	      storage[i].ia.ifa_netmask = (struct sockaddr *) &storage[i].netmask;
 	      sin = ((struct sockaddr_in *) &storage[i].netmask);
 	      sin->sin_family = AF_INET;
+	      sin->sin_len = sizeof(*sin);
 	      sin->sin_port = 0;
 	      inet_pton (AF_INET, addr, &sin->sin_addr);
 
 	      storage[i].ia.ifa_broadaddr = (struct sockaddr *) &storage[i].broadaddr;
 	      sin = ((struct sockaddr_in *) &storage[i].broadaddr);
 	      sin->sin_family = AF_INET;
+	      sin->sin_len = sizeof(*sin);
 	      sin->sin_port = 0;
 	      sin->sin_addr.s_addr =
 		  ((struct sockaddr_in *) &storage[i].addr)->sin_addr.s_addr
@@ -203,6 +210,7 @@ getifaddrs (struct ifaddrs **ifap)
 	      storage[i].ia.ifa_dstaddr = (struct sockaddr *) &storage[i].broadaddr;
 	      sin = ((struct sockaddr_in *) &storage[i].broadaddr);
 	      sin->sin_family = AF_INET;
+	      sin->sin_len = sizeof(*sin);
 	      sin->sin_port = 0;
 	      inet_pton (AF_INET, addr, &sin->sin_addr);
 
@@ -234,6 +242,7 @@ getifaddrs (struct ifaddrs **ifap)
 	      storage[i].ia.ifa_addr = (struct sockaddr *) &storage[i].addr;
 	      sin6 = ((struct sockaddr_in6 *) &storage[i].addr);
 	      sin6->sin6_family = AF_INET6;
+	      sin6->sin6_len = sizeof(*sin6);
 	      sin6->sin6_port = 0;
 	      sin6->sin6_flowinfo = 0;
 	      inet_pton (AF_INET6, addr, &sin6->sin6_addr);
@@ -242,6 +251,7 @@ getifaddrs (struct ifaddrs **ifap)
 	      storage[i].ia.ifa_netmask = (struct sockaddr *) &storage[i].netmask;
 	      sin6 = ((struct sockaddr_in6 *) &storage[i].netmask);
 	      sin6->sin6_family = AF_INET6;
+	      sin6->sin6_len = sizeof(*sin6);
 	      sin6->sin6_port = 0;
 	      sin6->sin6_flowinfo = 0;
 	      sin6->sin6_addr.s6_addr32[0] = htonl (cidr >=  32 ? 0xffffffffUL : cidr <=  0 ? 0 : ~((1UL << ( 32 - cidr)) - 1));
@@ -264,6 +274,7 @@ getifaddrs (struct ifaddrs **ifap)
 	      storage[i].ia.ifa_dstaddr = (struct sockaddr *) &storage[i].broadaddr;
 	      sin6 = ((struct sockaddr_in6 *) &storage[i].broadaddr);
 	      sin6->sin6_family = AF_INET6;
+	      sin6->sin6_len = sizeof(*sin6);
 	      sin6->sin6_port = 0;
 	      sin6->sin6_flowinfo = 0;
 	      inet_pton (AF_INET6, addr, &sin6->sin6_addr);
