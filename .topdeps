@@ -60,3 +60,4 @@ t/sigstate_thread_reference
 t/tls_thread_leak
 t/aio_misc
 t/select_deadcode
+t/futimens
