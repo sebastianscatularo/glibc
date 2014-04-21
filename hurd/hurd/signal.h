@@ -129,7 +129,7 @@ extern struct hurd_sigstate *_hurd_self_sigstate (void)
 #define _HURD_SIGNAL_H_EXTERN_INLINE __extern_inline
 #endif
 
-#if defined __USE_EXTERN_INLINES && defined _LIBC
+#if defined __USE_EXTERN_INLINES && defined _LIBC && !defined NOT_IN_libc
 _HURD_SIGNAL_H_EXTERN_INLINE struct hurd_sigstate *
 _hurd_self_sigstate (void)
 {
@@ -168,7 +168,7 @@ extern int _hurd_core_limit;
 
 void *_hurd_critical_section_lock (void);
 
-#if defined __USE_EXTERN_INLINES && defined _LIBC
+#if defined __USE_EXTERN_INLINES && defined _LIBC && !defined NOT_IN_libc
 _HURD_SIGNAL_H_EXTERN_INLINE void *
 _hurd_critical_section_lock (void)
 {
@@ -198,7 +198,7 @@ _hurd_critical_section_lock (void)
 
 void _hurd_critical_section_unlock (void *our_lock);
 
-#if defined __USE_EXTERN_INLINES && defined _LIBC
+#if defined __USE_EXTERN_INLINES && defined _LIBC && !defined NOT_IN_libc
 _HURD_SIGNAL_H_EXTERN_INLINE void
 _hurd_critical_section_unlock (void *our_lock)
 {
