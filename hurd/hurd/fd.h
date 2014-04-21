@@ -60,7 +60,7 @@ extern struct mutex _hurd_dtable_lock; /* Locks those two variables.  */
 
 struct hurd_fd *_hurd_fd_get (int fd);
 
-#if defined __USE_EXTERN_INLINES && defined _LIBC
+#if defined __USE_EXTERN_INLINES && defined _LIBC && !defined NOT_IN_libc
 _HURD_FD_H_EXTERN_INLINE struct hurd_fd *
 _hurd_fd_get (int fd)
 {
