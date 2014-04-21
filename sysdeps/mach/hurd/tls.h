@@ -50,6 +50,7 @@ typedef struct
 
   /* Keep this field last */
   mach_port_t reply_port;	/* This thread's reply port.  */
+  struct hurd_sigstate *_hurd_sigstate;
 } tcbhead_t;
 
 

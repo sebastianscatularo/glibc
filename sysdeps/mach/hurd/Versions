@@ -7,7 +7,6 @@ libc {
     # Functions shared with the dynamic linker
     __libc_read; __libc_write; __libc_lseek64;
     __libc_lock_self0; __libc_lock_self;
-    _hurd_sigstate;
 
     _dl_init_first;
   }
@@ -34,6 +33,5 @@ ld {
     # functions that must be shared with libc
     __libc_read; __libc_write; __libc_lseek64;
     __libc_lock_self0; __libc_lock_self;
-    _hurd_sigstate;
   }
 }
