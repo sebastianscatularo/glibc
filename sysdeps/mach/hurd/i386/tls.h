@@ -152,7 +152,6 @@ out:
 /* Return the TCB address of a thread given its state.  */
 # define THREAD_TCB(thread, thread_state)				      \
   ({ int __sel = (thread_state)->basic.gs;				      \
-     tcbhead_t *__tcb;							      \
      struct descriptor __desc, *___desc = &__desc;			      \
      unsigned int __count = 1;						      \
      kern_return_t __err;						      \
