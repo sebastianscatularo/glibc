@@ -4,4 +4,4 @@ Subject: [PATCH] tls-threadvar
 replace the custom threadvar mechanism with generic TLS.
 That will fix sigaltstack.
 
-Note: the added reply_port field should be kept last.
+Note: the added reply_port and _hurd_sigstate fields should be kept last.

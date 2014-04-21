@@ -50,9 +50,6 @@ thread_t _hurd_sigthread;
 unsigned long int __hurd_sigthread_stack_base;
 unsigned long int __hurd_sigthread_stack_end;
 
-/* Per-thread signal state.  */
-__thread struct hurd_sigstate *_hurd_sigstate;
-
 /* Linked-list of per-thread signal state.  */
 struct hurd_sigstate *_hurd_sigstates;
 

@@ -128,14 +128,13 @@ extern struct hurd_sigstate *_hurd_self_sigstate (void)
 #define _HURD_SIGNAL_H_EXTERN_INLINE __extern_inline
 #endif
 
-extern __thread struct hurd_sigstate *_hurd_sigstate;
 #if defined __USE_EXTERN_INLINES && defined _LIBC
 _HURD_SIGNAL_H_EXTERN_INLINE struct hurd_sigstate *
 _hurd_self_sigstate (void)
 {
-  if (_hurd_sigstate == NULL)
-    _hurd_sigstate = _hurd_thread_sigstate (__mach_thread_self ());
-  return _hurd_sigstate;
+  if (THREAD_SELF->_hurd_sigstate == NULL)
+    THREAD_SELF->_hurd_sigstate = _hurd_thread_sigstate (__mach_thread_self ());
+  return THREAD_SELF->_hurd_sigstate;
 }
 #endif
 
@@ -178,14 +177,14 @@ _hurd_critical_section_lock (void)
     return NULL;
 #endif
 
-  ss = _hurd_sigstate;
+  ss = THREAD_SELF->_hurd_sigstate;
   if (ss == NULL)
     {
       /* The thread variable is unset; this must be the first time we've
 	 asked for it.  In this case, the critical section flag cannot
 	 possible already be set.  Look up our sigstate structure the slow
 	 way; this locks the sigstate lock.  */
-      ss = _hurd_sigstate = _hurd_thread_sigstate (__mach_thread_self ());
+      ss = THREAD_SELF->_hurd_sigstate = _hurd_thread_sigstate (__mach_thread_self ());
       __spin_unlock (&ss->lock);
     }
 
