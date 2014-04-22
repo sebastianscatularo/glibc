@@ -216,15 +216,9 @@ _hurd_critical_section_lock (void)
       /* The thread variable is unset; this must be the first time we've
 	 asked for it.  In this case, the critical section flag cannot
 	 possible already be set.  Look up our sigstate structure the slow
-<<<<<<< HEAD
 	 way.  */
-      ss = THREAD_SELF->_hurd_sigstate = _hurd_thread_sigstate (self);
+      ss = *location = _hurd_thread_sigstate (self);
       __mach_port_deallocate (__mach_task_self (), self);
-=======
-	 way; this locks the sigstate lock.  */
-      ss = *location = _hurd_thread_sigstate (__mach_thread_self ());
-      __spin_unlock (&ss->lock);
->>>>>>> t/tls-threadvar
     }
 
   if (! __spin_try_lock (&ss->critical_section_lock))
