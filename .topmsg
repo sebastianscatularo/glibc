@@ -3,4 +3,8 @@ Subject: [PATCH] t/posix_thread
 
 Declare that we have a libpthread.
 
+The additional version in Versions.def should be updated when we'd
+actually get the libpthread commited into glibc (as well as in
+libpthread/Versions).
+
 Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
