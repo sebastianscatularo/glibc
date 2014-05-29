@@ -62,3 +62,4 @@ t/aio_misc
 t/select_deadcode
 t/futimens
 t/mmap_file_prot_none_fix
+t/posix_thread
