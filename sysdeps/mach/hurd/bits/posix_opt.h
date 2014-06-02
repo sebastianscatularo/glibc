@@ -153,7 +153,7 @@
 /* We do not have POSIX timers, but could in future without ABI change.  */
 #define _POSIX_TIMERS	0
 
-/* The barrier functions are not available.  */
+/* We support barrier functions.  */
 #define _POSIX_BARRIERS	200112L
 
 /* POSIX message queues could be available in future.  */
