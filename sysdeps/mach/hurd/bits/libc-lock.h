@@ -35,8 +35,11 @@ typedef struct
 typedef __libc_lock_recursive_t __rtld_lock_recursive_t;
 
 extern char __libc_lock_self0[0];
-extern __thread char __libc_lock_self[0];
-#define __libc_lock_owner_self() (__LIBC_NO_TLS() ? &__libc_lock_self0 : (void*) &__libc_lock_self)
+/* We have to hide the __libc_lock_self access behind a function call,
+   otherwise gcc >= 4.9 would try to prefetch the TLS dereference even before
+   the __LIBC_NO_TLS test is finished... */
+extern void *__libc_get_lock_self(void);
+#define __libc_lock_owner_self() (__LIBC_NO_TLS() ? &__libc_lock_self0 : __libc_get_lock_self())
 
 #else
 typedef struct __libc_lock_opaque__ __libc_lock_t;
