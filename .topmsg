@@ -1,16 +1,10 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] Fix hang on fork
 
----
+If e.g. a signal is being received while we are running fork(), the signal
+thread may be having our ss lock when we make the space copy, and thus in the
+child we can not take the ss lock any more.
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
+* sysdeps/mach/hurd/fork.c (__fork): Lock SS->lock around __proc_dostop() call.
 
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
