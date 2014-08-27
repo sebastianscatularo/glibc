@@ -128,6 +128,8 @@ __libc_fcntl (int fd, int cmd, ...)
     case F_SETLK:
     case F_SETLKW:
       {
+	/* XXX: TODO: replace with conversion to flock64 and actual
+	   implementation.  */
 	/* XXX
 	   We need new RPCs to support POSIX.1 fcntl file locking!!
 	   For the time being we support the whole-file case only,
@@ -178,6 +180,13 @@ __libc_fcntl (int fd, int cmd, ...)
 	  }
 
 	return __flock (fd, cmd);
+      }
+    case F_GETLK64:
+    case F_SETLK64:
+    case F_SETLKW64:
+      {
+	struct flock64 *fl = va_arg (ap, struct flock64 *);
+	/* TODO: implementation */
       }
 
     case F_GETFL:		/* Get per-open flags.  */
