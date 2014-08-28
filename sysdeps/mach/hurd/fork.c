@@ -131,7 +131,7 @@ __fork (void)
 
 
       /* Keep our SS locked while stopping other threads, so they don't get a
-       * chance to be having it locked in the copied space.  */
+         chance to be having it locked in the copied space.  */
       __spin_lock(&ss->lock);
       /* Stop all other threads while copying the address space,
 	 so nothing changes.  */
