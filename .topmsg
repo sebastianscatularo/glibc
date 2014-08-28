@@ -5,6 +5,6 @@ If e.g. a signal is being received while we are running fork(), the signal
 thread may be having our SS lock when we make the space copy, and thus in the
 child we can not take the SS lock any more.
 
-* sysdeps/mach/hurd/fork.c (__fork): Lock SS->lock around __proc_dostop() call.
+* sysdeps/mach/hurd/fork.c (__fork): Lock SS->lock around __proc_dostop call.
 
 Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
