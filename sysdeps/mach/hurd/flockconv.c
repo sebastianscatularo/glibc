@@ -19,7 +19,7 @@
 #include <errno.h>
 #include <fcntl.h>
 
-static intline int
+static inline int
 flock64_conv (struct flock *buf, const struct flock64 *buf64)
 {
   if (sizeof *buf == sizeof *buf64
@@ -48,7 +48,7 @@ flock64_conv (struct flock *buf, const struct flock64 *buf64)
   return 0;
 }
 
-static intline int
+static inline int
 flock_conv (struct flock64 *buf64, const struct flock *buf)
 {
   if (sizeof *buf == sizeof *buf64
