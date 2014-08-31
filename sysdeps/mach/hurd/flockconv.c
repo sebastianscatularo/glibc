@@ -65,14 +65,5 @@ flock_conv (struct flock64 *buf64, const struct flock *buf)
   buf64->l_len = buf->l_len;
   buf64->l_pid = buf->l_pid;
 
-  if ((sizeof buf->l_start != sizeof buf64->l_start
-       && buf->l_start != buf64->l_start)
-      || (sizeof buf->l_len != sizeof buf64->l_len
-	  && buf->l_len != buf64->l_len))
-    {
-      __set_errno (EOVERFLOW);
-      return -1;
-    }
-
   return 0;
 }
