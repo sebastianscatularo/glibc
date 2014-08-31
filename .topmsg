@@ -1,5 +1,5 @@
 From: Samuel Thibault <samuel.thibault@ens-lyon.org>
-Subject: [PATCH] Fix lockf64 support
+Subject: [PATCH] Fix F_*LK* fcntl with __USE_FILE_OFFSET64
 
 struct flock64 uses 64bit values.  This introduces other values for F_GETLK,
 F_SETLK, F_SETLKW to distinguish between both.
