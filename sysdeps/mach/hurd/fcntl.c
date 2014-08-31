@@ -130,8 +130,6 @@ __libc_fcntl (int fd, int cmd, ...)
     case F_SETLK:
     case F_SETLKW:
       {
-	/* XXX: TODO: replace with conversion to flock64 and actual
-	   implementation.  */
 	/* XXX
 	   We need new RPCs to support POSIX.1 fcntl file locking!!
 	   For the time being we support the whole-file case only,
