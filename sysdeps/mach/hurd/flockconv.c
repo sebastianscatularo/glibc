@@ -55,7 +55,7 @@ flock_conv (struct flock64 *buf64, const struct flock *buf)
       && sizeof buf->l_start == sizeof buf64->l_start
       && sizeof buf->l_len == sizeof buf64->l_len)
     {
-      *buf64 = *(struct flock *) buf;
+      *buf64 = *(struct flock64 *) buf;
       return 0;
     }
 
