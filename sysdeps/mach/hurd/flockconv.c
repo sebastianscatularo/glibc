@@ -24,7 +24,7 @@ flock64_conv (struct flock *buf, const struct flock64 *buf64)
 {
   if (sizeof *buf == sizeof *buf64
       && sizeof buf->l_start == sizeof buf64->l_start
-      && sizeof buf->l_end == sizeof buf64->l_end)
+      && sizeof buf->l_len == sizeof buf64->l_len)
     {
       *buf = *(struct flock *) buf64;
       return 0;
@@ -53,7 +53,7 @@ flock_conv (struct flock64 *buf64, const struct flock *buf)
 {
   if (sizeof *buf == sizeof *buf64
       && sizeof buf->l_start == sizeof buf64->l_start
-      && sizeof buf->l_end == sizeof buf64->l_end)
+      && sizeof buf->l_len == sizeof buf64->l_len)
     {
       *buf64 = *(struct flock *) buf;
       return 0;
