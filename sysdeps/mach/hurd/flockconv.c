@@ -17,7 +17,7 @@
    <http://www.gnu.org/licenses/>.  */
 
 #include <errno.h>
-#include <bits/fcntl.h>
+#include <fcntl.h>
 
 static intline int
 flock64_conv (struct flock *buf, const struct flock64 *buf64)
