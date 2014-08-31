@@ -1,5 +1,5 @@
 From: Samuel Thibault <samuel.thibault@ens-lyon.org>
-Subject: [WIP] [PATCH] Fix lockf64 support
+Subject: [PATCH] Fix lockf64 support
 
 struct flock64 uses 64bit values.  This introduces other values for F_GETLK,
 F_SETLK, F_SETLKW to distinguish between both.
