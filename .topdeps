@@ -65,3 +65,4 @@ t/mmap_file_prot_none_fix
 t/posix_thread
 t/gai_misc
 t/fork_ss_hang
+t/lockf64
