@@ -26,7 +26,6 @@ http://lists.gnu.org/archive/html/bug-hurd/2014-05/msg00025.html
 
        * hurd/thread-cancel.c (hurd_thread_cancel): Do not assert that
        `&ss->critical_section_lock' is unlocked.
-       * sysdeps/mach/hurd/jmp-unwind.c (_longjmp_unwind): Likewise.
+       * sysdeps/mach/hurd/jmp-unwind.c (_longjmp_unwind): Likewise, and take
+       critical section lock before taking the sigstate lock.
        * sysdeps/mach/hurd/spawni.c (__spawni): Likewise.
-       * sysdeps/mach/hurd/jmp-unwind.c (_longjmp_unwind): Take critical section
-       lock before taking the sigstate lock.
