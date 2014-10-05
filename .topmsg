@@ -3,13 +3,12 @@ Subject: [PATCH] Fix F_*LK* fcntl with __USE_FILE_OFFSET64
 
 2014-08-31  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
-        struct flock64 uses 64bit values.  This introduces other values for
-        F_GETLK, F_SETLK, F_SETLKW to distinguish between both.
-
-        * sysdeps/mach/hurd/bits/fcntl.h (F_GETLK64, F_SETLK64, F_SETLKW64): New
-        macros
-        [__USE_FILE_OFFSET64] (F_GETLK, F_SETLK, F_SETLKW): Define to F_GETLK64,
-        F_SETLK64, F_SETLKW64, respectively.
+	struct flock64 uses 64bit values.  This introduces other values for
+	F_GETLK, F_SETLK, F_SETLKW to distinguish between both.
+	* sysdeps/mach/hurd/bits/fcntl.h (F_GETLK64, F_SETLK64, F_SETLKW64): New
+	macros
+	[__USE_FILE_OFFSET64] (F_GETLK, F_SETLK, F_SETLKW): Define to F_GETLK64,
+	F_SETLK64, F_SETLKW64, respectively.
 	* sysdeps/mach/hurd/flockconv.c: New file.
-        * sysdeps/mach/hurd/fcntl.c (__libc_fcntl): Include "flockconv.c",
-        handle F_GETLK64, F_SETLK64, F_SETLKW64 cases.
+	* sysdeps/mach/hurd/fcntl.c (__libc_fcntl): Include "flockconv.c",
+	handle F_GETLK64, F_SETLK64, F_SETLKW64 cases.
