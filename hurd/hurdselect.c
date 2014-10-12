@@ -544,7 +544,15 @@ _hurd_select (int nfds,
 	       readiness of the erring object and the next call hopefully
 	       will get the error again.  */
 	    if (type & SELECT_ERROR)
-	      type = SELECT_ALL;
+	      {
+		type = 0;
+		if (readfds != NULL && FD_ISSET (i, readfds))
+		  type |= SELECT_READ;
+		if (writefds != NULL && FD_ISSET (i, writefds))
+		  type |= SELECT_WRITE;
+		if (exceptfds != NULL && FD_ISSET (i, exceptfds))
+		  type |= SELECT_URG;
+	      }
 
 	    if (type & SELECT_READ)
 	      ready++;
