@@ -1,16 +1,8 @@
-Subject: Baseline for our topic branches.
+From: David Michael <fedora.dm0@gmail.com>
+Subject: [PATCH] Lookup the startup server through /servers/startup
 
----
+* sysdeps/mach/hurd/reboot.c: Include <hurd/paths.h>
+(reboot): Lookup _SERVERS_STARTUP instead of calling proc_getmsgport to get a
+port to the startup server.
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
 
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
