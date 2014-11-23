@@ -67,3 +67,4 @@ t/gai_misc
 t/fork_ss_hang
 t/lockf64
 t/reboot-startup
+t/WRLCK-upgrade
