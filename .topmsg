@@ -1,16 +1,10 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] Make F_WRLCK potentially upgrade owned F_RDLCK
 
----
+lockf(LOCK_EX) would drop any existing shared lock before taking the exclusive
+lock. F_WRLCK needs an atomic upgrade, so use lockf(LOCK_SH|LOCK_EX) instead.
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
+Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
 
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+* sysdeps/mach/hurd/fcntl.c (__libc_fcntl): For F_WRLCK, set cmd to
+LOCK_SH|LOCK_EX instead of LOCK_SH.
