@@ -1,10 +1,12 @@
 From: Samuel Thibault <samuel.thibault@ens-lyon.org>
-Subject: [PATCH] Make F_WRLCK potentially upgrade owned F_RDLCK
+Subject: [PATCH] Make F_RDLCK/F_WRLCK atomic
 
-lockf(LOCK_EX) would drop any existing shared lock before taking the exclusive
-lock. F_WRLCK needs an atomic upgrade, so use lockf(LOCK_SH|LOCK_EX) instead.
+lockf(LOCK_EX) would for instance drop any existing shared lock before taking
+the exclusive lock. F_RDLCK/F_WRLCK need atomic changes, so introduce and use
+__LOCK_ATOM
 
 Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
 
-* sysdeps/mach/hurd/fcntl.c (__libc_fcntl): For F_WRLCK, set cmd to
-LOCK_SH|LOCK_EX instead of LOCK_SH.
+* misc/sys/file.h (__LOCK_ATOMIC): New macro.
+* sysdeps/mach/hurd/fcntl.c (__libc_fcntl): Use __LOCK_ATOMIC along LOCK_SH and
+LOCK_EX.
