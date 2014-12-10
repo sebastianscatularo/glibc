@@ -1,16 +1,24 @@
-Subject: Baseline for our topic branches.
+From: Justus Winter <4winter@informatik.uni-hamburg.de>
+Subject: [PATCH] Hurd: Fix definition of `PAGE_COPY_THRESHOLD'
+
+Previously, `PAGE_THRESHOLD' was defined instead of
+`PAGE_COPY_THRESHOLD', preventing the optimization of memory copy
+operations using `vm_copy'.
+
+Also, increase the threshold to 4 pages.  XXX Tune this.
+
+* sysdeps/mach/pagecopy.h (PAGE_THRESHOLD): Rename to `PAGE_COPY_THRESHOLD'.
+Raise threshold to XXX pages.
 
 ---
+This is however still WIP:
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+“
+this currently doesn't make any difference since the
+Makefile rules end up compiling sysdeps/i386/i586/memcpy{,_chk}.S,
+i386/i586/memcopy.h, i386/memcopy.h instead...  Also, #if
+PAGE_COPY_THRESHOLD doesn't like PAGE_COPY_THRESHOLD being
+2*__vm_page_size, it ends up considering it false. Also, the rtld magic
+in elf/ doesn't manage to determine that it also needs to include
+wordcopy.os.
+”
