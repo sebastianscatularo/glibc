@@ -1,16 +1,15 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] Fix connect/sendto/sendmsg into making sure to ignore bytes beyond sockaddr length
 
----
+2014-03-01  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
+Thanks Tanaka Akira for the report.
 
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+        * hurd/hurdsocket.h: New file, defines _hurd_sun_path_dupa which
+        duplicates ADDR->sun_path with sockaddr LEN limitation.
+	* sysdeps/mach/hurd/connect.c: Include <string.h>
+	(__connect): Give result of _hurd_sun_path_dupa to name lookup.
+	* sysdeps/mach/hurd/sendmsg.c: Likewise.
+	* sysdeps/mach/hurd/sendto.c: Likewise.
+        * sysdeps/mach/hurd/bind.c: Call _hurd_sun_path_dupa instead of
+        implementing it by hand.
