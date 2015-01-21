@@ -515,6 +515,15 @@ $(common-objpfx)shlib.lds: $(common-objpfx)config.make $(..)Makerules
 		 PROVIDE(__start__hurd_fork_parent_hook = .);\
 		 _hurd_fork_parent_hook : { *(_hurd_fork_parent_hook) }\
 		 PROVIDE(__stop__hurd_fork_parent_hook = .);\
+		 PROVIDE(__start__hurd_atfork_prepare_hook = .);\
+		 _hurd_atfork_prepare_hook : { *(_hurd_atfork_prepare_hook) }\
+		 PROVIDE(__stop__hurd_atfork_prepare_hook = .);\
+		 PROVIDE(__start__hurd_atfork_child_hook = .);\
+		 _hurd_atfork_child_hook : { *(_hurd_atfork_child_hook) }\
+		 PROVIDE(__stop__hurd_atfork_child_hook = .);\
+		 PROVIDE(__start__hurd_atfork_parent_hook = .);\
+		 _hurd_atfork_parent_hook : { *(_hurd_atfork_parent_hook) }\
+		 PROVIDE(__stop__hurd_atfork_parent_hook = .);\
 		 PROVIDE(__start__hurd_fork_locks = .);\
 		 _hurd_fork_locks : { *(_hurd_fork_locks) }\
 		 PROVIDE(__stop__hurd_fork_locks = .);\
