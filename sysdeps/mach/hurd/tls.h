@@ -47,6 +47,10 @@ typedef struct
   void *tcb;			/* Points to this structure.  */
   dtv_t *dtv;			/* Vector of pointers to TLS data.  */
   thread_t self;		/* This thread's control port.  */
+
+  /* Keep this field last */
+  mach_port_t reply_port;	/* This thread's reply port.  */
+  struct hurd_sigstate *_hurd_sigstate;
 } tcbhead_t;
 
 

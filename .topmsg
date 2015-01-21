@@ -1,9 +1,7 @@
-Subject: [PATCH] getcontext, makecontext, setcontext, swapcontext
+From: Thomas Schwinge <thomas@schwinge.name>
+Subject: [PATCH] tls-threadvar
 
-From: Thomas Schwinge <thomas@codesourcery.com>
+replace the custom threadvar mechanism with generic TLS.
+That will fix sigaltstack.
 
-Adapted from the Linux x86 functions.
-
-Not thoroughly tested, but manual testing as well as glibc tests look fine, and
-manual -lpthread testing also looks fine (within the given bounds for a new
-stack to be used with makecontext).
+Note: the added reply_port and _hurd_sigstate fields should be kept last.
