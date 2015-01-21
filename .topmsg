@@ -1,7 +1,7 @@
 From: Thomas Schwinge <thomas@schwinge.name>
-Subject: [PATCH] tls-threadvar
+Subject: Roger Whittaker
 
-replace the custom threadvar mechanism with generic TLS.
-That will fix sigaltstack.
+Not for upstream submission.
 
-Note: the added reply_port and _hurd_sigstate fields should be kept last.
+Currently used by Thomas Schwinge for building cross toolchains / testing /
+development.
