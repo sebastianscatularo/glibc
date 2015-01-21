@@ -1,16 +1,8 @@
-Subject: Baseline for our topic branches.
+From: Thomas Schwinge <thomas@schwinge.name>
+Subject: [PATCH] extern_inline
 
----
+Fix some ``extern inline'' stuff.
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
+glibc-2.8/debian/patches/hurd-i386/submitted-extern_inline.diff 3057
 
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+2008-01-08  Samuel Thibault  <samuel.thibault@ens-lyon.org>
