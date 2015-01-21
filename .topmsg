@@ -1,16 +1,8 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: hurdselect: Let select get interrupted by signals
 
----
+We need to set MACH_RCV_INTERRUPT to avoid __mach_msg just looping on signals,
+and then we can handle the interruption.
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+* hurd/hurdselect.c (_hurd_select): Pass MACH_RCV_INTERRUPT to
+__mach_msg.  If that returns MACH_RCV_INTERRUPTED, set ERR to EINTR.
