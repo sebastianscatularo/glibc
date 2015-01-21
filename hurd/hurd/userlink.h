@@ -76,6 +76,11 @@ struct hurd_userlink
 
 /* Attach LINK to the chain of users at *CHAINP.  */
 
+void
+_hurd_userlink_link (struct hurd_userlink **chainp,
+		     struct hurd_userlink *link);
+
+#if defined __USE_EXTERN_INLINES && defined _LIBC && !defined NOT_IN_libc
 _HURD_USERLINK_H_EXTERN_INLINE void
 _hurd_userlink_link (struct hurd_userlink **chainp,
 		     struct hurd_userlink *link)
@@ -96,11 +101,15 @@ _hurd_userlink_link (struct hurd_userlink **chainp,
   link->thread.prevp = thread_chainp;
   *thread_chainp = link;
 }
+#endif
 
 
 /* Detach LINK from its chain.  Returns nonzero iff this was the
    last user of the resource and it should be deallocated.  */
 
+int _hurd_userlink_unlink (struct hurd_userlink *link);
+
+#if defined __USE_EXTERN_INLINES && defined _LIBC && !defined NOT_IN_libc
 _HURD_USERLINK_H_EXTERN_INLINE int
 _hurd_userlink_unlink (struct hurd_userlink *link)
 {
@@ -123,6 +132,7 @@ _hurd_userlink_unlink (struct hurd_userlink *link)
 
   return dealloc;
 }
+#endif
 
 
 /* Clear all users from *CHAINP.  Call this when the resource *CHAINP
@@ -131,6 +141,9 @@ _hurd_userlink_unlink (struct hurd_userlink *link)
    value is zero, someone is still using the resource and they will
    deallocate it when they are finished.  */
 
+int _hurd_userlink_clear (struct hurd_userlink **chainp);
+
+#if defined __USE_EXTERN_INLINES && defined _LIBC && !defined NOT_IN_libc
 _HURD_USERLINK_H_EXTERN_INLINE int
 _hurd_userlink_clear (struct hurd_userlink **chainp)
 {
@@ -143,5 +156,6 @@ _hurd_userlink_clear (struct hurd_userlink **chainp)
   *chainp = NULL;
   return 0;
 }
+#endif
 
 #endif	/* hurd/userlink.h */
