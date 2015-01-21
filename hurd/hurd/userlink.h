@@ -80,7 +80,7 @@ void
 _hurd_userlink_link (struct hurd_userlink **chainp,
 		     struct hurd_userlink *link);
 
-#ifdef __USE_EXTERN_INLINES
+#if defined __USE_EXTERN_INLINES && defined _LIBC && !defined NOT_IN_libc
 _HURD_USERLINK_H_EXTERN_INLINE void
 _hurd_userlink_link (struct hurd_userlink **chainp,
 		     struct hurd_userlink *link)
@@ -109,7 +109,7 @@ _hurd_userlink_link (struct hurd_userlink **chainp,
 
 int _hurd_userlink_unlink (struct hurd_userlink *link);
 
-#ifdef __USE_EXTERN_INLINES
+#if defined __USE_EXTERN_INLINES && defined _LIBC && !defined NOT_IN_libc
 _HURD_USERLINK_H_EXTERN_INLINE int
 _hurd_userlink_unlink (struct hurd_userlink *link)
 {
@@ -143,7 +143,7 @@ _hurd_userlink_unlink (struct hurd_userlink *link)
 
 int _hurd_userlink_clear (struct hurd_userlink **chainp);
 
-#ifdef __USE_EXTERN_INLINES
+#if defined __USE_EXTERN_INLINES && defined _LIBC && !defined NOT_IN_libc
 _HURD_USERLINK_H_EXTERN_INLINE int
 _hurd_userlink_clear (struct hurd_userlink **chainp)
 {
