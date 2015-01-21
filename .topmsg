@@ -1,17 +1,30 @@
-From: Richard Braun <rbraun@sceen.net>
-Subject: Fix timeout handling in _hurd_select
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: Fix poll and select POSIX compliancy details about errors
     
-Rely on servers to implement timeouts, so that very short values (including
-0) don't make mach_msg return before valid replies can be received. The
-purpose of this scheme is to guarantee a full client-server round-trip,
-whatever the timeout value.
+This fixes the following:
 
-This change depends on the new io_select_timeout RPC being implemented by
-servers.
+- On error, poll must not return without polling, including EBADF, and instead
+report POLLHUP/POLLERR/POLLNVAL
+- Select must report EBADF if some set contains an invalid FD.
 
-* hurd/Makefile (user-interfaces): Add io_reply and io_request.
-* hurd/hurdselect.c: Include <sys/time.h>, <hurd/io_request.h> and <limits.h>.
-(_hurd_select): Replace the call to __io_select with either __io_select_request
-or __io_select_timeout_request, depending on the timeout. Count the number of
-ready descriptors (replies for which at least one type bit is set). Implement
-the timeout locally when there is no file descriptor.
+The idea is to move error management to after all select calls, in the
+poll/select final treatment. The error is instead recorded in a new `error'
+field, and a new SELECT_ERROR bit set.
+
+Thanks Svante Signell for the initial version of the patch.
+
+* hurd/hurdselect.c (SELECT_ERROR): New macro.
+(_hurd_select):
+- Add `error' field to `d' structures array.
+- If a poll descriptor is bogus, set EBADF, but continue with a zero timeout.
+- Go through the whole fd_set, not only until _hurd_dtablesize. Return EBADF
+there is any bit set above _hurd_dtablesize.
+- Do not request io_select on bogus descriptors (SELECT_ERROR).
+- On io_select request error, record the error.
+- On io_select bogus reply, use EIO error code.
+- On io_select bogus or error reply, record the error.
+- Do not destroy reply port for bogus FDs.
+- On error, make poll set POLLHUP in the EPIPE case, POLLNVAL in the EBADF
+case, or else POLLERR.
+- On error, make select simulated readiness.
+
