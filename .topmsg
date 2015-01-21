@@ -1,16 +1,10 @@
-Subject: Baseline for our topic branches.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] t/hooks
 
----
+Add link rules to sort hooks, otherwise they are not properly recorded
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
+2012-04-21  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
-As the baseline is merged into the topic branches, it is forward-only.
+        * Makerules (shlib.lds): Add hurd hooks sorting rules.
 
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
