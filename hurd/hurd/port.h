@@ -62,7 +62,7 @@ struct hurd_port
 
 void _hurd_port_init (struct hurd_port *port, mach_port_t init);
 
-#ifdef __USE_EXTERN_INLINES
+#if defined __USE_EXTERN_INLINES && defined _LIBC && !defined NOT_IN_libc
 _HURD_PORT_H_EXTERN_INLINE void
 _hurd_port_init (struct hurd_port *port, mach_port_t init)
 {
@@ -83,7 +83,7 @@ mach_port_t
 _hurd_port_locked_get (struct hurd_port *port,
 		       struct hurd_userlink *link);
 
-#ifdef __USE_EXTERN_INLINES
+#if defined __USE_EXTERN_INLINES && defined _LIBC && !defined NOT_IN_libc
 _HURD_PORT_H_EXTERN_INLINE mach_port_t
 _hurd_port_locked_get (struct hurd_port *port,
 		       struct hurd_userlink *link)
@@ -107,7 +107,7 @@ mach_port_t
 _hurd_port_get (struct hurd_port *port,
 		struct hurd_userlink *link);
 
-#ifdef __USE_EXTERN_INLINES
+#if defined __USE_EXTERN_INLINES && defined _LIBC && !defined NOT_IN_libc
 _HURD_PORT_H_EXTERN_INLINE mach_port_t
 _hurd_port_get (struct hurd_port *port,
 		struct hurd_userlink *link)
@@ -129,7 +129,7 @@ _hurd_port_free (struct hurd_port *port,
 		 struct hurd_userlink *link,
 		 mach_port_t used_port);
 
-#ifdef __USE_EXTERN_INLINES
+#if defined __USE_EXTERN_INLINES && defined _LIBC && !defined NOT_IN_libc
 _HURD_PORT_H_EXTERN_INLINE void
 _hurd_port_free (struct hurd_port *port,
 		 struct hurd_userlink *link,
@@ -157,7 +157,7 @@ _hurd_port_free (struct hurd_port *port,
 
 void _hurd_port_locked_set (struct hurd_port *port, mach_port_t newport);
 
-#ifdef __USE_EXTERN_INLINES
+#if defined __USE_EXTERN_INLINES && defined _LIBC && !defined NOT_IN_libc
 _HURD_PORT_H_EXTERN_INLINE void
 _hurd_port_locked_set (struct hurd_port *port, mach_port_t newport)
 {
@@ -174,7 +174,7 @@ _hurd_port_locked_set (struct hurd_port *port, mach_port_t newport)
 
 void _hurd_port_set (struct hurd_port *port, mach_port_t newport);
 
-#ifdef __USE_EXTERN_INLINES
+#if defined __USE_EXTERN_INLINES && defined _LIBC && !defined NOT_IN_libc
 _HURD_PORT_H_EXTERN_INLINE void
 _hurd_port_set (struct hurd_port *port, mach_port_t newport)
 {

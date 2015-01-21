@@ -40,7 +40,6 @@
 #include <cthreads.h>		/* For `struct mutex'.  */
 #include <setjmp.h>		/* For `jmp_buf'.  */
 #include <spin-lock.h>
-#include <hurd/threadvar.h>	/* We cache sigstate in a threadvar.  */
 struct hurd_signal_preemptor;	/* <hurd/sigpreempt.h> */
 
 
@@ -64,7 +63,9 @@ struct hurd_sigstate
 
     spin_lock_t lock;		/* Locks most of the rest of the structure.  */
 
+    /* The signal state holds a reference on the thread port.  */
     thread_t thread;
+
     struct hurd_sigstate *next; /* Linked-list of thread sigstates.  */
 
     sigset_t blocked;		/* What signals are blocked.  */
@@ -118,7 +119,9 @@ extern struct hurd_sigstate *_hurd_sigstates;
 
 extern struct mutex _hurd_siglock; /* Locks _hurd_sigstates.  */
 
-/* Get the sigstate of a given thread, taking its lock.  */
+/* Get the sigstate of a given thread.  If there was no sigstate for
+   the thread, one is created, and the thread gains a reference.  If
+   the given thread is MACH_PORT_NULL, return the global sigstate.  */
 
 extern struct hurd_sigstate *_hurd_thread_sigstate (thread_t);
 
@@ -155,14 +158,17 @@ extern void _hurd_sigstate_delete (thread_t thread);
 #define _HURD_SIGNAL_H_EXTERN_INLINE __extern_inline
 #endif
 
-#ifdef __USE_EXTERN_INLINES
+#if defined __USE_EXTERN_INLINES && defined _LIBC && !defined NOT_IN_libc
 _HURD_SIGNAL_H_EXTERN_INLINE struct hurd_sigstate *
 _hurd_self_sigstate (void)
 {
-  struct hurd_sigstate **location = (struct hurd_sigstate **)
-    (void *) __hurd_threadvar_location (_HURD_THREADVAR_SIGSTATE);
+  struct hurd_sigstate **location = &THREAD_SELF->_hurd_sigstate;
   if (*location == NULL)
-    *location = _hurd_thread_sigstate (__mach_thread_self ());
+    {
+      thread_t self = __mach_thread_self ();
+      *location = _hurd_thread_sigstate (self);
+      __mach_port_deallocate (__mach_task_self (), self);
+    }
   return *location;
 }
 #endif
@@ -188,21 +194,31 @@ extern int _hurd_core_limit;
 
 void *_hurd_critical_section_lock (void);
 
-#ifdef __USE_EXTERN_INLINES
+#if defined __USE_EXTERN_INLINES && defined _LIBC && !defined NOT_IN_libc
 _HURD_SIGNAL_H_EXTERN_INLINE void *
 _hurd_critical_section_lock (void)
 {
-  struct hurd_sigstate **location = (struct hurd_sigstate **)
-    (void *) __hurd_threadvar_location (_HURD_THREADVAR_SIGSTATE);
-  struct hurd_sigstate *ss = *location;
+  struct hurd_sigstate **location;
+  struct hurd_sigstate *ss;
+
+#ifdef __LIBC_NO_TLS
+  if (__LIBC_NO_TLS())
+    /* TLS is currently initializing, no need to enter critical section.  */
+    return NULL;
+#endif
+
+  location = &THREAD_SELF->_hurd_sigstate;
+  ss = *location;
   if (ss == NULL)
     {
+      thread_t self = __mach_thread_self ();
+
       /* The thread variable is unset; this must be the first time we've
 	 asked for it.  In this case, the critical section flag cannot
 	 possible already be set.  Look up our sigstate structure the slow
-	 way; this locks the sigstate lock.  */
-      ss = *location = _hurd_thread_sigstate (__mach_thread_self ());
-      __spin_unlock (&ss->lock);
+	 way.  */
+      ss = *location = _hurd_thread_sigstate (self);
+      __mach_port_deallocate (__mach_task_self (), self);
     }
 
   if (! __spin_try_lock (&ss->critical_section_lock))
@@ -218,7 +234,7 @@ _hurd_critical_section_lock (void)
 
 void _hurd_critical_section_unlock (void *our_lock);
 
-#ifdef __USE_EXTERN_INLINES
+#if defined __USE_EXTERN_INLINES && defined _LIBC && !defined NOT_IN_libc
 _HURD_SIGNAL_H_EXTERN_INLINE void
 _hurd_critical_section_unlock (void *our_lock)
 {

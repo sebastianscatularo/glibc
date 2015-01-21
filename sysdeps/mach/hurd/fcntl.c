@@ -1,4 +1,4 @@
-/* Copyright (C) 1992-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -21,6 +21,8 @@
 #include <hurd/fd.h>
 #include <stdarg.h>
 #include <sys/file.h>		/* XXX for LOCK_* */
+
+#include "flockconv.c"
 
 /* Perform file control operations on FD.  */
 int
@@ -150,8 +152,8 @@ __libc_fcntl (int fd, int cmd, ...)
 	  }
 	switch (fl->l_type)
 	  {
-	  case F_RDLCK: cmd |= LOCK_SH; break;
-	  case F_WRLCK: cmd |= LOCK_EX; break;
+	  case F_RDLCK: cmd |= LOCK_SH | __LOCK_ATOMIC; break;
+	  case F_WRLCK: cmd |= LOCK_EX | __LOCK_ATOMIC; break;
 	  case F_UNLCK: cmd |= LOCK_UN; break;
 	  default:
 	    errno = EINVAL;
@@ -178,6 +180,39 @@ __libc_fcntl (int fd, int cmd, ...)
 	  }
 
 	return __flock (fd, cmd);
+      }
+
+    case F_GETLK64:
+    case F_SETLK64:
+    case F_SETLKW64:
+      {
+	struct flock64 *fl64 = va_arg (ap, struct flock64 *);
+	struct flock fl;
+
+	if (flock64_conv (&fl, fl64))
+	  {
+	    result = -1;
+	    break;
+	  }
+
+	switch (cmd)
+	  {
+	  case F_GETLK64:
+	    result = fcntl (fd, F_GETLK, &fl);
+	    if (flock_conv (fl64, &fl))
+	      result = -1;
+	    break;
+
+	  case F_SETLK64:
+	    result = fcntl (fd, F_SETLK, &fl);
+	    break;
+
+	  case F_SETLKW64:
+	    result = fcntl (fd, F_SETLKW, &fl);
+	    break;
+	  }
+
+	break;
       }
 
     case F_GETFL:		/* Get per-open flags.  */
