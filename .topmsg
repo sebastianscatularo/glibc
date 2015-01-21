@@ -1,17 +1,7 @@
 From: Thomas Schwinge <thomas@schwinge.name>
 Subject: [PATCH] tls-threadvar
 
-TODO: replace the custom threadvar mechanism with generic TLS.
+replace the custom threadvar mechanism with generic TLS.
 That will fix sigaltstack.
 
-errno:
-
-* include/errno.h: Remove special-casing for __GNU__.
-* sysdeps/mach/hurd/errno-loc.c: Remove file.
-* sysdeps/mach/hurd/errno.c: Remove file.
-* sysdeps/mach/hurd/dl-sysdep.c (errno): Remove variable.
-
-Until the crash pointed out in
-<http://news.gmane.org/find-root.php?message_id=%3C87txzo9yl4.fsf@kepler.schwinge.homeip.net%3E>
-and following has been resolved, this patch has been (temporarily) reverted in
-commit 40339e71f9b56a3c7ac5909d8f8e7b4274cf5daf.
+Note: the added reply_port and _hurd_sigstate fields should be kept last.

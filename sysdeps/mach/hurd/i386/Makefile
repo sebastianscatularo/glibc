@@ -6,3 +6,8 @@ endif
 ifeq ($(subdir),debug)
 gen-as-const-headers += signal-defines.sym
 endif
+
+ifeq ($(subdir),stdlib)
+gen-as-const-headers += ucontext_i.sym
+sysdep_routines += makecontext-helper
+endif
