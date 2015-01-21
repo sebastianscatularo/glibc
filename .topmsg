@@ -1,5 +1,8 @@
 From: Samuel Thibault <samuel.thibault@ens-lyon.org>
-Subject: Let select be interrupted by signals
+Subject: hurdselect: Let select get interrupted by signals
 
-We need to set MACH_RCV_INTERRUPT to avoid __mach_msg looping on signals, and
-then handle the interruption.
+We need to set MACH_RCV_INTERRUPT to avoid __mach_msg just looping on signals,
+and then we can handle the interruption.
+
+* hurd/hurdselect.c (_hurd_select): Pass MACH_RCV_INTERRUPT to
+__mach_msg.  If that returns MACH_RCV_INTERRUPTED, set ERR to EINTR.
