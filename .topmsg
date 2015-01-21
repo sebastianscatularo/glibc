@@ -1,16 +1,48 @@
-Subject: Baseline for our topic branches.
+From: Thomas Schwinge <thomas@schwinge.name>
+Subject: [PATCH] tls
 
----
+TLS support.
 
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
+2009-07-30  Samuel Thibault  <samuel.thibault@gnu.org>
 
-As the baseline is merged into the topic branches, it is forward-only.
+	* sysdeps/mach/hurd/bits/libc-lock.h [_LIBC - 0]: Include <tls.h>
+	* sysdeps/mach/hurd/tls.h: Include <stdint.h> and <sysdep.h>
+	* include/errno.h (__GNU__): Do not define TLS errno for now.
 
-To advance it:
+	* sysdeps/generic/thread_state.h (MACHINE_NEW_THREAD_STATE_FLAVOR): New
+	macro.
+	* sysdeps/mach/thread_state.h (MACHINE_THREAD_STATE_FIX_NEW): New macro.
+	* sysdeps/mach/i386/thread_state.h (MACHINE_NEW_THREAD_STATE_FLAVOR):
+	New macro, defined to i386_THREAD_STATE.
+	(MACHINE_THREAD_STATE_FLAVOR): Define to i386_REGS_SEGS_STATE instead
+	of i386_THREAD_STATE.
+	(MACHINE_THREAD_STATE_FIX_NEW): New macro, reads segments.
 
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
+	* sysdeps/mach/hurd/i386/trampoline.c (_hurd_setup_sighandler): Use
+	i386_REGS_SEGS_STATE instead of i386_THREAD_STATE.
 
----
+	* sysdeps/mach/hurd/i386/tls.h (_hurd_tls_init): Use kern_return_t
+	error type. Use first GDT slot, 0x48.
+	(_hurd_tls_fork): Use kern_return_t error type.  Duplicate existing LDT
+	descriptor instead of creating a new one.
+	(_hurd_tls_new): New function, creates a new descriptor and updates tcb.
+
+	* mach/mach.h (__mach_setup_tls,mach_setup_tls): Add declarations.
+	* mach/setup-thread.c: Include <ldsodefs.h>.
+	(__mach_setup_thread): Use MACHINE_NEW_THREAD_STATE_FLAVOR instead of
+	MACHINE_THREAD_STATE_FLAVOR.
+	(__mach_setup_tls): New function.
+	* hurd/hurdfault.c (_hurdsig_fault_init): Call
+	MACHINE_THREAD_STATE_FIX_NEW.
+
+	* sysdeps/mach/hurd/profil.c (update_waiter): Call __mach_setup_tls.
+	* sysdeps/mach/hurd/setitimer.c (setitimer_locked): Call
+	__mach_setup_tls.
+	* hurd/hurdsig.c (_hurdsig_init): Call __mach_setup_tls.
+	* sysdeps/mach/hurd/fork.c (__fork): Call _hurd_tls_fork for
+	sigthread.  Pass kernel thread to _hurd_tls_fork.
+	* sysdeps/mach/hurd/i386/init-first.c (init): Move ELF header parsing
+	after getting up the environment pointer.  Call
+	__pthread_initialize_minimal.
+	* csu/libc-start.c (LIBC_START_MAIN) [__GNU__]: Do not call
+	__pthread_initialize_minimal.
