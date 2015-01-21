@@ -1,16 +1,4 @@
-Subject: Baseline for our topic branches.
-
----
-
-This need not strictly be a TopGit branch, but it is for easy synchronization
-between different machines.
-
-As the baseline is merged into the topic branches, it is forward-only.
-
-To advance it:
-
-    $ echo [SHA1] > .topdeps
-    $ git commit -m Advance. -- .topdeps
-    $ tg update
-
----
+From 1b911148009f696717da0b676d6d10af85d5aefb Mon Sep 17 00:00:00 2001
+From: Emilio Pozuelo Monfort <pochu27@gmail.com>
+Date: Sat, 17 Jul 2010 22:09:13 +0200
+Subject: [PATCH] Add support to send file descriptors over Unix sockets
