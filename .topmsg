@@ -1,15 +1,15 @@
 From: Samuel Thibault <samuel.thibault@ens-lyon.org>
-Subject: [PATCH] Fix connect/sendto/sendmsg into ignoring bytes beyond sockaddr length
+Subject: [PATCH] Fix connect/sendto/sendmsg into making sure to ignore bytes beyond sockaddr length
+
+2014-03-01  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
 Thanks Tanaka Akira for the report.
 
-* hurd/hurdsocket.h: New file, defines _hurd_sun_path_dupa which duplicates
-ADDR->sun_path with sockaddr LEN limitation.
-* sysdeps/mach/hurd/connect.c: Include <string.h>
-(__connect): Give result of _hurd_sun_path_dupa to name lookup.
-* sysdeps/mach/hurd/sendmsg.c: Likewise.
-* sysdeps/mach/hurd/sendto.c: Likewise.
-* sysdeps/mach/hurd/bind.c: Call _hurd_sun_path_dupa instead of implementing it
-by hand.
-
-Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
+        * hurd/hurdsocket.h: New file, defines _hurd_sun_path_dupa which
+        duplicates ADDR->sun_path with sockaddr LEN limitation.
+	* sysdeps/mach/hurd/connect.c: Include <string.h>
+	(__connect): Give result of _hurd_sun_path_dupa to name lookup.
+	* sysdeps/mach/hurd/sendmsg.c: Likewise.
+	* sysdeps/mach/hurd/sendto.c: Likewise.
+        * sysdeps/mach/hurd/bind.c: Call _hurd_sun_path_dupa instead of
+        implementing it by hand.
