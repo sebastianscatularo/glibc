@@ -27,7 +27,7 @@ ENTRY(__makecontext)
 	subl	$4, %esp
 	cfi_adjust_cfa_offset (4)
 	movl	%eax, (%esp)
-	call	HIDDEN_JUMPTARGET (__makecontext_helper)
+	/* call	HIDDEN_JUMPTARGET (__makecontext_helper) */
 	addl	$4, %esp
 	cfi_adjust_cfa_offset (-4)
 

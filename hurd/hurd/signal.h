@@ -40,7 +40,6 @@
 #include <cthreads.h>		/* For `struct mutex'.  */
 #include <setjmp.h>		/* For `jmp_buf'.  */
 #include <spin-lock.h>
-#include <hurd/threadvar.h>	/* We cache sigstate in a threadvar.  */
 struct hurd_signal_preemptor;	/* <hurd/sigpreempt.h> */
 
 
@@ -133,8 +132,7 @@ extern struct hurd_sigstate *_hurd_self_sigstate (void)
 _HURD_SIGNAL_H_EXTERN_INLINE struct hurd_sigstate *
 _hurd_self_sigstate (void)
 {
-  struct hurd_sigstate **location = (struct hurd_sigstate **)
-    (void *) __hurd_threadvar_location (_HURD_THREADVAR_SIGSTATE);
+  struct hurd_sigstate **location = &THREAD_SELF->_hurd_sigstate;
   if (*location == NULL)
     *location = _hurd_thread_sigstate (__mach_thread_self ());
   return *location;
@@ -172,9 +170,17 @@ void *_hurd_critical_section_lock (void);
 _HURD_SIGNAL_H_EXTERN_INLINE void *
 _hurd_critical_section_lock (void)
 {
-  struct hurd_sigstate **location = (struct hurd_sigstate **)
-    (void *) __hurd_threadvar_location (_HURD_THREADVAR_SIGSTATE);
-  struct hurd_sigstate *ss = *location;
+  struct hurd_sigstate **location;
+  struct hurd_sigstate *ss;
+
+#ifdef __LIBC_NO_TLS
+  if (__LIBC_NO_TLS())
+    /* TLS is currently initializing, no need to enter critical section.  */
+    return NULL;
+#endif
+
+  location = &THREAD_SELF->_hurd_sigstate;
+  ss = *location;
   if (ss == NULL)
     {
       /* The thread variable is unset; this must be the first time we've

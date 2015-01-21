@@ -22,6 +22,7 @@
 #include <string.h>
 #include <ucontext.h>
 
+#if 0
 
 void
 __makecontext_helper (ucontext_t *ucp)
@@ -67,3 +68,4 @@ __makecontext_helper (ucontext_t *ucp)
       ucp->uc_stack.ss_size -= t_size;
     }
 }
+#endif
