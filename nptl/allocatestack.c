@@ -242,11 +242,7 @@ get_cached_stack (size_t *sizep, void **memp)
 
   /* Clear the DTV.  */
   dtv_t *dtv = GET_DTV (TLS_TPADJ (result));
-  for (size_t cnt = 0; cnt < dtv[-1].counter; ++cnt)
-    if (! dtv[1 + cnt].pointer.is_static
-	&& dtv[1 + cnt].pointer.val != TLS_DTV_UNALLOCATED)
-      free (dtv[1 + cnt].pointer.val);
-  memset (dtv, '\0', (dtv[-1].counter + 1) * sizeof (dtv_t));
+  _dl_clear_dtv (dtv);
 
   /* Re-initialize the TLS.  */
   _dl_allocate_tls_init (TLS_TPADJ (result));
@@ -358,7 +354,14 @@ allocate_stack (const struct pthread_attr *attr, struct pthread **pdp,
 
   /* Get the stack size from the attribute if it is set.  Otherwise we
      use the default we determined at start time.  */
-  size = attr->stacksize ?: __default_pthread_attr.stacksize;
+  if (attr->stacksize != 0)
+    size = attr->stacksize;
+  else
+    {
+      lll_lock (__default_pthread_attr_lock, LLL_PRIVATE);
+      size = __default_pthread_attr.stacksize;
+      lll_unlock (__default_pthread_attr_lock, LLL_PRIVATE);
+    }
 
   /* Get memory for the stack.  */
   if (__builtin_expect (attr->flags & ATTR_FLAG_STACKADDR, 0))
@@ -919,8 +922,9 @@ __reclaim_stacks (void)
 
   in_flight_stack = 0;
 
-  /* Initialize the lock.  */
+  /* Initialize locks.  */
   stack_cache_lock = LLL_LOCK_INITIALIZER;
+  __default_pthread_attr_lock = LLL_LOCK_INITIALIZER;
 }
 
 
