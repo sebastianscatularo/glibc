@@ -76,8 +76,9 @@ typedef struct link_map *lookup_t;
 # define DL_SYMBOL_ADDRESS(map, ref) \
  (void *) (LOOKUP_VALUE_ADDRESS (map) + ref->st_value)
 # define DL_LOOKUP_ADDRESS(addr) ((ElfW(Addr)) (addr))
-# define DL_DT_INIT_ADDRESS(map, start) (start)
-# define DL_DT_FINI_ADDRESS(map, start) (start)
+# define DL_CALL_DT_INIT(map, start, argc, argv, env) \
+ ((init_t) (start)) (argc, argv, env)
+# define DL_CALL_DT_FINI(map, start) ((fini_t) (start)) ()
 #endif
 
 /* On some architectures dladdr can't use st_size of all symbols this way.  */
@@ -128,6 +129,11 @@ typedef struct link_map *lookup_t;
    | ((PROT_WRITE | PROT_EXEC) << (PF_W | PF_X) * 4)			      \
    | ((PROT_READ | PROT_WRITE | PROT_EXEC) << ((PF_R | PF_W | PF_X) * 4)))
 
+/* The filename itself, or the main program name, if available.  */
+#define DSO_FILENAME(name) ((name)[0] ? (name)				      \
+			    : (rtld_progname ?: "<main program>"))
+
+#define RTLD_PROGNAME (rtld_progname ?: "<program name unknown>")
 
 /* For the version handling we need an array with only names and their
    hash values.  */
@@ -227,6 +233,11 @@ extern int _dl_name_match_p (const char *__name, const struct link_map *__map)
 /* Compute next higher prime number.  */
 extern unsigned long int _dl_higher_prime_number (unsigned long int n)
      internal_function;
+
+/* Mask every signal, returning the previous sigmask in OLD.  */
+extern void _dl_mask_all_signals (sigset_t *old) internal_function;
+/* Undo _dl_mask_all_signals.  */
+extern void _dl_unmask_signals (sigset_t *old) internal_function;
 
 /* Function used as argument for `_dl_receive_error' function.  The
    arguments are the error code, error string, and the objname the
@@ -548,6 +559,10 @@ struct rtld_global_ro
      and this points to it.  */
   EXTERN struct link_map *_dl_sysinfo_map;
 #endif
+
+  /* Mask for more hardware capabilities that are available on some
+     platforms.  */
+  EXTERN uint64_t _dl_hwcap2;
 
 #ifdef SHARED
   /* We add a function table to _rtld_global which is then used to
@@ -973,6 +988,17 @@ extern void *_dl_allocate_tls_storage (void)
      internal_function attribute_hidden;
 extern void *_dl_allocate_tls_init (void *) internal_function;
 rtld_hidden_proto (_dl_allocate_tls_init)
+
+/* Remove all allocated dynamic TLS regions from a DTV
+   for reuse by new thread.  */
+extern void _dl_clear_dtv (dtv_t *dtv) internal_function;
+rtld_hidden_proto (_dl_clear_dtv)
+
+extern void *__signal_safe_memalign (size_t boundary, size_t size);
+extern void *__signal_safe_malloc (size_t size);
+extern void __signal_safe_free (void *ptr);
+extern void *__signal_safe_realloc (void *ptr, size_t size);
+extern void *__signal_safe_calloc (size_t nmemb, size_t size);
 
 /* Deallocate memory allocated with _dl_allocate_tls.  */
 extern void _dl_deallocate_tls (void *tcb, bool dealloc_tcb) internal_function;

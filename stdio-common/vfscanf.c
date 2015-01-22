@@ -206,13 +206,13 @@ _IO_vfscanf_internal (_IO_FILE *s, const char *format, _IO_va_list argptr,
 #endif
 {
   va_list arg;
-  register const CHAR_T *f = format;
-  register UCHAR_T fc;	/* Current character of the format.  */
-  register WINT_T done = 0;	/* Assignments done.  */
-  register size_t read_in = 0;	/* Chars read in.  */
-  register WINT_T c = 0;	/* Last char read.  */
-  register int width;		/* Maximum field width.  */
-  register int flags;		/* Modifiers for current format element.  */
+  const CHAR_T *f = format;
+  UCHAR_T fc;	/* Current character of the format.  */
+  WINT_T done = 0;	/* Assignments done.  */
+  size_t read_in = 0;	/* Chars read in.  */
+  WINT_T c = 0;	/* Last char read.  */
+  int width;		/* Maximum field width.  */
+  int flags;		/* Modifiers for current format element.  */
   int errval = 0;
 #ifndef COMPILE_WSCANF
   __locale_t loc = _NL_CURRENT_LOCALE;
@@ -1757,7 +1757,7 @@ _IO_vfscanf_internal (_IO_FILE *s, const char *format, _IO_va_list argptr,
 		 we must recognize "(nil)" as well.  */
 	      if (__builtin_expect (wpsize == 0
 				    && (flags & READ_POINTER)
-				    && (width < 0 || width >= 0)
+				    && (width < 0 || width >= 5)
 				    && c == '('
 				    && TOLOWER (inchar ()) == L_('n')
 				    && TOLOWER (inchar ()) == L_('i')
@@ -1966,6 +1966,8 @@ _IO_vfscanf_internal (_IO_FILE *s, const char *format, _IO_va_list argptr,
 		  if (width > 0)
 		    --width;
 		}
+	      else
+		got_digit = 1;
 	    }
 
 	  while (1)
@@ -2185,7 +2187,7 @@ _IO_vfscanf_internal (_IO_FILE *s, const char *format, _IO_va_list argptr,
 		    }
 
 		  /* Start checking against localized digits, if
-		     convertion is done correctly. */
+		     conversion is done correctly. */
 		  while (1)
 		    {
 		      if (got_e && wp[wpsize - 1] == exp_char

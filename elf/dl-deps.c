@@ -310,8 +310,7 @@ _dl_map_object_deps (struct link_map *map,
 		      _dl_debug_printf ("load auxiliary object=%s"
 					" requested by file=%s\n",
 					name,
-					l->l_name[0]
-					? l->l_name : rtld_progname);
+					DSO_FILENAME (l->l_name));
 
 		    /* We must be prepared that the addressed shared
 		       object is not available.  */
@@ -337,8 +336,7 @@ _dl_map_object_deps (struct link_map *map,
 		      _dl_debug_printf ("load filtered object=%s"
 					" requested by file=%s\n",
 					name,
-					l->l_name[0]
-					? l->l_name : rtld_progname);
+					DSO_FILENAME (l->l_name));
 
 		    /* For filter objects the dependency must be available.  */
 		    bool malloced;
@@ -597,7 +595,6 @@ Filters not supported with LD_TRACE_PRELINKING"));
 	if (list[i]->l_reserved)
 	  {
 	    /* Need to allocate new array of relocation dependencies.  */
-	    struct link_map_reldeps *l_reldeps;
 	    l_reldeps = malloc (sizeof (*l_reldeps)
 				+ map->l_reldepsmax
 				  * sizeof (struct link_map *));
