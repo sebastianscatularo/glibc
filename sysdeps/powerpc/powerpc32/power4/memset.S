@@ -50,7 +50,7 @@ L(_memset):
 
 /* Align to word boundary.  */
 	cmplwi	cr5, rLEN, 31
-	rlwimi	rCHR, rCHR, 8, 16, 23 /* Replicate byte to halfword.  */
+	insrdi	rCHR, rCHR, 8, 48     /* Replicate byte to halfword.  */
 	beq+	L(aligned)
 	mtcrf	0x01, rMEMP0
 	subfic	rALIGN, rALIGN, 4
@@ -65,7 +65,7 @@ L(g0):
 /* Handle the case of size < 31.  */
 L(aligned):
 	mtcrf	0x01, rLEN
-	rlwimi	rCHR, rCHR, 16, 0, 15 /* Replicate halfword to word.  */
+	insrdi	rCHR, rCHR, 16, 32    /* Replicate halfword to word.  */
 	ble	cr5, L(medium)
 /* Align to 32-byte boundary.  */
 	andi.	rALIGN, rMEMP, 0x1C
@@ -162,7 +162,7 @@ L(cacheAligned):
 	add	rMEMP,rMEMP,rCLS
 	b	L(cacheAligned)
 
-/* We are here because the cache line size was set and the remainder 
+/* We are here because the cache line size was set and the remainder
   (rLEN) is less than the actual cache line size.
    So set up the preconditions for L(nondcbz) and go there.  */
 L(handletail32):

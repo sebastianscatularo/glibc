@@ -23,6 +23,7 @@
 
 #include <tls.h>
 #include <dl-tlsdesc.h>
+#include <dl-irel.h>
 
 /* Return nonzero iff ELF header is compatible with the running host.  */
 static inline int __attribute__ ((unused))
@@ -36,8 +37,8 @@ elf_machine_matches_host (const ElfW(Ehdr) *ehdr)
 static inline ElfW(Addr) __attribute__ ((unused))
 elf_machine_dynamic (void)
 {
-  ElfW(Addr) addr = (ElfW(Addr)) &_DYNAMIC;
-  return addr;
+  extern const ElfW(Addr) _GLOBAL_OFFSET_TABLE_[] attribute_hidden;
+  return _GLOBAL_OFFSET_TABLE_[0];
 }
 
 /* Return the run-time load address of the shared object.  */
@@ -243,6 +244,12 @@ elf_machine_rela (struct link_map *map, const ElfW(Rela) *reloc,
       struct link_map *sym_map = RESOLVE_MAP (&sym, version, r_type);
       ElfW(Addr) value = sym_map == NULL ? 0 : sym_map->l_addr + sym->st_value;
 
+      if (sym != NULL
+	  && __glibc_unlikely (ELFW(ST_TYPE) (sym->st_info) == STT_GNU_IFUNC)
+	  && __glibc_likely (sym->st_shndx != SHN_UNDEF)
+	  && __glibc_likely (!skip_ifunc))
+	value = elf_ifunc_invoke (value);
+
       switch (r_type)
 	{
 	case R_AARCH64_COPY:
@@ -257,8 +264,7 @@ elf_machine_rela (struct link_map *map, const ElfW(Rela) *reloc,
 	      strtab = (const void *) D_PTR (map, l_info[DT_STRTAB]);
 	      _dl_error_printf ("\
 %s: Symbol `%s' has different size in shared object, consider re-linking\n",
-				rtld_progname ?: "<program name unknown>",
-				strtab + refsym->st_name);
+				RTLD_PROGNAME, strtab + refsym->st_name);
 	    }
 	  memcpy (reloc_addr_arg, (void *) value,
 		  MIN (sym->st_size, refsym->st_size));
@@ -332,6 +338,12 @@ elf_machine_rela (struct link_map *map, const ElfW(Rela) *reloc,
 	    }
 	  break;
 
+	case R_AARCH64_IRELATIVE:
+	  value = map->l_addr + reloc->r_addend;
+	  value = elf_ifunc_invoke (value);
+	  *reloc_addr = value;
+	  break;
+
 	default:
 	  _dl_reloc_bad_type (map, r_type, 0);
 	  break;
@@ -374,6 +386,13 @@ elf_machine_lazy_rel (struct link_map *map,
       td->arg = (void*)reloc;
       td->entry = (void*)(D_PTR (map, l_info[ADDRIDX (DT_TLSDESC_PLT)])
 			  + map->l_addr);
+    }
+  else if (__glibc_unlikely (r_type == R_AARCH64_IRELATIVE))
+    {
+      ElfW(Addr) value = map->l_addr + reloc->r_addend;
+      if (__glibc_likely (!skip_ifunc))
+	value = elf_ifunc_invoke (value);
+      *reloc_addr = value;
     }
   else
     _dl_reloc_bad_type (map, r_type, 1);
