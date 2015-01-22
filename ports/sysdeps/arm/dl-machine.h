@@ -398,8 +398,7 @@ elf_machine_rel (struct link_map *map, const Elf32_Rel *reloc,
 	      strtab = (const void *) D_PTR (map, l_info[DT_STRTAB]);
 	      _dl_error_printf ("\
 %s: Symbol `%s' has different size in shared object, consider re-linking\n",
-				rtld_progname ?: "<program name unknown>",
-				strtab + refsym->st_name);
+				RTLD_PROGNAME, strtab + refsym->st_name);
 	    }
 	  memcpy (reloc_addr_arg, (void *) value,
 		  MIN (sym->st_size, refsym->st_size));
@@ -504,7 +503,7 @@ elf_machine_rel (struct link_map *map, const Elf32_Rel *reloc,
 	  break;
 	case R_ARM_IRELATIVE:
 	  value = map->l_addr + *reloc_addr;
-	  value = ((Elf32_Addr (*) (void)) value) ();
+	  value = ((Elf32_Addr (*) (int)) value) (GLRO(dl_hwcap));
 	  *reloc_addr = value;
 	  break;
 #endif
@@ -560,8 +559,7 @@ elf_machine_rela (struct link_map *map, const Elf32_Rela *reloc,
 	      strtab = (const void *) D_PTR (map, l_info[DT_STRTAB]);
 	      _dl_error_printf ("\
 %s: Symbol `%s' has different size in shared object, consider re-linking\n",
-				rtld_progname ?: "<program name unknown>",
-				strtab + refsym->st_name);
+				RTLD_PROGNAME, strtab + refsym->st_name);
 	    }
 	  memcpy (reloc_addr_arg, (void *) value,
 		  MIN (sym->st_size, refsym->st_size));
@@ -597,7 +595,7 @@ elf_machine_rela (struct link_map *map, const Elf32_Rela *reloc,
 	  break;
 	case R_ARM_IRELATIVE:
 	  value = map->l_addr + *reloc_addr;
-	  value = ((Elf32_Addr (*) (void)) value) ();
+	  value = ((Elf32_Addr (*) (int)) value) (GLRO(dl_hwcap));
 	  *reloc_addr = value;
 	  break;
 #endif

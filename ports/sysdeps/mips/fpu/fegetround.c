@@ -28,5 +28,6 @@ fegetround (void)
   /* Get control word.  */
   _FPU_GETCW (cw);
 
-  return cw & 0x3;
+  return cw & _FPU_RC_MASK;
 }
+libm_hidden_def (fegetround)
