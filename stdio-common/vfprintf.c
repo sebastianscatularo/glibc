@@ -90,13 +90,13 @@
   do {									      \
     if (width > 0)							      \
       {									      \
-	unsigned int d = _IO_padn (s, (Padchar), width);		      \
-	if (__glibc_unlikely (d == EOF))				      \
+	_IO_ssize_t written = _IO_padn (s, (Padchar), width);		      \
+	if (__glibc_unlikely (written != width))			      \
 	  {								      \
 	    done = -1;							      \
 	    goto all_done;						      \
 	  }								      \
-	done_add (d);							      \
+	done_add (written);						      \
       }									      \
   } while (0)
 # define PUTC(C, F)	_IO_putc_unlocked (C, F)
@@ -119,13 +119,13 @@
   do {									      \
     if (width > 0)							      \
       {									      \
-	unsigned int d = _IO_wpadn (s, (Padchar), width);		      \
-	if (__glibc_unlikely (d == EOF))				      \
+	_IO_ssize_t written = _IO_wpadn (s, (Padchar), width);		      \
+	if (__glibc_unlikely (written != width))			      \
 	  {								      \
 	    done = -1;							      \
 	    goto all_done;						      \
 	  }								      \
-	done_add (d);							      \
+	done_add (written);						      \
       }									      \
   } while (0)
 # define PUTC(C, F)	_IO_putwc_unlocked (C, F)
@@ -147,7 +147,7 @@
 #define	outchar(Ch)							      \
   do									      \
     {									      \
-      register const INT_T outc = (Ch);					      \
+      const INT_T outc = (Ch);						      \
       if (PUTC (outc, s) == EOF || done == INT_MAX)			      \
 	{								      \
 	  done = -1;							      \
@@ -2061,7 +2061,7 @@ printf_unknown (FILE *s, const struct printf_info *info,
   CHAR_T work_buffer[MAX (sizeof (info->width), sizeof (info->prec)) * 3];
   CHAR_T *const workend
     = &work_buffer[sizeof (work_buffer) / sizeof (CHAR_T)];
-  register CHAR_T *w;
+  CHAR_T *w;
 
   outchar (L_('%'));
 
@@ -2267,12 +2267,12 @@ static const struct _IO_jump_t _IO_helper_jumps =
 
 static int
 internal_function
-buffered_vfprintf (register _IO_FILE *s, const CHAR_T *format,
+buffered_vfprintf (_IO_FILE *s, const CHAR_T *format,
 		   _IO_va_list args)
 {
   CHAR_T buf[_IO_BUFSIZ];
   struct helper_file helper;
-  register _IO_FILE *hp = (_IO_FILE *) &helper._f;
+  _IO_FILE *hp = (_IO_FILE *) &helper._f;
   int result, to_flush;
 
   /* Orient the stream.  */

@@ -46,10 +46,10 @@
 # define __field64(type, type64, name) type name
 #elif __BYTE_ORDER == __LITTLE_ENDIAN
 # define __field64(type, type64, name) \
-  type name __attribute__((__aligned__(8))); int __##name##_pad
+  type name __attribute__((__aligned__ (__alignof__ (type64)))); int __##name##_pad
 #else
 # define __field64(type, type64, name) \
-  int __##name##_pad __attribute__((__aligned__(8))); type name
+  int __##name##_pad __attribute__((__aligned__ (__alignof__ (type64)))); type name
 #endif
 
 struct stat
@@ -87,7 +87,7 @@ struct stat
     __time_t st_ctime;			/* Time of last status change.  */
     unsigned long int st_ctimensec;	/* Nsecs of last status change.  */
 #endif
-    int __unused[2];
+    int __glibc_reserved[2];
   };
 
 #undef __field64
@@ -125,7 +125,7 @@ struct stat64
     __time_t st_ctime;			/* Time of last status change.  */
     unsigned long int st_ctimensec;	/* Nsecs of last status change.  */
 #endif
-    int __unused[2];
+    int __glibc_reserved[2];
   };
 #endif
 
