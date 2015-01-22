@@ -320,17 +320,14 @@ __strptime_internal (rp, fmt, tmp, statep LOCALE_PARAM)
 	}
 
       ++fmt;
-      if (statep != NULL)
-	{
-	  /* In recursive calls silently discard strftime modifiers.  */
-	  while (*fmt == '-' || *fmt == '_' || *fmt == '0'
-		 || *fmt == '^' || *fmt == '#')
-	    ++fmt;
+      /* We discard strftime modifiers.  */
+      while (*fmt == '-' || *fmt == '_' || *fmt == '0'
+	     || *fmt == '^' || *fmt == '#')
+	++fmt;
 
-	  /* And field width.  */
-	  while (*fmt >= '0' && *fmt <= '9')
-	    ++fmt;
-	}
+      /* And field width.  */
+      while (*fmt >= '0' && *fmt <= '9')
+	++fmt;
 
 #ifndef _NL_CURRENT
       /* We need this for handling the `E' modifier.  */
@@ -744,7 +741,11 @@ __strptime_internal (rp, fmt, tmp, statep LOCALE_PARAM)
 	  s.want_xday = 1;
 	  break;
 	case 'Z':
-	  /* XXX How to handle this?  */
+	  /* Read timezone but perform no conversion.  */
+	  while (ISSPACE (*rp))
+	    rp++;
+	  while (!ISSPACE (*rp) && *rp != '\0')
+	    rp++;
 	  break;
 	case 'z':
 	  /* We recognize two formats: if two digits are given, these
@@ -1180,8 +1181,8 @@ __strptime_internal (rp, fmt, tmp, statep LOCALE_PARAM)
 
       if (!s.have_yday)
 	tm->tm_yday = ((7 - (tm->tm_wday - w_offset)) % 7
-		       + (s.week_no - 1) *7
-		       + save_wday - w_offset);
+		       + (s.week_no - 1) * 7
+		       + (save_wday - w_offset + 7) % 7);
 
       if (!s.have_mday || !s.have_mon)
 	{

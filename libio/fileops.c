@@ -1245,13 +1245,12 @@ _IO_new_file_write (f, data, n)
      _IO_ssize_t n;
 {
   _IO_ssize_t to_do = n;
-  _IO_ssize_t count = 0;
   while (to_do > 0)
     {
-      count = (__builtin_expect (f->_flags2
-				 & _IO_FLAGS2_NOTCANCEL, 0)
-	       ? write_not_cancel (f->_fileno, data, to_do)
-	       : write (f->_fileno, data, to_do));
+      _IO_ssize_t count = (__builtin_expect (f->_flags2
+					     & _IO_FLAGS2_NOTCANCEL, 0)
+			   ? write_not_cancel (f->_fileno, data, to_do)
+			   : write (f->_fileno, data, to_do));
       if (count < 0)
 	{
 	  f->_flags |= _IO_ERR_SEEN;
@@ -1263,7 +1262,7 @@ _IO_new_file_write (f, data, n)
   n -= to_do;
   if (f->_offset >= 0)
     f->_offset += n;
-  return count < 0 ? count : n;
+  return n;
 }
 
 _IO_size_t
@@ -1272,7 +1271,7 @@ _IO_new_file_xsputn (f, data, n)
      const void *data;
      _IO_size_t n;
 {
-  register const char *s = (const char *) data;
+  const char *s = (const char *) data;
   _IO_size_t to_do = n;
   int must_flush = 0;
   _IO_size_t count = 0;
@@ -1289,7 +1288,7 @@ _IO_new_file_xsputn (f, data, n)
       count = f->_IO_buf_end - f->_IO_write_ptr;
       if (count >= n)
 	{
-	  register const char *p;
+	  const char *p;
 	  for (p = s + n; p > s; )
 	    {
 	      if (*--p == '\n')
@@ -1323,13 +1322,11 @@ _IO_new_file_xsputn (f, data, n)
       _IO_size_t block_size, do_write;
       /* Next flush the (full) buffer. */
       if (_IO_OVERFLOW (f, EOF) == EOF)
-	/* If nothing else has to be written or nothing has been written, we
-	   must not signal the caller that the call was even partially
-	   successful.  */
-	return (to_do == 0 || to_do == n) ? EOF : n - to_do;
+	/* If nothing else has to be written we must not signal the
+	   caller that everything has been written.  */
+	return to_do == 0 ? EOF : n - to_do;
 
-      /* Try to maintain alignment: write a whole number of blocks.
-	 dont_write is what gets left over. */
+      /* Try to maintain alignment: write a whole number of blocks.  */
       block_size = f->_IO_buf_end - f->_IO_buf_base;
       do_write = to_do - (block_size >= 128 ? to_do % block_size : 0);
 
@@ -1357,9 +1354,9 @@ _IO_file_xsgetn (fp, data, n)
      void *data;
      _IO_size_t n;
 {
-  register _IO_size_t want, have;
-  register _IO_ssize_t count;
-  register char *s = data;
+  _IO_size_t want, have;
+  _IO_ssize_t count;
+  char *s = data;
 
   want = n;
 
@@ -1459,9 +1456,9 @@ _IO_file_xsgetn_mmap (fp, data, n)
      void *data;
      _IO_size_t n;
 {
-  register _IO_size_t have;
+  _IO_size_t have;
   char *read_ptr = fp->_IO_read_ptr;
-  register char *s = (char *) data;
+  char *s = (char *) data;
 
   have = fp->_IO_read_end - fp->_IO_read_ptr;
 
