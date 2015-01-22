@@ -69,7 +69,7 @@ static int disallow_malloc_check;
 
 /* Activate a standard set of debugging hooks. */
 void
-__malloc_check_init()
+__malloc_check_init (void)
 {
   if (disallow_malloc_check) {
     disallow_malloc_check = 0;
@@ -236,7 +236,7 @@ top_check(void)
       return -1;
     }
   /* Call the `morecore' hook if necessary.  */
-  void (*hook) (void) = force_reg (__after_morecore_hook);
+  void (*hook) (void) = atomic_forced_read (__after_morecore_hook);
   if (hook)
     (*hook) ();
   main_arena.system_mem = (new_brk - mp_.sbrk_base) + sbrk_size;
@@ -330,7 +330,7 @@ realloc_check(void* oldmem, size_t bytes, const void *caller)
 	if (top_check() >= 0)
 	  newmem = _int_malloc(&main_arena, bytes+1);
 	if (newmem) {
-	  MALLOC_COPY(newmem, oldmem, oldsize - 2*SIZE_SZ);
+	  memcpy(newmem, oldmem, oldsize - 2*SIZE_SZ);
 	  munmap_chunk(oldp);
 	}
       }
@@ -361,10 +361,28 @@ memalign_check(size_t alignment, size_t bytes, const void *caller)
   if (alignment <= MALLOC_ALIGNMENT) return malloc_check(bytes, NULL);
   if (alignment <  MINSIZE) alignment = MINSIZE;
 
-  if (bytes+1 == 0) {
-    __set_errno (ENOMEM);
-    return NULL;
+  /* If the alignment is greater than SIZE_MAX / 2 + 1 it cannot be a
+     power of 2 and will cause overflow in the check below.  */
+  if (alignment > SIZE_MAX / 2 + 1)
+    {
+      __set_errno (EINVAL);
+      return 0;
+    }
+
+  /* Check for overflow.  */
+  if (bytes > SIZE_MAX - alignment - MINSIZE)
+    {
+      __set_errno (ENOMEM);
+      return 0;
+    }
+
+  /* Make sure alignment is power of 2.  */
+  if (!powerof2(alignment)) {
+    size_t a = MALLOC_ALIGNMENT * 2;
+    while (a < alignment) a <<= 1;
+    alignment = a;
   }
+
   (void)mutex_lock(&main_arena.mutex);
   mem = (top_check() >= 0) ? _int_memalign(&main_arena, alignment, bytes+1) :
     NULL;
@@ -458,11 +476,9 @@ __malloc_get_state(void)
   ms->max_mmapped_mem = mp_.max_mmapped_mem;
   ms->using_malloc_checking = using_malloc_checking;
   ms->max_fast = get_max_fast();
-#ifdef PER_THREAD
   ms->arena_test = mp_.arena_test;
   ms->arena_max = mp_.arena_max;
   ms->narenas = narenas;
-#endif
   (void)mutex_unlock(&main_arena.mutex);
   return (void*)ms;
 }
@@ -559,11 +575,9 @@ __malloc_set_state(void* msptr)
     }
   }
   if (ms->version >= 4) {
-#ifdef PER_THREAD
     mp_.arena_test = ms->arena_test;
     mp_.arena_max = ms->arena_max;
     narenas = ms->narenas;
-#endif
   }
   check_malloc_state(&main_arena);
 
