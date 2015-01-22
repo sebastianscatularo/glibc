@@ -61,6 +61,18 @@ typedef union dtv
    are private.  */
 typedef struct
 {
+  /* Reservation for Dynamic System Optimizer ABI.  */
+  uintptr_t dso_slot2;
+  uintptr_t dso_slot1;
+  /* Reservation for tar register (ISA 2.07).  */
+  uintptr_t tar_save;
+  /* GCC split stack support.  */
+  void *__private_ss;
+  /* Reservation for the Event-Based Branching ABI.  */
+  uintptr_t ebb_handler;
+  uintptr_t ebb_ctx_pointer;
+  uintptr_t ebb_reserved1;
+  uintptr_t ebb_reserved2;
   uintptr_t pointer_guard;
   uintptr_t stack_guard;
   dtv_t *dtv;

@@ -19,8 +19,10 @@
 #include <sysdep.h>
 
 	.section	".toc","aw"
+	.p2align 3
 .LC0:	/* 2**23 */
-	.tc FD_4b000000_0[TC],0x4b00000000000000
+	.long 0x4b000000
+	.long 0x0
 	.section	".text"
 
 EALIGN (__floorf, 4, 0)
@@ -47,7 +49,7 @@ EALIGN (__floorf, 4, 0)
 	fnabs	fp1,fp1		/* if (x == 0.0)  */
 				/* x = -0.0; */
 .L9:
-	mtfsf	0x01,fp11	/* restore previous rounding mode.  */	
+	mtfsf	0x01,fp11	/* restore previous rounding mode.  */
 	blr
 	END (__floorf)
 

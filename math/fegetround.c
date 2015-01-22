@@ -22,6 +22,11 @@
 int
 fegetround (void)
 {
+#ifdef FE_TONEAREST
+  return FE_TONEAREST;
+#else
   return 0;
+#endif
 }
+libm_hidden_def (fegetround)
 stub_warning (fegetround)

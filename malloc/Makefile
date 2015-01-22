@@ -25,7 +25,9 @@ all:
 dist-headers := malloc.h
 headers := $(dist-headers) obstack.h mcheck.h
 tests := mallocbug tst-malloc tst-valloc tst-calloc tst-obstack \
-	 tst-mallocstate tst-mcheck tst-mallocfork tst-trim1 tst-malloc-usable
+	 tst-mallocstate tst-mcheck tst-mallocfork tst-trim1 \
+	 tst-malloc-usable tst-realloc tst-posix_memalign \
+	 tst-pvalloc tst-memalign
 test-srcs = tst-mtrace
 
 routines = malloc morecore mcheck mtrace obstack
@@ -76,7 +78,7 @@ install-bin-script += memusage
 generated += memusagestat memusage
 extra-objs += memusagestat.o
 
-# The configure.in check for libgd and its headers did not use $SYSINCLUDES.
+# The configure.ac check for libgd and its headers did not use $SYSINCLUDES.
 # The directory specified by --with-headers usually contains only the basic
 # kernel interface headers, not something like libgd.  So the simplest thing
 # is to presume that the standard system headers will be ok for this file.
@@ -117,7 +119,6 @@ endif
 tst-mcheck-ENV = MALLOC_CHECK_=3
 tst-malloc-usable-ENV = MALLOC_CHECK_=3
 
-CPPFLAGS-malloc.c += -DPER_THREAD
 # Uncomment this for test releases.  For public releases it is too expensive.
 #CPPFLAGS-malloc.o += -DMALLOC_DEBUG=1
 
@@ -141,7 +142,7 @@ $(objpfx)memusage: memusage.sh
 
 
 # The implementation uses `dlsym'
-$(objpfx)libmemusage.so: $(common-objpfx)dlfcn/libdl.so $(elfobjdir)/ld.so
+$(objpfx)libmemusage.so: $(common-objpfx)dlfcn/libdl.so
 
 # Extra dependencies
 $(foreach o,$(all-object-suffixes),$(objpfx)malloc$(o)): arena.c hooks.c
