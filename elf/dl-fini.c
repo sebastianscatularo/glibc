@@ -237,7 +237,7 @@ _dl_fini (void)
 		  if (__builtin_expect (GLRO(dl_debug_mask)
 					& DL_DEBUG_IMPCALLS, 0))
 		    _dl_debug_printf ("\ncalling fini: %s [%lu]\n\n",
-				      l->l_name[0] ? l->l_name : rtld_progname,
+				      DSO_FILENAME (l->l_name),
 				      ns);
 
 		  /* First see whether an array is given.  */
@@ -254,7 +254,7 @@ _dl_fini (void)
 
 		  /* Next try the old-style destructor.  */
 		  if (l->l_info[DT_FINI] != NULL)
-		    ((fini_t) DL_DT_FINI_ADDRESS (l, l->l_addr + l->l_info[DT_FINI]->d_un.d_ptr)) ();
+		     DL_CALL_DT_FINI(l, l->l_addr + l->l_info[DT_FINI]->d_un.d_ptr);
 		}
 
 #ifdef SHARED
