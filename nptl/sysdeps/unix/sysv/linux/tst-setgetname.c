@@ -1,5 +1,5 @@
 /* Test pthread_setname_np and pthread_getname_np.
-   Copyright (C) 2013 Free Software Foundation, Inc.
+   Copyright (C) 2013-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <kernel-features.h>
 
 /* New name of process.  */
 #define NEW_NAME "setname"
@@ -99,6 +100,19 @@ do_test (int argc, char **argv)
   if (res == 0)
     {
       res = get_self_comm (gettid (), name_check, TASK_COMM_LEN);
+
+#if !__ASSUME_PROC_PID_TASK_COMM
+      /* On this first test we look for ENOENT to be returned from
+         get_self_comm to indicate that the kernel is older than
+         2.6.33 and doesn't contain comm within the proc structure.
+         In that case we skip the entire test.  */
+      if (res == ENOENT)
+	{
+	  printf ("SKIP: The kernel does not have /proc/self/task/%%lu/comm.\n");
+	  return 0;
+	}
+#endif
+
       if (res == 0)
        {
          if (strncmp (name, name_check, strlen (BIG_NAME)) == 0)

@@ -1,3 +1,941 @@
+2014-02-06  Carlos O'Donell  <carlos@redhat.com>
+
+	[BZ #16529]
+	* inet/netinet/in.h: Remove comma after IPPROTO_MH.
+
+2014-02-06  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* manual/contrib.texi: Update entry for Carlos O'Donell,
+	Joseph Myers, Roland McGrath, Alexandre Oliva and Ryan Arnold.
+
+2014-02-05  Carlos O'Donell  <carlos@rehdat.com>
+
+	* sysdeps/unix/sysv/linux/kernel-features.h: Fix comment.
+
+	* sysdeps/unix/sysv/linux/kernel-features.h
+	[__LINUX_KERNEL_VERSION >= 0x020621]
+	(__ASSUME_PROC_PID_TASK_COMM): Define.
+
+2014-02-05  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* manual/contrib.texi: Update entry for Ondrej Bilka, Will
+	Newton and Alexandre Oliva.  Add entries for Steve Ellcey, Chris
+	Leonard and Allan McRae.
+
+2014-02-04  David S. Miller  <davem@davemloft.net>
+
+	* sysdeps/sparc/fpu/libm-test-ulps: Update for some 64-bit differences from
+	32-bit.
+
+2014-02-04  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
+
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/nptl/ld-le.abilist: New
+	file
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/nptl/libBrokenLocale-le.abilist:
+	New file
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/nptl/libanl-le.abilist: New
+	file.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/nptl/libc-le.abilist: New
+	file.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/nptl/libcrypt-le.abilist:
+	New file.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/nptl/libdl-le.abilist: New
+	file.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/nptl/libm-le.abilist: New
+	file.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/nptl/libnsl-le.abilist:
+	New file.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/nptl/libpthread-le.abilist:
+	New file.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/nptl/libresolv-le.abilist:
+	New file.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/nptl/librt-le.abilist:
+	New file.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/nptl/libthread_db-le.abilist:
+	New file.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/nptl/libutil-le.abilist:
+	New file.
+
+2014-02-01  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
+
+	* nptl/shlib-versions: Change powerpc*le start to 2.17.
+	* shlib-versions: Likewise.
+
+2014-02-04  Roland McGrath  <roland@hack.frob.com>
+	    Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
+
+	* sysdeps/powerpc/Makefile [$(config-machine) ends with 'le']
+	(abilist-pattern): New variable, set to %-le.abilist.
+
+	* Makerules (abilist-pattern): New variable.
+	(vpath): Use $(abilist-pattern) in place of %.abilist.
+	(check-abi-% pattern rule): Likewise.
+	(check-abi, update-abi): Likewise.
+
+2014-02-04  Eric Wong  <normalperson@yhbt.net>
+
+	* sysdeps/x86_64/fpu/libm-test-ulps: Update.
+
+2014-02-04  Eric Wong  <normalperson@yhbt.net>
+
+	* sysdeps/x86_64/fpu/libm-test-ulps: Update.
+
+2014-02-03  Carlos O'Donell  <carlos@redhat.com>
+
+	* manual/startup.texi: Add next, previous, and top entries for
+	the `Program Arguments' and `Environment Variables' nodes.
+
+2014-02-03  Alexandre Oliva <aoliva@redhat.com>
+
+	* manual/macros.texi: Add comments before MTASC-safety macros.
+
+	* manual/users.texi: Document MTASC-safety properties.
+
+	* manual/threads.texi (pthread_key_create, pthread_key_delete,
+	pthread_getspecific, pthread_setspecific): Format with
+	@deftypefun, and add @safety note.
+	* manual/signal.texi: Move comments that analyze the above
+	functions to their home place.
+
+2014-02-03  Allan McRae  <allan@archlinux.org>
+
+	* po/sl.po: Update Slovenian translation from translation project.
+
+2014-02-02  Alexandre Oliva <aoliva@redhat.com>
+
+	* manual/time.texi (timegm): Add missing blank after @c.
+	Reported by Joseph Myers <joseph@codesourcery.com>.
+
+2014-02-01  Alexandre Oliva <aoliva@redhat.com>
+
+	* manual/check-safety.sh: New.
+	* manual/Makefile ($(objpfx)stamp-summary): Run it.
+
+	* manual/terminal.texi: Document MTASC-safety properties.
+
+	* manual/filesys.texi: Document MTASC-safety properties.
+
+	* manual/errno.texi: Document MTASC-safety properties.
+
+	* manual/intro.texi: Document safety identifiers and
+	conditionals.
+
+	* manual/string.texi (wcstok): Fix prototype.
+	(wcstok, strtok, strtok_r): Adjust reentrancy remarks.
+
+	* manual/time.texi: Document MTASC-safety properties.
+
+	* manual/string.texi: Document MTASC-safety properties.
+
+	* manual/threads.texi: Document MTASC-safety properties.
+
+	* manual/stdio.texi: Document MTASC-safety properties.
+
+	* manual/syslog.texi: Document MTASC-safety properties.
+
+	* manual/sysinfo.texi: Document MTASC-safety properties.
+
+	* manual/startup.texi: Document MTASC-safety properties.
+
+	* manual/socket.texi: Document MTASC-safety properties.
+
+	* manual/signal.texi: Document MTASC-safety properties.
+
+2014-01-31  Alexandre Oliva <aoliva@redhat.com>
+
+	* manual/setjmp.texi: Document MTASC-safety properties.
+
+	* manual/search.texi: Document MTASC-safety properties.
+
+	* manual/resource.texi: Document MTASC-safety properties.
+
+	* manual/process.texi: Document MTASC-safety properties.
+
+	* manual/platform.texi: Document MTASC-safety properties.
+
+	* manual/pipe.texi: Document MTASC-safety properties.
+
+	* manual/pattern.texi: Document MTASC-safety properties.
+
+	* manual/message.texi: Document MTASC-safety properties.
+
+	[BZ #12751]
+	* manual/memory.texi: Document MTASC-safety properties.
+
+	* manual/math.texi: Document MTASC-safety properties.
+
+	* manual/locale.texi: Document MTASC-safety properties.
+
+	* manual/llio.texi: Document MTASC-safety properties.
+
+	* manual/libdl.texi: New.
+
+	* manual/lang.texi: Document MTASC-safety properties.
+
+	* manual/job.texi: Document MTASC-safety properties.
+
+	* manual/getopt.texi: Document MTASC-safety properties.
+
+	* manual/ctype.texi: Document MTASC-safety properties.
+
+2014-01-31  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	[BZ #16046]
+	* csu/libc-tls.c (static_map): Remove variable.
+	(__libc_setup_tls): Use main executable's link map for TLS data.
+	* elf/dl-close.c (_dl_close_worker) [!SHARED]: Remove special
+	casing for LM_ID_BASE and GL(dl_nns).
+	* elf/dl-iteratephdr.c [!SHARED] (dl_iterate_phdr): Remove
+	function.  Alias dl_iterate_phdr to __dl_iterate_phdr.
+	* elf/dl-load.c (_dl_map_object) [!SHARED]: Remove special
+	casing for GL(dl_ns)[LM_ID_BASE]._ns_loaded.
+	* elf/dl-support.c (_dl_main_map): Also initialize l_flags_1
+	member.
+	(_dl_non_dynamic_init): Also initialize _dl_main_map's l_phdr and
+	l_phnum members.
+
+2014-01-30  Alexandre Oliva <aoliva@redhat.com>
+
+	* manual/debug.texi: Document MTASC-safety properties.
+
+2014-01-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	[BZ #16510]
+	* sysdeps/x86/fpu/bits/mathinline.h: Check __SSE2_MATH__ instead
+	of __x86_64__ when disabling x87 inline functions.
+
+2014-01-29  Alexandre Oliva <aoliva@redhat.com>
+
+	* manual/charset.texi: Document MTASC-safety properties.
+
+	* manual/crypt.texi: Document MTASC-safety properties.
+
+	* manual/conf.texi: Document MTASC-safety properties.
+
+	* manual/arith.texi: Document MTASC-safety properties.
+
+	* manual/argp.texi: Document MTASC-safety properties.
+
+	* manual/macros.texi: Introduce macros to document multi
+	thread, asynchronous signal and asynchronous cancellation
+	safety properties.
+	* manual/intro.texi: Introduce the properties themselves.
+
+2014-01-27  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* sysdeps/sh/sh4/Makefile: New file.
+
+2014-01-27  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* math/gen-libm-test.pl ($srcdir): New variable.
+	($auto_input): Use it.
+
+2014-01-27  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	[BZ #16506]
+	* nss/nss_files/files-netgrp.c (_nss_files_setnetgrent): Avoid
+	access beyond array bounds when parsing netgroups file.
+
+	* nscd/netgroupcache.c (addgetnetgrentX): Compute offset from
+	the old buffer before realloc.
+
+2014-01-27  Allan McRae  <allan@archlinux.org>
+
+	* po/fr.po: Update French translation from translation project.
+
+2014-01-26  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* sysdeps/sh/libm-test-ulps: Regenerate.
+
+2014-01-24  David S. Miller  <davem@davemloft.net>
+
+	* sysdeps/sparc/fpu/libm-test-ulps: Regenerate.
+
+2014-01-25  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* sysdeps/sh/sh4/fpu/libm-test-ulps: Move to ...
+	* sysdeps/sh/libm-test-ulps: ... here and regenerated.
+
+2013-01-24  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	[BZ #16474]
+	* nscd/netgroupcache.c (addgetnetgrentX): Adjust triplet
+	string pointers after reallocation.
+
+2014-01-24  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* sysdeps/unix/sysv/linux/sh/sys/ucontext.h: Use __SH4__ and
+	__SH4A__ instead of __SH_FPU_ANY__.
+
+2014-01-23  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* sysdeps/sh/fpu_control.h: New file.
+	* sysdeps/sh/sh4/fpu/fpu_control.h: Remove.
+	* sysdeps/unix/sysv/linux/sh/sys/ucontext.h: New file.
+	* sysdeps/unix/sysv/linux/sh/sh3/sys/ucontext.h: Remove.
+	* sysdeps/unix/sysv/linux/sh/sh3/sys: Remove directory.
+	* sysdeps/unix/sysv/linux/sh/sh4/sys/ucontext.h: Remove.
+	* sysdeps/unix/sysv/linux/sh/sh4/sys: Remove directory.
+	* sysdeps/sh/sys/ucontext.h: Remove.
+	* sysdeps/sh/sys: Remove directory.
+
+2014-01-22  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* sysdeps/unix/sysv/linux/s390/s390-32/sys/ucontext.h: Merge into
+	s390/sys/ucontext.h.
+	* sysdeps/unix/sysv/linux/s390/s390-64/sys/ucontext.h: Likewise.
+	* sysdeps/unix/sysv/linux/s390/sys/ucontext.h: New file.
+
+2014-01-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	[BZ #15605]
+	* sysdeps/x86_64/x32/symbol-hacks.h: Include generic symbol-hacks.h.
+
+2014-01-20  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
+
+	[BZ#16431]
+	* sysdeps/unix/sysv/linux/powerpc/gettimeofday.c (__gettimeofday):
+	Adjust the vDSO correctly for internal calls.
+	* sysdeps/unix/sysv/linux/powerpc/time.c (time): Likewise.
+
+2014-01-20  Allan McRae  <allan@archlinux.org>
+
+	* po/ca.po: Update Catalan translation from translation project.
+
+2014-01-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* sysdeps/s390/sotruss-lib.c: New file.
+
+2014-01-16  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
+
+	[BZ#16430]
+	* sysdeps/unix/sysv/linux/powerpc/gettimeofday.c
+	(__GI___gettimeofday): Alias for a different internal symbol to avoid
+	local calls issues by not having a PLT stub required for IFUNC calls.
+	* sysdeps/unix/sysv/linux/powerpc/time.c (__GI_time): Likewise.
+
+2014-01-16 Joseph Myers  <joseph@codesourcery.com>
+
+	* math/test-fpucw-ieee.c: Use <> in #include of test-fpucw.c.
+	* math/test-fpucw-static.c: Likewise.
+
+2013-01-16  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	[BZ #16453]
+	* nscd/netgroupcache.c (addgetnetgrentX): Don't use alloca.
+
+2014-01-15  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
+
+	* sysdeps/powerpc/sotruss-lib.c: New file: sotruss-lib.so
+	implementation for powerpc.
+
+2014-01-15  Ondřej Bílka  <neleai@seznam.cz>
+
+	[BZ #14782]
+	* sysdeps/posix/system.c (__libc_system): Do not enable
+	asynchronous cancellation.
+
+2014-01-15  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	[BZ #16427]
+	* sysdeps/ieee754/ldbl-128/w_expl.c (__expl): Invoke the non-IEEE
+	handling only for numbers special also in the IEEE case.
+
+2014-01-15  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* sysdeps/s390/fpu/libm-test-ulps: Regenerate.
+
+2014-01-11  Allan McRae  <allan@archlinux.org>
+
+	* po/bg.po: Update Bulgarian translation from translation project.
+
+	* po/de.po: Update German translation from translation project.
+
+2014-01-10  Roland McGrath  <roland@hack.frob.com>
+
+	* sysdeps/generic/gcc-compat.h: New file.
+
+2014-01-10  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* benchtests/asin-inputs: Correct slow inputs.
+	* benchtests/acos-inputs: Likewise.
+
+2014-01-10  Allan McRae  <allan@archlinux.org>
+
+	* po:sv.po: Update Swedish translation from translation project.
+
+	* po/vi.po: Update Vietnamese translation from translation project.
+
+	* po/eo.po: Update Esperanto translation from translation project.
+
+	* po/cs.po: Update Czech translation from translation project.
+
+	* po/nl.po: Update Dutch translation from translation project.
+
+	* po/pl.po: Update Polish translation from translation project.
+
+	* po/ru.po: Update Russian translation from translation project.
+
+	* po/uk.po: Update Ukrainian translation from translation project.
+
+2014-01-08  Brooks Moses  <bmoses@google.com>
+
+	* elf/dl-load.c: Fix comment typo.
+
+2014-01-08  Carlos O'Donell  <carlos@redhat.com>
+
+	* po/header.pot: Rename to...
+	* po/pot.header: ... this.
+	* po/Makefile: Use pot.header.
+
+2014-01-08  Yuriy Kaminskiy  <yumkam@gmail.com>
+	    Maxim Kuvyrkov  <maxim@kugelworks.com>
+
+	[BZ #16394]
+	* sysdeps/i386/i686/memmove.S (memmove): Compare distance between
+	SRC and DEST against LEN.
+
+2014-01-08  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
+
+	[BZ #16414]
+	* sysdeps/powerpc/powerpc64/fpu/s_truncl.S: Remove wrong
+	implementation.
+	* sysdeps/ieee754/ldbl-128ibm/s_truncl.c: Remove bogus comment.
+
+2014-01-08  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
+
+	* sysdeps/powerpc/fpu/libm-test-ulps: Update.
+
+2014-01-08  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #16408]
+	* sysdeps/ieee754/ldbl-128ibm/s_expm1l.c (__expm1l): Use __expl
+	for large positive arguments.
+
+2014-01-07  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/powerpc/nofpu/libm-test-ulps: Regenerated.
+
+	* math/auto-libm-test-in: Mark various tests with
+	xfail-rounding:ldbl-128ibm.
+	* math/auto-libm-test-out: Regenerated.
+
+	[BZ #16407]
+	* sysdeps/ieee754/ldbl-128ibm/e_coshl.c (__ieee754_coshl):
+	Increase overflow threshold.
+
+2014-01-07  Ondřej Bílka  <neleai@seznam.cz>
+
+	[BZ #14286]
+	* stdio-common/vfprintf.c: Check for integer overflow.
+
+2014-01-07  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* sysdeps/s390/dl-tls.h: sysdeps/s390/dl-tls.h: Remove casts for
+	the first argument and return value of __tls_get_addr_internal.
+
+2014-01-07  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* sysdeps/s390/s390-32/dl-machine.h: Gate the definition of refsym
+	also with !RTLD_BOOTSTRAP to get rid of unused variable warning.
+
+2014-01-07  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* sysdeps/s390/Makefile: Build rtld-global-offsets.sym.
+	* sysdeps/s390/rtld-global-offsets.sym: New file.
+	* sysdeps/unix/sysv/linux/s390/Versions: Add getcontext as new
+	GLIBC_2.19 symbol.
+	* sysdeps/unix/sysv/linux/s390/getcontext.S: New file.
+	* sysdeps/unix/sysv/linux/s390/s390-32/getcontext.S: Rename to ...
+	* sysdeps/unix/sysv/linux/s390/s390-32/getcontext-common.S:
+	... this.
+	* sysdeps/unix/sysv/linux/s390/s390-64/getcontext.S: Rename to ...
+	* sysdeps/unix/sysv/linux/s390/s390-64/getcontext-common.S:
+	... this.
+	* sysdeps/unix/sysv/linux/s390/s390-32/nptl/libc.abilist:
+	Regenerate.
+	* sysdeps/unix/sysv/linux/s390/s390-64/nptl/libc.abilist:
+	Regenerate.
+	* sysdeps/unix/sysv/linux/s390/s390-32/setcontext.S: Restore upper
+	halfs of GPRs for high_gprs contexts.
+	* sysdeps/unix/sysv/linux/s390/s390-32/swapcontext.S: Save and
+	restore upper halfs of GPRs for high_gprs contexts.  Copy uc_flags
+	field.
+	* sysdeps/unix/sysv/linux/s390/s390-64/swapcontext.S: Copy
+	uc_flags field.
+	* sysdeps/unix/sysv/linux/s390/sys/ucontext.h: Split into 32 and
+	64 bit versions:
+	* sysdeps/unix/sysv/linux/s390/s390-32/sys/ucontext.h: Add field
+	for high GPRs (uc_high_gprs) and for future extensions
+	(__reserved).
+	* sysdeps/unix/sysv/linux/s390/s390-64/sys/ucontext.h: Add field
+	for future extensions (__reserved).
+	* sysdeps/unix/sysv/linux/s390/ucontext_i.sym: Split into 32 and
+	64 bit versions:
+	* sysdeps/unix/sysv/linux/s390/s390-32/ucontext_i.sym: Add
+	SC_HIGHGPRS offset definition.
+	* sysdeps/unix/sysv/linux/s390/s390-64/ucontext_i.sym: New file.
+	* sysdeps/unix/sysv/linux/s390/rtld-getcontext.S: New file.
+
+2014-01-07  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* Versions.def: Add GLIBC_2.19 for libpthread.
+	* nptl/sysdeps/unix/sysv/linux/s390/Versions: Add longjmp and
+	siglongjmp for libpthread with GLIBC_2.19 symver.
+	* nptl/sysdeps/unix/sysv/linux/s390/pt-longjmp.c: New file.
+	* sysdeps/s390/Makefile: Build v1-longjmp.c and v1-sigjmp.c.
+	* sysdeps/s390/Versions: New GLIBC_2.19 and GLIBC_PRIVATE symbols.
+	* sysdeps/s390/__longjmp.c: New file.
+	* sysdeps/s390/bits/setjmp.h: Add new fields to __s390_jmp_buf.
+	* sysdeps/s390/longjmp.c: New file.
+	* sysdeps/s390/setjmp.S: New file.
+	* sysdeps/s390/sigjmp.S: New file.
+	* sysdeps/s390/v1-longjmp.c: New file.
+	* sysdeps/s390/v1-setjmp.h: New file.
+	* sysdeps/s390/v1-sigjmp.c: New file.
+	* sysdeps/unix/sysv/linux/s390/Makefile: Build __longjmp_chk.
+	* sysdeps/unix/sysv/linux/s390/Versions: Add __longjmp_chk with
+	GLIBC_2.19 version.
+	* sysdeps/unix/sysv/linux/s390/longjmp_chk.c: New file.
+	* sysdeps/unix/sysv/linux/s390/s390-32/____longjmp_chk.c: Provide
+	versioned symbols for ____longjmp_chk.
+	* sysdeps/unix/sysv/linux/s390/s390-64/____longjmp_chk.c:
+	Likewise.
+	* sysdeps/unix/sysv/linux/s390/s390-32/nptl/libc.abilist:
+	Regenerate.
+	* sysdeps/unix/sysv/linux/s390/s390-32/nptl/libpthread.abilist:
+	Regenerate.
+	* sysdeps/unix/sysv/linux/s390/s390-64/nptl/libc.abilist:
+	Regenerate.
+	* sysdeps/unix/sysv/linux/s390/s390-64/nptl/libpthread.abilist:
+	Regenerate.
+	* sysdeps/unix/sysv/linux/s390/v1-longjmp_chk.c: New file.
+	* sysdeps/s390/s390-32/__longjmp.c: Rename to ...
+	* sysdeps/s390/s390-32/__longjmp-common.c: ... this.
+	* sysdeps/s390/s390-32/setjmp.S: Rename and adjust to ...
+	* sysdeps/s390/s390-32/setjmp-common.S: ... this.
+	* sysdeps/s390/s390-64/__longjmp.c: Rename to ...
+	* sysdeps/s390/s390-64/__longjmp-common.c: ... this.
+	* sysdeps/s390/s390-64/setjmp.S: Rename and adjust to ...
+	* sysdeps/s390/s390-64/setjmp-common.S: ... this.
+	* sysdeps/s390/rtld-__longjmp.c: New file.
+	* sysdeps/s390/rtld-setjmp.S: New file.
+
+2014-01-06  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #16400]
+	* sysdeps/ieee754/ldbl-128/e_lgammal_r.c (__ieee754_lgammal_r):
+	Return -__logl (x) for small positive arguments without evaluating
+	a polynomial.
+
+2014-01-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* sysdeps/unix/sysv/linux/sys/ptrace.h (ptrace_peeksiginfo_args):
+	Rename to ...
+	(__ptrace_peeksiginfo_args): ... this.
+	* sysdeps/unix/sysv/linux/powerpc/sys/ptrace.h: Likewise.
+	* sysdeps/unix/sysv/linux/s390/sys/ptrace.h: Likewise.
+	* sysdeps/unix/sysv/linux/sparc/sys/ptrace.h: Likewise.
+
+2014-01-06  Allan McRae  <allan@archlinux.org>
+
+	* inet/netinet/in.h: Fix typo in comment.
+
+2014-01-05  Andreas Jaeger  <aj@suse.de>
+
+	* sysdeps/i386/fpu/libm-test-ulps: Update.
+
+2014-01-05  Allan McRae  <allan@archlinux.org>
+
+	* po/libc.pot: Regenerated.
+
+	* malloc/memusagestat.c: Fix gettext call formatting.
+
+2014-01-04  Sami Kerola  <kerolasa@iki.fi>
+
+	* nscd/nscd.c: Improve usage() output.
+
+2014-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.h.in: Add HAVE_LINUX_FANOTIFY_H template.
+	* sysdeps/unix/sysv/linux/configure: Regenerated.
+	* sysdeps/unix/sysv/linux/configure.ac: Call AC_DEFINE.
+	* sysdeps/unix/sysv/linux/tst-fanotify.c: Include config.h.
+
+2014-01-03  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #16390]
+	* sysdeps/powerpc/nofpu/Makefile [$(subdir) = math]
+	(CFLAGS-e_atan2l.c): Use -fno-builtin-fabsl.
+
+2014-01-03  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
+
+	* sysdeps/powerpc/powerpc64/multiarch/strcasecmp-power7.S: Remove
+	extra tokens at end of #undef directive.
+	* sysdeps/powerpc/powerpc64/multiarch/strcasecmp_l-power7.S: Likewise.
+	* sysdeps/powerpc/powerpc64/multiarch/strnlen-power7.S: Likewise.
+	* sysdeps/powerpc/powerpc64/multiarch/wcscpy.c: Likewise.
+
+2014-01-03  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/powerpc/nofpu/libm-test-ulps: Regenerated.
+
+	* math/auto-libm-test-in: Mark various tests with
+	xfail-rounding:ldbl-128ibm.
+	* math/auto-libm-test-out: Regenerated.
+
+2014-01-02  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #16386]
+	* sysdeps/ieee754/ldbl-128ibm/e_logl.c (__ieee754_logl): Adjust
+	numbers with subnormal high part when calculating exponent.
+
+	[BZ #16385]
+	* sysdeps/ieee754/ldbl-128ibm/s_asinhl.c (__asinhl): Use fabsl not
+	fabs.
+
+	[BZ #16384]
+	* sysdeps/ieee754/ldbl-128ibm/e_acoshl.c (ln2): Initialize with
+	M_LN2l.
+	(__ieee754_acoshl): Use __log1pl not __log1p.
+
+2013-01-02  Ondřej Bílka  <neleai@seznam.cz>
+
+	* malloc/arena.c (malloc_atfork, free_atfork, ptmalloc_lock_all,
+	ptmalloc_unlock_all, ptmalloc_unlock_all2, next_env_entry,
+	__failing_morecore, ptmalloc_init, dump_heap, new_heap, grow_heap,
+	heap_trim, _int_new_arena, get_free_list, reused_arena, arena_get2):
+	Convert to GNU style.
+	* malloc/hooks.c (memalign_hook_ini, __malloc_check_init,
+	mem2mem_check, mem2chunk_check, top_check, realloc_check,
+	memalign_check, __malloc_set_state): Likewise.
+	* malloc/mallocbug.c (main): Likewise.
+	* malloc/malloc.c (__malloc_assert, malloc_init_state, free_perturb,
+	do_check_malloced_chunk, do_check_malloc_state, sysmalloc, systrim,
+	mremap_chunk, __libc_malloc, __libc_free, __libc_realloc, _mid_memalign,
+	_int_malloc, malloc_consolidate, _int_realloc, _int_memalign, mtrim,
+	musable, __libc_mallopt, __posix_memalign, malloc_info): Likewise.
+	* malloc/malloc.h: Likewise.
+	* malloc/mcheck.c (checkhdr, unlink_blk, link_blk, freehook, mallochook,
+	memalignhook, reallochook, mabort): Likewise.
+	* malloc/mcheck.h: Likewise.
+	* malloc/memusage.c (update_data, me, malloc, realloc, calloc, free, mmap,
+	mmap64, mremap, munmap, dest): Likewise.
+	* malloc/memusagestat.c (main, parse_opt, more_help): Likewise.
+	* malloc/morecore.c (__default_morecore): Likewise.
+	* malloc/mtrace.c (tr_break, lock_and_info, mtrace): Likewise.
+	* malloc/obstack.c (_obstack_begin, _obstack_newchunk,
+	_obstack_allocated_p, obstack_free, _obstack_memory_used,
+	print_and_abort): Likewise.
+	* malloc/obstack.h: Likewise.
+	* malloc/set-freeres.c (__libc_freeres): Likewise.
+	* malloc/tst-mallocstate.c (main): Likewise.
+	* malloc/tst-mtrace.c (main): Likewise.
+	* malloc/tst-realloc.c (do_test): Likewise.
+
+2013-01-02  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	[BZ #16366]
+	* nscd/netgroupcache.c (do_notfound): New function.
+	(addgetnetgrentX): Use it.
+
+	[BZ # 16365]
+	* nscd/netgroupcache.c (addgetnetgrentX): Break if status is
+	NSS_STATUS_NOTFOUND.
+
+2014-01-01  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/i386/fpu/libm-test-ulps: Regenerated.
+	* sysdeps/x86_64/fpu/libm-test-ulps: Likewise.
+
+2014-01-01  Allan McRae  <allan@archlinux.org>
+
+	* scripts/update-copyrights: Update configure input file suffix.
+
+	* NEWS: Update copyright year.
+	* catgets/gencat.c: Likewise.
+	* csu/version.c: Likewise.
+	* debug/catchsegv.sh: Likewise.
+	* debug/pcprofiledump.c: Likewise.
+	* debug/xtrace.sh: Likewise.
+	* elf/ldconfig.c: Likewise.
+	* elf/ldd.bash.in: Likewise.
+	* elf/pldd.c: Likewise.
+	* elf/sotruss.ksh: Likewise.
+	* elf/sprof.c: Likewise.
+	* iconv/iconv_prog.c: Likewise.
+	* iconv/iconvconfig.c: Likewise.
+	* locale/programs/locale.c: Likewise.
+	* locale/programs/localedef.c: Likewise.
+	* login/programs/pt_chown.c: Likewise.
+	* malloc/memusage.sh: Likewise.
+	* malloc/memusagestat.c: Likewise.
+	* malloc/mtrace.pl: Likewise.
+	* manual/libc.texinfo: Likewise.
+	* nscd/nscd.c: Likewise.
+	* nss/getent.c: Likewise.
+	* nss/makedb.c: Likewise.
+	* posix/getconf.c: Likewise.
+	* scripts/test-installation.pl: Likewise.
+
+	* All files with FSF copyright notices: Update copyright dates
+	using scripts/update-copyrights.
+	* intl/plural.c: Regenerated.
+	* locale/programs/charmap-kw.h: Likewise.
+	* locale/programs/locfile-kw.h: Likewise.
+
+2013-12-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* sysdeps/unix/sysv/linux/configure: Regenerated.
+	* sysdeps/unix/sysv/linux/configure.ac: Call AC_CHECK_HEADER on
+	the linux/fanotify.h header.
+	* sysdeps/unix/sysv/linux/tst-fanotify.c: Check if
+	HAVE_LINUX_FANOTIFY_H is defined.
+
+2013-12-31  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* benchtests/cos-inputs: New inputs.
+	* benchtests/sin-inputs: Likewise.
+
+	* benchtests/atan-inputs: New inputs. Fix name of multiple
+	precision fallback inputs.
+
+	* benchtests/atanh-inputs: New inputs.
+	* benchtests/tanh-inputs: Likewise.
+
+	* benchtests/acosh-inputs: New inputs.
+	* benchtests/asinh-inputs: Likewise.
+
+	* benchtests/cosh-inputs: New inputs.
+	* benchtests/sinh-inputs: Likewise.
+
+	* benchtests/acos-inputs: Add more inputs.
+	* benchtests/asin-inputs: Likewise.
+
+2013-12-30  Ville Skytta  <ville.skytta@iki.fi>
+
+	[BZ #16375]
+	* manual/arith.texi: Fix spelling.
+	* manual/charset.texi: Likewise.
+	* manual/errno.texi: Likewise.
+	* manual/filesys.texi: Likewise.
+	* manual/lang.texi: Likewise.
+	* manual/llio.texi: Likewise.
+	* manual/locale.texi: Likewise.
+	* manual/message.texi: Likewise.
+	* manual/resource.texi: Likewise.
+	* manual/search.texi: Likewise.
+	* manual/setjmp.texi: Likewise.
+	* manual/stdio.texi: Likewise.
+	* manual/string.texi: Likewise.
+	* manual/sysinfo.texi: Likewise.
+	* manual/time.texi: Likewise.
+
+2013-12-27  Carlos O'Donell  <carlos@redhat.com>
+
+	* po/sl.po: New file.
+
+2013-12-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* .gitignore: Add core/.gdbinit/.gdb_history.
+
+2013-12-27  Allan McRae  <allan@archlinux.org>
+
+	[BZ #16369]
+	* sysdeps/ieee754/dbl-64/s_sin.c (csloww): Fix variable name.
+	Reported by Il'ya Malakhov <ilmalakhov@yandex.ru>
+
+2013-12-24  Brooks Moses  <bmoses@google.com>
+
+	* string/string.h (__CORRECT_ISO_CPP_STRING_H_PROTO): Define for
+	all compilers that claim C++98 compliance, not just GCC.
+	* string/strings.h (__CORRECT_ISO_CPP_STRINGS_H_PROTO):
+	Likewise.
+
+2013-12-24  Maxim Kuvyrkov  <maxim@kugelworks.com>
+
+	* NEWS: Restore accidentally deleted bug-fix entries.
+
+2013-12-24  Maxim Kuvyrkov  <maxim@kugelworks.com>
+	    Ondřej Bílka  <neleai@seznam.cz>
+
+	[BZ #15073]
+	* malloc/malloc.c (_int_free): Perform sanity check only if we
+	have_lock.
+
+2013-12-23  Ondřej Bílka  <neleai@seznam.cz>
+
+	[BZ #12986]
+	* manual/stdio.texi (String Input Conversions): Clarify that character
+	classes are not supported.
+
+2013-12-23  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
+
+	* sysdeps/powerpc/fpu/libm-test-ulps: Update.
+
+2013-12-22  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #16337]
+	* sysdeps/ieee754/ldbl-128/e_lgammal_r.c (__ieee754_lgammal_r):
+	Calculate results for small negative arguments directly rather
+	than using reflection formula with special underflow handling.
+
+	* sysdeps/mach/hurd/Implies: Change unix/bsd/bsd4.4 to unix/bsd.
+	* sysdeps/unix/bsd/syscalls.list (chflags): Add entry from
+	sysdeps/unix/bsd/bsd4.4/syscalls.list.
+	(fchflags): Likewise.
+	(revoke): Likewise.
+	(setlogin): Likewise.
+	(sigaltstack): Likewise.
+	(wait4): Likewise.
+	(sigblock): Remove.
+	(sigsetmask): Likewise.
+	(wait3): Likewise.
+	(waitpid): Likewise.
+	* sysdeps/unix/bsd/bsd4.4/syscalls.list: Remove file.
+	* sysdeps/unix/sysv/linux/wait3.c: Update directory of included
+	file.
+	* sysdeps/unix/bsd/bsd4.4/Makefile: Move to ...
+	* sysdeps/unix/bsd/Makefile: ... here.
+	* sysdeps/unix/bsd/bsd4.4/Versions: Move to ...
+	* sysdeps/unix/bsd/Versions: ... here.
+	* sysdeps/unix/bsd/bsd4.4/bits/sockaddr.h: Move to ...
+	* sysdeps/unix/bsd/bits/sockaddr.h: ... here.
+	* sysdeps/unix/bsd/bsd4.4/cmsg_nxthdr.c: Move to ...
+	* sysdeps/unix/bsd/cmsg_nxthdr.c: ... here.
+	* sysdeps/unix/bsd/bsd4.4/sigblock.c: Move to ...
+	* sysdeps/unix/bsd/sigblock.c: ... here.
+	* sysdeps/unix/bsd/bsd4.4/sigsetmask.c: Move to ...
+	* sysdeps/unix/bsd/sigsetmask.c: ... here.
+	* sysdeps/unix/bsd/bsd4.4/sigvec.c: Move to ...
+	* sysdeps/unix/bsd/sigvec.c: ... here.
+	* sysdeps/unix/bsd/bsd4.4/tcdrain.c: Move to ...
+	* sysdeps/unix/bsd/tcdrain.c: ... here.
+	* sysdeps/unix/bsd/bsd4.4/tcgetattr.c: Move to ...
+	* sysdeps/unix/bsd/tcgetattr.c: ... here.
+	* sysdeps/unix/bsd/bsd4.4/tcsetattr.c: Move to ...
+	* sysdeps/unix/bsd/tcsetattr.c: ... here.
+	* sysdeps/unix/bsd/bsd4.4/wait.c: Move to ...
+	* sysdeps/unix/bsd/wait.c: ... here.
+	* sysdeps/unix/bsd/bsd4.4/wait3.c: Move to ...
+	* sysdeps/unix/bsd/wait3.c: ... here.
+	* sysdeps/unix/bsd/bsd4.4/waitpid.c: Move to ...
+	* sysdeps/unix/bsd/waitpid.c: ... here.
+
+2013-12-21  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #16356]
+	* sysdeps/i386/fpu/e_expl.S (IEEE754_EXPL): Also set
+	round-to-nearest for [!USE_AS_EXPM1L].
+	* sysdeps/x86_64/fpu/e_expl.S (IEEE754_EXPL): Likewise.
+	* math/auto-libm-test-in: Do not expect cosh tests to fail.  Add
+	more tests of exp and exp10.  Expect some exp10 tests to miss
+	exceptions or fail in directed rounding modes.
+	* math/auto-libm-test-out: Regenerated.
+	* math/libm-test.inc (exp10_tonearest_test_data): New array.
+	(exp10_test_tonearest): New function.
+	(exp10_towardzero_test_data): New array.
+	(exp10_test_towardzero): New function.
+	(exp10_downward_test_data): New array.
+	(exp10_test_downward): New function.
+	(exp10_upward_test_data): New array.
+	(exp10_test_upward): New function.
+	(main): Call the new functions.
+	* sysdeps/i386/fpu/libm-test-ulps: Update.
+	* sysdeps/x86_64/fpu/libm-test-ulps: Likewise.
+
+2013-12-20  Joseph Myers  <joseph@codesourcery.com>
+
+	* math/auto-libm-test-in: Add more tests of acos, acosh, asin,
+	asinh, atan, atan2, atanh, cbrt, cos and cosh.
+	* math/auto-libm-test-out: Regenerated.
+	* math/libm-test.inc (acosh_test_data): Add more tests.
+	(atanh_test_data): Likewise.
+	(ceil_test_data): Likewise.
+	(copysign_test_data): Likewise.
+	* sysdeps/i386/fpu/libm-test-ulps: Update.
+	* sysdeps/x86_64/fpu/libm-test-ulps: Likewise.
+
+	* timezone/checktab.awk: Update from tzcode 2013i.
+	* timezone/private.h: Likewise.
+	* timezone/scheck.c: Likewise.
+	* timezone/tzfile.h: Likewise.
+	* timezone/tzselect.ksh: Likewise.
+	* timezone/zdump.c: Likewise.
+	* timezone/zic.c: Likewise.
+
+	* math/auto-libm-test-in: Add tests of cpow.
+	* math/auto-libm-test-out: Regenerated.
+	* math/libm-test.inc (cpow_test_data): Use AUTO_TESTS_cc_c.
+	* * math/gen-auto-libm-tests.c (func_calc_method): Add value
+	mpc_cc_c.
+	(func_calc_desc): Add mpc_cc_c union field.
+	(test_functions): Add cpow.
+	(special_fill_2pi): New function.
+	(special_real_inputs): Add 2pi.
+	(calc_generic_results): Handle mpc_cc_c.
+	* sysdeps/i386/fpu/libm-test-ulps: Update.
+	* sysdeps/x86_64/fpu/libm-test-ulps: Likewise.
+
+	* math/auto-libm-test-in: Add tests of ccos, ccosh, cexp, clog,
+	csqrt, ctan and ctanh.
+	* math/auto-libm-test-out: Regenerated.
+	* math/libm-test.inc (TEST_COND_x86_64): New macro.
+	(TEST_COND_x86): Likewise.
+	(ccos_test_data): Use AUTO_TESTS_c_c.
+	(ccosh_test_data): Likewise.
+	(cexp_test_data): Likewise.
+	(clog_test_data): Likewise.
+	(csqrt_test_data): Likewise.
+	(ctan_test_data): Likewise.
+	(ctan_tonearest_test_data): Likewise.
+	(ctan_towardzero_test_data): Likewise.
+	(ctan_downward_test_data): Likewise.
+	(ctan_upward_test_data): Likewise.
+	(ctanh_test_data): Likewise.
+	(ctanh_tonearest_test_data): Likewise.
+	(ctanh_towardzero_test_data): Likewise.
+	(ctanh_downward_test_data): Likewise.
+	(ctanh_upward_test_data): Likewise.
+	* math/gen-auto-libm-tests.c (func_calc_method): Add value
+	mpc_c_c.
+	(func_calc_desc): Add mpc_c_c union field.
+	(FUNC_mpc_c_c): New macro.
+	(test_functions): Add cacos, cacosh, casin, casinh, catan, catanh,
+	ccos, ccosh, cexp, clog, clog10, csin, csinh, csqrt, ctan and
+	ctanh.
+	(special_fill_min_subnorm_p120): New function.
+	(special_real_inputs): Add min_subnorm_p120.
+	(calc_generic_results): Handle mpc_c_c.
+	* sysdeps/i386/fpu/libm-test-ulps: Update.
+	* sysdeps/x86_64/fpu/libm-test-ulps: Likewise.
+
+2013-12-20  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* sysdeps/ieee754/dbl-64/s_sin.c (do_cos, do_cos_slow, do_sin,
+	do_sin_slow): New functions.
+	(__sin, __cos, slow1, slow2, sloww1, sloww2, bsloww1, bsloww2,
+	cslow2, csloww1, csloww2): Use the new functions.
+
+	* sysdeps/ieee754/dbl-64/s_sin.c (sloww1): Add new argument M.
+	Use M to change sign of result instead of X.  Assume X is
+	positive.
+	(csloww1): Likewise.
+	(__sin): Adjust.
+	(__cos): Adjust.
+
+	* sysdeps/ieee754/dbl-64/s_sin.c (reduce_and_compute): Remove
+	arguments A and DA.
+	(__sin): Adjust.
+	(__cos): Likewise.
+
+	* sysdeps/ieee754/dbl-64/s_sin.c (__sin): Use DA directly.
+	(__cos): Likewise.
+	(sloww1): Don't adjust sign of DX.
+	(csloww1): Likewise.
+	(sloww2): Use X directly and don't adjust sign of DX.
+	(csloww2): Likewise.
+
 2013-12-19  Joseph Myers  <joseph@codesourcery.com>
 
 	* math/auto-libm-test-in: Add tests of cabs and carg.
@@ -37,12 +975,6 @@
 2013-12-19  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
 
 	* sysdeps/powerpc/fpu/libm-test-ulps: Update.
-
-2013-12-19  Paul Pluzhnikov  <ppluzhnikov@google.com>
-
-	* elf/dl-misc.c (ptr_to_signal_safe_allocator_header): New function.
-	(__signal_safe_memalign, __signal_safe_free): Use it.
-	(__signal_safe_realloc): Likewise.
 
 2013-12-19  Joseph Myers  <joseph@codesourcery.com>
 
@@ -127,37 +1059,6 @@
 	* manual/install.texi: Suppress menu for plain text output.
 	* INSTALL: Regenerated.
 
-2013-12-18  Andrew Hunter  <ahh@google.com>
-
-	* sysdeps/generic/ldsodefs.h (__signal_safe_memalign): New prototype.
-	(__signal_safe_malloc, __signal_safe_free): Likewise.
-	(__signal_safe_realloc, __signal_safe_calloc): Likewise.
-	* elf/dl-misc.c (__signal_safe_allocator_header): New struct.
-	(__signal_safe_memalign, __signal_safe_malloc): New function.
-	(__signal_safe_free, __signal_safe_realloc): Likewise.
-	(__signal_safe_calloc): Likewise.
-	* elf/dl-tls.c (allocate_dtv, _dl_clear_dtv): Call signal-safe
-	functions.
-	(_dl_deallocate_tls, _dl_update_slotinfo): Likewise.
-
-2013-12-18  Andrew Hunter  <ahh@google.com>
-
-	* elf/Versions (ld): Add _dl_clear_dtv.
-	* sysdeps/generic/ldsodefs.h (_dl_clear_dtv): New prototype.
-	* elf/dl-tls.c (_dl_clear_dtv): New function.
-	* nptl/allocatestack.c (get_cached_stack): Call _dl_clear_dtv.
-
-2013-12-18  Andrew Hunter  <ahh@google.com>
-
-	* sysdeps/generic/ldsodefs.h (_dl_mask_all_signals): New prototype.
-	(_dl_unmask_signals): Likewise.
-	* sysdeps/mach/hurd/dl-sysdep.h (_dl_mask_all_signals): New stub.
-	(_dl_unmask_all_signals): Likewise.
-	* sysdeps/unix/sysv/linux/dl-sysdep.h (_dl_mask_all_signals): New prototype.
-	(_dl_unmask_all_signals): Likewise.
-	* sysdeps/unix/sysv/linux/dl-sysdep.c (_dl_mask_all_signals): New function.
-	(_dl_unmask_signals): Likewise.
-
 2013-12-18  Brooks Moses  <bmoses@google.com>
 
 	[BZ #15846]
@@ -230,6 +1131,7 @@
 
 2013-12-17  Paul Eggert  <eggert@cs.ucla.edu>
 
+	[BZ #15968]
 	Support TZ transition times < 00:00:00.
 	This is needed for version-3 tz-format files; it supports time
 	stamps past 2037 for America/Godthab (the only entry in the tz
@@ -2981,6 +3883,7 @@
 
 2013-11-04  Joseph Myers  <joseph@codesourcery.com>
 
+	[BZ #6981]
 	* include/stdc-predef.h [__GCC_IEC_559] (__STDC_IEC_559__): Define
 	depending on [__GCC_IEC_559 > 0].
 	[__GCC_IEC_559_COMPLEX] (__STDC_IEC_559_COMPLEX__): Define
@@ -5189,6 +6092,7 @@
 2013-09-05  Carlos O'Donell  <carlos@redhat.com>
 	    Cong Wang  <amwang@redhat.com>
 
+	[BZ #15850]
 	* sysdeps/unix/sysv/linux/bits/in.h
 	[_UAPI_LINUX_IN6_H]: Define __USE_KERNEL_IPV6_DEFS.
 	* inet/netinet/in.h: Move in_addr definition and bits/in.h inclusion
