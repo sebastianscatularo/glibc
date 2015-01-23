@@ -1,5 +1,5 @@
 /* setjmp for ARM.
-   Copyright (C) 1997-2013 Free Software Foundation, Inc.
+   Copyright (C) 1997-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -23,9 +23,7 @@
 
 ENTRY (__sigsetjmp)
 #ifdef PTR_MANGLE
-	PTR_MANGLE (a4, fp, a3, ip)
-#else
-	mov	a4, fp
+	PTR_MANGLE_LOAD (a3, ip)
 #endif
 	mov	ip, r0
 
