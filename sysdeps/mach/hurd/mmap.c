@@ -104,7 +104,6 @@ __mmap (__ptr_t addr, size_t len, int prot, int flags, int fd, off_t offset)
 	     implementations take into account whether the mapping is
 	     anonymous or not when selecting addresses.  */
 	  case PROT_NONE:
-
 	  case PROT_READ:
 	    memobj = robj;
 	    if (wobj != MACH_PORT_NULL)
@@ -134,6 +133,8 @@ __mmap (__ptr_t addr, size_t len, int prot, int flags, int fd, off_t offset)
 		return (__ptr_t) (long int) __hurd_fail (EACCES);
 	      }
 	    break;
+	  default:
+	    __builtin_unreachable ();
 	  }
 	break;
 	/* XXX handle MAP_NOEXTEND */
