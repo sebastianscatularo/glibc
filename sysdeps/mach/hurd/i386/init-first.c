@@ -252,7 +252,6 @@ init (int *data)
     }
   else
     {
-      unsigned int i;
       int usercode;
 
       void call_init1 (void);
