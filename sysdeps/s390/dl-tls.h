@@ -1,5 +1,5 @@
 /* Thread-local storage handling in the ELF dynamic linker.  s390 version.
-   Copyright (C) 2003-2013 Free Software Foundation, Inc.
+   Copyright (C) 2003-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -91,7 +91,7 @@ extern void *__tls_get_addr_internal (tls_index *ti);
    compiler will take care of setting up r12 only if itself issued the
    __tls_get_offset call.  */
 # define __TLS_GET_ADDR(__ti)					\
-  ({ (void *) __tls_get_addr_internal ((char *) (__ti))		\
+  ({ __tls_get_addr_internal (__ti)				\
       + (unsigned long) __builtin_thread_pointer (); })
 
 #endif
