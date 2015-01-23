@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -90,7 +90,7 @@ enum
     IPPROTO_MAX
   };
 
-/* If __USER_KERNEL_IPV6_DEFS is defined then the user has included the kernel
+/* If __USE_KERNEL_IPV6_DEFS is defined then the user has included the kernel
    network headers first and we should use those ABI-identical definitions
    instead of our own.  */
 #ifndef __USE_KERNEL_IPV6_DEFS
@@ -108,7 +108,7 @@ enum
 #define IPPROTO_NONE		IPPROTO_NONE
     IPPROTO_DSTOPTS = 60,  /* IPv6 destination options.  */
 #define IPPROTO_DSTOPTS		IPPROTO_DSTOPTS
-    IPPROTO_MH = 135,      /* IPv6 mobility header.  */
+    IPPROTO_MH = 135       /* IPv6 mobility header.  */
 #define IPPROTO_MH		IPPROTO_MH
   };
 #endif /* !__USE_KERNEL_IPV6_DEFS */
