@@ -1,5 +1,5 @@
 /* Map in a shared object's segments from the file.
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -1734,7 +1734,7 @@ open_verify (const char *name, struct filebuf *fbp, struct link_map *loader,
       unsigned int osversion;
       size_t maplength;
 
-      /* We successfully openened the file.  Now verify it is a file
+      /* We successfully opened the file.  Now verify it is a file
 	 we can use.  */
       __set_errno (0);
       fbp->len = 0;
@@ -2233,23 +2233,17 @@ _dl_map_object (struct link_map *loader, const char *name,
 
 	  if (cached != NULL)
 	    {
-# ifdef SHARED
 	      // XXX Correct to unconditionally default to namespace 0?
 	      l = (loader
 		   ?: GL(dl_ns)[LM_ID_BASE]._ns_loaded
-		   ?: &GL(dl_rtld_map));
-# else
-	      l = loader;
+# ifdef SHARED
+		   ?: &GL(dl_rtld_map)
 # endif
+		  );
 
 	      /* If the loader has the DF_1_NODEFLIB flag set we must not
 		 use a cache entry from any of these directories.  */
-	      if (
-# ifndef SHARED
-		  /* 'l' is always != NULL for dynamically linked objects.  */
-		  l != NULL &&
-# endif
-		  __builtin_expect (l->l_flags_1 & DF_1_NODEFLIB, 0))
+	      if (__builtin_expect (l->l_flags_1 & DF_1_NODEFLIB, 0))
 		{
 		  const char *dirp = system_dirs;
 		  unsigned int cnt = 0;
