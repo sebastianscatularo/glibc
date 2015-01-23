@@ -1,5 +1,5 @@
 /* FPU control word overridden initialization test.
-   Copyright (C) 2013 Free Software Foundation, Inc.
+   Copyright (C) 2013-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -21,7 +21,7 @@
 # define FPU_CONTROL _FPU_IEEE
 #endif
 
-#include "test-fpucw.c"
+#include <test-fpucw.c>
 
 /* Preempt the library's definition of `__fpu_control'.  */
 fpu_control_t __fpu_control = FPU_CONTROL;
