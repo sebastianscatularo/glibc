@@ -2,5 +2,7 @@ From: Samuel Thibault <samuel.thibault@ens-lyon.org>
 Subject: [PATCH] Add futimens support
  
 * sysdeps/mach/hurd/futimens.c: New file.
+
+TODO: add and implement UTIME_OMIT and UTIME_NOW
   
 Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
