@@ -4,7 +4,6 @@ Subject: [PATCH] Implement SysV shared memory for GNU/Hurd.
 2005-07-11  Marcus Brinkmann  <marcus@gnu.org>
 
         * hurd/Makefile (routines): Add sysvshm.
-        (distribute): Add sysvshm.h.
         * hurd/sysvshm.h: New file.
         * hurd/sysvshm.c: New file.
         * sysdeps/mach/hurd/bits/stat.h (S_IMMAP0): New macro.
