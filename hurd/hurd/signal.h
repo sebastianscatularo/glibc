@@ -244,7 +244,7 @@ _hurd_critical_section_unlock (void *our_lock)
   else
     {
       /* It was us who acquired the critical section lock.  Unlock it.  */
-      struct hurd_sigstate *ss = (struct hurd_sigstate *) our_lock;
+      struct hurd_sigstate *ss = our_lock;
       sigset_t pending;
       _hurd_sigstate_lock (ss);
       __spin_unlock (&ss->critical_section_lock);
