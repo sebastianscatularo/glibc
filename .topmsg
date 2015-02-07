@@ -1,3 +1,5 @@
+Commited
+
 From: Richard Braun <rbraun@sceen.net>
 Subject: [PATCH] Hurd: fix sigstate locking
 
