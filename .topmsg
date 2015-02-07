@@ -1,9 +1,11 @@
-From: Thomas Schwinge <thomas@schwinge.name>
-Subject: [PATCH] tls
-
-TLS support.
+From: Samuel Thibault <samuel.thibault@gnu.org>
+Subject: [PATCH] hurd: add TLS support
 
 2009-07-30  Samuel Thibault  <samuel.thibault@gnu.org>
+
+	Add TLS support: __mach_setup_tls allocates and sets
+	architecture state for the TLS area.  i386 fork needs to
+	propagate the segment kernel definitions.
 
 	* sysdeps/mach/hurd/bits/libc-lock.h [_LIBC - 0]: Include <tls.h>
 	* sysdeps/mach/hurd/tls.h: Include <stdint.h> and <sysdep.h>
