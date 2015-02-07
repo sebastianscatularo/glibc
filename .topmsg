@@ -5,3 +5,6 @@ Subject: [PATCH] Fix boot with statically-linked exec server.
 when the pointer given in D is nul (as set by ext2fs).
 
 Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
+
+TODO: why is that actually needed? If exec being static is the problem,
+that would happen with ext2fs.static too, but it doesn't...
