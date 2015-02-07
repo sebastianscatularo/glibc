@@ -1,8 +1,29 @@
-From: Thomas Schwinge <thomas@schwinge.name>
-Subject: [PATCH] extern_inline
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] hurd: take __USE_EXTERN_INLINES into account
 
-Fix some ``extern inline'' stuff.
+* hurd/hurd.h (__hurd_fail): Always declare function, and provide inline
+version only if __USE_EXTERN_INLINES is defined.
+* hurd/hurd/fd.h (_hurd_fd_get, _hurd_fd_error_signal, _hurd_fd_error,
+__hurd_dfail, __hurd_sockfail): Likewise.
+* mach/lock-intern.h (__spin_lock_init, __spin_lock, __mutex_lock,
+__mutex_unlock, __mutex_trylock): Likewise.
+* mach/mach/mig_support.h (__mig_strncpy): Likewise.
+* sysdeps/generic/machine-lock.h (__spin_unlock, __spin_try_lock,
+__spin_lock_locked): Likewise.
+* sysdeps/generic/machine-sp.h (__thread_stack_pointer): Likewise.
+* sysdeps/mach/i386/machine-lock.h (__spin_unlock, __spin_try_lock,
+__spin_lock_locked): Likewise.
 
-glibc-2.8/debian/patches/hurd-i386/submitted-extern_inline.diff 3057
+* hurd/hurd/port.h (_hurd_port_init, _hurd_port_locked_get,
+_hurd_port_get, _hurd_port_free, _hurd_port_locked_set,
+_hurd_port_set): Always declare functions, and provide inline version
+only if __USE_EXTERN_INLINES is defined and _LIBC is defined and
+NOT_IN_libc is not defined.
+* hurd/hurd/signal.h (_hurd_self_sigstate, _hurd_critical_section_lock,
+_hurd_critical_section_unlock): Likewise.
+* hurd/hurd/threadvar.h (__hurd_threadvar_location_from_sp,
+* __hurd_threadvar_location): Likewise.
+* hurd/hurd/userlink.h (_hurd_userlink_link, _hurd_userlink_unlink,
+_hurd_userlink_clear): Likewise.
 
-2008-01-08  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+* mach/spin-lock.c (__USE_EXTERN_INLINES): Define to 1.
