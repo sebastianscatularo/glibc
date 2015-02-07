@@ -6,10 +6,37 @@ Subject: [PATCH] Implement SysV shared memory for GNU/Hurd.
         * hurd/Makefile (routines): Add sysvshm.
         * hurd/sysvshm.h: New file.
         * hurd/sysvshm.c: New file.
-        * sysdeps/mach/hurd/bits/stat.h (S_IMMAP0): New macro.
-        (S_ISPARE): Unset the S_IMMAP0 flag.
         * sysdeps/mach/hurd/ftok.c: New file.
         * sysdeps/mach/hurd/shmat.c: New file.
         * sysdeps/mach/hurd/shmctl.c: New file.
         * sysdeps/mach/hurd/shmdt.c: New file.
+        * sysdeps/mach/hurd/shmget.c: New file.
         * sysdeps/mach/hurd/bits/posix_opt.h: Define _XOPEN_SHM to 1.
+
+TODO:
+“
+> +  char filename[sizeof (SHM_DIR) - 1 + SHM_NAMEMAX];
+> +  struct stat statbuf;
+> +
+> +  sprintf (filename, SHM_DIR SHM_NAMEPRI, id);
+> +  /* SysV requires read access for IPC_STAT.  */
+> +  fd = __open (filename, O_NORW);
+> +  if (fd < 0)
+> +    {
+> +      if (errno == ENOENT)
+> +     errno = EINVAL;
+> +      return -1;
+> +    }
+
+Since this is repeated in more than one function, put it into an
+internal subroutine.  Then we have only one place doing the
+name-generation logic.
+”
+
+“
+> +    case IPC_RMID:
+> +      res = __unlink (filename);
+> +      /* FIXME: Check error (mapping ENOENT to EINVAL).  */
+
+Fix it.
+”

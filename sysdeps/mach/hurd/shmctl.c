@@ -1,4 +1,5 @@
-/* Copyright (C) 2005-2015 Free Software Foundation, Inc.
+/* SysV shmctl for Hurd.
+   Copyright (C) 2005-2015 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -26,7 +27,7 @@
 
 #include "sysvshm.h"
 
-/* Provide operations to control over shared memory segments.  */
+/* Provide operations to control shared memory segments.  */
 int
 __shmctl (int id, int cmd, struct shmid_ds *buf)
 {

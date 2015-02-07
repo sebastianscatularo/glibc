@@ -1,4 +1,5 @@
-/* Copyright (C) 2005-2015 Free Software Foundation, Inc.
+/* SysV shmget for Hurd.
+   Copyright (C) 2005-2015 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -94,7 +95,7 @@ get_exclusive (int shmflags, size_t size, key_t *r_key, int *r_fd)
       key = SHM_PRIV_KEY_START;
 
       /* Try to link the shared memory segment into the filesystem
-	 (exclusively).  Private segments have negative keys.  */
+	 (exclusively).  */
       do
 	{
 	  sprintf (filename, SHM_NAMEPRI, key);

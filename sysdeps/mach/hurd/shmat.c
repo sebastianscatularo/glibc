@@ -1,4 +1,5 @@
-/* Copyright (C) 2005-2015 Free Software Foundation, Inc.
+/* SysV shmat for Hurd.
+   Copyright (C) 2005-2015 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -53,7 +54,9 @@ __shmat (int shmid, const void *shmaddr, int shmflg)
   res = __fstat (fd, &statbuf);
   if (res < 0)
     {
+      err = errno;
       __close (fd);
+      errno = err;
       return (void *) -1;
     }
 
@@ -68,6 +71,7 @@ __shmat (int shmid, const void *shmaddr, int shmflg)
   if (err)
     {
       munmap (addr, statbuf.st_size);
+      errno = err;
       return (void *) -1;
     }
 

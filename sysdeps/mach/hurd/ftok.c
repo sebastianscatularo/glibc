@@ -1,6 +1,6 @@
-/* Copyright (C) 1995-2015 Free Software Foundation, Inc.
+/* SysV ftok for Hurd.
+   Copyright (C) 1995-2015 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
-   Contributed by Ulrich Drepper <drepper@gnu.ai.mit.edu>, August 1995.
 
    The GNU C Library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -21,8 +21,9 @@
 
 
 /* In the Hurd, we use the second-to-most-significant bit as flag for
-   private keys.  We use a different order of the components so that
-   the biggest one---the inode number---is affected by this.  */
+   private keys.  We use an order of the components different from the generic
+   code in sysvipc/ftok.c so that the biggest one--the inode number--is
+   affected by this.  */
 
 key_t
 ftok (pathname, proj_id)
