@@ -230,7 +230,7 @@ setitimer_locked (const struct itimerval *new, struct itimerval *old,
 					 &timer_thread,
 					 &_hurd_itimer_thread_stack_base,
 					 &_hurd_itimer_thread_stack_size))
-	      || (err = __mach_setup_tls(_hurd_itimer_thread)))
+	      || (err = __mach_setup_tls (_hurd_itimer_thread)))
 	    {
 	      __thread_terminate (_hurd_itimer_thread);
 	      _hurd_itimer_thread = MACH_PORT_NULL;

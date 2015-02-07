@@ -194,7 +194,7 @@ init (int *data)
 
   /* We need to setup TLS before starting sigthread */
   extern void __pthread_initialize_minimal(void);
-  __pthread_initialize_minimal();
+  __pthread_initialize_minimal ();
 #endif
 
 
