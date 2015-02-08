@@ -27,3 +27,8 @@ _hurd_critical_section_unlock): Likewise.
 _hurd_userlink_clear): Likewise.
 
 * mach/spin-lock.c (__USE_EXTERN_INLINES): Define to 1.
+
+* hurd/Versions (libc: GLIBC_2.19): Add _hurd_fd_error_signal,
+_hurd_fd_error, __hurd_dfail, __hurd_sockfail,
+__hurd_threadvar_location_from_sp, __hurd_threadvar_location,
+_hurd_userlink_link, _hurd_userlink_unlink, _hurd_userlink_clear.
