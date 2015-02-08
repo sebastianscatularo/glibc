@@ -37,6 +37,8 @@
 #  define __i386_set_gdt(thr, sel, desc) ((void) (thr), (void) (sel), (void) (desc), MIG_BAD_ID)
 # endif
 
+#define __i386_selector_is_ldt(sel) (!!((sel) & 4))
+
 # include <errno.h>
 # include <assert.h>
 
@@ -94,7 +96,7 @@ _hurd_tls_init (tcbhead_t *tcb, int secondcall)
       /* Fetch the selector set by the first call.  */
       int sel;
       asm ("mov %%gs, %w0" : "=q" (sel) : "0" (0));
-      if (__builtin_expect (sel, 0x48) & 4) /* LDT selector */
+      if (__glibc_unlikely (__i386_selector_is_ldt(sel)))
 	{
 	  kern_return_t err = __i386_set_ldt (tcb->self, sel, &desc, 1);
 	  assert_perror (err);
@@ -153,7 +155,7 @@ _hurd_tls_fork (thread_t child, thread_t orig, struct i386_thread_state *state)
   kern_return_t err;
   unsigned int count = 1;
 
-  if (__builtin_expect (sel, 0x48) & 4) /* LDT selector */
+  if (__glibc_unlikely (__i386_selector_is_ldt(sel)))
     err = __i386_get_ldt (orig, sel, 1, &_desc, &count);
   else
     err = __i386_get_gdt (orig, sel, &desc);
@@ -162,7 +164,7 @@ _hurd_tls_fork (thread_t child, thread_t orig, struct i386_thread_state *state)
   if (err)
     return err;
 
-  if (__builtin_expect (sel, 0x48) & 4) /* LDT selector */
+  if (__glibc_unlikely (__i386_selector_is_ldt(sel)))
     err = __i386_set_ldt (child, sel, &desc, 1);
   else
     err = __i386_set_gdt (child, &sel, desc);
@@ -186,7 +188,7 @@ _hurd_tls_new (thread_t child, struct i386_thread_state *state, tcbhead_t *tcb)
   tcb->tcb = tcb;
   tcb->self = child;
 
-  if (__builtin_expect (sel, 0x48) & 4) /* LDT selector */
+  if (__glibc_unlikely (__i386_selector_is_ldt(sel)))
     err = __i386_set_ldt (child, sel, &desc, 1);
   else
     err = __i386_set_gdt (child, &sel, desc);

@@ -23,8 +23,10 @@ Subject: [PATCH] hurd: add TLS support
 	* sysdeps/mach/hurd/i386/trampoline.c (_hurd_setup_sighandler): Use
 	i386_REGS_SEGS_STATE instead of i386_THREAD_STATE.
 
-	* sysdeps/mach/hurd/i386/tls.h (_hurd_tls_init): Use kern_return_t
-	error type. Use first GDT slot, 0x48.
+	* sysdeps/mach/hurd/i386/tls.h (__i386_selector_is_ldt): New
+	macro.
+	(_hurd_tls_init): Use kern_return_t error type.  Use
+	__i386_selector_is_ldt to test for LDT segment type.
 	(_hurd_tls_fork): Use kern_return_t error type.  Duplicate existing LDT
 	descriptor instead of creating a new one.
 	(_hurd_tls_new): New function, creates a new descriptor and updates tcb.

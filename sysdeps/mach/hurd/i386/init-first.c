@@ -112,9 +112,7 @@ init1 (int argc, char *arg0, ...)
      then after the environment pointers there is no Hurd
      data block; the argument strings start there.  */
   if ((void *) d == argv[0])
-    {
-      return;
-    }
+    return;
 
 #ifndef SHARED
   __libc_enable_secure = d->flags & EXEC_SECURE;
@@ -201,8 +199,8 @@ init (int *data)
       assert (d->phdrsz % sizeof (ElfW(Phdr)) == 0);
     }
 
-  /* We need to setup TLS before starting sigthread */
-  extern void __pthread_initialize_minimal(void);
+  /* We need to setup TLS before starting the signal thread.  */
+  extern void __pthread_initialize_minimal (void);
   __pthread_initialize_minimal ();
 #endif
 

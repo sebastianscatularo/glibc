@@ -94,7 +94,7 @@ __mach_setup_tls (thread_t thread)
   assert (tssize == MACHINE_THREAD_STATE_COUNT);
 
   tcb = _dl_allocate_tls (NULL);
-  if (!tcb)
+  if (tcb == NULL)
     return KERN_RESOURCE_SHORTAGE;
 
   _hurd_tls_new (thread, &ts, tcb);
