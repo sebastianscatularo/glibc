@@ -142,7 +142,7 @@ __libc_fcntl (int fd, int cmd, ...)
 	    /* FALLTHROUGH */
 	  case F_SETLK:
 	    return __f_setlk (fd, fl->l_type, fl->l_whence,
-			      fl->l_start, fl->l_end, wait);
+			      fl->l_start, fl->l_len, wait);
 	  default:
 	    errno = EINVAL;
 	    return -1;
@@ -153,7 +153,7 @@ __libc_fcntl (int fd, int cmd, ...)
     case F_SETLK64:
     case F_SETLKW64:
       {
-	struct flock64 *fl64 = va_arg (ap, struct flock64 *);
+	struct flock64 *fl = va_arg (ap, struct flock64 *);
 	int wait = 0;
 	va_end (ap);
 	switch (cmd)
@@ -166,7 +166,7 @@ __libc_fcntl (int fd, int cmd, ...)
 	    /* FALLTHROUGH */
 	  case F_SETLKW64:
 	    return __f_setlk (fd, fl->l_type, fl->l_whence,
-			      fl->l_start, fl->l_end, wait);
+			      fl->l_start, fl->l_len, wait);
 	  default:
 	    errno = EINVAL;
 	    return -1;
