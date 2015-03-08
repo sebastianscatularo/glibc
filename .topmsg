@@ -1,18 +1,7 @@
 From: Samuel Thibault <samuel.thibault@ens-lyon.org>
 Subject: [PATCH] hurd: Make libc able to call pthread stubs
 
-* sysdeps/mach/hurd/bits/libc-lock.h: Include
-<pthread/pthread-functions.h>
-(__libc_maybe_call, PTFAVAIL, __libc_ptf_call, __libc_ptf_call_always):
-New macros.
-(__pthread_mutex_init, __pthread_mutex_destroy, __pthread_mutex_trylock,
-__pthread_mutex_lock, __pthread_mutex_unlock, __pthread_mutexattr_init,
-__pthread_mutexattr_destroy, __pthread_mutexattr_settype,
-__pthread_rwlock_init, __pthread_rwlock_destroy,
-__pthread_rwlock_rdlock, __pthread_rwlock_tryrdlock,
-__pthread_rwlock_wrlock, __pthread_rwlock_trywrlock,
-__pthread_rwlock_unlock, __pthread_key_create, __pthread_setspecific,
-__pthread_getspecific, __pthread_once, __pthread_atfork): New
-declarations and weak references.
+* sysdeps/mach/hurd/bits/libc-lock.h [_LIBC]: Include
+<bits/libc-lockP.h>
 
 Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
