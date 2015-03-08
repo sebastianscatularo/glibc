@@ -1,3 +1,5 @@
+Commited to git
+
 From: Samuel Thibault <samuel.thibault@ens-lyon.org>
 Subject: [PATCH] hurd: Make libc able to call pthread stubs
 
