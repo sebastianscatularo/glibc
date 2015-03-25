@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Philip Blundell <philb@gnu.org>.
 
@@ -37,7 +37,7 @@ ENTRY (__vfork)
 	mov	ip, r7
 	cfi_register (r7, ip)
 	.fnstart
-	str r7, [sp, #-4]!
+	push	{ r7 }
 	cfi_adjust_cfa_offset (4)
 	.save { r7 }
 	ldr	r7, =SYS_ify (vfork)
@@ -51,6 +51,7 @@ ENTRY (__vfork)
 	RESTORE_PID
 #endif
 	cmn	a1, #4096
+	it	cc
 	RETINSTR(cc, lr)
 
 	b	PLTJMP(SYSCALL_ERROR)

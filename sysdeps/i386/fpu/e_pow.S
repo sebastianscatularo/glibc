@@ -1,6 +1,5 @@
 /* ix87 specific implementation of pow function.
-   Copyright (C) 1996-1999, 2001, 2004-2005, 2007, 2011-2012
-   Free Software Foundation, Inc.
+   Copyright (C) 1996-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@cygnus.com>, 1996.
 
@@ -99,6 +98,9 @@ ENTRY(__ieee754_pow)
 	cmpb	$0x05, %ah
 	je	15f		// x is ±inf
 
+	cmpb	$0x01, %ah
+	je	32f		// x is NaN
+
 	fxch			// y : x
 
 	/* fistpll raises invalid exception for |y| >= 1L<<63.  */
@@ -164,6 +166,12 @@ ENTRY(__ieee754_pow)
 	je	31f
 	fxch			// y : x
 31:	fstp	%st(1)
+	ret
+
+	cfi_adjust_cfa_offset (8)
+32:	addl	$8, %esp
+	cfi_adjust_cfa_offset (-8)
+	fstp	%st(1)
 	ret
 
 	cfi_adjust_cfa_offset (8)

@@ -1,5 +1,5 @@
 /* Verify that condition variables synchronized by PI mutexes don't hang.
-   Copyright (C) 2012 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -244,6 +244,6 @@ do_test (void)
   return do_test_wait (thread_fun_timed);
 }
 
-#define TIMEOUT 10
+#define TIMEOUT 20
 #define TEST_FUNCTION do_test ()
 #include "../test-skeleton.c"

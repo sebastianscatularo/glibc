@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 Free Software Foundation, Inc.
+/* Copyright (C) 2012-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -38,6 +38,4 @@ CONCATX(__,FUNC) (float_type x)
     __set_errno (ERANGE);
   return __m81_u(CONCATX(__, FUNC)) (x);
 }
-
-#define weak_aliasx(a, b) weak_alias(a, b)
-weak_aliasx (CONCATX(__, FUNC), FUNC)
+weak_alias (CONCATX(__, FUNC), FUNC)

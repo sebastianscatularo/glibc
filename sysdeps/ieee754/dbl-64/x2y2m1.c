@@ -1,5 +1,5 @@
 /* Compute x^2 + y^2 - 1, without large cancellation error.
-   Copyright (C) 2012 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -37,7 +37,7 @@ add_split (double *hi, double *lo, double x, double y)
    given that the values are small enough that no overflow occurs and
    large enough (or zero) that no underflow occurs.  */
 
-static inline void
+static void
 mul_split (double *hi, double *lo, double x, double y)
 {
 #ifdef __FP_FAST_FMA

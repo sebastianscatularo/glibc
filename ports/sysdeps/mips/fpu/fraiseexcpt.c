@@ -1,5 +1,5 @@
 /* Raise given exceptions.
-   Copyright (C) 2000, 2002 Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Andreas Jaeger <aj@suse.de>, 2000.
 
@@ -29,7 +29,7 @@ feraiseexcept (int excepts)
   /* Get current state.  */
   _FPU_GETCW (cw);
 
-  /* Set flag bits (which are accumulative), and *also* set the 
+  /* Set flag bits (which are accumulative), and *also* set the
      cause bits. The setting of the cause bits is what actually causes
      the hardware to generate the exception, if the corresponding enable
      bit is set as well.  */

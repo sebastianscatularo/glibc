@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2012 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@redhat.com>, 2002.
 
@@ -23,6 +23,7 @@
 #include <atomic.h>
 #include <ldsodefs.h>
 #include <tls.h>
+#include <stdint.h>
 
 #include "kernel-features.h"
 

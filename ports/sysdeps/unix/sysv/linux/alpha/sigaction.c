@@ -1,4 +1,4 @@
-/* Copyright (C) 2003 Free Software Foundation, Inc.
+/* Copyright (C) 2003-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -32,7 +32,7 @@
          : INLINE_SYSCALL1(name, nr, args))
 
 struct kernel_sigaction;
-extern int __syscall_rt_sigaction (int, const struct kernel_sigaction *__unbounded,
-				   struct kernel_sigaction *__unbounded, size_t);
+extern int __syscall_rt_sigaction (int, const struct kernel_sigaction *,
+				   struct kernel_sigaction *, size_t);
 
 #include <sysdeps/unix/sysv/linux/sigaction.c>

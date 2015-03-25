@@ -1,5 +1,5 @@
 /* longjmp for ARM.
-   Copyright (C) 1997-2012 Free Software Foundation, Inc.
+   Copyright (C) 1997-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -17,8 +17,6 @@
    <http://www.gnu.org/licenses/>.  */
 
 #include <sysdep.h>
-#define _SETJMP_H
-#define _ASM
 #include <bits/setjmp.h>
 #include <rtld-global-offsets.h>
 #include <arm-features.h>
@@ -28,14 +26,30 @@
 ENTRY (__longjmp)
 	mov	ip, r0
 	movs	r0, r1		/* get the return value in place */
+	it	eq
 	moveq	r0, #1		/* can't let setjmp() return zero! */
 
 #ifdef CHECK_SP
-	ldr	r4, [ip, #32]	/* jmpbuf's sp */
+	sfi_breg ip, \
+	ldr	r4, [\B, #32]	/* jmpbuf's sp */
 	cfi_undefined (r4)
+#ifdef PTR_DEMANGLE
+	PTR_DEMANGLE (r4, r4, a3, a4)
+#endif
 	CHECK_SP (r4)
 #endif
-	LOADREGS(ia, ip!, {v1-v6, sl, fp, sp, lr})
+	sfi_sp sfi_breg ip, \
+	ldmia	\B!, JMP_BUF_REGLIST
+#ifdef PTR_DEMANGLE
+	ldr	a4, [ip], #4
+	PTR_DEMANGLE (a4, a4, a3, a2)
+	mov	sp, a4
+	ldr	a4, [ip], #4
+	PTR_DEMANGLE2 (lr, a4, a3)
+#else
+	ldr	sp, [ip], #4
+	ldr	lr, [ip], #4
+#endif
 	cfi_restore (v1)
 	cfi_restore (v2)
 	cfi_restore (v3)
@@ -79,11 +93,8 @@ ENTRY (__longjmp)
 
 	/* Restore the VFP registers.  */
 	/* Following instruction is vldmia ip!, {d8-d15}.  */
-	ldc	p11, cr8, [r12], #64
-	/* Restore the floating-point status register.  */
-	ldr     a3, [ip], #4
-	/* Following instruction is fmxr fpscr, a3.  */
-	mcr	p10, 7, a3, cr1, cr0, 0
+	sfi_breg r12, \
+	ldc	p11, cr8, [\B], #64
 .Lno_vfp:
 
 #ifndef ARM_ASSUME_NO_IWMMXT
@@ -92,12 +103,18 @@ ENTRY (__longjmp)
 
 	/* Restore the call-preserved iWMMXt registers.  */
 	/* Following instructions are wldrd wr10, [ip], #8 (etc.)  */
-	ldcl	p1, cr10, [r12], #8
-	ldcl	p1, cr11, [r12], #8
-	ldcl	p1, cr12, [r12], #8
-	ldcl	p1, cr13, [r12], #8
-	ldcl	p1, cr14, [r12], #8
-	ldcl	p1, cr15, [r12], #8
+	sfi_breg r12, \
+	ldcl	p1, cr10, [\B], #8
+	sfi_breg r12, \
+	ldcl	p1, cr11, [\B], #8
+	sfi_breg r12, \
+	ldcl	p1, cr12, [\B], #8
+	sfi_breg r12, \
+	ldcl	p1, cr13, [\B], #8
+	sfi_breg r12, \
+	ldcl	p1, cr14, [\B], #8
+	sfi_breg r12, \
+	ldcl	p1, cr15, [\B], #8
 .Lno_iwmmxt:
 #endif
 
@@ -105,12 +122,12 @@ ENTRY (__longjmp)
 
 #ifdef NEED_HWCAP
 # ifdef IS_IN_rtld
-1:	.long	_GLOBAL_OFFSET_TABLE_ - 0b - 8
+1:	.long	_GLOBAL_OFFSET_TABLE_ - 0b - PC_OFS
 .Lrtld_local_ro:
 	.long	C_SYMBOL_NAME(_rtld_local_ro)(GOTOFF)
 # else
 #  ifdef PIC
-1:	.long	_GLOBAL_OFFSET_TABLE_ - 0b - 8
+1:	.long	_GLOBAL_OFFSET_TABLE_ - 0b - PC_OFS
 .Lrtld_global_ro:
 	.long	C_SYMBOL_NAME(_rtld_global_ro)(GOT)
 #  else

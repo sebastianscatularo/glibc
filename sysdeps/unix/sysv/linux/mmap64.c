@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Jakub Jelinek <jakub@redhat.com>, 1999.
 
@@ -19,10 +19,10 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <string.h>
 
 #include <sysdep.h>
 #include <sys/syscall.h>
-#include <bp-checks.h>
 
 #include <kernel-features.h>
 
@@ -43,9 +43,8 @@ __mmap64 (void *addr, size_t len, int prot, int flags, int fd, off64_t offset)
 #if MMAP2_PAGE_SHIFT == -1
   if (page_shift == 0)
     {
-      int page_size = getpagesize ();
-      while ((1 << ++page_shift) != page_size)
-	;
+      int page_size = __getpagesize ();
+      page_shift = __ffs (page_size) - 1;
     }
 #endif
   if (offset & ((1 << page_shift) - 1))
@@ -54,14 +53,10 @@ __mmap64 (void *addr, size_t len, int prot, int flags, int fd, off64_t offset)
       return MAP_FAILED;
     }
   void *result;
-  __ptrvalue (result) = (void *__unbounded)
-    INLINE_SYSCALL (mmap2, 6, __ptrvalue (addr),
+  result = (void *)
+    INLINE_SYSCALL (mmap2, 6, addr,
 		    len, prot, flags, fd,
-		    (off_t) (offset >> MMAP2_PAGE_SHIFT));
-#if __BOUNDED_POINTERS__
-  __ptrlow (result) = __ptrvalue (result);
-  __ptrhigh (result) = __ptrvalue (result) + len;
-#endif
+		    (off_t) (offset >> page_shift));
   return result;
 }
 weak_alias (__mmap64, mmap64)

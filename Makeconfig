@@ -1,5 +1,4 @@
-# Copyright (C) 1991-2003,2004,2005,2006,2007,2008,2009,2010,2011,2012
-#	Free Software Foundation, Inc.
+# Copyright (C) 1991-2014 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -89,12 +88,16 @@ $(common-objpfx)config.status: $(..)version.h $(..)configure \
 					 $(wildcard $(dir)/Implies) \
 					 $(patsubst %.in,%,\
 						    $(firstword $(wildcard \
- $(addprefix $(dir)/,configure configure.in))))) \
+ $(addprefix $(dir)/,configure configure.ac))))) \
+			       $(patsubst %.in,%,\
+ $(wildcard $(..)sysdeps/*/preconfigure $(..)sysdeps/*/preconfigure.ac)) \
 			       $(patsubst %.in,%,\
 					  $(foreach add-on,$(add-ons),\
 						    $(firstword $(wildcard \
  $(addprefix $(firstword $(filter /%,$(add-on)) $(..)$(add-on))/,\
-	     configure configure.in)))))
+	     configure configure.ac))) \
+ $(wildcard $(addprefix $(firstword $(filter /%,$(add-on)) $(..)$(add-on))/,\
+			sysdeps/*/preconfigure sysdeps/*/preconfigure.ac))))
 	@cd $(@D); if test -f $(@F); then exec $(SHELL) $(@F) --recheck; else \
 	 echo The GNU C library has not been configured. >&2; \
 	 echo Run \`configure\' to configure it before building. >&2; \
@@ -148,11 +151,17 @@ libdir = $(exec_prefix)/lib
 endif
 inst_libdir = $(install_root)$(libdir)
 
-# Where to install the shared library and dynamic linker.
+# Where to install the shared library.
 ifndef slibdir
 slibdir = $(exec_prefix)/lib
 endif
 inst_slibdir = $(install_root)$(slibdir)
+
+# Where to install the dynamic linker.
+ifndef rtlddir
+rtlddir = $(slibdir)
+endif
+inst_rtlddir = $(install_root)$(rtlddir)
 
 # Prefix to put on files installed in $(libdir).  For libraries `libNAME.a',
 # the prefix is spliced between `lib' and the name, so the linker switch
@@ -380,8 +389,8 @@ endif
 
 # Command for linking PIE programs with the C library.
 ifndef +link-pie
-+link-pie = $(CC) -pie -Wl,-O1 -nostdlib -nostartfiles -o $@ \
-	     $(sysdep-LDFLAGS) $(config-LDFLAGS) $(LDFLAGS) $(LDFLAGS-$(@F)) \
++link-pie-before-libc = $(CC) -pie -Wl,-O1 -nostdlib -nostartfiles -o $@ \
+	     $(sysdep-LDFLAGS) $(LDFLAGS) $(LDFLAGS-$(@F)) \
 	     $(combreloc-LDFLAGS) $(relro-LDFLAGS) $(hashstyle-LDFLAGS) \
 	     $(addprefix $(csu-objpfx),S$(start-installed-name)) \
 	     $(+preinit) $(+prectorS) \
@@ -389,7 +398,12 @@ ifndef +link-pie
 						    S$(start-installed-name))\
 			  $(+preinit) $(link-extra-libs) \
 			  $(common-objpfx)libc% $(+postinit),$^) \
-	     $(link-extra-libs) $(link-libc) $(+postctorS) $(+postinit)
+	     $(link-extra-libs)
++link-pie-after-libc = $(+postctorS) $(+postinit)
++link-pie = $(+link-pie-before-libc) $(rtld-LDFLAGS) $(link-libc) \
+	    $(+link-pie-after-libc)
++link-pie-tests = $(+link-pie-before-libc) $(rtld-tests-LDFLAGS) \
+		  $(link-libc-tests) $(+link-pie-after-libc)
 endif
 # Command for statically linking programs with the C library.
 ifndef +link-static
@@ -412,7 +426,7 @@ endif
 ifndef +link
 ifeq (yes,$(build-shared))
 +link-before-libc = $(CC) -nostdlib -nostartfiles -o $@ \
-	      $(sysdep-LDFLAGS) $(config-LDFLAGS) $(LDFLAGS) $(LDFLAGS-$(@F)) \
+	      $(sysdep-LDFLAGS) $(LDFLAGS) $(LDFLAGS-$(@F)) \
 	      $(combreloc-LDFLAGS) $(relro-LDFLAGS) $(hashstyle-LDFLAGS) \
 	      $(addprefix $(csu-objpfx),$(start-installed-name)) \
 	      $(+preinit) $(+prector) \
@@ -422,28 +436,25 @@ ifeq (yes,$(build-shared))
 			   $(common-objpfx)libc% $(+postinit),$^) \
 	      $(link-extra-libs)
 +link-after-libc = $(+postctor) $(+postinit)
-+link = $(+link-before-libc) $(link-libc) $(+link-after-libc)
-+link-tests = $(+link-before-libc) $(link-libc-tests) $(+link-after-libc)
++link = $(+link-before-libc) $(rtld-LDFLAGS) $(link-libc) \
+	$(+link-after-libc)
++link-tests = $(+link-before-libc) $(rtld-tests-LDFLAGS) \
+	      $(link-libc-tests) $(+link-after-libc)
 else
 +link = $(+link-static)
 +link-tests = $(+link-static-tests)
 endif
 endif
-# Command for statically linking bounded-pointer programs with the C library.
-ifndef +link-bounded
-+link-bounded = $(CC) -nostdlib -nostartfiles -static -fbounded-pointers -o $@ \
-	      $(sysdep-LDFLAGS) $(LDFLAGS)  \
-	      $(addprefix $(csu-objpfx),b$(static-start-installed-name)) \
-	      $(+preinit) $(+prectorT) \
-	      $(filter-out $(addprefix $(csu-objpfx),start.ob \
-						     $(start-installed-name))\
-			   $(+preinit) $(link-extra-libs-bounded) \
-			   $(common-objpfx)libc% $(+postinit),$^) \
-	      $(link-extra-libs-bounded) $(link-libc-bounded) $(+postctorT) $(+postinit)
-endif
-ifndef config-LDFLAGS
 ifeq (yes,$(build-shared))
-config-LDFLAGS = -Wl,-dynamic-linker=$(slibdir)/$(rtld-installed-name)
+ifndef rtld-LDFLAGS
+rtld-LDFLAGS = -Wl,-dynamic-linker=$(rtlddir)/$(rtld-installed-name)
+endif
+ifndef rtld-tests-LDFLAGS
+ifeq (yes,$(build-hardcoded-path-in-tests))
+rtld-tests-LDFLAGS = -Wl,-dynamic-linker=$(common-objpfx)elf/ld.so
+else
+rtld-tests-LDFLAGS = $(rtld-LDFLAGS)
+endif
 endif
 endif
 ifndef link-libc
@@ -451,12 +462,19 @@ ifeq (yes,$(build-shared))
 # We need the versioned name of libc.so in the deps of $(others) et al
 # so that the symlink to libc.so is created before anything tries to
 # run the linked programs.
-link-libc-before-gnulib = -Wl,-rpath-link=$(rpath-link) \
-	    $(common-objpfx)libc.so$(libc.so-version) \
-	    $(common-objpfx)$(patsubst %,$(libtype.oS),c) \
-	    $(as-needed) $(common-objpfx)elf/ld.so $(no-as-needed)
-link-libc = $(link-libc-before-gnulib) $(gnulib)
-link-libc-tests = $(link-libc-before-gnulib) $(gnulib-tests)
+link-libc-rpath-link = -Wl,-rpath-link=$(rpath-link)
+ifeq (yes,$(build-hardcoded-path-in-tests))
+link-libc-tests-rpath-link = -Wl,-rpath=$(rpath-link)
+else
+link-libc-tests-rpath-link = $(link-libc-rpath-link)
+endif
+link-libc-before-gnulib = $(common-objpfx)libc.so$(libc.so-version) \
+			  $(common-objpfx)$(patsubst %,$(libtype.oS),c) \
+			  $(as-needed) $(common-objpfx)elf/ld.so \
+			  $(no-as-needed)
+link-libc = $(link-libc-rpath-link) $(link-libc-before-gnulib) $(gnulib)
+link-libc-tests = $(link-libc-tests-rpath-link) \
+		  $(link-libc-before-gnulib) $(gnulib-tests)
 # This is how to find at build-time things that will be installed there.
 rpath-dirs = math elf dlfcn nss nis rt resolv crypt
 rpath-link = \
@@ -486,13 +504,11 @@ endif
 ifndef link-extra-libs
 link-extra-libs = $(LDLIBS-$(@F))
 link-extra-libs-static = $(link-extra-libs)
-link-extra-libs-bounded = $(link-extra-libs)
 endif
 
 # The static libraries.
 link-libc-static = -Wl,--start-group $(common-objpfx)libc.a $(static-gnulib) -Wl,--end-group
 link-libc-static-tests = -Wl,--start-group $(common-objpfx)libc.a $(static-gnulib-tests) -Wl,--end-group
-link-libc-bounded = $(common-objpfx)libc_b.a $(gnulib) $(common-objpfx)libc_b.a
 
 # How to link against libgcc.  Some libgcc functions, such as those
 # for "long long" arithmetic or software floating point, can always be
@@ -588,6 +604,9 @@ endif
 # How to run a program we just linked with our library.
 # The program binary is assumed to be $(word 2,$^).
 built-program-file = $(dir $(word 2,$^))$(notdir $(word 2,$^))
+rtld-prefix = $(elf-objpfx)$(rtld-installed-name)			      \
+	      --library-path						      \
+	      $(rpath-link)$(patsubst %,:%,$(sysdep-library-path))
 ifeq (yes,$(build-shared))
 comma = ,
 sysdep-library-path = \
@@ -597,14 +616,11 @@ $(subst $(empty) ,:,$(strip $(patsubst -Wl$(comma)-rpath-link=%, %,\
 # $(run-via-rtld-prefix) is a command that, when prepended to the name
 # of a program built with the newly built library, produces a command
 # that, executed on the host for which the library is built, runs that
-# program.  For the statically-linked %-bp test programs, and for
-# tests listed in tests-static or xtests-static, it is empty.
+# program.  For tests listed in tests-static or xtests-static, it is
+# empty.
 run-via-rtld-prefix =							      \
   $(if $(strip $(filter $(notdir $(built-program-file)),		      \
-			$(tests-static) $(xtests-static))		      \
-	       $(filter %-bp,$(built-program-file))),,			      \
-       $(elf-objpfx)$(rtld-installed-name)				      \
-	 --library-path $(rpath-link)$(patsubst %,:%,$(sysdep-library-path)))
+			$(tests-static) $(xtests-static))),, $(rtld-prefix))
 else
 run-via-rtld-prefix =
 endif
@@ -627,6 +643,40 @@ host-built-program-cmd = $(run-via-rtld-prefix) $(built-program-file)
 
 ifndef LD
 LD := ld -X
+endif
+
+# $(test-via-rtld-prefix) is a command that, when prepended to the name
+# of a test program built with the newly built library, produces a command
+# that, executed on the host for which the library is built, runs that
+# program.  For tests listed in tests-static or xtests-static as well
+# as when test programs are hardcoded to the newly built libraries, it
+# is empty.
+
+# $(test-program-prefix) is a command that, when prepended to the name
+# of a test program built with the newly built library, produces a command
+# that, executed on the build system on which "make" is run, runs that
+# test program.
+
+# $(test-program-cmd) is a command that, executed on the build system
+# on which "make" is run, runs the newly built test program that is the
+# second dependency of the makefile target in which
+# $(test-program-cmd) is used.
+
+# $(host-test-program-cmd) is a command that, executed on the host
+# for which the library is built, runs the newly built test program that
+# is the second dependency of the makefile target in which
+# $(host-test-program-cmd) is used.
+
+ifeq (yes,$(build-hardcoded-path-in-tests))
+test-via-rtld-prefix =
+test-program-prefix = $(test-wrapper)
+test-program-cmd = $(test-wrapper) $(built-program-file)
+host-test-program-cmd = $(built-program-file)
+else
+test-via-rtld-prefix = $(run-via-rtld-prefix)
+test-program-prefix = $(run-program-prefix)
+test-program-cmd = $(built-program-cmd)
+host-test-program-cmd = $(host-built-program-cmd)
 endif
 
 # Extra flags to pass to GCC.
@@ -711,11 +761,18 @@ endif	# $(+cflags) == ""
 # Don't duplicate options if we inherited variables from the parent.
 +cflags	:= $(sort $(+cflags))
 
+# Each sysdeps directory can contain header files that both will be
+# used to compile and will be installed.  Each can also contain an
+# include/ subdirectory, whose header files will be used to compile
+# but will not be installed, and will take precedence over the
+# installed files.  This mirrors the top-level include/ subdirectory.
++sysdep-includes := $(foreach dir,$(+sysdep_dirs),\
+			      $(addprefix -I,$(wildcard $(dir)/include) $(dir)))
+
 # These are flags given to the C compiler to tell it to look for
 # include files (including ones given in angle brackets) in the parent
 # library source directory, in the include directory, and in the
 # current directory.
-+sysdep-includes = $(addprefix -I,$(+sysdep_dirs))
 +includes = -I$(..)include $(if $(subdir),$(objpfx:%/=-I%)) \
 	    $(+sysdep-includes) $(includes) \
 	    $(patsubst %/,-I%,$(..)) $(libio-include) -I. $(sysincludes)
@@ -756,7 +813,7 @@ endif
 # The compilation rules use $(CPPFLAGS-${SUFFIX}) and $(CFLAGS-${SUFFIX})
 # to pass different flags for each flavor.
 libtypes = $(foreach o,$(object-suffixes-for-libc),$(libtype$o))
-all-object-suffixes := .o .os .op .og .ob .oS
+all-object-suffixes := .o .os .op .og .oS
 object-suffixes :=
 CPPFLAGS-.o = $(pic-default)
 CFLAGS-.o = $(filter %frame-pointer,$(+cflags))
@@ -791,18 +848,6 @@ endif
 # differently from the rest.
 object-suffixes-noshared := $(filter-out .os,$(object-suffixes))
 
-bppfx = BP-
-ifeq (yes,$(build-bounded))
-# Under --enable-bounded, we build the library with `-fbounded-pointers -g'
-# to runtime bounds checking.  The bounded-pointer objects are named foo.ob.
-# We disable sibling-call optimizations so that stack traces will be complete
-# and thus aid debugging, since after all, BPs are a debugging tool.
-object-suffixes += .ob
-CPPFLAGS-.ob = -fbounded-pointers $(pic-default)
-CFLAGS-.ob = -g -O2 -fno-optimize-sibling-calls -fno-strict-aliasing
-libtype.ob = lib%_b.a
-endif
-
 object-suffixes-for-libc := $(object-suffixes)
 
 ifeq (yes,$(build-shared))
@@ -834,8 +879,6 @@ subdirs = $(sorted-subdirs)
 subdir-srcdirs = $(foreach dir,$(subdirs),\
 			   $(firstword $($(dir)-srcdir) $(..)$(dir)))
 
-ifeq (yes, $(build-shared))
-
 # This is a pair of implicit rules to preprocess a file with # comments,
 # %ifdef et al, based on config.h settings or other %include'd files.
 # We use chained rules instead of a pipeline here so that we can properly
@@ -853,6 +896,8 @@ ifeq (yes, $(build-shared))
 %.v: %.v.i
 	sed '/^[ 	]*#/d;/^[ 	]*$$/d' $< > $@T
 	mv -f $@T $@
+
+ifeq (yes, $(build-shared))
 
 # To generate a header to support more than one ABI for different
 # architecture variants, the CPU/Makefile defines abi-variants to be a
@@ -987,13 +1032,19 @@ all-subdirs = csu assert ctype locale intl catgets math setjmp signal	    \
 	      stdlib stdio-common libio malloc string wcsmbs time dirent    \
 	      grp pwd posix io termios resource misc socket sysvipc gmon    \
 	      gnulib iconv iconvdata wctype manual shadow gshadow po argp   \
-	      crypt nss localedata timezone rt conform debug		    \
+	      crypt localedata timezone rt conform debug		    \
 	      $(add-on-subdirs) dlfcn elf
 
 ifndef avoid-generated
-all-Depend-files := $(wildcard $(foreach dir,$(all-subdirs),\
-					 $(firstword $($(dir)-srcdir) \
-						     $(..)$(dir))/Depend))
+# sysd-sorted itself will contain rules making the sysd-sorted target
+# depend on Depend files.  But if you just added a Depend file to an
+# existing directory not in all-subdirs, then sysd-sorted needs to
+# be regenerated, so it depends on existing $(sorted-subdirs:=/Depend) files.
+all-Depend-files := $(wildcard $(sort \
+		        $(foreach dir,$(all-subdirs),\
+				  $(firstword $($(dir)-srcdir) \
+				  $(..)$(dir))/Depend) \
+			$(sorted-subdirs:=/Depend)))
 $(common-objpfx)sysd-sorted: $(..)scripts/gen-sorted.awk \
 			     $(common-objpfx)config.make $(..)Makeconfig \
 			     $(wildcard $(sysdirs:=/Subdirs)) \

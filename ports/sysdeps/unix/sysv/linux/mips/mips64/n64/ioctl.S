@@ -1,4 +1,4 @@
-/* Copyright 2003, 2005 Free Software Foundation, Inc.
+/* Copyright 2003-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -31,9 +31,9 @@ ENTRY (__ioctl)
 	ret
 
 L(error):
-	SETUP_GP64 (a0, __ioctl)
+	SETUP_GP64_REG (a0, __ioctl)
 	PTR_LA t9, __syscall_error
-	RESTORE_GP64
+	RESTORE_GP64_REG
 	jr t9
 
 PSEUDO_END (__ioctl)

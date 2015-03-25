@@ -1,5 +1,5 @@
 /* Run-time dynamic linker data structures for loaded ELF shared objects.
-   Copyright (C) 1995-2012 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -26,6 +26,7 @@
 #define __need_NULL
 #include <stddef.h>
 #include <string.h>
+#include <stdint.h>
 
 #include <elf.h>
 #include <dlfcn.h>
@@ -75,8 +76,9 @@ typedef struct link_map *lookup_t;
 # define DL_SYMBOL_ADDRESS(map, ref) \
  (void *) (LOOKUP_VALUE_ADDRESS (map) + ref->st_value)
 # define DL_LOOKUP_ADDRESS(addr) ((ElfW(Addr)) (addr))
-# define DL_DT_INIT_ADDRESS(map, start) (start)
-# define DL_DT_FINI_ADDRESS(map, start) (start)
+# define DL_CALL_DT_INIT(map, start, argc, argv, env) \
+ ((init_t) (start)) (argc, argv, env)
+# define DL_CALL_DT_FINI(map, start) ((fini_t) (start)) ()
 #endif
 
 /* On some architectures dladdr can't use st_size of all symbols this way.  */
@@ -127,6 +129,11 @@ typedef struct link_map *lookup_t;
    | ((PROT_WRITE | PROT_EXEC) << (PF_W | PF_X) * 4)			      \
    | ((PROT_READ | PROT_WRITE | PROT_EXEC) << ((PF_R | PF_W | PF_X) * 4)))
 
+/* The filename itself, or the main program name, if available.  */
+#define DSO_FILENAME(name) ((name)[0] ? (name)				      \
+			    : (rtld_progname ?: "<main program>"))
+
+#define RTLD_PROGNAME (rtld_progname ?: "<program name unknown>")
 
 /* For the version handling we need an array with only names and their
    hash values.  */
@@ -538,7 +545,7 @@ struct rtld_global_ro
   EXTERN uintptr_t _dl_sysinfo;
 #endif
 
-#if defined NEED_DL_SYSINFO || defined NEED_DL_SYSINFO_DSO
+#ifdef NEED_DL_SYSINFO_DSO
   /* The vsyscall page is a virtual DSO pre-mapped by the kernel.
      This points to its ELF header.  */
   EXTERN const ElfW(Ehdr) *_dl_sysinfo_dso;
@@ -547,6 +554,10 @@ struct rtld_global_ro
      and this points to it.  */
   EXTERN struct link_map *_dl_sysinfo_map;
 #endif
+
+  /* Mask for more hardware capabilities that are available on some
+     platforms.  */
+  EXTERN uint64_t _dl_hwcap2;
 
 #ifdef SHARED
   /* We add a function table to _rtld_global which is then used to
@@ -601,6 +612,12 @@ extern const struct rtld_global_ro _rtld_global_ro
 #endif
 #undef EXTERN
 
+#ifndef SHARED
+/* dl-support.c defines these and initializes them early on.  */
+extern const ElfW(Phdr) *_dl_phdr;
+extern size_t _dl_phnum;
+#endif
+
 #ifdef IS_IN_rtld
 /* This is the initial value of GL(dl_error_catch_tsd).
    A non-TLS libpthread will change it.  */
@@ -633,6 +650,16 @@ extern char **_dl_argv
 #endif
      ;
 #ifdef IS_IN_rtld
+extern unsigned int _dl_skip_args attribute_hidden
+# ifndef DL_ARGV_NOT_RELRO
+     attribute_relro
+# endif
+     ;
+extern unsigned int _dl_skip_args_internal attribute_hidden
+# ifndef DL_ARGV_NOT_RELRO
+     attribute_relro
+# endif
+     ;
 extern char **_dl_argv_internal attribute_hidden
 # ifndef DL_ARGV_NOT_RELRO
      attribute_relro
@@ -1005,6 +1032,17 @@ extern int _dl_addr_inside_object (struct link_map *l, const ElfW(Addr) addr)
 
 /* Show show of an object.  */
 extern void _dl_show_scope (struct link_map *new, int from);
+
+extern struct link_map *_dl_find_dso_for_object (const ElfW(Addr) addr)
+     internal_function;
+rtld_hidden_proto (_dl_find_dso_for_object)
+
+/* Initialization which is normally done by the dynamic linker.  */
+extern void _dl_non_dynamic_init (void) internal_function;
+
+/* Used by static binaries to check the auxiliary vector.  */
+extern void _dl_aux_init (ElfW(auxv_t) *av) internal_function;
+
 
 __END_DECLS
 

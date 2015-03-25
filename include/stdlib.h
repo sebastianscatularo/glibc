@@ -77,6 +77,7 @@ extern struct drand48_data __libc_drand48_data attribute_hidden;
 extern int __setenv (const char *__name, const char *__value, int __replace);
 extern int __unsetenv (const char *__name);
 extern int __clearenv (void);
+extern char *__mktemp (char *__template) __THROW __nonnull ((1));
 extern char *__canonicalize_file_name (const char *__name);
 extern char *__realpath (const char *__name, char *__resolved);
 extern int __ptsname_r (int __fd, char *__buf, size_t __buflen);
@@ -98,6 +99,15 @@ extern int __on_exit (void (*__func) (int __status, void *__arg), void *__arg);
 extern int __cxa_atexit (void (*func) (void *), void *arg, void *d);
 extern int __cxa_atexit_internal (void (*func) (void *), void *arg, void *d)
      attribute_hidden;
+
+extern int __cxa_thread_atexit_impl (void (*func) (void *), void *arg,
+				     void *d);
+extern void __call_tls_dtors (void)
+#ifndef SHARED
+  __attribute__ ((weak))
+#endif
+  ;
+libc_hidden_proto (__call_tls_dtors)
 
 extern void __cxa_finalize (void *d);
 

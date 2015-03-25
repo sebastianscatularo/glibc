@@ -1,5 +1,5 @@
 /* Open a file by name.  Stub version.
-   Copyright (C) 1991-2012 Free Software Foundation, Inc.
+   Copyright (C) 1991-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -22,7 +22,6 @@
 #include <stddef.h>
 #include <stdio.h>
 
-extern char **__libc_argv attribute_hidden;
 
 /* Open FILE with access OFLAG.  If OFLAG includes O_CREAT,
    a third argument is the file protection.  */
@@ -57,17 +56,6 @@ weak_alias (__libc_open, open)
 
 stub_warning (open)
 
-
-int
-__open_2 (file, oflag)
-     const char *file;
-     int oflag;
-{
-  if (oflag & O_CREAT)
-    __fortify_fail ("invalid open call: O_CREAT without mode");
-
-  return __open (file, oflag);
-}
+/* __open_2 is a generic wrapper that calls __open.
+   So give a stub warning for that symbol too.  */
 stub_warning (__open_2)
-
-#include <stub-tag.h>

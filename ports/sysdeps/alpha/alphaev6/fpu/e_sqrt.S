@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2012 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -16,6 +16,7 @@
    <http://www.gnu.org/licenses/>.  */
 
 #include <sysdep.h>
+#include <shlib-compat.h>
 
 	.arch ev6
 	.set noreorder
@@ -42,3 +43,11 @@ ENTRY(__ieee754_sqrt)
 	nop
 
 END(__ieee754_sqrt)
+
+#if SHLIB_COMPAT (libm, GLIBC_2_15, GLIBC_2_18)
+strong_alias(__ieee754_sqrt, __sqrt_finite1)
+compat_symbol(libm, __sqrt_finite1, __sqrt_finite, GLIBC_2_15)
+versioned_symbol(libm, __ieee754_sqrt, __sqrt_finite, GLIBC_2_18)
+#else
+strong_alias(__ieee754_sqrt, __sqrt_finite)
+#endif

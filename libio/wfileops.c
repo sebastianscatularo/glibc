@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Written by Ulrich Drepper <drepper@cygnus.com>.
    Based on the single byte version by Per Bothner <bothner@cygnus.com>.
@@ -551,7 +551,7 @@ libc_hidden_def (_IO_wfile_sync)
    fp->_wide_data->_IO_read_base and fp->_wide_data->_IO_read_end.
 
    Returns 0 on success and -1 on error with the _IO_ERR_SEEN flag set.  */
-static inline int
+static int
 adjust_wide_data (_IO_FILE *fp, bool do_convert)
 {
   struct _IO_codecvt *cv = fp->_codecvt;
@@ -715,7 +715,7 @@ _IO_wfile_seekoff (fp, offset, dir, mode)
 		       - fp->_wide_data->_IO_write_base) / clen;
 	  else
 	    {
-	      enum __codecvt_result status;
+	      enum __codecvt_result status = __codecvt_ok;
 	      delta = (fp->_wide_data->_IO_write_ptr
 		       - fp->_wide_data->_IO_write_base);
 	      const wchar_t *write_base = fp->_wide_data->_IO_write_base;
@@ -728,9 +728,12 @@ _IO_wfile_seekoff (fp, offset, dir, mode)
 		 flush buffers for every ftell.  */
 	      do
 		{
-		  /* Ugh, no point trying to avoid the flush.  Just do it
-		     and go back to how it was with the read mode.  */
-		  if (delta > 0 && new_write_ptr == fp->_IO_buf_end)
+		  /* There is not enough space in the buffer to do the entire
+		     conversion, so there is no point trying to avoid the
+		     buffer flush.  Just do it and go back to how it was with
+		     the read mode.  */
+		  if (status == __codecvt_partial
+		      || (delta > 0 && new_write_ptr == fp->_IO_buf_end))
 		    {
 		      if (_IO_switch_to_wget_mode (fp))
 			return WEOF;
@@ -907,7 +910,7 @@ _IO_wfile_xsputn (f, data, n)
      const void *data;
      _IO_size_t n;
 {
-  register const wchar_t *s = (const wchar_t *) data;
+  const wchar_t *s = (const wchar_t *) data;
   _IO_size_t to_do = n;
   int must_flush = 0;
   _IO_size_t count;
@@ -925,7 +928,7 @@ _IO_wfile_xsputn (f, data, n)
       count = f->_wide_data->_IO_buf_end - f->_wide_data->_IO_write_ptr;
       if (count >= n)
 	{
-	  register const wchar_t *p;
+	  const wchar_t *p;
 	  for (p = s + n; p > s; )
 	    {
 	      if (*--p == L'\n')
@@ -955,8 +958,8 @@ _IO_wfile_xsputn (f, data, n)
 	}
       else
 	{
-	  register wchar_t *p = f->_wide_data->_IO_write_ptr;
-	  register int i = (int) count;
+	  wchar_t *p = f->_wide_data->_IO_write_ptr;
+	  int i = (int) count;
 	  while (--i >= 0)
 	    *p++ = *s++;
 	  f->_wide_data->_IO_write_ptr = p;

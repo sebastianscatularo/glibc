@@ -1,5 +1,5 @@
 /* low level locking for pthread library.  Generic futex-using version.
-   Copyright (C) 2003, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2003-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Paul Mackerras <paulus@au.ibm.com>, 2003.
 
@@ -87,17 +87,6 @@ __lll_timedlock_wait (lll_lock_t *futex, const struct timespec *abstime, int pri
 /* These don't get included in libc.so  */
 #ifdef IS_IN_libpthread
 int
-lll_unlock_wake_cb (lll_lock_t *futex)
-{
-  int val = atomic_exchange_rel (futex, 0);
-
-  if (__builtin_expect (val > 1, 0))
-    lll_private_futex_wake (futex, 1);
-  return 0;
-}
-
-
-int
 __lll_timedwait_tid (int *tidp, const struct timespec *abstime)
 {
   int tid;
@@ -134,6 +123,5 @@ __lll_timedwait_tid (int *tidp, const struct timespec *abstime)
 
   return 0;
 }
-
 #endif
 

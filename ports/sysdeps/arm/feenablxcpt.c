@@ -1,5 +1,5 @@
 /* Enable floating-point exceptions.
-   Copyright (C) 2001-2012 Free Software Foundation, Inc.
+   Copyright (C) 2001-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Philip Blundell <philb@gnu.org>, 2001.
 
@@ -38,6 +38,18 @@ feenableexcept (int excepts)
       new_exc |= (excepts << FE_EXCEPT_SHIFT);
 
       _FPU_SETCW(new_exc);
+
+      if (excepts != 0)
+	{
+	  /* VFPv3 and VFPv4 do not support trapping exceptions, so
+	     test whether the relevant bits were set and fail if
+	     not.  */
+	  unsigned int temp;
+	  _FPU_GETCW (temp);
+	  if ((temp & (excepts << FE_EXCEPT_SHIFT))
+	      != (excepts << FE_EXCEPT_SHIFT))
+	    return -1;
+	}
 
       return old_exc;
     }

@@ -1,5 +1,4 @@
-/* Copyright (C) 2000, 2002, 2003, 2004, 2007, 2009
-   Free Software Foundation, Inc.
+/* Copyright (C) 2000-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Maciej W. Rozycki <macro@ds2.pg.gda.pl>, 2000.
 
@@ -25,7 +24,8 @@
 
 __BEGIN_DECLS
 
-extern int _test_and_set (int *__p, int __v) __THROW;
+extern int _test_and_set (int *__p, int __v)
+     __THROW __attribute__ ((__nomips16__));
 
 #ifdef __USE_EXTERN_INLINES
 
@@ -33,7 +33,7 @@ extern int _test_and_set (int *__p, int __v) __THROW;
 #  define _EXTERN_INLINE __extern_inline
 # endif
 
-_EXTERN_INLINE int
+_EXTERN_INLINE int __attribute__ ((__nomips16__))
 __NTH (_test_and_set (int *__p, int __v))
 {
   int __r, __t;

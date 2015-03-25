@@ -1,5 +1,5 @@
 /* BSD `setjmp' entry point to `sigsetjmp (..., 1)'.  MIPS64 version.
-   Copyright (C) 1996, 1997, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright (C) 1996-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -31,16 +31,16 @@ ENTRY (setjmp)
 #ifdef __PIC__
 	SETUP_GP
 #endif
-	SETUP_GP64 (v0, C_SYMBOL_NAME (setjmp))
+	SETUP_GP64_REG (v0, C_SYMBOL_NAME (setjmp))
 	PTR_LA t9, C_SYMBOL_NAME (__sigsetjmp)
 #if _MIPS_SIM == _ABIO32
 	nop
-#endif	
-	RESTORE_GP64
+#endif
+	RESTORE_GP64_REG
 	dli a1, 1		/* Pass a second argument of one.  */
 #ifdef __PIC__
 	jr	t9
 #else
 	j	C_SYMBOL_NAME (__sigsetjmp)
 #endif
-	.end	setjmp
+END (setjmp)

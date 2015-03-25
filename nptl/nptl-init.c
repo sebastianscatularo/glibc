@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2012 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@redhat.com>, 2002.
 
@@ -423,7 +423,10 @@ __pthread_initialize_minimal_internal (void)
 
   /* Round the resource limit up to page size.  */
   limit.rlim_cur = (limit.rlim_cur + pagesz - 1) & -pagesz;
-  __default_stacksize = limit.rlim_cur;
+  lll_lock (__default_pthread_attr_lock, LLL_PRIVATE);
+  __default_pthread_attr.stacksize = limit.rlim_cur;
+  __default_pthread_attr.guardsize = GLRO (dl_pagesize);
+  lll_unlock (__default_pthread_attr_lock, LLL_PRIVATE);
 
 #ifdef SHARED
   /* Transfer the old value from the dynamic linker's internal location.  */

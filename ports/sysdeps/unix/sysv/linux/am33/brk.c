@@ -1,5 +1,5 @@
 /* brk system call for Linux/am33.
-   Copyright (C) 1995, 1996, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Alexandre Oliva <aoliva@redhat.com>.
    Based on ../i386/brk.c.
@@ -30,7 +30,7 @@ __brk (void *addr)
 {
   void *newbrk;
 
-  newbrk = INLINE_SYSCALL (brk, 1, __ptrvalue (addr));
+  newbrk = INLINE_SYSCALL (brk, 1, addr);
 
   __curbrk = newbrk;
 

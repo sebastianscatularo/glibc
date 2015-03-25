@@ -1,5 +1,5 @@
 /* Function descriptors.  HPPA version.
-   Copyright (C) 2003-2012 Free Software Foundation, Inc.
+   Copyright (C) 2003-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -26,7 +26,7 @@ extern void _dl_fptr_init (void);
 
 /* There are currently 33 dynamic symbols in ld.so.
    ELF_MACHINE_BOOT_FPTR_TABLE_LEN needs to be at least that big.  */
-#define ELF_MACHINE_BOOT_FPTR_TABLE_LEN 64	
+#define ELF_MACHINE_BOOT_FPTR_TABLE_LEN 64
 
 #define ELF_MACHINE_LOAD_ADDRESS(var, symbol) \
   asm (								\

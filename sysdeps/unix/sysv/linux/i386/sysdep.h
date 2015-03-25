@@ -1,4 +1,4 @@
-/* Copyright (C) 1992-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper, <drepper@gnu.org>, August 1995.
 
@@ -21,8 +21,6 @@
 
 /* There is some commonality.  */
 #include <sysdeps/unix/i386/sysdep.h>
-#include <bp-sym.h>
-#include <bp-asm.h>
 /* Defines RTLD_PRIVATE_ERRNO and USE_DL_SYSINFO.  */
 #include <dl-sysdep.h>
 #include <tls.h>

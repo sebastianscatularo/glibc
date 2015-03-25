@@ -1,4 +1,4 @@
-# Copyright (C) 1991-2012 Free Software Foundation, Inc.
+# Copyright (C) 1991-2014 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -40,7 +40,6 @@ routines :=								      \
 	getuid geteuid getgid getegid getgroups setuid setgid group_member    \
 	getpgid setpgid getpgrp bsd-getpgrp setpgrp getsid setsid	      \
 	getresuid getresgid setresuid setresgid				      \
-	getlogin getlogin_r setlogin					      \
 	pathconf sysconf fpathconf					      \
 	glob glob64 fnmatch regex					      \
 	confstr								      \
@@ -86,12 +85,15 @@ tests		:= tstgetopt testfnm runtests runptests	     \
 		   tst-rfc3484-3 \
 		   tst-getaddrinfo3 tst-fnmatch2 tst-cpucount tst-cpuset \
 		   bug-getopt1 bug-getopt2 bug-getopt3 bug-getopt4 \
-		   bug-getopt5 tst-getopt_long1
+		   bug-getopt5 tst-getopt_long1 bug-regex34 bug-regex35 \
+		   tst-pathconf tst-getaddrinfo4
 xtests		:= bug-ga2
 ifeq (yes,$(build-shared))
 test-srcs	:= globtest
 tests           += wordexp-test tst-exec tst-spawn
 endif
+tests-static	= tst-exec-static tst-spawn-static
+tests		+= $(tests-static)
 others		:= getconf
 install-bin	:= getconf
 install-others-programs	:= $(inst_libexecdir)/getconf
@@ -117,10 +119,10 @@ ifeq ($(run-built-tests),yes)
 ifeq (yes,$(build-shared))
 tests: $(objpfx)globtest.out $(objpfx)wordexp-tst.out
 $(objpfx)globtest.out: globtest.sh $(objpfx)globtest
-	$(SHELL) $< $(common-objpfx) '$(run-via-rtld-prefix)' \
-		'$(test-wrapper)' '$(test-wrapper-env)'
+	$(SHELL) $< $(common-objpfx) '$(test-via-rtld-prefix)' \
+		'$(test-program-prefix)' '$(test-wrapper-env)'
 $(objpfx)wordexp-tst.out: wordexp-tst.sh $(objpfx)wordexp-test
-	$(SHELL) $< $(common-objpfx) '$(run-program-prefix)'
+	$(SHELL) $< $(common-objpfx) '$(test-program-prefix)'
 endif
 endif
 
@@ -135,6 +137,7 @@ $(objpfx)config-name.h: $(..)scripts/config-uname.sh $(common-objpfx)config.make
 
 CFLAGS-regex.c = -Wno-strict-prototypes
 CFLAGS-getaddrinfo.c = -DRESOLVER -fexceptions
+CFLAGS-pause.c = -fexceptions -fasynchronous-unwind-tables
 CFLAGS-pread.c = -fexceptions -fasynchronous-unwind-tables
 CFLAGS-pread64.c = -fexceptions -fasynchronous-unwind-tables
 CFLAGS-pwrite.c = -fexceptions -fasynchronous-unwind-tables
@@ -170,8 +173,10 @@ CFLAGS-execlp.os = -fomit-frame-pointer
 tstgetopt-ARGS = -a -b -cfoobar --required foobar --optional=bazbug \
 		--none random --col --color --colour
 
-tst-exec-ARGS = -- $(host-built-program-cmd)
-tst-spawn-ARGS = -- $(host-built-program-cmd)
+tst-exec-ARGS = -- $(host-test-program-cmd)
+tst-exec-static-ARGS = $(tst-exec-ARGS)
+tst-spawn-ARGS = -- $(host-test-program-cmd)
+tst-spawn-static-ARGS = $(tst-spawn-ARGS)
 tst-dir-ARGS = `pwd` `cd $(common-objdir)/$(subdir); pwd` `cd $(common-objdir); pwd` $(objpfx)tst-dir
 tst-chmod-ARGS = $(objdir)
 tst-vfork3-ARGS = --test-dir=$(objpfx)
@@ -194,6 +199,8 @@ bug-regex26-ENV = LOCPATH=$(common-objpfx)localedata
 bug-regex30-ENV = LOCPATH=$(common-objpfx)localedata
 bug-regex32-ENV = LOCPATH=$(common-objpfx)localedata
 bug-regex33-ENV = LOCPATH=$(common-objpfx)localedata
+bug-regex34-ENV = LOCPATH=$(common-objpfx)localedata
+bug-regex35-ENV = LOCPATH=$(common-objpfx)localedata
 tst-rxspencer-ARGS = --utf8 rxspencer/tests
 tst-rxspencer-ENV = LOCPATH=$(common-objpfx)localedata
 tst-pcre-ARGS = PCRE.tests
@@ -202,11 +209,11 @@ bug-glob1-ARGS = "$(objpfx)"
 tst-execvp3-ARGS = --test-dir=$(objpfx)
 
 testcases.h: TESTS TESTS2C.sed
-	sed -f TESTS2C.sed < $< > $@T
+	LC_ALL=C sed -f TESTS2C.sed < $< > $@T
 	mv -f $@T $@
 
 ptestcases.h: PTESTS PTESTS2C.sed
-	sed -f PTESTS2C.sed < $< > $@T
+	LC_ALL=C sed -f PTESTS2C.sed < $< > $@T
 	mv -f $@T $@
 
 # Run a test on the header files we use.
@@ -263,7 +270,7 @@ $(objpfx)tst-vfork3-mem: $(objpfx)tst-vfork3.out
 # time to process.
 $(objpfx)tst-rxspencer-mem: $(objpfx)tst-rxspencer.out
 	MALLOC_TRACE=$(objpfx)tst-rxspencer.mtrace $(tst-rxspencer-ENV) \
-	  $(run-program-prefix) $(objpfx)tst-rxspencer rxspencer/tests \
+	  $(test-program-prefix) $(objpfx)tst-rxspencer rxspencer/tests \
 	  > /dev/null
 	$(common-objpfx)malloc/mtrace $(objpfx)tst-rxspencer.mtrace > $@
 
@@ -297,15 +304,12 @@ $(inst_libexecdir)/getconf: $(inst_bindir)/getconf \
 	  mv -f $@/$$spec.new $@/$$spec; \
 	done < $(objpfx)getconf.speclist
 
-$(objpfx)getconf.speclist: $(objpfx)getconf
-ifeq (no,$(cross-compiling))
-	LC_ALL=C GETCONF_DIR=/dev/null \
-	$(run-program-prefix) $< _POSIX_V7_WIDTH_RESTRICTED_ENVS > $@.new
-	LC_ALL=C GETCONF_DIR=/dev/null \
-	$(run-program-prefix) $< _POSIX_V6_WIDTH_RESTRICTED_ENVS >> $@.new
-	LC_ALL=C GETCONF_DIR=/dev/null \
-	$(run-program-prefix) $< _XBS5_WIDTH_RESTRICTED_ENVS >> $@.new
-else
-	> $@.new
-endif
+$(objpfx)getconf.speclist: getconf-speclist.c posix-envs.def
+	$(compile.c) -E -o - \
+	    | sed -n -e '/@@@PRESENT_/s/@@@PRESENT_//p' > $@.new
 	mv -f $@.new $@
+
+# This file is only actually needed at install time.  But forcing it to
+# be built both makes it available for eyeball inspection and avoids the
+# surprise of things that look like compilation being done by 'make install'.
+others: $(objpfx)getconf.speclist

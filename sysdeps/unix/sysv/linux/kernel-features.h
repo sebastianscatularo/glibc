@@ -1,6 +1,6 @@
 /* Set flags signalling availability of kernel features based on given
    kernel version number.
-   Copyright (C) 1999-2009, 2010, 2011, 2012 Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -187,6 +187,11 @@
 # define __ASSUME_PWRITEV	1
 #endif
 
+/* Support for FUTEX_*_REQUEUE_PI was added in 2.6.31.  */
+#if __LINUX_KERNEL_VERSION >= 0x02061f
+# define __ASSUME_REQUEUE_PI	1
+#endif
+
 /* Support for F_GETOWN_EX was introduced in 2.6.32.  */
 #if __LINUX_KERNEL_VERSION >= 0x020620
 # define __ASSUME_F_GETOWN_EX	1
@@ -195,6 +200,12 @@
 /* Support for the recvmmsg syscall was added in 2.6.33.  */
 #if __LINUX_KERNEL_VERSION >= 0x020621
 # define __ASSUME_RECVMMSG	1
+#endif
+
+/* Support for /proc/self/task/$tid/comm and /proc/$pid/task/$tid/comm was
+   added in 2.6.33.  */
+#if __LINUX_KERNEL_VERSION >= 0x020621
+# define __ASSUME_PROC_PID_TASK_COMM	1
 #endif
 
 /* statfs fills in f_flags since 2.6.36.  */
@@ -215,4 +226,10 @@
 /* getcpu is a syscall for x86-64 since 3.1.  */
 #if defined __x86_64__ && __LINUX_KERNEL_VERSION >= 0x030100
 # define __ASSUME_GETCPU_SYSCALL	1
+#endif
+
+/* 2.6.29 removed the XFS restricted_chown sysctl, so it is pointless looking
+   for it in newer kernels.  */
+#if __LINUX_KERNEL_VERSION >= 0x02061d
+# define __ASSUME_XFS_RESTRICTED_CHOWN 1
 #endif

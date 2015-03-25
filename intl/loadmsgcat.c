@@ -1,5 +1,5 @@
 /* Load needed message catalogs.
-   Copyright (C) 1995-2012 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -1237,7 +1237,7 @@ _nl_load_domain (domain_file, domainbinding)
     default:
       /* This is an invalid revision.  */
     invalid:
-      /* This is an invalid .mo file.  */
+      /* This is an invalid .mo file or we ran out of resources.  */
       free (domain->malloced);
 #ifdef HAVE_MMAP
       if (use_mmap)
@@ -1257,6 +1257,11 @@ _nl_load_domain (domain_file, domainbinding)
 
   /* Get the header entry and look for a plural specification.  */
   nullentry = _nl_find_msg (domain_file, domainbinding, "", 0, &nullentrylen);
+  if (__builtin_expect (nullentry == (char *) -1, 0))
+    {
+      __libc_rwlock_fini (domain->conversions_lock);
+      goto invalid;
+    }
   EXTRACT_PLURAL_EXPRESSION (nullentry, &domain->plural, &domain->nplurals);
 
  out:

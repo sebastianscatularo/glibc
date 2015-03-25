@@ -1,5 +1,5 @@
 /* Install given floating-point environment.
-   Copyright (C) 2004-2012 Free Software Foundation, Inc.
+   Copyright (C) 2004-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -39,6 +39,16 @@ __fesetenv (const fenv_t *envp)
 	temp |= envp->__cw & ~_FPU_RESERVED;
 
       _FPU_SETCW (temp);
+
+      if (envp == FE_NOMASK_ENV)
+	{
+	  /* VFPv3 and VFPv4 do not support trapping exceptions, so
+	     test whether the relevant bits were set and fail if
+	     not.  */
+	  _FPU_GETCW (temp);
+	  if ((temp & _FPU_IEEE) != _FPU_IEEE)
+	    return 1;
+	}
 
       /* Success.  */
       return 0;

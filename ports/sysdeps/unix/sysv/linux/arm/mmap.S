@@ -1,4 +1,4 @@
-/* Copyright (C) 1998-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1998-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -23,11 +23,11 @@
 
 ENTRY (__mmap)
 	/* shuffle args */
-	str	r5, [sp, #-4]!
+	push	{ r5 }
 	cfi_adjust_cfa_offset (4)
 	cfi_rel_offset (r5, 0)
 	ldr	r5, [sp, #8]
-	str	r4, [sp, #-4]!
+	push	{ r4 }
 	cfi_adjust_cfa_offset (4)
 	cfi_rel_offset (r4, 0)
 	cfi_remember_state
@@ -37,20 +37,21 @@ ENTRY (__mmap)
 	movs	ip, r5, lsl #20
 	bne	.Linval
 	mov	r5, r5, lsr #12
-	
+
 	/* do the syscall */
 	DO_CALL (mmap2, 0)
 
 	/* restore registers */
 2:
-	ldr	r4, [sp], #4
+	pop	{ r4 }
 	cfi_adjust_cfa_offset (-4)
 	cfi_restore (r4)
-	ldr	r5, [sp], #4
+	pop	{ r5 }
 	cfi_adjust_cfa_offset (-4)
 	cfi_restore (r5)
 
 	cmn	r0, $4096
+	it	cc
 	RETINSTR(cc, lr)
 	b	PLTJMP(syscall_error)
 

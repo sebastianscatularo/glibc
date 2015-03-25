@@ -1,4 +1,4 @@
-/* Copyright (C) 2005, 2009 Free Software Foundation, Inc.
+/* Copyright (C) 2005-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@
 
 ENTRY (syscall)
 	mov	ip, sp
-	stmfd	sp!, {r4, r5, r6, r7}
+	push	{r4, r5, r6, r7}
 	cfi_adjust_cfa_offset (16)
 	cfi_rel_offset (r4, 0)
 	cfi_rel_offset (r5, 4)
@@ -35,13 +35,14 @@ ENTRY (syscall)
 	mov	r2, r3
 	ldmfd	ip, {r3, r4, r5, r6}
 	swi	0x0
-	ldmfd	sp!, {r4, r5, r6, r7}
+	pop	{r4, r5, r6, r7}
 	cfi_adjust_cfa_offset (-16)
 	cfi_restore (r4)
 	cfi_restore (r5)
 	cfi_restore (r6)
 	cfi_restore (r7)
 	cmn	r0, #4096
+	it	cc
 	RETINSTR(cc, lr)
 	b	PLTJMP(syscall_error)
 PSEUDO_END (syscall)

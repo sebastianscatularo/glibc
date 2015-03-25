@@ -1,5 +1,5 @@
 /* fxstat64 using 64-bit MIPS fstat system call.
-   Copyright (C) 1997-2012 Free Software Foundation, Inc.
+   Copyright (C) 1997-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -23,7 +23,6 @@
 
 #include <sysdep.h>
 #include <sys/syscall.h>
-#include <bp-checks.h>
 
 #include <xstatconv.h>
 
@@ -35,7 +34,7 @@ __fxstat64 (int vers, int fd, struct stat64 *buf)
   int result;
   struct kernel_stat kbuf;
 
-  result = INLINE_SYSCALL (fstat, 2, fd, __ptrvalue (&kbuf));
+  result = INLINE_SYSCALL (fstat, 2, fd, &kbuf);
   if (result == 0)
     result = __xstat64_conv (vers, &kbuf, buf);
 

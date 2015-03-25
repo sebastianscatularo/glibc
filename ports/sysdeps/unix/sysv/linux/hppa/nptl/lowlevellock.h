@@ -1,4 +1,4 @@
-/* Copyright (C) 2003, 2004, 2005, 2007 Free Software Foundation, Inc.
+/* Copyright (C) 2003-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -77,7 +77,7 @@
       : (fl))								      \
    : ((fl) | (((private) ^ FUTEX_PRIVATE_FLAG)				      \
 	      & THREAD_GETMEM (THREAD_SELF, header.private_futex))))
-# endif	      
+# endif
 #endif
 
 /* Type for lock object.  */
@@ -257,7 +257,7 @@ __lll_cond_lock (int *futex, int private)
 }
 #define lll_cond_lock(futex, private) __lll_cond_lock (&(futex), private)
 
-extern int __lll_timedlock_wait (lll_lock_t *futex, const struct timespec *, 
+extern int __lll_timedlock_wait (lll_lock_t *futex, const struct timespec *,
 				 int private) attribute_hidden;
 extern int __lll_robust_timedlock_wait (int *futex, const struct timespec *,
 				 int private) attribute_hidden;
@@ -316,8 +316,6 @@ __lll_robust_timedlock (int *futex, const struct timespec *abstime,
 
 #define THREAD_INIT_LOCK(PD, LOCK) \
   (PD)->LOCK = LLL_LOCK_INITIALIZER
-
-extern int lll_unlock_wake_cb (lll_lock_t *__futex) attribute_hidden;
 
 /* The kernel notifies a process which uses CLONE_CHILD_CLEARTID via futex
    wakeup when the clone terminates.  The memory location contains the

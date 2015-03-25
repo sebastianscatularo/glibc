@@ -1,5 +1,5 @@
 /* Definition for thread-local data handling.  NPTL/hppa version.
-   Copyright (C) 2005, 2007, 2010, 2011 Free Software Foundation, Inc.
+   Copyright (C) 2005-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -115,7 +115,7 @@ typedef struct
    elf_gregset_t.  The thread descriptor is sizeof (struct pthread) away.  */
 # define DB_THREAD_SELF \
   REGISTER (32, 32, 53 * 4, -sizeof (struct pthread))
- 
+
 /* Access to data in the thread descriptor is easy.  */
 # define THREAD_GETMEM(descr, member) \
   descr->member

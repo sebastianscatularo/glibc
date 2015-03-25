@@ -1,5 +1,5 @@
 /* Machine-dependent ELF dynamic relocation inline functions.  MIPS version.
-   Copyright (C) 1996-2012 Free Software Foundation, Inc.
+   Copyright (C) 1996-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Kazumoto Kojima <kkojima@info.kanagawa-u.ac.jp>.
 
@@ -73,6 +73,16 @@ do { if ((l)->l_info[DT_MIPS (RLD_MAP)]) \
        (ElfW(Addr)) (r); \
    } while (0)
 
+#if ((defined __mips_nan2008 && !defined HAVE_MIPS_NAN2008) \
+     || (!defined __mips_nan2008 && defined HAVE_MIPS_NAN2008))
+# error "Configuration inconsistency: __mips_nan2008 != HAVE_MIPS_NAN2008, overridden CFLAGS?"
+#endif
+#ifdef __mips_nan2008
+# define ELF_MACHINE_NAN2008 EF_MIPS_NAN2008
+#else
+# define ELF_MACHINE_NAN2008 0
+#endif
+
 /* Return nonzero iff ELF header is compatible with the running host.  */
 static inline int __attribute_used__
 elf_machine_matches_host (const ElfW(Ehdr) *ehdr)
@@ -82,6 +92,10 @@ elf_machine_matches_host (const ElfW(Ehdr) *ehdr)
   if (((ehdr->e_flags & EF_MIPS_ABI2) != 0) != (_MIPS_SIM == _ABIN32))
     return 0;
 #endif
+
+  /* Don't link 2008-NaN and legacy-NaN objects together.  */
+  if ((ehdr->e_flags & EF_MIPS_NAN2008) != ELF_MACHINE_NAN2008)
+    return 0;
 
   switch (ehdr->e_machine)
     {
@@ -119,6 +133,7 @@ static inline ElfW(Addr)
 elf_machine_load_address (void)
 {
   ElfW(Addr) addr;
+#ifndef __mips16
   asm ("	.set noreorder\n"
        "	" STRINGXP (PTR_LA) " %0, 0f\n"
        "	bltzal $0, 0f\n"
@@ -128,6 +143,19 @@ elf_machine_load_address (void)
        :	"=r" (addr)
        :	/* No inputs */
        :	"$31");
+#else
+  ElfW(Addr) tmp;
+  asm ("	.set noreorder\n"
+       "	move %1,$gp\n"
+       "	lw %1,%%got(0f)(%1)\n"
+       "0:	.fill 0\n"		/* Clear the ISA bit on 0:.  */
+       "	la %0,0b\n"
+       "	addiu %1,%%lo(0b)\n"
+       "	subu %0,%1\n"
+       "	.set reorder\n"
+       :	"=d" (addr), "=d" (tmp)
+       :	/* No inputs */);
+#endif
   return addr;
 }
 
@@ -210,7 +238,8 @@ do {									\
    2) That under Unix the entry is named __start
       and not just plain _start.  */
 
-#define RTLD_START asm (\
+#ifndef __mips16
+# define RTLD_START asm (\
 	".text\n\
 	" _RTLD_PROLOGUE(ENTRY_POINT) "\
 	" STRINGXV(SETUP_GPX($25)) "\n\
@@ -282,6 +311,91 @@ do {									\
 	_RTLD_EPILOGUE(_dl_start_user)\
 	".previous"\
 );
+
+#else /* __mips16 */
+/* MIPS16 version.  We currently only support O32 under MIPS16; the proper
+   assembly preprocessor abstractions will need to be added if other ABIs
+   are to be supported.  */
+
+# define RTLD_START asm (\
+	".text\n\
+	.set mips16\n\
+	" _RTLD_PROLOGUE (ENTRY_POINT) "\
+	# Construct GP value in $3.\n\
+	li $3, %hi(_gp_disp)\n\
+	addiu $4, $pc, %lo(_gp_disp)\n\
+	sll $3, 16\n\
+	addu $3, $4\n\
+	move $28, $3\n\
+	lw $4, %got(_DYNAMIC)($3)\n\
+	sw $4, -0x7ff0($3)\n\
+	move $4, $sp\n\
+	addiu $sp, -16\n\
+	# _dl_start() is sufficiently near to use pc-relative\n\
+	# load address.\n\
+	la $3, _dl_start\n\
+	move $25, $3\n\
+	jalr $3\n\
+	addiu $sp, 16\n\
+	" _RTLD_EPILOGUE (ENTRY_POINT) "\
+	\n\
+	\n\
+	" _RTLD_PROLOGUE (_dl_start_user) "\
+	li $16, %hi(_gp_disp)\n\
+	addiu $4, $pc, %lo(_gp_disp)\n\
+	sll $16, 16\n\
+	addu $16, $4\n\
+	move $17, $2\n\
+	move $28, $16\n\
+	lw $4, %got(_dl_skip_args)($16)\n\
+	lw $4, 0($4)\n\
+	beqz $4, 1f\n\
+	# Load the original argument count.\n\
+	lw $5, 0($sp)\n\
+	# Subtract _dl_skip_args from it.\n\
+	subu $5, $4\n\
+	# Adjust the stack pointer to skip _dl_skip_args words.\n\
+	sll $4, " STRINGXP (PTRLOG) "\n\
+	move $6, $sp\n\
+	addu $6, $4\n\
+	move $sp, $6\n\
+	# Save back the modified argument count.\n\
+	sw $5, 0($sp)\n\
+1:	# Call _dl_init (struct link_map *main_map, int argc, char **argv, char **env) \n\
+	lw $4, %got(_rtld_local)($16)\n\
+	lw $4, 0($4)\n\
+	lw $5, 0($sp)\n\
+	addiu $6, $sp, " STRINGXP (PTRSIZE) "\n\
+	sll $7, $5, " STRINGXP (PTRLOG) "\n\
+	addu $7, $6\n\
+	addu $7, " STRINGXP (PTRSIZE) "\n\
+	# Make sure the stack pointer is aligned for _dl_init_internal.\n\
+	li $2, 2 * " STRINGXP (SZREG) "\n\
+	neg $2, $2\n\
+	move $3, $sp\n\
+	and $2, $3\n\
+	sw $3, -" STRINGXP (SZREG) "($2)\n\
+	addiu $2, -32\n\
+	move $sp, $2\n\
+	sw $16, 16($sp)\n\
+	# Call the function to run the initializers.\n\
+	lw $2, %call16(_dl_init_internal)($16)\n\
+	move $25, $2\n\
+	jalr $2\n\
+	# Restore the stack pointer for _start.\n\
+	lw $2, 32-" STRINGXP (SZREG) "($sp)\n\
+	move $sp, $2\n\
+	move $28, $16\n\
+	# Pass our finalizer function to the user in $2 as per ELF ABI.\n\
+	lw $2, %call16(_dl_fini)($16)\n\
+	# Jump to the user entry point.\n\
+	move $25, $17\n\
+	jr $17\n\t"\
+	_RTLD_EPILOGUE (_dl_start_user)\
+	".previous"\
+);
+
+#endif /* __mips16 */
 
 /* Names of the architecture-specific auditing callback functions.  */
 # if _MIPS_SIM == _ABIO32
@@ -535,8 +649,7 @@ elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
 	    strtab = (const void *) D_PTR (map, l_info[DT_STRTAB]);
 	    _dl_error_printf ("\
   %s: Symbol `%s' has different size in shared object, consider re-linking\n",
-			      rtld_progname ?: "<program name unknown>",
-			      strtab + refsym->st_name);
+			      RTLD_PROGNAME, strtab + refsym->st_name);
 	  }
 	memcpy (reloc_addr, (void *) value,
 		MIN (sym->st_size, refsym->st_size));
@@ -637,7 +750,7 @@ elf_machine_got_rel (struct link_map *map, int lazy)
 #define RESOLVE_GOTSYM(sym,vernum,sym_index,reloc)			  \
     ({									  \
       const ElfW(Sym) *ref = sym;					  \
-      const struct r_found_version *version				  \
+      const struct r_found_version *version __attribute__ ((unused))	  \
 	= vernum ? &map->l_versions[vernum[sym_index] & 0x7fff] : NULL;	  \
       struct link_map *sym_map;						  \
       sym_map = RESOLVE_MAP (&ref, version, reloc);			  \

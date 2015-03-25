@@ -1,5 +1,5 @@
 /* Store current floating-point environment.
-   Copyright (C) 2000, 2011 Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by David Huggins-Daines <dhd@debian.org>, 2000
 
@@ -24,7 +24,7 @@ int
 fegetenv (fenv_t *envp)
 {
   unsigned long long buf[4], *bufptr = buf;
-  
+
   __asm__ (
 	   "fstd,ma %%fr0,8(%1)	\n\t"
 	   "fldd -8(%1),%%fr0	\n\t"

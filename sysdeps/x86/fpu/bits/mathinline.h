@@ -1,5 +1,5 @@
 /* Inline math functions for i387 and SSE.
-   Copyright (C) 1995-2012 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -198,6 +198,7 @@ __NTH (lrint (double __x))
 }
 #   endif
 #   ifdef __x86_64__
+__extension__
 __MATH_INLINE long long int
 __NTH (llrintf (float __x))
 {
@@ -209,6 +210,7 @@ __NTH (llrintf (float __x))
   __asm __volatile__ ("cvtss2si %1, %0" : "=r" (__res) : "xm" (__x));
   return __res;
 }
+__extension__
 __MATH_INLINE long long int
 __NTH (llrint (double __x))
 {
@@ -382,7 +384,7 @@ __END_NAMESPACE_C99
 # endif
 #endif
 
-#ifndef __x86_64__
+#ifndef __SSE2_MATH__
 # if ((!defined __NO_MATH_INLINES || defined __LIBC_INTERNAL_MATH_INLINES) \
      && defined __OPTIMIZE__)
 
@@ -896,16 +898,19 @@ __NTH (lrintl (long double __x))
     ("fistpll %0"							      \
      : "=m" (__llrintres) : "t" (__x) : "st");				      \
   return __llrintres
+__extension__
 __MATH_INLINE long long int
 __NTH (llrintf (float __x))
 {
   __llrint_code;
 }
+__extension__
 __MATH_INLINE long long int
 __NTH (llrint (double __x))
 {
   __llrint_code;
 }
+__extension__
 __MATH_INLINE long long int
 __NTH (llrintl (long double __x))
 {
@@ -965,4 +970,4 @@ __inline_mathcode2 (__ieee754_atan2, __y, __x,
 		    return __value;)
 # endif
 
-#endif /* !__x86_64__ */
+#endif /* !__SSE2_MATH__ */

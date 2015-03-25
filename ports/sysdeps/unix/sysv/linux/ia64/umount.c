@@ -1,5 +1,5 @@
 /* umount system call for Linux/ia64.
-   Copyright (C) 2003 Free Software Foundation, Inc.
+   Copyright (C) 2003-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -20,11 +20,10 @@
 #include <errno.h>
 
 #include <sysdep.h>
-#include <bp-checks.h>
 
 /* Unmount a filesystem.  */
 int
 umount (const char *special_file)
 {
-  return INLINE_SYSCALL (umount, 2, CHECK_STRING (special_file), 0);
+  return INLINE_SYSCALL (umount, 2, special_file, 0);
 }

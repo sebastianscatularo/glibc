@@ -1,4 +1,4 @@
-/* Copyright (C) 1995-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@gnu.ai.mit.edu>, August 1995.
 
@@ -33,10 +33,6 @@ union semun
   struct seminfo *__buf;	/* buffer for IPC_INFO */
 };
 
-#include <bp-checks.h>
-#include <bp-semctl.h>
-
-
 int
 __new_semctl (int semid, int semnum, int cmd, ...)
 {
@@ -51,7 +47,7 @@ __new_semctl (int semid, int semnum, int cmd, ...)
   va_end (ap);
 
   return INLINE_SYSCALL (semctl, 4, semid, semnum, cmd | __IPC_64,
-			 CHECK_SEMCTL (&arg, semid, cmd | __IPC_64)->array);
+			 arg.array);
 }
 
 #include <shlib-compat.h>

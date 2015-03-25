@@ -1,5 +1,5 @@
 /* System-specific malloc support functions.  Generic version.
-   Copyright (C) 2012 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -15,6 +15,9 @@
    You should have received a copy of the GNU Lesser General Public
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
+
+#include <stdbool.h>
+#include <unistd.h>
 
 /* Force an unmap when the heap shrinks in a secure exec.  This ensures that
    the old data pages immediately cease to be accessible.  */

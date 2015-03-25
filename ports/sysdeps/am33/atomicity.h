@@ -1,5 +1,5 @@
 /* Low-level functions for atomic operations.  AM33 version.
-   Copyright 1999, 2001 Free Software Foundation, Inc.
+   Copyright 1999-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Alexandre Oliva <aoliva@redhat.com>.
    Based on ../sparc/sparc32/atomicity.h
@@ -22,6 +22,7 @@
 #define _ATOMICITY_H	1
 
 #include <inttypes.h>
+#include <stdint.h>
 
 #define __acquire_lock(lock) \
   __asm__ __volatile__("1:	bset	%1, (%0)\n\t"		\

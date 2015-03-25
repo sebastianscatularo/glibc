@@ -1,4 +1,4 @@
-/* Copyright (C) 2000, 2012 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Denis Joseph Barrow <djbarrow@de.ibm.com>.
 
@@ -76,8 +76,8 @@ typedef unsigned int fexcept_t; /* size of fpc */
    to the layout of the block written by the `fstenv'.  */
 typedef struct
 {
-  fexcept_t fpc;
-  void *ieee_instruction_pointer;
+  fexcept_t __fpc;
+  void *__ieee_instruction_pointer;
   /* failing instruction for ieee exceptions */
 } fenv_t;
 

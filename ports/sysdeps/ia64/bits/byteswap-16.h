@@ -1,5 +1,5 @@
 /* Macros to swap the order of bytes in 16-bit integer values.
-   Copyright (C) 1997-2012 Free Software Foundation, Inc.
+   Copyright (C) 1997-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@
 #if defined __GNUC__ && __GNUC__ >= 2
 # define __bswap_16(x) \
      (__extension__							      \
-      ({ register unsigned short int __v, __x = (unsigned short int) (x);     \
+      ({ unsigned short int __v, __x = (unsigned short int) (x);	      \
 	 if (__builtin_constant_p (x))					      \
 	   __v = __bswap_constant_16 (__x);				      \
 	 else								      \

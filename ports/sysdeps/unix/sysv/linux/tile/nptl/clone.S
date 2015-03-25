@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2012 Free Software Foundation, Inc.
+/* Copyright (C) 2011-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Chris Metcalf <cmetcalf@tilera.com>, 2011.
 
@@ -83,7 +83,7 @@ ENTRY (__clone)
 
 	/* We need to switch the argument convention around from
 	   libc to kernel:
-	  
+
 	   libc:
 	    r0 fn
 	    r1 child_stack
@@ -92,14 +92,14 @@ ENTRY (__clone)
 	    r4 ptid
 	    r5 tls
 	    r6 ctid
-	  
+
 	   kernel:
 	    r0 flags
 	    r1 child_stack [same as libc]
 	    r2 ptid
 	    r3 ctid
 	    r4 tls
-	  
+
 	   Plus the callee-saves as described at .Lthread_start, below.  */
 	{
 	 move r32, r0
@@ -151,15 +151,17 @@ ENTRY (__clone)
 	 movei r1, EINVAL
 	 j SYSCALL_ERROR_NAME
 	}
-	
+
 /* This function expects to receive:
-   
+
    sp: the top of a valid stack area
    r30: clone() flags
    r31: the argument to pass to the user function
    r32: the user function pointer  */
 
 .Lthread_start:
+	cfi_def_cfa_offset (FRAME_SIZE)
+	cfi_undefined (lr)
 	/* Check and see if we need to reset the PID, which we do if
 	   CLONE_THREAD isn't set, i.e. we're not staying in the thread group.
 	   If CLONE_VM is set, we're doing some kind of thread-like clone,
@@ -167,7 +169,6 @@ ENTRY (__clone)
 	   in getpid().  Otherwise (if CLONE_VM isn't set), it's a
 	   fork-like clone, and we go ahead and write the cached values
 	   from the true system pid (retrieved via __NR_getpid syscall).  */
-	cfi_def_cfa_offset (FRAME_SIZE)
 #ifdef __tilegx__
 	{
 	 moveli r0, hw1_last(CLONE_VM)

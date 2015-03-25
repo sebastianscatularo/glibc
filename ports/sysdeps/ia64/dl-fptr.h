@@ -1,5 +1,5 @@
 /* Function descriptors.  IA64 version.
-   Copyright (C) 2003 Free Software Foundation, Inc.
+   Copyright (C) 2003-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -31,5 +31,15 @@
 
 #define ELF_MACHINE_LOAD_ADDRESS(var, symbol)	\
   asm ("movl %0 = @gprel (" #symbol ");; add %0 = %0, gp" : "=&r" (var));
+
+/* We don't have a gcc helper to extract the plabel info.  */
+#define ELF_PTR_TO_FDESC(ptr) \
+  ({ union { \
+       void *_ptr; \
+       struct fdesc *_fdesc; \
+     } _u; \
+     _u._ptr = ptr; \
+     _u._fdesc; \
+  })
 
 #endif /* !dl_ia64_fptr_h */

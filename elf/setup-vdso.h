@@ -1,5 +1,5 @@
 /* Set up the data structures for the system-supplied DSO.
-   Copyright (C) 2012 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -20,7 +20,7 @@ static inline void __attribute__ ((always_inline))
 setup_vdso (struct link_map *main_map __attribute__ ((unused)),
 	    struct link_map ***first_preload __attribute__ ((unused)))
 {
-#if defined NEED_DL_SYSINFO || defined NEED_DL_SYSINFO_DSO
+#ifdef NEED_DL_SYSINFO_DSO
   if (GLRO(dl_sysinfo_dso) == NULL)
     return;
 
@@ -89,7 +89,7 @@ setup_vdso (struct link_map *main_map __attribute__ ((unused)),
 	     addresses in the vsyscall DSO pages in writev() calls.  */
 	  const char *dsoname = ((char *) D_PTR (l, l_info[DT_STRTAB])
 				 + l->l_info[DT_SONAME]->d_un.d_val);
-	  size_t len = strlen (dsoname);
+	  size_t len = strlen (dsoname) + 1;
 	  char *copy = malloc (len);
 	  if (copy == NULL)
 	    _dl_fatal_printf ("out of memory\n");

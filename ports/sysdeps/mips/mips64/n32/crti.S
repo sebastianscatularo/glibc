@@ -1,5 +1,5 @@
 /* Special .init and .fini section support for MIPS (n32).
-   Copyright (C) 1995-2012 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -53,6 +53,8 @@
 #else
 	.hidden PREINIT_FUNCTION
 #endif
+
+	.set nomips16
 
 	.section .init,"ax",@progbits
 	.p2align 2

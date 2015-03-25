@@ -1,6 +1,5 @@
 /* Machine-dependent ELF dynamic relocation inline functions.  AM33 version.
-   Copyright (C) 1995,96,97,98,99,2000,2001, 2004, 2011
-   Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -56,16 +55,14 @@ elf_machine_load_address (void)
   return off + gotaddr - gotval;
 }
 
-#if !defined PROF && !__BOUNDED_POINTERS__
+#ifndef PROF
 /* We add a declaration of this function here so that in dl-runtime.c
    the ELF_MACHINE_RUNTIME_TRAMPOLINE macro really can pass the parameters
    in registers.
 
    We cannot use this scheme for profiling because the _mcount call
    destroys the passed register information.  */
-/* GKM FIXME: Fix trampoline to pass bounds so we can do
-   without the `__unbounded' qualifier.  */
-static ElfW(Addr) fixup (struct link_map *__unbounded l, ElfW(Word) reloc_offset)
+static ElfW(Addr) fixup (struct link_map *l, ElfW(Word) reloc_offset)
      __attribute__ ((unused));
 static ElfW(Addr) profile_fixup (struct link_map *l, ElfW(Word) reloc_offset,
 				 ElfW(Addr) retaddr)
@@ -117,7 +114,7 @@ elf_machine_runtime_setup (struct link_map *l, int lazy, int profile)
 
 /* This code is used in dl-runtime.c to call the `fixup' function
    and then redirect to the address it returns.  */
-#if !defined PROF && !__BOUNDED_POINTERS__
+#ifndef PROF
 # define ELF_MACHINE_RUNTIME_TRAMPOLINE asm ("\
 	.text\n\
 	.globl _dl_runtime_resolve\n\

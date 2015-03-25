@@ -1,5 +1,5 @@
 /* Compute x * y + z as ternary operation.
-   Copyright (C) 2010-2012 Free Software Foundation, Inc.
+   Copyright (C) 2010-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Jakub Jelinek <jakub@redhat.com>, 2010.
 
@@ -55,16 +55,17 @@ __fma (double x, double y, double z)
 	 underflows to 0.  */
       if (z == 0 && x != 0 && y != 0)
 	return x * y;
-      /* If x or y or z is Inf/NaN, or if fma will certainly overflow,
-	 or if x * y is zero, compute as x * y + z.  */
+      /* If x or y or z is Inf/NaN, or if x * y is zero, compute as
+	 x * y + z.  */
       if (u.ieee.exponent == 0x7ff
 	  || v.ieee.exponent == 0x7ff
 	  || w.ieee.exponent == 0x7ff
-	  || u.ieee.exponent + v.ieee.exponent
-	     > 0x7ff + IEEE754_DOUBLE_BIAS
 	  || x == 0
 	  || y == 0)
 	return x * y + z;
+      /* If fma will certainly overflow, compute as x * y.  */
+      if (u.ieee.exponent + v.ieee.exponent > 0x7ff + IEEE754_DOUBLE_BIAS)
+	return x * y;
       /* If x * y is less than 1/4 of DBL_DENORM_MIN, neither the
 	 result nor whether there is underflow depends on its exact
 	 value, only on its sign.  */
@@ -113,8 +114,17 @@ __fma (double x, double y, double z)
 	{
 	  /* Similarly.
 	     If z exponent is very large and x and y exponents are
-	     very small, it doesn't matter if we don't adjust it.  */
-	  if (u.ieee.exponent > v.ieee.exponent)
+	     very small, adjust them up to avoid spurious underflows,
+	     rather than down.  */
+	  if (u.ieee.exponent + v.ieee.exponent
+	      <= IEEE754_DOUBLE_BIAS + DBL_MANT_DIG)
+	    {
+	      if (u.ieee.exponent > v.ieee.exponent)
+		u.ieee.exponent += 2 * DBL_MANT_DIG + 2;
+	      else
+		v.ieee.exponent += 2 * DBL_MANT_DIG + 2;
+	    }
+	  else if (u.ieee.exponent > v.ieee.exponent)
 	    {
 	      if (u.ieee.exponent > DBL_MANT_DIG)
 		u.ieee.exponent -= DBL_MANT_DIG;
@@ -144,15 +154,15 @@ __fma (double x, double y, double z)
 		  <= IEEE754_DOUBLE_BIAS + DBL_MANT_DIG) */
 	{
 	  if (u.ieee.exponent > v.ieee.exponent)
-	    u.ieee.exponent += 2 * DBL_MANT_DIG;
+	    u.ieee.exponent += 2 * DBL_MANT_DIG + 2;
 	  else
-	    v.ieee.exponent += 2 * DBL_MANT_DIG;
-	  if (w.ieee.exponent <= 4 * DBL_MANT_DIG + 4)
+	    v.ieee.exponent += 2 * DBL_MANT_DIG + 2;
+	  if (w.ieee.exponent <= 4 * DBL_MANT_DIG + 6)
 	    {
 	      if (w.ieee.exponent)
-		w.ieee.exponent += 2 * DBL_MANT_DIG;
+		w.ieee.exponent += 2 * DBL_MANT_DIG + 2;
 	      else
-		w.d *= 0x1p106;
+		w.d *= 0x1p108;
 	      adjust = -1;
 	    }
 	  /* Otherwise x * y should just affect inexact
@@ -166,6 +176,9 @@ __fma (double x, double y, double z)
   /* Ensure correct sign of exact 0 + 0.  */
   if (__builtin_expect ((x == 0 || y == 0) && z == 0, 0))
     return x * y + z;
+
+  fenv_t env;
+  libc_feholdexcept_setround (&env, FE_TONEAREST);
 
   /* Multiplication m1 + m2 = x * y using Dekker's algorithm.  */
 #define C ((1 << (DBL_MANT_DIG + 1) / 2) + 1)
@@ -185,9 +198,20 @@ __fma (double x, double y, double z)
   t1 = m1 - t1;
   t2 = z - t2;
   double a2 = t1 + t2;
+  feclearexcept (FE_INEXACT);
 
-  fenv_t env;
-  libc_feholdexcept_setround (&env, FE_TOWARDZERO);
+  /* If the result is an exact zero, ensure it has the correct
+     sign.  */
+  if (a1 == 0 && m2 == 0)
+    {
+      libc_feupdateenv (&env);
+      /* Ensure that round-to-nearest value of z + m1 is not
+	 reused.  */
+      asm volatile ("" : "=m" (z) : "m" (z));
+      return z + m1;
+    }
+
+  libc_fesetround (FE_TOWARDZERO);
 
   /* Perform m2 + a2 addition with round to odd.  */
   u.d = a2 + m2;
@@ -223,19 +247,19 @@ __fma (double x, double y, double z)
       /* If a1 + u.d is exact, the only rounding happens during
 	 scaling down.  */
       if (j == 0)
-	return v.d * 0x1p-106;
+	return v.d * 0x1p-108;
       /* If result rounded to zero is not subnormal, no double
 	 rounding will occur.  */
-      if (v.ieee.exponent > 106)
-	return (a1 + u.d) * 0x1p-106;
-      /* If v.d * 0x1p-106 with round to zero is a subnormal above
-	 or equal to DBL_MIN / 2, then v.d * 0x1p-106 shifts mantissa
+      if (v.ieee.exponent > 108)
+	return (a1 + u.d) * 0x1p-108;
+      /* If v.d * 0x1p-108 with round to zero is a subnormal above
+	 or equal to DBL_MIN / 2, then v.d * 0x1p-108 shifts mantissa
 	 down just by 1 bit, which means v.ieee.mantissa1 |= j would
 	 change the round bit, not sticky or guard bit.
-	 v.d * 0x1p-106 never normalizes by shifting up,
+	 v.d * 0x1p-108 never normalizes by shifting up,
 	 so round bit plus sticky bit should be already enough
 	 for proper rounding.  */
-      if (v.ieee.exponent == 106)
+      if (v.ieee.exponent == 108)
 	{
 	  /* If the exponent would be in the normal range when
 	     rounding to normal precision with unbounded exponent
@@ -245,8 +269,8 @@ __fma (double x, double y, double z)
 	  if (TININESS_AFTER_ROUNDING)
 	    {
 	      w.d = a1 + u.d;
-	      if (w.ieee.exponent == 107)
-		return w.d * 0x1p-106;
+	      if (w.ieee.exponent == 109)
+		return w.d * 0x1p-108;
 	    }
 	  /* v.ieee.mantissa1 & 2 is LSB bit of the result before rounding,
 	     v.ieee.mantissa1 & 1 is the round bit and j is our sticky
@@ -255,12 +279,12 @@ __fma (double x, double y, double z)
 	  w.ieee.mantissa1 = ((v.ieee.mantissa1 & 3) << 1) | j;
 	  w.ieee.negative = v.ieee.negative;
 	  v.ieee.mantissa1 &= ~3U;
-	  v.d *= 0x1p-106;
+	  v.d *= 0x1p-108;
 	  w.d *= 0x1p-2;
 	  return v.d + w.d;
 	}
       v.ieee.mantissa1 |= j;
-      return v.d * 0x1p-106;
+      return v.d * 0x1p-108;
     }
 }
 #ifndef __fma

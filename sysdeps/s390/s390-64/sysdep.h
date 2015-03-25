@@ -1,5 +1,5 @@
 /* Assembler macros for 64 bit S/390.
-   Copyright (C) 2001, 2003, 2012 Free Software Foundation, Inc.
+   Copyright (C) 2001-2014 Free Software Foundation, Inc.
    Contributed by Martin Schwidefsky (schwidefsky@de.ibm.com).
    This file is part of the GNU C Library.
 
@@ -63,6 +63,7 @@
 #define	syscall_error	__syscall_error
 #define mcount		_mcount
 
+#undef PSEUDO
 #define	PSEUDO(name, syscall_name, args) \
 lose: SYSCALL_PIC_SETUP			\
   jg JUMPTARGET(syscall_error);		\

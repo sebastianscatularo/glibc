@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 Free Software Foundation, Inc.
+/* Copyright (C) 2011-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Chris Metcalf <cmetcalf@tilera.com>, 2011.
 
@@ -143,7 +143,7 @@ ENTRY (__setcontext)
 	mtspr EX_CONTEXT_0_1, r12
 	iret
 	jrp lr    /* keep the backtracer happy */
-	
+
 .Lsigreturn:
 	/* This is a context obtained from a signal handler.
 	   Perform a full restore by pushing the context

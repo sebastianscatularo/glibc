@@ -1,5 +1,5 @@
 /* FIPS compliance status test for GNU/Linux systems.
-   Copyright (C) 2012 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -29,7 +29,7 @@
 /* Return true if FIPS mode is enabled.  See
    sysdeps/generic/fips-private.h for more information.  */
 
-static inline bool
+static bool
 fips_enabled_p (void)
 {
   static enum

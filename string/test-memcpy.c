@@ -1,5 +1,5 @@
 /* Test and measure memcpy functions.
-   Copyright (C) 1999-2012 Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Written by Jakub Jelinek <jakub@redhat.com>, 1999.
 
@@ -63,28 +63,10 @@ do_one_test (impl_t *impl, char *dst, const char *src,
 
   if (memcmp (dst, src, len) != 0)
     {
-      error (0, 0, "Wrong result in function %s dst \"%s\" src \"%s\"",
-	     impl->name, dst, src);
+      error (0, 0, "Wrong result in function %s dst %p \"%.*s\" src %p \"%.*s\" len %zu",
+	     impl->name, dst, (int) len, dst, src, (int) len, src, len);
       ret = 1;
       return;
-    }
-
-  if (HP_TIMING_AVAIL)
-    {
-      hp_timing_t start __attribute ((unused));
-      hp_timing_t stop __attribute ((unused));
-      hp_timing_t best_time = ~ (hp_timing_t) 0;
-      size_t i;
-
-      for (i = 0; i < 32; ++i)
-	{
-	  HP_TIMING_NOW (start);
-	  CALL (impl, dst, src, len);
-	  HP_TIMING_NOW (stop);
-	  HP_TIMING_BEST (best_time, start, stop);
-	}
-
-      printf ("\t%zd", (size_t) best_time);
     }
 }
 
@@ -108,14 +90,8 @@ do_test (size_t align1, size_t align2, size_t len)
   for (i = 0, j = 1; i < len; i++, j += 23)
     s1[i] = j;
 
-  if (HP_TIMING_AVAIL)
-    printf ("Length %4zd, alignment %2zd/%2zd:", len, align1, align2);
-
   FOR_EACH_IMPL (impl, 0)
     do_one_test (impl, s2, s1, len);
-
-  if (HP_TIMING_AVAIL)
-    putchar ('\n');
 }
 
 static void

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Written by Per Bothner <bothner@cygnus.com>.
 
@@ -155,21 +155,13 @@ int
 _IO_new_file_close_it (fp)
      _IO_FILE *fp;
 {
+  int write_status;
   if (!_IO_file_is_open (fp))
     return EOF;
 
-  int write_status;
-  if (_IO_in_put_mode (fp))
+  if ((fp->_flags & _IO_NO_WRITES) == 0
+      && (fp->_flags & _IO_CURRENTLY_PUTTING) != 0)
     write_status = _IO_do_flush (fp);
-  else if (fp->_offset != _IO_pos_BAD && fp->_IO_read_base != NULL
-	   && !_IO_in_backup (fp))
-    {
-      off64_t o = _IO_SEEKOFF (fp, 0, _IO_seek_cur, 0);
-      if (o == WEOF)
-	write_status = EOF;
-      else
-	write_status = _IO_SYSSEEK (fp, o, SEEK_SET) < 0 ? EOF : 0;
-    }
   else
     write_status = 0;
 
@@ -1279,7 +1271,7 @@ _IO_new_file_xsputn (f, data, n)
      const void *data;
      _IO_size_t n;
 {
-  register const char *s = (const char *) data;
+  const char *s = (const char *) data;
   _IO_size_t to_do = n;
   int must_flush = 0;
   _IO_size_t count = 0;
@@ -1296,7 +1288,7 @@ _IO_new_file_xsputn (f, data, n)
       count = f->_IO_buf_end - f->_IO_write_ptr;
       if (count >= n)
 	{
-	  register const char *p;
+	  const char *p;
 	  for (p = s + n; p > s; )
 	    {
 	      if (*--p == '\n')
@@ -1334,8 +1326,7 @@ _IO_new_file_xsputn (f, data, n)
 	   caller that everything has been written.  */
 	return to_do == 0 ? EOF : n - to_do;
 
-      /* Try to maintain alignment: write a whole number of blocks.
-	 dont_write is what gets left over. */
+      /* Try to maintain alignment: write a whole number of blocks.  */
       block_size = f->_IO_buf_end - f->_IO_buf_base;
       do_write = to_do - (block_size >= 128 ? to_do % block_size : 0);
 
@@ -1363,9 +1354,9 @@ _IO_file_xsgetn (fp, data, n)
      void *data;
      _IO_size_t n;
 {
-  register _IO_size_t want, have;
-  register _IO_ssize_t count;
-  register char *s = data;
+  _IO_size_t want, have;
+  _IO_ssize_t count;
+  char *s = data;
 
   want = n;
 
@@ -1465,9 +1456,9 @@ _IO_file_xsgetn_mmap (fp, data, n)
      void *data;
      _IO_size_t n;
 {
-  register _IO_size_t have;
+  _IO_size_t have;
   char *read_ptr = fp->_IO_read_ptr;
-  register char *s = (char *) data;
+  char *s = (char *) data;
 
   have = fp->_IO_read_end - fp->_IO_read_ptr;
 

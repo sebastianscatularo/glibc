@@ -1,5 +1,4 @@
-/* Copyright (C) 1993, 1997-2003,2004,2005,2006,2007,2012
-	Free Software Foundation, Inc.
+/* Copyright (C) 1993-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -24,6 +23,14 @@
    might be covered by the GNU Lesser General Public License.
    This exception applies to code released by its copyright holders
    in files containing the exception.  */
+
+/* NOTE: libio is now exclusively used only by glibc since libstdc++ has its
+   own implementation.  As a result, functions that were implemented for C++
+   (like *sputn) may no longer have C++ semantics.  This is of course only
+   relevant for internal callers of these functions since these functions are
+   not intended for external use otherwise.
+
+   FIXME: All of the C++ cruft eventually needs to go away.  */
 
 #include <errno.h>
 #ifndef __set_errno
@@ -66,7 +73,7 @@ extern "C" {
  * These are all the same, just used differently.
  * An _IO_FILE (or FILE) object is allows followed by a pointer to
  * a jump table (of pointers to functions).  The pointer is accessed
- * with the _IO_JUMPS macro.  The jump table has a eccentric format,
+ * with the _IO_JUMPS macro.  The jump table has an eccentric format,
  * so as to be compatible with the layout of a C++ virtual function table.
  * (as implemented by g++).  When a pointer to a streambuf object is
  * coerced to an (_IO_FILE*), then _IO_JUMPS on the result just
@@ -159,7 +166,7 @@ typedef int (*_IO_pbackfail_t) (_IO_FILE *, int);
 #define _IO_WPBACKFAIL(FP, CH) WJUMP1 (__pbackfail, FP, CH)
 
 /* The 'xsputn' hook writes upto N characters from buffer DATA.
-   Returns the number of character actually written.
+   Returns EOF or the number of character actually written.
    It matches the streambuf::xsputn virtual function. */
 typedef _IO_size_t (*_IO_xsputn_t) (_IO_FILE *FP, const void *DATA,
 				    _IO_size_t N);
@@ -217,7 +224,7 @@ typedef int (*_IO_doallocate_t) (_IO_FILE *);
    There is no correspondence in the ANSI/ISO C++ standard library.
    The hooks basically correspond to the Unix system functions
    (read, write, close, lseek, and stat) except that a _IO_FILE*
-   parameter is used instead of a integer file descriptor;  the default
+   parameter is used instead of an integer file descriptor;  the default
    implementation used for normal files just calls those functions.
    The advantage of overriding these functions instead of the higher-level
    ones (underflow, overflow etc) is that you can leave all the buffering

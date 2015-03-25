@@ -1,4 +1,4 @@
-/* Copyright (C) 1998-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1998-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -15,12 +15,11 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <ldsodefs.h>
-#include <bp-start.h>
-#include <bp-sym.h>
 
 extern void __libc_init_first (int argc, char **argv, char **envp);
 #ifndef SHARED
@@ -37,6 +36,12 @@ extern void __pthread_initialize_minimal (void);
 /* Only exported for architectures that don't store the stack guard canary
    in thread local area.  */
 uintptr_t __stack_chk_guard attribute_relro;
+# endif
+# ifndef  THREAD_SET_POINTER_GUARD
+/* Only exported for architectures that don't store the pointer guard
+   value in thread local area.  */
+uintptr_t __pointer_chk_guard_local
+	attribute_relro attribute_hidden __attribute__ ((nocommon));
 # endif
 #endif
 
@@ -87,7 +92,7 @@ apply_irel (void)
 # endif
 #else
 # define STATIC
-# define LIBC_START_MAIN BP_SYM (__libc_start_main)
+# define LIBC_START_MAIN __libc_start_main
 #endif
 
 #ifdef MAIN_AUXVEC_ARG
@@ -102,14 +107,14 @@ apply_irel (void)
 STATIC int LIBC_START_MAIN (int (*main) (int, char **, char **
 					 MAIN_AUXVEC_DECL),
 			    int argc,
-			    char *__unbounded *__unbounded ubp_av,
+			    char **argv,
 #ifdef LIBC_START_MAIN_AUXVEC_ARG
-			    ElfW(auxv_t) *__unbounded auxvec,
+			    ElfW(auxv_t) *auxvec,
 #endif
 			    __typeof (main) init,
 			    void (*fini) (void),
 			    void (*rtld_fini) (void),
-			    void *__unbounded stack_end)
+			    void *stack_end)
      __attribute__ ((noreturn));
 
 
@@ -118,29 +123,23 @@ STATIC int LIBC_START_MAIN (int (*main) (int, char **, char **
    finalizers were called in more than one place.  */
 STATIC int
 LIBC_START_MAIN (int (*main) (int, char **, char ** MAIN_AUXVEC_DECL),
-		 int argc, char *__unbounded *__unbounded ubp_av,
+		 int argc, char **argv,
 #ifdef LIBC_START_MAIN_AUXVEC_ARG
-		 ElfW(auxv_t) *__unbounded auxvec,
+		 ElfW(auxv_t) *auxvec,
 #endif
 		 __typeof (main) init,
 		 void (*fini) (void),
-		 void (*rtld_fini) (void), void *__unbounded stack_end)
+		 void (*rtld_fini) (void), void *stack_end)
 {
-#if __BOUNDED_POINTERS__
-  char **argv;
-#else
-# define argv ubp_av
-#endif
-
   /* Result of the 'main' function.  */
   int result;
 
   __libc_multiple_libcs = &_dl_starting_up && !_dl_starting_up;
 
 #ifndef SHARED
-  char *__unbounded *__unbounded ubp_ev = &ubp_av[argc + 1];
+  char **ev = &argv[argc + 1];
 
-  INIT_ARGV_and_ENVIRON;
+  __environ = ev;
 
   /* Store the lowest stack address.  This is done in ld.so if this is
      the code for the DSO.  */
@@ -150,16 +149,34 @@ LIBC_START_MAIN (int (*main) (int, char **, char ** MAIN_AUXVEC_DECL),
   /* First process the auxiliary vector since we need to find the
      program header to locate an eventually present PT_TLS entry.  */
 #  ifndef LIBC_START_MAIN_AUXVEC_ARG
-  ElfW(auxv_t) *__unbounded auxvec;
+  ElfW(auxv_t) *auxvec;
   {
-    char *__unbounded *__unbounded evp = ubp_ev;
+    char **evp = ev;
     while (*evp++ != NULL)
       ;
-    auxvec = (ElfW(auxv_t) *__unbounded) evp;
+    auxvec = (ElfW(auxv_t) *) evp;
   }
 #  endif
   _dl_aux_init (auxvec);
+  if (GL(dl_phdr) == NULL)
 # endif
+    {
+      /* Starting from binutils-2.23, the linker will define the
+         magic symbol __ehdr_start to point to our own ELF header
+         if it is visible in a segment that also includes the phdrs.
+         So we can set up _dl_phdr and _dl_phnum even without any
+         information from auxv.  */
+
+      extern const ElfW(Ehdr) __ehdr_start
+	__attribute__ ((weak, visibility ("hidden")));
+      if (&__ehdr_start != NULL)
+        {
+          assert (__ehdr_start.e_phentsize == sizeof *GL(dl_phdr));
+          GL(dl_phdr) = (const void *) &__ehdr_start + __ehdr_start.e_phoff;
+          GL(dl_phnum) = __ehdr_start.e_phnum;
+        }
+    }
+
 # ifdef DL_SYSDEP_OSCHECK
   if (!__libc_multiple_libcs)
     {
@@ -184,6 +201,16 @@ LIBC_START_MAIN (int (*main) (int, char **, char ** MAIN_AUXVEC_DECL),
 # else
   __stack_chk_guard = stack_chk_guard;
 # endif
+
+  /* Set up the pointer guard value.  */
+  uintptr_t pointer_chk_guard = _dl_setup_pointer_guard (_dl_random,
+							 stack_chk_guard);
+# ifdef THREAD_SET_POINTER_GUARD
+  THREAD_SET_POINTER_GUARD (pointer_chk_guard);
+# else
+  __pointer_chk_guard_local = pointer_chk_guard;
+# endif
+
 #endif
 
   /* Register the destructor of the dynamic linker if there is any.  */
@@ -272,7 +299,9 @@ LIBC_START_MAIN (int (*main) (int, char **, char ** MAIN_AUXVEC_DECL),
       result = 0;
 # ifdef SHARED
       unsigned int *ptr = __libc_pthread_functions.ptr_nthreads;
+#  ifdef PTR_DEMANGLE
       PTR_DEMANGLE (ptr);
+#  endif
 # else
       extern unsigned int __nptl_nthreads __attribute ((weak));
       unsigned int *const ptr = &__nptl_nthreads;

@@ -1,4 +1,4 @@
-/* Copyright (C) 2004, 2005, 2012 Free Software Foundation, Inc.
+/* Copyright (C) 2004-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -74,7 +74,7 @@ typedef struct
 fenv_t;
 
 /* If the default argument is used we use this value.  */
-#define FE_DFL_ENV	((fenv_t *) -1l)
+#define FE_DFL_ENV	((const fenv_t *) -1l)
 
 #ifdef __USE_GNU
 /* Floating-point environment where none of the exceptions are masked.  */

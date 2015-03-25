@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 Free Software Foundation, Inc.
+/* Copyright (C) 2011-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Chris Metcalf <cmetcalf@tilera.com>, 2011.
 
@@ -30,4 +30,3 @@ ustat (dev_t dev, struct ustat *ubuf)
   return -1;
 }
 stub_warning (ustat)
-#include <stub-tag.h>

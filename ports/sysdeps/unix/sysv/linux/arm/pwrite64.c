@@ -1,5 +1,4 @@
-/* Copyright (C) 1997, 1998, 1999, 2000, 2002, 2003, 2005
-   Free Software Foundation, Inc.
+/* Copyright (C) 1997-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@cygnus.com>, 1997.
 
@@ -23,7 +22,6 @@
 
 #include <sysdep-cancel.h>
 #include <sys/syscall.h>
-#include <bp-checks.h>
 
 ssize_t
 __libc_pwrite64 (fd, buf, count, offset)
@@ -38,7 +36,7 @@ __libc_pwrite64 (fd, buf, count, offset)
     {
       /* In the ARM EABI, 64-bit values are aligned to even/odd register
 	 pairs for syscalls.  */
-      result = INLINE_SYSCALL (pwrite64, 6, fd, CHECK_N (buf, count), count, 0,
+      result = INLINE_SYSCALL (pwrite64, 6, fd, buf, count, 0,
 			       __LONG_LONG_PAIR ((off_t) (offset >> 32),
 						 (off_t) (offset & 0xffffffff)));
 
@@ -49,7 +47,7 @@ __libc_pwrite64 (fd, buf, count, offset)
 
   /* In the ARM EABI, 64-bit values are aligned to even/odd register
      pairs for syscalls.  */
-  result = INLINE_SYSCALL (pwrite64, 6, fd, CHECK_N (buf, count), count, 0,
+  result = INLINE_SYSCALL (pwrite64, 6, fd, buf, count, 0,
 			   __LONG_LONG_PAIR ((off_t) (offset >> 32),
 					     (off_t) (offset & 0xffffffff)));
 

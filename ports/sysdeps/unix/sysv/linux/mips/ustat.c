@@ -1,4 +1,4 @@
-/* Copyright (C) 1997, 1998, 2000, 2003 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@cygnus.com>, 1997.
 
@@ -22,7 +22,6 @@
 
 #include <sysdep.h>
 #include <sys/syscall.h>
-#include <bp-checks.h>
 
 int
 ustat (dev_t dev, struct ustat *ubuf)
@@ -32,5 +31,5 @@ ustat (dev_t dev, struct ustat *ubuf)
   /* We must convert the value to dev_t type used by the kernel.  */
   k_dev = ((major (dev) & 0xff) << 8) | (minor (dev) & 0xff);
 
-  return INLINE_SYSCALL (ustat, 2, k_dev, CHECK_1 (ubuf));
+  return INLINE_SYSCALL (ustat, 2, k_dev, ubuf);
 }

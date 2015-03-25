@@ -1,4 +1,4 @@
-/* Copyright (C) 2002, 2011 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Hartvig Ekner <hartvige@mips.com>, 2002.
 
@@ -22,7 +22,7 @@
 
 #if (_MIPS_ISA >= _MIPS_ISA_MIPS2)
 
-float
+float __attribute__ ((nomips16))
 __ieee754_sqrtf (float x)
 {
   float z;

@@ -1,5 +1,4 @@
-/* Copyright (C) 1993,1995,1997-2002, 2003, 2004, 2006, 2007, 2011-2012
-   Free Software Foundation, Inc.
+/* Copyright (C) 1993-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -662,6 +661,10 @@ _IO_no_init (fp, flags, orientation, wd, jmp)
 
       fp->_wide_data->_wide_vtable = jmp;
     }
+  else
+    /* Cause predictable crash when a wide function is called on a byte
+       stream.  */
+    fp->_wide_data = (struct _IO_wide_data *) -1L;
 #endif
   fp->_freeres_list = NULL;
 }
@@ -870,7 +873,7 @@ _IO_flush_all_lockp (int do_lock)
 
 
 int
-_IO_flush_all ()
+_IO_flush_all (void)
 {
   /* We want locking.  */
   return _IO_flush_all_lockp (1);
@@ -878,7 +881,7 @@ _IO_flush_all ()
 libc_hidden_def (_IO_flush_all)
 
 void
-_IO_flush_all_linebuffered ()
+_IO_flush_all_linebuffered (void)
 {
   struct _IO_FILE *fp;
   int last_stamp;
@@ -1003,7 +1006,7 @@ libc_freeres_fn (buffer_free)
 
 
 int
-_IO_cleanup ()
+_IO_cleanup (void)
 {
   /* We do *not* want locking.  Some threads might use streams but
      that is their problem, we flush them underneath them.  */
@@ -1263,14 +1266,14 @@ _IO_default_imbue (fp, locale)
 }
 
 _IO_ITER
-_IO_iter_begin()
+_IO_iter_begin (void)
 {
   return (_IO_ITER) _IO_list_all;
 }
 libc_hidden_def (_IO_iter_begin)
 
 _IO_ITER
-_IO_iter_end()
+_IO_iter_end (void)
 {
   return NULL;
 }
@@ -1293,7 +1296,7 @@ _IO_iter_file(iter)
 libc_hidden_def (_IO_iter_file)
 
 void
-_IO_list_lock()
+_IO_list_lock (void)
 {
 #ifdef _IO_MTSAFE_IO
   _IO_lock_lock (list_all_lock);
@@ -1302,7 +1305,7 @@ _IO_list_lock()
 libc_hidden_def (_IO_list_lock)
 
 void
-_IO_list_unlock()
+_IO_list_unlock (void)
 {
 #ifdef _IO_MTSAFE_IO
   _IO_lock_unlock (list_all_lock);
@@ -1311,7 +1314,7 @@ _IO_list_unlock()
 libc_hidden_def (_IO_list_unlock)
 
 void
-_IO_list_resetlock()
+_IO_list_resetlock (void)
 {
 #ifdef _IO_MTSAFE_IO
   _IO_lock_init (list_all_lock);

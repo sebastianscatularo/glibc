@@ -1,6 +1,6 @@
 /* Optimized version of the standard memchr() function.
    This file is part of the GNU C Library.
-   Copyright (C) 2000, 2001, 2003, 2010 Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
    Contributed by Dan Pop <Dan.Pop@cern.ch>.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -154,7 +154,4 @@ ENTRY(__memchr)
 END(__memchr)
 
 weak_alias (__memchr, memchr)
-#if !__BOUNDED_POINTERS__
-weak_alias (__memchr, __ubp_memchr)
-#endif
 libc_hidden_builtin_def (memchr)

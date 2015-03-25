@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 Free Software Foundation, Inc.
+/* Copyright (C) 2007-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -20,14 +20,12 @@
 #include <ipc_priv.h>
 #include <sysdep.h>
 
-#include <bp-checks.h>
-
 int __msgctl (int msqid, int cmd, struct msqid_ds *buf);
 
 int
 __msgctl (int msqid, int cmd, struct msqid_ds *buf)
 {
-  return INLINE_SYSCALL (msgctl, 3, msqid, cmd | __IPC_64, CHECK_1 (buf));
+  return INLINE_SYSCALL (msgctl, 3, msqid, cmd | __IPC_64, buf);
 }
 
 #include <shlib-compat.h>

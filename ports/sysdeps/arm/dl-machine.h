@@ -1,5 +1,5 @@
 /* Machine-dependent ELF dynamic relocation inline functions.  ARM version.
-   Copyright (C) 1995-2012 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -39,30 +39,13 @@ elf_machine_matches_host (const Elf32_Ehdr *ehdr)
 
 
 /* Return the link-time address of _DYNAMIC.  Conveniently, this is the
-   first element of the GOT.  We used to use the PIC register to do this
-   without a constant pool reference, but GCC 4.2 will use a pseudo-register
-   for the PIC base, so it may not be in r10.  */
+   first element of the GOT.  */
 static inline Elf32_Addr __attribute__ ((unused))
 elf_machine_dynamic (void)
 {
-  Elf32_Addr dynamic;
-#ifdef __thumb2__
-  long tmp;
-  asm ("ldr\t%0, 1f\n\t"
-       "adr\t%1, 1f\n\t"
-       "ldr\t%0, [%0, %1]\n\t"
-       "b 2f\n"
-       ".align 2\n"
-       "1: .word _GLOBAL_OFFSET_TABLE_ - 1b\n"
-       "2:" : "=r" (dynamic), "=r"(tmp));
-#else
-  asm ("ldr %0, 2f\n"
-       "1: ldr %0, [pc, %0]\n"
-       "b 3f\n"
-       "2: .word _GLOBAL_OFFSET_TABLE_ - (1b+8)\n"
-       "3:" : "=r" (dynamic));
-#endif
-  return dynamic;
+  /* Declaring this hidden ensures that a PC-relative reference is used.  */
+  extern const Elf32_Addr _GLOBAL_OFFSET_TABLE_[] attribute_hidden;
+  return _GLOBAL_OFFSET_TABLE_[0];
 }
 
 
@@ -136,7 +119,7 @@ elf_machine_runtime_setup (struct link_map *l, int lazy, int profile)
   return lazy;
 }
 
-#if defined(__USE_BX__)
+#if defined(ARCH_HAS_BX)
 #define BX(x) "bx\t" #x
 #else
 #define BX(x) "mov\tpc, " #x
@@ -415,8 +398,7 @@ elf_machine_rel (struct link_map *map, const Elf32_Rel *reloc,
 	      strtab = (const void *) D_PTR (map, l_info[DT_STRTAB]);
 	      _dl_error_printf ("\
 %s: Symbol `%s' has different size in shared object, consider re-linking\n",
-				rtld_progname ?: "<program name unknown>",
-				strtab + refsym->st_name);
+				RTLD_PROGNAME, strtab + refsym->st_name);
 	    }
 	  memcpy (reloc_addr_arg, (void *) value,
 		  MIN (sym->st_size, refsym->st_size));
@@ -521,7 +503,7 @@ elf_machine_rel (struct link_map *map, const Elf32_Rel *reloc,
 	  break;
 	case R_ARM_IRELATIVE:
 	  value = map->l_addr + *reloc_addr;
-	  value = ((Elf32_Addr (*) (void)) value) ();
+	  value = ((Elf32_Addr (*) (int)) value) (GLRO(dl_hwcap));
 	  *reloc_addr = value;
 	  break;
 #endif
@@ -577,8 +559,7 @@ elf_machine_rela (struct link_map *map, const Elf32_Rela *reloc,
 	      strtab = (const void *) D_PTR (map, l_info[DT_STRTAB]);
 	      _dl_error_printf ("\
 %s: Symbol `%s' has different size in shared object, consider re-linking\n",
-				rtld_progname ?: "<program name unknown>",
-				strtab + refsym->st_name);
+				RTLD_PROGNAME, strtab + refsym->st_name);
 	    }
 	  memcpy (reloc_addr_arg, (void *) value,
 		  MIN (sym->st_size, refsym->st_size));
@@ -614,7 +595,7 @@ elf_machine_rela (struct link_map *map, const Elf32_Rela *reloc,
 	  break;
 	case R_ARM_IRELATIVE:
 	  value = map->l_addr + *reloc_addr;
-	  value = ((Elf32_Addr (*) (void)) value) ();
+	  value = ((Elf32_Addr (*) (int)) value) (GLRO(dl_hwcap));
 	  *reloc_addr = value;
 	  break;
 #endif

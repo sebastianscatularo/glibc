@@ -1,6 +1,6 @@
 /* Machine-dependent ELF indirect relocation inline functions.
    HP-PARISC version.
-   Copyright (C) 2012 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -30,7 +30,7 @@
 /* Implement enough to get the build going again.  */
 #warning "NEED STT_GNU_IFUNC IMPLEMENTATION"
 
-static inline struct fdesc 
+static inline struct fdesc
 __attribute ((always_inline))
 elf_ifunc_invoke (uintptr_t addr)
 {

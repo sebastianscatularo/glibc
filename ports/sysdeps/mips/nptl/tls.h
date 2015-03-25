@@ -1,5 +1,5 @@
 /* Definition for thread-local data handling.  NPTL/MIPS version.
-   Copyright (C) 2005, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2005-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -37,12 +37,17 @@ typedef union dtv
   } pointer;
 } dtv_t;
 
+#ifdef __mips16
+/* MIPS16 uses GCC builtin to access the TP.  */
+# define READ_THREAD_POINTER() (__builtin_thread_pointer ())
+#else
 /* Note: rd must be $v1 to be ABI-conformant.  */
 # define READ_THREAD_POINTER() \
     ({ void *__result;							      \
        asm volatile (".set\tpush\n\t.set\tmips32r2\n\t"			      \
 		     "rdhwr\t%0, $29\n\t.set\tpop" : "=v" (__result));	      \
        __result; })
+#endif
 
 #else /* __ASSEMBLER__ */
 # include <tcb-offsets.h>

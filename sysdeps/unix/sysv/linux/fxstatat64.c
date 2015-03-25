@@ -1,4 +1,4 @@
-/* Copyright (C) 2005-2012 Free Software Foundation, Inc.
+/* Copyright (C) 2005-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -25,7 +25,6 @@
 
 #include <sysdep.h>
 #include <sys/syscall.h>
-#include <bp-checks.h>
 
 #include <kernel-features.h>
 
@@ -99,11 +98,9 @@ __fxstatat64 (int vers, int fd, const char *file, struct stat64 *st, int flag)
     }
 
   if (flag & AT_SYMLINK_NOFOLLOW)
-    result = INTERNAL_SYSCALL (lstat64, err, 2, CHECK_STRING (file),
-			       CHECK_1 (st));
+    result = INTERNAL_SYSCALL (lstat64, err, 2, file, st);
   else
-    result = INTERNAL_SYSCALL (stat64, err, 2, CHECK_STRING (file),
-			       CHECK_1 (st));
+    result = INTERNAL_SYSCALL (stat64, err, 2, file, st);
   if (__builtin_expect (!INTERNAL_SYSCALL_ERROR_P (result, err), 1))
     {
 # if defined _HAVE_STAT64___ST_INO && __ASSUME_ST_INO_64_BIT == 0

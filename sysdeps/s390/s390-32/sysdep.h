@@ -1,5 +1,5 @@
 /* Assembler macros for s390.
-   Copyright (C) 2000, 2001, 2003, 2012 Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
    Contributed by Martin Schwidefsky (schwidefsky@de.ibm.com).
    This file is part of the GNU C Library.
 
@@ -65,6 +65,7 @@
 #define	syscall_error	__syscall_error
 #define mcount		_mcount
 
+#undef PSEUDO
 #define	PSEUDO(name, syscall_name, args) \
 lose: SYSCALL_PIC_SETUP				\
     basr %r1,0;					\

@@ -1,5 +1,5 @@
 /* Special .init and .fini section support for ARM.
-   Copyright (C) 1995-2012 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -33,6 +33,8 @@
    License along with the GNU C Library.  If not, see
    <http://www.gnu.org/licenses/>.  */
 
+/* Always build .init and .fini sections in ARM mode.  */
+#define NO_THUMB
 #include <sysdep.h>
 
 /* crtn.S puts function epilogues in the .init and .fini sections
@@ -40,16 +42,16 @@
 
 	.section .init,"ax",%progbits
 #ifdef __ARM_ARCH_4T__
-	ldmfd sp!, {r3, lr}
+	pop {r3, lr}
 	bx lr
 #else
-	ldmfd sp!, {r3, pc}
+	pop {r3, pc}
 #endif
 
 	.section .fini,"ax",%progbits
 #ifdef __ARM_ARCH_4T__
-	ldmfd sp!, {r3, lr}
+	pop {r3, lr}
 	bx lr
 #else
-	ldmfd sp!, {r3, pc}
+	pop {r3, pc}
 #endif

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012 Free Software Foundation, Inc.
+/* Copyright (C) 2008-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -38,4 +38,3 @@ weak_alias (__libc_accept4, accept4)
 
 
 stub_warning (accept4)
-#include <stub-tag.h>

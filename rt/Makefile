@@ -1,4 +1,4 @@
-# Copyright (C) 1997-2004, 2006, 2007, 2012 Free Software Foundation, Inc.
+# Copyright (C) 1997-2014 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -64,20 +64,12 @@ CFLAGS-librt-cancellation.c = -fasynchronous-unwind-tables
 
 LDFLAGS-rt.so = -Wl,--enable-new-dtags,-z,nodelete
 
-# Depend on libc.so so a DT_NEEDED is generated in the shared objects.
-# This ensures they will load libc.so for needed symbols if loaded by
-# a statically-linked program that hasn't already loaded it.
-$(objpfx)librt.so: $(common-objpfx)libc.so $(common-objpfx)libc_nonshared.a \
-		   $(shared-thread-library) \
-		   $(elfobjdir)/ld.so
+$(objpfx)librt.so: $(shared-thread-library)
 
 ifeq (yes,$(build-shared))
 $(addprefix $(objpfx),$(tests)): $(objpfx)librt.so $(shared-thread-library)
 else
 $(addprefix $(objpfx),$(tests)): $(objpfx)librt.a $(static-thread-library)
 endif
-ifeq (yes,$(build-bounded))
-$(tests:%=$(objpfx)%-bp): $(objpfx)librt_b.a $(bounded-thread-library)
-endif
 
-tst-mqueue7-ARGS = -- $(host-built-program-cmd)
+tst-mqueue7-ARGS = -- $(host-test-program-cmd)

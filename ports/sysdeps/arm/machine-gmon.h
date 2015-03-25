@@ -1,5 +1,5 @@
 /* Machine-dependent definitions for profiling support.  ARM EABI version.
-   Copyright (C) 2008, 2009 Free Software Foundation, Inc.
+   Copyright (C) 2008-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -18,7 +18,7 @@
 
 #include <sysdep.h>
 
-/* GCC for the ARM cannot compile __builtin_return_address(N) for N != 0, 
+/* GCC for the ARM cannot compile __builtin_return_address(N) for N != 0,
    so we must use an assembly stub.  */
 
 /* We must not pollute the global namespace.  */

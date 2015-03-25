@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Written by Jes Sorensen, <Jes.Sorensen@cern.ch>, April 1999.
    Based on code originally written by David Mosberger-Tang
@@ -252,7 +252,7 @@
     _retval; })
 
 #undef INTERNAL_SYSCALL_DECL
-#define INTERNAL_SYSCALL_DECL(err) long int err
+#define INTERNAL_SYSCALL_DECL(err) long int err __attribute__ ((unused))
 
 #undef INTERNAL_SYSCALL
 #define INTERNAL_SYSCALL_NCS(name, err, nr, args...)	\
@@ -264,7 +264,10 @@
   INTERNAL_SYSCALL_NCS (__NR_##name, err, nr, ##args)
 
 #undef INTERNAL_SYSCALL_ERROR_P
-#define INTERNAL_SYSCALL_ERROR_P(val, err)	(err == -1)
+#define INTERNAL_SYSCALL_ERROR_P(val, err)		\
+  ({ (void) (val);					\
+     (err == -1);					\
+  })
 
 #undef INTERNAL_SYSCALL_ERRNO
 #define INTERNAL_SYSCALL_ERRNO(val, err)	(val)

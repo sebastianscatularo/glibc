@@ -1,5 +1,5 @@
 /* Handle floating-point rounding mode within libc.
-   Copyright (C) 2012 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -39,7 +39,7 @@
    MORE_BITS is true if the number is not exactly equal to the
    truncated value or the half-way value, false otherwise.  */
 
-static inline bool
+static bool
 round_away (bool negative, bool last_digit_odd, bool half_bit, bool more_bits,
 	    int mode)
 {

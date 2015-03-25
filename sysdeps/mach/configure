@@ -65,7 +65,7 @@ $as_echo "$ac_res" >&6; }
   eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
 
 } # ac_fn_c_check_header_preproc
-# This file is generated from configure.in by Autoconf.  DO NOT EDIT!
+# This file is generated from configure.ac by Autoconf.  DO NOT EDIT!
 
 if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}mig", so it can be a program name with args.
@@ -162,6 +162,8 @@ fi
 if test "x$MIG" = xMISSING; then
   as_fn_error $? "cannot find required build tool mig" "$LINENO" 5
 fi
+config_vars="$config_vars
+MIG = $MIG"
 
 ### Sanity checks for Mach header installation
 

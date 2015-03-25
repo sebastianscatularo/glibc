@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2012 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@redhat.com>, 2002.
 
@@ -340,6 +340,10 @@ change_stack_perm (struct pthread *pd
 }
 
 
+/* Returns a usable stack for a new thread either by allocating a
+   new stack or reusing a cached stack of sufficient size.
+   ATTR must be non-NULL and point to a valid pthread_attr.
+   PDP must be non-NULL.  */
 static int
 allocate_stack (const struct pthread_attr *attr, struct pthread **pdp,
 		ALLOCATE_STACK_PARMS)
@@ -349,13 +353,19 @@ allocate_stack (const struct pthread_attr *attr, struct pthread **pdp,
   size_t pagesize_m1 = __getpagesize () - 1;
   void *stacktop;
 
-  assert (attr != NULL);
   assert (powerof2 (pagesize_m1 + 1));
   assert (TCB_ALIGNMENT >= STACK_ALIGN);
 
   /* Get the stack size from the attribute if it is set.  Otherwise we
      use the default we determined at start time.  */
-  size = attr->stacksize ?: __default_stacksize;
+  if (attr->stacksize != 0)
+    size = attr->stacksize;
+  else
+    {
+      lll_lock (__default_pthread_attr_lock, LLL_PRIVATE);
+      size = __default_pthread_attr.stacksize;
+      lll_unlock (__default_pthread_attr_lock, LLL_PRIVATE);
+    }
 
   /* Get memory for the stack.  */
   if (__builtin_expect (attr->flags & ATTR_FLAG_STACKADDR, 0))
@@ -916,8 +926,9 @@ __reclaim_stacks (void)
 
   in_flight_stack = 0;
 
-  /* Initialize the lock.  */
+  /* Initialize locks.  */
   stack_cache_lock = LLL_LOCK_INITIALIZER;
+  __default_pthread_attr_lock = LLL_LOCK_INITIALIZER;
 }
 
 

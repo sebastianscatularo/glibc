@@ -1,4 +1,4 @@
-/* Copyright (C) 1995-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -16,15 +16,13 @@
    <http://www.gnu.org/licenses/>.  */
 
 #include <sysdep.h>
-#include <bp-sym.h>
-#include <bp-asm.h>
 
 #define EINVAL	22
 #define ENOSYS	38
 #define EOVERFLOW 75
 
 #define SVRSP	16		/* saved register space */
-#define PARMS	LINKAGE+SVRSP	/* space for 4 saved regs */
+#define PARMS	4+SVRSP	/* space for 4 saved regs */
 #define FD	PARMS
 #define OFFLO	FD+4
 #define OFFHI	OFFLO+4
@@ -33,7 +31,7 @@
 #define FLAGS	LENHI+4
 
 	.text
-ENTRY (BP_SYM (__posix_fadvise64_l64))
+ENTRY (__posix_fadvise64_l64)
 
 	/* Save registers.  */
 	pushl	%ebp
@@ -81,7 +79,7 @@ ENTRY (BP_SYM (__posix_fadvise64_l64))
 	/* Successful; return the syscall's value.  */
 	ret
 
-END (BP_SYM (__posix_fadvise64_l64))
+END (__posix_fadvise64_l64)
 
 	.section	.text.compat, "ax"
 ENTRY (__posix_fadvise64_l32)

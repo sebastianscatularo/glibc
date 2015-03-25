@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 Free Software Foundation, Inc.
+/* Copyright (C) 2007-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Richard Henderson.
 
@@ -26,7 +26,7 @@ __truncf (float x)
 {
   float two23 = copysignf (0x1.0p23, x);
   float r, tmp;
-  
+
   __asm (
 #ifdef _IEEE_FP_INEXACT
 	 "adds/suic %2, %3, %1\n\tsubs/suic %1, %3, %0"

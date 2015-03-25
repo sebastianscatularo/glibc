@@ -1,6 +1,6 @@
 /* Machine-dependent software floating-point definitions.
    Alpha userland IEEE 128-bit version.
-   Copyright (C) 2004-2012 Free Software Foundation, Inc.
+   Copyright (C) 2004-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Richard Henderson (rth@cygnus.com),
 		  Jakub Jelinek (jj@ultra.linux.cz) and
@@ -46,6 +46,7 @@
 #define _FP_NANSIGN_Q		0
 
 #define _FP_KEEPNANFRACP 1
+#define _FP_QNANNEGATEDP 0
 
 /* Alpha Architecture Handbook, 4.7.10.4 sez that we should prefer any
    type of NaN in Fb, then Fa.  */

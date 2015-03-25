@@ -1,5 +1,5 @@
 /* Machine-dependent ELF dynamic relocation inline functions.  PA-RISC version.
-   Copyright (C) 1995-2012 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    Contributed by David Huggins-Daines <dhd@debian.org>
    This file is part of the GNU C Library.
 
@@ -490,8 +490,12 @@ asm (									\
 #define ELF_MACHINE_NO_REL 1
 
 /* Return the address of the entry point. */
-#define ELF_MACHINE_START_ADDRESS(map, start) \
-  DL_STATIC_FUNCTION_ADDRESS (map, start)
+#define ELF_MACHINE_START_ADDRESS(map, start)			\
+({								\
+	ElfW(Addr) addr;					\
+	DL_DT_FUNCTION_ADDRESS(map, start, static, addr)	\
+	addr;							\
+})
 
 /* We define an initialization functions.  This is called very early in
  *    _dl_sysdep_start.  */
@@ -673,8 +677,7 @@ elf_machine_rela (struct link_map *map,
 	  strtab = (const char *) D_PTR (map, l_info[DT_STRTAB]);
 	  _dl_error_printf ("%s: Symbol `%s' has different size in shared object, "
 			    "consider re-linking\n",
-			    rtld_progname ?: "<program name unknown>",
-			    strtab + refsym->st_name);
+			    RTLD_PROGNAME, strtab + refsym->st_name);
 	}
       memcpy (reloc_addr_arg, (void *) value,
 	      MIN (sym->st_size, refsym->st_size));
@@ -730,7 +733,7 @@ elf_machine_rela_relative (Elf32_Addr l_addr,
   if (ELF32_R_SYM (reloc->r_info) != 0){
     _dl_error_printf ("%s: In elf_machine_rela_relative "
 		      "ELF32_R_SYM (reloc->r_info) != 0. Aborting.",
-		      rtld_progname ?: "<program name unknown>");
+		      RTLD_PROGNAME);
     ABORT_INSTRUCTION;  /* Crash. */
   }
 

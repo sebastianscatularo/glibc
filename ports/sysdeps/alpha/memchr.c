@@ -1,4 +1,4 @@
-/* Copyright (C) 2010 Free Software Foundation, Inc.
+/* Copyright (C) 2010-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -16,7 +16,6 @@
    <http://www.gnu.org/licenses/>.  */
 
 #include <string.h>
-#include <bp-sym.h>
 
 typedef unsigned long word;
 
@@ -116,7 +115,7 @@ __memchr (const void *s, int xc, size_t n)
 	  s_align++;				\
 	  n -= 64;				\
 	} while (0)
-      
+
       /* While there's still lots more data to potentially be read,
 	 continue issuing prefetches for the 4th cacheline out.  */
       while (n >= 256)
@@ -170,6 +169,6 @@ __memchr (const void *s, int xc, size_t n)
 }
 
 #ifdef weak_alias
-weak_alias (__memchr, BP_SYM (memchr))
+weak_alias (__memchr, memchr)
 #endif
 libc_hidden_builtin_def (memchr)

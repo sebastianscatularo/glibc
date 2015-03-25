@@ -1,5 +1,5 @@
 /* Implementation of profiling support.  ARM EABI version.
-   Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
+   Copyright (C) 2008-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -21,11 +21,12 @@
 
 #include <sysdep.h>
 
+#undef mcount
 
 #ifdef __thumb2__
 	.thumb
-	.syntax unified
 #endif
+	.syntax unified
 
 
 /* Use an assembly stub with a special ABI.  The calling lr has been
@@ -39,7 +40,7 @@
    The calling sequence looks something like:
 func:
    push {lr}
-   bl __gnu_mount_nc
+   bl __gnu_mcount_nc
    <function body>
 */
 
@@ -65,11 +66,21 @@ ENTRY(__gnu_mcount_nc)
 END(__gnu_mcount_nc)
 
 
+#include <gcc-compat.h>
+#include <shlib-compat.h>
+
+/* The new __gnu_mcount_nc entry point was introduced in 4.4, so the
+   static library needs the old one only to support older compilers.
+   Even in a configuration that only cares about newer compilers, the
+   shared library might need it only for strict ABI compatibility.  */
+
+#if GCC_COMPAT (4, 3) || SHLIB_COMPAT (libc, GLIBC_2_0, GLIBC_2_19)
+
 /* Provide old mcount for backwards compatibility.  This requires
    code be compiled with APCS frame pointers.  */
 
-ENTRY(_mcount)
-	stmdb sp!, {r0, r1, r2, r3, fp, lr}
+ENTRY(__mcount_arm_compat)
+	push	{r0, r1, r2, r3, fp, lr}
 	cfi_adjust_cfa_offset (24)
 	cfi_rel_offset (r0, 0)
 	cfi_rel_offset (r1, 4)
@@ -77,20 +88,14 @@ ENTRY(_mcount)
 	cfi_rel_offset (r3, 12)
 	cfi_rel_offset (fp, 16)
 	cfi_rel_offset (lr, 20)
-#ifdef __thumb2__
 	movs r0, fp
 	ittt ne
-	ldrne r0, [r0, #-4]
-#else
-	movs fp, fp
-	ldrne r0, [fp, #-4]
-#endif
-	movnes r1, lr
+	sfi_breg r0, \
+	ldrne r0, [\B, #-4]
+	movsne r1, lr
 	blne __mcount_internal
-#ifdef __thumb2__
-	ldmia sp!, {r0, r1, r2, r3, fp, pc}
-#else
-	ldmia sp!, {r0, r1, r2, r3, fp, lr}
+# if defined (__ARM_ARCH_4T__) && defined (__THUMB_INTERWORK__)
+	pop	{r0, r1, r2, r3, fp, lr}
 	cfi_adjust_cfa_offset (-24)
 	cfi_restore (r0)
 	cfi_restore (r1)
@@ -99,10 +104,26 @@ ENTRY(_mcount)
 	cfi_restore (fp)
 	cfi_restore (lr)
 	bx lr
+# else
+	pop	{r0, r1, r2, r3, fp, pc}
+# endif
+END(__mcount_arm_compat)
+
 #endif
-END(_mcount)
+
+#if GCC_COMPAT (4, 3)
+
+strong_alias (__mcount_arm_compat, _mcount)
 
 /* The canonical name for the function is `_mcount' in both C and asm,
    but some old asm code might assume it's `mcount'.  */
-#undef mcount
 weak_alias (_mcount, mcount)
+
+#elif SHLIB_COMPAT (libc, GLIBC_2_0, GLIBC_2_19)
+
+compat_symbol (libc, __mcount_arm_compat, _mcount, GLIBC_2_0)
+
+strong_alias (__mcount_arm_compat, __mcount_arm_compat_1)
+compat_symbol (libc, __mcount_arm_compat_1, mcount, GLIBC_2_0)
+
+#endif

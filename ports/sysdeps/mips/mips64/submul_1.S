@@ -1,8 +1,7 @@
 /* MIPS3 __mpn_submul_1 -- Multiply a limb vector with a single limb and
  * subtract the product from a second limb vector.
  *
- * Copyright (C) 1992, 1994, 1995, 2000, 2002, 2003
- * Free Software Foundation, Inc.
+ * Copyright (C) 1992-2014 Free Software Foundation, Inc.
  *
  * This file is part of the GNU MP Library.
  *
@@ -34,11 +33,7 @@
 #ifdef __PIC__
 	.option pic2
 #endif
-	.text
-	.align	4
-	.globl	__mpn_submul_1
-	.ent	__mpn_submul_1
-__mpn_submul_1:
+ENTRY (__mpn_submul_1)
 #ifdef __PIC__
 	SETUP_GP /* ??? unused */
 #endif
@@ -104,4 +99,4 @@ L(LC0):	ld	$10,0($4)
 	j	$31
 	daddu	$2,$9,$2	# add high product limb and carry from addition
 
-	.end	__mpn_submul_1
+END (__mpn_submul_1)

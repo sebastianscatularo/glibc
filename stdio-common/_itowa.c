@@ -1,5 +1,5 @@
 /* Internal function for converting integers to ASCII.
-   Copyright (C) 1994-2012 Free Software Foundation, Inc.
+   Copyright (C) 1994-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Torbjorn Granlund <tege@matematik.su.se>
    and Ulrich Drepper <drepper@gnu.org>.
@@ -159,7 +159,8 @@ _itowa (value, buflim, base, upper_case)
 	if (brec->flag)
 	  while (value != 0)
 	    {
-	      mp_limb_t quo, rem, x, dummy;
+	      mp_limb_t quo, rem, x;
+	      mp_limb_t dummy __attribute__ ((unused));
 
 	      umul_ppmm (x, dummy, value, base_multiplier);
 	      quo = (x + ((value - x) >> 1)) >> (brec->post_shift - 1);
@@ -170,7 +171,8 @@ _itowa (value, buflim, base, upper_case)
 	else
 	  while (value != 0)
 	    {
-	      mp_limb_t quo, rem, x, dummy;
+	      mp_limb_t quo, rem, x;
+	      mp_limb_t dummy __attribute__ ((unused));
 
 	      umul_ppmm (x, dummy, value, base_multiplier);
 	      quo = x >> brec->post_shift;

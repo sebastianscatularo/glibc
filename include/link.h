@@ -1,6 +1,6 @@
 /* Data structure for communication from the run-time dynamic linker for
    loaded ELF shared objects.
-   Copyright (C) 1995-2012 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -37,7 +37,7 @@ struct link_map;
 extern unsigned int la_objopen (struct link_map *__map, Lmid_t __lmid,
 				uintptr_t *__cookie);
 
-
+#include <stdint.h>
 #include <stddef.h>
 #include <bits/linkmap.h>
 #include <dl-lookupcfg.h>
@@ -87,7 +87,8 @@ struct link_map
     /* These first few members are part of the protocol with the debugger.
        This is the same format used in SVR4.  */
 
-    ElfW(Addr) l_addr;		/* Base address shared object is loaded at.  */
+    ElfW(Addr) l_addr;		/* Difference between the address in the ELF
+				   file and the addresses in memory.  */
     char *l_name;		/* Absolute file name object was found in.  */
     ElfW(Dyn) *l_ld;		/* Dynamic section of the shared object.  */
     struct link_map *l_next, *l_prev; /* Chain of loaded objects.  */
@@ -289,7 +290,7 @@ struct link_map
 #endif
 #ifndef FORCED_DYNAMIC_TLS_OFFSET
 # if NO_TLS_OFFSET == 0
-#  define FORCED_DYNAMIC_TLS_OFFSET 1
+#  define FORCED_DYNAMIC_TLS_OFFSET -1
 # elif NO_TLS_OFFSET == -1
 #  define FORCED_DYNAMIC_TLS_OFFSET -2
 # else
@@ -300,6 +301,9 @@ struct link_map
     ptrdiff_t l_tls_offset;
     /* Index of the module in the dtv array.  */
     size_t l_tls_modid;
+
+    /* Number of thread_local objects constructed by this DSO.  */
+    size_t l_tls_dtor_count;
 
     /* Information used to change permission after the relocations are
        done.  */

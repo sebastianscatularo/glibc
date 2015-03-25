@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 Free Software Foundation, Inc.
+/* Copyright (C) 2011-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Chris Metcalf <cmetcalf@tilera.com>, 2011.
 
@@ -30,4 +30,3 @@ sysctl (int *name, int nlen, void *oldval, size_t *oldlenp,
   return -1;
 }
 stub_warning (sysctl)
-#include <stub-tag.h>

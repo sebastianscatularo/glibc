@@ -1,5 +1,5 @@
 /* Disable floating-point exceptions.
-   Copyright (C) 2000 Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by David Huggins-Daines <dhd@debian.org>, 2000
 
@@ -22,7 +22,7 @@
 int
 fedisableexcept (int excepts)
 {
-  union { unsigned long long l; unsigned int sw[2]; } s; 
+  union { unsigned long long l; unsigned int sw[2]; } s;
   unsigned int old_exc;
 
   /* Get the current status word. */

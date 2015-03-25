@@ -1,5 +1,5 @@
 /* Hardware capability support for run-time dynamic loader.
-   Copyright (C) 2012 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -42,7 +42,6 @@ _dl_important_hwcaps (const char *platform, size_t platform_len, size_t *sz,
   size_t cnt = platform != NULL;
   size_t n, m;
   size_t total;
-  struct r_strlenpair *temp;
   struct r_strlenpair *result;
   struct r_strlenpair *rp;
   char *cp;
@@ -52,7 +51,7 @@ _dl_important_hwcaps (const char *platform, size_t platform_len, size_t *sz,
     if ((masked & (1ULL << n)) != 0)
       ++cnt;
 
-#if defined NEED_DL_SYSINFO || defined NEED_DL_SYSINFO_DSO
+#ifdef NEED_DL_SYSINFO_DSO
   /* The system-supplied DSO can contain a note of type 2, vendor "GNU".
      This gives us a list of names to treat as fake hwcap bits.  */
 
@@ -67,6 +66,11 @@ _dl_important_hwcaps (const char *platform, size_t platform_len, size_t *sz,
 	  {
 	    const ElfW(Addr) start = (phdr[i].p_vaddr
 				      + GLRO(dl_sysinfo_map)->l_addr);
+	    /* The standard ELF note layout is exactly as the anonymous struct.
+	       The next element is a variable length vendor name of length
+	       VENDORLEN (with a real length rounded to ElfW(Word)), followed
+	       by the data of length DATALEN (with a real length rounded to
+	       ElfW(Word)).  */
 	    const struct
 	    {
 	      ElfW(Word) vendorlen;
@@ -76,6 +80,11 @@ _dl_important_hwcaps (const char *platform, size_t platform_len, size_t *sz,
 	    while ((ElfW(Addr)) (note + 1) - start < phdr[i].p_memsz)
 	      {
 #define ROUND(len) (((len) + sizeof (ElfW(Word)) - 1) & -sizeof (ElfW(Word)))
+		/* The layout of the type 2, vendor "GNU" note is as follows:
+		   .long <Number of capabilities enabled by this note>
+		   .long <Capabilities mask> (as mask >> _DL_FIRST_EXTRA).
+		   .byte <The bit number for the next capability>
+		   .asciz <The name of the capability>.  */
 		if (note->type == NT_GNU_HWCAP
 		    && note->vendorlen == sizeof "GNU"
 		    && !memcmp ((note + 1), "GNU", sizeof "GNU")
@@ -85,7 +94,7 @@ _dl_important_hwcaps (const char *platform, size_t platform_len, size_t *sz,
 					   + ROUND (sizeof "GNU"));
 		    cnt += *p++;
 		    ++p;	/* Skip mask word.  */
-		    dsocaps = (const char *) p;
+		    dsocaps = (const char *) p; /* Pseudo-string "<b>name"  */
 		    dsocapslen = note->datalen - sizeof *p * 2;
 		    break;
 		  }
@@ -103,11 +112,13 @@ _dl_important_hwcaps (const char *platform, size_t platform_len, size_t *sz,
   ++cnt;
 
   /* Create temporary data structure to generate result table.  */
-  temp = (struct r_strlenpair *) alloca (cnt * sizeof (*temp));
+  struct r_strlenpair temp[cnt];
   m = 0;
-#if defined NEED_DL_SYSINFO || defined NEED_DL_SYSINFO_DSO
+#ifdef NEED_DL_SYSINFO_DSO
   if (dsocaps != NULL)
     {
+      /* dsocaps points to the .asciz string, and -1 points to the mask
+         .long just before the string.  */
       const ElfW(Word) mask = ((const ElfW(Word) *) dsocaps)[-1];
       GLRO(dl_hwcap) |= (uint64_t) mask << _DL_FIRST_EXTRA;
       /* Note that we add the dsocaps to the set already chosen by the
@@ -199,7 +210,7 @@ _dl_important_hwcaps (const char *platform, size_t platform_len, size_t *sz,
     }
 
   /* Fill in the information.  This follows the following scheme
-     (indeces from TEMP for four strings):
+     (indices from TEMP for four strings):
 	entry #0: 0, 1, 2, 3	binary: 1111
 	      #1: 0, 1, 3		1101
 	      #2: 0, 2, 3		1011

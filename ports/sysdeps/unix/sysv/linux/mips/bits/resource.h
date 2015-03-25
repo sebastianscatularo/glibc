@@ -1,6 +1,5 @@
 /* Bit values & structures for resource limits.  Linux/MIPS version.
-   Copyright (C) 1994, 1996, 1997, 1998, 1999, 2000, 2004, 2005, 2006, 2008,
-   2009, 2010, 2011, 2012 Free Software Foundation, Inc.
+   Copyright (C) 1994-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -123,10 +122,10 @@ enum __rlimit_resource
 # ifndef __USE_FILE_OFFSET64
 #  define RLIM_INFINITY ((long int)(~0UL >> 1))
 # else
-#  define RLIM_INFINITY 0x7fffffffffffffffULL
+#  define RLIM_INFINITY 0xffffffffffffffffULL
 # endif
 # ifdef __USE_LARGEFILE64
-#  define RLIM64_INFINITY 0x7fffffffffffffffULL
+#  define RLIM64_INFINITY 0xffffffffffffffffULL
 # endif
 #endif
 

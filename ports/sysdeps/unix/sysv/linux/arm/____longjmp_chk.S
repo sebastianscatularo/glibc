@@ -1,4 +1,4 @@
-/* Copyright (C) 2009 Free Software Foundation, Inc.
+/* Copyright (C) 2009-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -51,7 +51,7 @@ longjmp_msg:
 	cfi_remember_state;			\
 	cmp	sp, reg;			\
 	bls	.Lok;				\
-	str	r7, [sp, #-4]!;			\
+	push	{ r7 };				\
 	cfi_adjust_cfa_offset (4);		\
 	cfi_rel_offset (r7, 0);			\
 	mov	r5, r0;				\
@@ -77,7 +77,7 @@ longjmp_msg:
 .Lfail:						\
 	add	sp, sp, #12;			\
 	cfi_adjust_cfa_offset (-12);		\
-	ldr	r7, [sp], #4;			\
+	pop	{ r7 };				\
 	cfi_adjust_cfa_offset (-4);		\
 	cfi_restore (r7);			\
 	CALL_FAIL				\

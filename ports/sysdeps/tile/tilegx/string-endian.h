@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2012 Free Software Foundation, Inc.
+/* Copyright (C) 2011-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Chris Metcalf <cmetcalf@tilera.com>, 2011.
 
@@ -21,6 +21,8 @@
    The MASK expression works because shift counts are taken mod 64.
    Also, specify how to count "first" and "last" bits
    when the bits have been read as a word.  */
+
+#include <stdint.h>
 
 #ifndef __BIG_ENDIAN__
 #define MASK(x) (__insn_shl(1ULL, (x << 3)) - 1)

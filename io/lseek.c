@@ -1,4 +1,4 @@
-/* Copyright (C) 1991, 1995, 1996, 1997, 2002 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -21,7 +21,7 @@
 
 /* Seek to OFFSET on FD, starting from WHENCE.  */
 off_t
-__lseek (fd, offset, whence)
+__libc_lseek (fd, offset, whence)
      int fd;
      off_t offset;
      int whence;
@@ -45,8 +45,8 @@ __lseek (fd, offset, whence)
   __set_errno (ENOSYS);
   return -1;
 }
+weak_alias (__libc_lseek, __lseek)
+weak_alias (__libc_lseek, lseek)
 stub_warning (lseek)
-libc_hidden_def (__lseek)
 
-weak_alias (__lseek, lseek)
-#include <stub-tag.h>
+libc_hidden_def (__lseek)

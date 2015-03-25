@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <fcntl.h>
+#include <sys/param.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -230,6 +231,7 @@ __alloc_dir (int fd, bool close_fd, int flags, const struct stat64 *statp)
   dirp->size = 0;
   dirp->offset = 0;
   dirp->filepos = 0;
+  dirp->errcode = 0;
 
   return dirp;
 }

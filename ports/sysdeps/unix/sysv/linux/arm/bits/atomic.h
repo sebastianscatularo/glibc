@@ -1,5 +1,5 @@
 /* Atomic operations.  ARM/Linux version.
-   Copyright (C) 2002-2012 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -15,6 +15,8 @@
    You should have received a copy of the GNU Lesser General Public
    License along with the GNU C Library.  If not, see
    <http://www.gnu.org/licenses/>.  */
+
+#include <stdint.h>
 
 /* If the compiler doesn't provide a primitive, we'll use this macro
    to get assistance from the kernel.  */

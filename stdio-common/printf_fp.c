@@ -1,5 +1,5 @@
 /* Floating point output for `printf'.
-   Copyright (C) 1995-2012 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
 
    This file is part of the GNU C Library.
    Written by Ulrich Drepper <drepper@gnu.ai.mit.edu>, 1995.
@@ -72,7 +72,7 @@
 #define outchar(ch)							      \
   do									      \
     {									      \
-      register const int outc = (ch);					      \
+      const int outc = (ch);						      \
       if (putc (outc, fp) == EOF)					      \
 	{								      \
 	  if (buffer_malloced)						      \
@@ -85,7 +85,7 @@
 #define PRINT(ptr, wptr, len)						      \
   do									      \
     {									      \
-      register size_t outlen = (len);					      \
+      size_t outlen = (len);						      \
       if (len > 20)							      \
 	{								      \
 	  if (PUT (fp, wide ? (const char *) wptr : ptr, outlen) != outlen)   \
@@ -132,9 +132,6 @@
   memcpy (dst, src, (dst##size = src##size) * sizeof (mp_limb_t))
 #define MPN_GE(u,v) \
   (u##size > v##size || (u##size == v##size && __mpn_cmp (u, v, u##size) >= 0))
-
-extern int __isinfl_internal (long double) attribute_hidden;
-extern int __isnanl_internal (long double) attribute_hidden;
 
 extern mp_size_t __mpn_extract_double (mp_ptr res_ptr, mp_size_t size,
 				       int *expt, int *is_neg,
@@ -335,8 +332,7 @@ ___printf_fp (FILE *fp,
       int res;
       if (__isnanl (fpnum.ldbl))
 	{
-	  union ieee854_long_double u = { .d = fpnum.ldbl };
-	  is_neg = u.ieee.negative != 0;
+	  is_neg = signbit (fpnum.ldbl);
 	  if (isupper (info->spec))
 	    {
 	      special = "NAN";

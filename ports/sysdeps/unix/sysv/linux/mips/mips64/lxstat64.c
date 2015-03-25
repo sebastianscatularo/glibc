@@ -1,5 +1,5 @@
 /* lxstat64 using 64-bit MIPS lstat system call.
-   Copyright (C) 1997-2012 Free Software Foundation, Inc.
+   Copyright (C) 1997-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -23,7 +23,6 @@
 
 #include <sysdep.h>
 #include <sys/syscall.h>
-#include <bp-checks.h>
 
 #include <xstatconv.h>
 
@@ -34,7 +33,7 @@ __lxstat64 (int vers, const char *name, struct stat64 *buf)
   int result;
   struct kernel_stat kbuf;
 
-  result = INLINE_SYSCALL (lstat, 2, CHECK_STRING (name), __ptrvalue (&kbuf));
+  result = INLINE_SYSCALL (lstat, 2, name, &kbuf);
   if (result == 0)
     result = __xstat64_conv (vers, &kbuf, buf);
 

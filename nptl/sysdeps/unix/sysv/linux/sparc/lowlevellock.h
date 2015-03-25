@@ -1,5 +1,4 @@
-/* Copyright (C) 2003, 2004, 2006, 2007, 2008, 2009
-   Free Software Foundation, Inc.
+/* Copyright (C) 2003-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Jakub Jelinek <jakub@redhat.com>, 2003.
 
@@ -38,6 +37,8 @@
 #define FUTEX_TRYLOCK_PI	8
 #define FUTEX_WAIT_BITSET	9
 #define FUTEX_WAKE_BITSET	10
+#define FUTEX_WAIT_REQUEUE_PI   11
+#define FUTEX_CMP_REQUEUE_PI    12
 #define FUTEX_PRIVATE_FLAG	128
 #define FUTEX_CLOCK_REALTIME	256
 
@@ -52,8 +53,8 @@
 
 #ifndef __sparc32_atomic_do_lock
 /* Delay in spinlock loop.  */
-extern void __cpu_relax(void);
-#define BUSY_WAIT_NOP	__cpu_relax()
+extern void __cpu_relax (void);
+#define BUSY_WAIT_NOP	__cpu_relax ()
 #endif
 
 #if !defined NOT_IN_libc || defined IS_IN_rtld
@@ -77,7 +78,7 @@ extern void __cpu_relax(void);
       : (fl))								      \
    : ((fl) | (((private) ^ FUTEX_PRIVATE_FLAG)				      \
 	      & THREAD_GETMEM (THREAD_SELF, header.private_futex))))
-# endif	      
+# endif
 #endif
 
 
@@ -93,6 +94,19 @@ extern void __cpu_relax(void);
 			      __lll_private_flag (FUTEX_WAIT, private),	      \
 			      (val), (timespec));			      \
     __ret;								      \
+  })
+
+#define lll_futex_timed_wait_bitset(futexp, val, timespec, clockbit, private) \
+  ({									      \
+    INTERNAL_SYSCALL_DECL (__err);					      \
+    long int __ret;							      \
+    int __op = FUTEX_WAIT_BITSET | clockbit;				      \
+									      \
+    __ret = INTERNAL_SYSCALL (futex, __err, 6, (futexp),		      \
+			      __lll_private_flag (__op, private),	      \
+			      (val), (timespec), NULL /* Unused.  */, 	      \
+			      FUTEX_BITSET_MATCH_ANY);			      \
+    __ret;		      						      \
   })
 
 #define lll_futex_wake(futexp, nr, private) \
@@ -144,6 +158,34 @@ extern void __cpu_relax(void);
     INTERNAL_SYSCALL_ERROR_P (__ret, __err);				      \
   })
 #endif
+
+/* Priority Inheritance support.  */
+#define lll_futex_wait_requeue_pi(futexp, val, mutex, private) \
+  lll_futex_timed_wait_requeue_pi (futexp, val, NULL, 0, mutex, private)
+
+#define lll_futex_timed_wait_requeue_pi(futexp, val, timespec, clockbit,      \
+					mutex, private)			      \
+  ({									      \
+    INTERNAL_SYSCALL_DECL (__err);					      \
+    long int __ret;							      \
+    int __op = FUTEX_WAIT_REQUEUE_PI | clockbit;			      \
+									      \
+    __ret = INTERNAL_SYSCALL (futex, __err, 5, (futexp),		      \
+			      __lll_private_flag (__op, private),	      \
+			      (val), (timespec), mutex); 		      \
+    INTERNAL_SYSCALL_ERROR_P (__ret, __err) ? -__ret : __ret;		      \
+  })
+
+#define lll_futex_cmp_requeue_pi(futexp, nr_wake, nr_move, mutex, val, priv)  \
+  ({									      \
+    INTERNAL_SYSCALL_DECL (__err);					      \
+    long int __ret;							      \
+									      \
+    __ret = INTERNAL_SYSCALL (futex, __err, 6, (futexp),		      \
+			      __lll_private_flag (FUTEX_CMP_REQUEUE_PI, priv),\
+			      (nr_wake), (nr_move), (mutex), (val));	      \
+    INTERNAL_SYSCALL_ERROR_P (__ret, __err);				      \
+  })
 
 static inline int
 __attribute__ ((always_inline))
