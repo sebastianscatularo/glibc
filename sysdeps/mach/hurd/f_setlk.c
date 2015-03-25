@@ -29,7 +29,7 @@
 int
 __f_setlk (int fd, int type, int whence, __off64_t start, __off64_t len, int wait)
 {
-  int cmd;
+  int cmd = 0;
 
   switch (type)
     {
