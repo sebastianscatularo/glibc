@@ -1,5 +1,5 @@
 /* Support for dynamic linking code in static libc.
-   Copyright (C) 1996-2013 Free Software Foundation, Inc.
+   Copyright (C) 1996-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -91,6 +91,7 @@ static struct link_map _dl_main_map =
     .l_scope = _dl_main_map.l_scope_mem,
     .l_local_scope = { &_dl_main_map.l_searchlist },
     .l_used = 1,
+    .l_flags_1 = DF_1_NODEFLIB,
     .l_tls_offset = NO_TLS_OFFSET,
     .l_serial = 1,
   };
@@ -311,6 +312,8 @@ internal_function
 _dl_non_dynamic_init (void)
 {
   _dl_main_map.l_origin = _dl_get_origin ();
+  _dl_main_map.l_phdr = GL(dl_phdr);
+  _dl_main_map.l_phnum = GL(dl_phnum);
 
   if (HP_TIMING_AVAIL)
     HP_TIMING_NOW (_dl_cpuclock_offset);
