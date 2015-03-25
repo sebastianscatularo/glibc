@@ -25,6 +25,7 @@
 
 /* Provide dummy definitions.  */
 #define HP_TIMING_AVAIL		(0)
+#define HP_SMALL_TIMING_AVAIL	(0)
 #define HP_TIMING_INLINE	(0)
 typedef int hp_timing_t;
 #define HP_TIMING_ZERO(Var)
