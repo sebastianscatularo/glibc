@@ -38,7 +38,7 @@
 #endif
 #endif
 #ifndef MACHINE_THREAD_STATE_FIX_NEW
-#define MACHINE_THREAD_STATE_FIX_NEW(ts)
+# define MACHINE_THREAD_STATE_FIX_NEW(ts)
 #endif
 
 /* These functions are of use in machine-dependent signal trampoline
