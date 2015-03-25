@@ -159,6 +159,13 @@ libc {
     _hurd_sigstate_pending;
     _hurd_sigstate_unlock;
     _hurd_sigstate_delete;
+  GLIBC_2.19 {
+    # These always existed as inlines but the real functions were not exported.
+    _hurd_fd_error_signal; _hurd_fd_error;
+    __hurd_dfail; __hurd_sockfail;
+    __hurd_threadvar_location_from_sp;
+    __hurd_threadvar_location;
+    _hurd_userlink_link; _hurd_userlink_unlink; _hurd_userlink_clear;
   }
 
 %if !SHLIB_COMPAT (libc, GLIBC_2_0, GLIBC_2_2)
