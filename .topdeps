@@ -66,3 +66,4 @@ t/reboot-startup
 t/WRLCK-upgrade
 t/signal_cplusplus
 t/ifaddrs_v6
+t/io_select_timeout
