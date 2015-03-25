@@ -68,3 +68,4 @@ t/signal_cplusplus
 t/ifaddrs_v6
 t/io_select_timeout
 t/pthread_functions
+t/vm_copy
