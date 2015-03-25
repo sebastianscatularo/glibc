@@ -16,7 +16,15 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
+#ifndef _HURD_HURDSOCKET_H
+#define _HURD_HURDSOCKET_H
+
 #include <string.h>
 
-#define _hurd_sun_path_dupa(__addr, __len) \
-  strndupa ((__addr)->sun_path, (__len) - offsetof (struct sockaddr_un, sun_path))
+/* Returns a duplicate of ADDR->sun_path with LEN limitation.  This
+   should to be used whenever reading a unix socket address, to cope with
+   sun_path possibly not including a trailing \0.  */
+#define _hurd_sun_path_dupa(addr, len) \
+  strndupa ((addr)->sun_path, (len) - offsetof (struct sockaddr_un, sun_path))
+
+#endif /* hurdsocket.h */
