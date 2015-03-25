@@ -1,7 +1,9 @@
-From: Thomas Schwinge <thomas@schwinge.name>
-Subject: [PATCH] tls-threadvar
+Commited to git
 
-replace the custom threadvar mechanism with generic TLS.
-That will fix sigaltstack.
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Subject: [PATCH] hurd: Make libc able to call pthread stubs
 
-Note: the added reply_port and _hurd_sigstate fields should be kept last.
+* sysdeps/mach/hurd/bits/libc-lock.h [_LIBC]: Include
+<bits/libc-lockP.h>
+
+Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
