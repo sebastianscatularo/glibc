@@ -1,5 +1,5 @@
 /* Convert string representing a number to integer value, using given locale.
-   Copyright (C) 1997-2013 Free Software Foundation, Inc.
+   Copyright (C) 1997-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@cygnus.com>, 1997.
 
@@ -231,11 +231,11 @@ INTERNAL (__strtol_l) (nptr, endptr, base, group, loc)
      __locale_t loc;
 {
   int negative;
-  register unsigned LONG int cutoff;
-  register unsigned int cutlim;
-  register unsigned LONG int i;
-  register const STRING_TYPE *s;
-  register UCHAR_TYPE c;
+  unsigned LONG int cutoff;
+  unsigned int cutlim;
+  unsigned LONG int i;
+  const STRING_TYPE *s;
+  UCHAR_TYPE c;
   const STRING_TYPE *save, *end;
   int overflow;
 #ifndef USE_WIDE_CHAR

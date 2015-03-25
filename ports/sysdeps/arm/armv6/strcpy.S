@@ -1,5 +1,5 @@
 /* strcpy -- copy a nul-terminated string.
-   Copyright (C) 2013 Free Software Foundation, Inc.
+   Copyright (C) 2013-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -89,7 +89,7 @@ ENTRY (strcpy)
 	tst	r0, #3			@ Test alignment of DEST
 	movt	r7, #0x0101
 #else
-	ldr	ip, =0x01010101
+	ldr	r7, =0x01010101
 	tst	r0, #3
 #endif
 	bne	.Lunaligned

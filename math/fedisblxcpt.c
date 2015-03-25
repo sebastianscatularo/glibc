@@ -1,5 +1,5 @@
 /* Disable floating-point exceptions.
-   Copyright (C) 1999-2013 Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Andreas Jaeger <aj@suse.de>, 1999.
 
@@ -22,7 +22,7 @@
 int
 fedisableexcept (int excepts)
 {
-  /* Signal failure.  */
-  return -1;
+  /* All exception traps are disabled.  */
+  return 0;
 }
 stub_warning (fedisableexcept)

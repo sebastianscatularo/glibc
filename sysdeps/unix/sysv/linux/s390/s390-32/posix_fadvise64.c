@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2003-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -38,7 +38,7 @@ __posix_fadvise64_l64 (int fd, off64_t offset, off64_t len, int advise)
 {
   struct fadvise64_64_layout parameters;
   INTERNAL_SYSCALL_DECL (err);
-  
+
   parameters.fd = fd;
   parameters.offset = offset;
   parameters.len = len;

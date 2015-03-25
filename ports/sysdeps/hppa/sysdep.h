@@ -1,5 +1,5 @@
 /* Assembler macros for HP/PA.
-   Copyright (C) 1999-2013 Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper, <drepper@cygnus.com>, August 1999.
 
@@ -22,7 +22,7 @@
 #include "config.h"
 
 #undef ASM_LINE_SEP
-#define ASM_LINE_SEP ! 
+#define ASM_LINE_SEP !
 
 #ifdef	__ASSEMBLER__
 
@@ -51,7 +51,7 @@
 
 /* GCC does everything for us. */
 #ifdef	PROF
-#define CALL_MCOUNT 
+#define CALL_MCOUNT
 #else
 #define CALL_MCOUNT		/* Do nothing.  */
 #endif

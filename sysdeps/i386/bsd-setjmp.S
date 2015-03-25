@@ -1,5 +1,5 @@
 /* BSD `setjmp' entry point to `sigsetjmp (..., 1)'.  i386 version.
-   Copyright (C) 1994-2013 Free Software Foundation, Inc.
+   Copyright (C) 1994-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -35,7 +35,7 @@ ENTRY (setjmp)
 
 	movl JMPBUF(%esp), %eax
 
-     	/* Save registers.  */
+	/* Save registers.  */
 	movl %ebx, (JB_BX*4)(%eax)
 	movl %esi, (JB_SI*4)(%eax)
 	movl %edi, (JB_DI*4)(%eax)
@@ -43,13 +43,13 @@ ENTRY (setjmp)
 #ifdef PTR_MANGLE
 	PTR_MANGLE (%ecx)
 #endif
-     	movl %ecx, (JB_SP*4)(%eax)
+	movl %ecx, (JB_SP*4)(%eax)
 	movl 0(%esp), %ecx	/* Save PC we are returning to now.  */
 	LIBC_PROBE (setjmp, 3, 4@%eax, -4@$1, 4@%ecx)
 #ifdef PTR_MANGLE
 	PTR_MANGLE (%ecx)
 #endif
-     	movl %ecx, (JB_PC*4)(%eax)
+	movl %ecx, (JB_PC*4)(%eax)
 	movl %ebp, (JB_BP*4)(%eax) /* Save caller's frame pointer.  */
 
 	/* Call __sigjmp_save.  */

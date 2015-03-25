@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2013 Free Software Foundation, Inc.
+# Copyright (C) 2002-2014 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -50,12 +50,6 @@ libthread_db-inhibit-o = $(filter-out .os,$(object-suffixes))
 libthread_db.so-no-z-defs = yes
 
 include ../Rules
-
-# Depend on libc.so so a DT_NEEDED is generated in the shared objects.
-# This ensures they will load libc.so for needed symbols if loaded by
-# a statically-linked program that hasn't already loaded it.
-$(objpfx)libthread_db.so: $(common-objpfx)libc.so \
-			  $(common-objpfx)libc_nonshared.a
 
 tests: $(objpfx)db-symbols.out
 $(objpfx)db-symbols.out: $(objpfx)db-symbols.v.i \

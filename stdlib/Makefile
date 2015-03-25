@@ -1,4 +1,4 @@
-# Copyright (C) 1991-2013 Free Software Foundation, Inc.
+# Copyright (C) 1991-2014 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -144,7 +144,7 @@ $(objpfx)tst-fmtmsg.out: tst-fmtmsg.sh $(objpfx)tst-fmtmsg
 $(objpfx)tst-putenv: $(objpfx)tst-putenvmod.so
 LDFLAGS-tst-putenv = $(no-as-needed)
 
-$(objpfx)tst-putenvmod.so: $(objpfx)tst-putenvmod.os
+$(objpfx)tst-putenvmod.so: $(objpfx)tst-putenvmod.os $(link-libc-deps)
 	$(build-module)
 CFLAGS-tst-putenvmod.c = -DNOT_IN_libc=1
 
@@ -161,6 +161,6 @@ $(objpfx)tst-strtod6: $(link-libm)
 
 tst-tls-atexit-lib.so-no-z-defs = yes
 
-LDFLAGS-tst-tls-atexit = $(common-objpfx)nptl/libpthread.so \
+$(objpfx)tst-tls-atexit: $(common-objpfx)nptl/libpthread.so \
 			 $(common-objpfx)dlfcn/libdl.so
 $(objpfx)tst-tls-atexit.out: $(objpfx)tst-tls-atexit-lib.so

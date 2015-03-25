@@ -1,5 +1,5 @@
 /* Manage function descriptors.  Generic version.
-   Copyright (C) 1999-2013 Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -99,7 +99,7 @@ new_fdesc_table (struct local *l, size_t *size)
 }
 
 /* Must call _dl_fptr_init before using any other function.  */
-void 
+void
 _dl_fptr_init (void)
 {
   struct local *l;

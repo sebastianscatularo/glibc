@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    This program is free software; you can redistribute it and/or modify
@@ -1043,7 +1043,7 @@ usage (void)
 static void
 print_all (const char *path)
 {
-  register const struct conf *c;
+  const struct conf *c;
   size_t clen;
   long int value;
   char *cvalue;
@@ -1087,7 +1087,7 @@ print_all (const char *path)
 int
 main (int argc, char *argv[])
 {
-  register const struct conf *c;
+  const struct conf *c;
 
   /* Set locale.  Do not set LC_ALL because the other categories must
      not be affected (according to POSIX.2).  */
@@ -1104,7 +1104,7 @@ main (int argc, char *argv[])
 Copyright (C) %s Free Software Foundation, Inc.\n\
 This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
-"), "2013");
+"), "2014");
       printf (gettext ("Written by %s.\n"), "Roland McGrath");
       return 0;
     }

@@ -1,4 +1,4 @@
-/* Copyright (C) 1998-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1998-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Zack Weinberg <zack@rabi.phys.columbia.edu>, 1998.
 
@@ -22,7 +22,7 @@
 /* Open the master side of a pseudoterminal and return its file
    descriptor, or -1 on error. */
 int
-__getpt ()
+__getpt (void)
 {
   __set_errno (ENOSYS);
   return -1;

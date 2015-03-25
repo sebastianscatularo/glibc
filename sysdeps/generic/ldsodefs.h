@@ -1,5 +1,5 @@
 /* Run-time dynamic linker data structures for loaded ELF shared objects.
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -76,8 +76,9 @@ typedef struct link_map *lookup_t;
 # define DL_SYMBOL_ADDRESS(map, ref) \
  (void *) (LOOKUP_VALUE_ADDRESS (map) + ref->st_value)
 # define DL_LOOKUP_ADDRESS(addr) ((ElfW(Addr)) (addr))
-# define DL_DT_INIT_ADDRESS(map, start) (start)
-# define DL_DT_FINI_ADDRESS(map, start) (start)
+# define DL_CALL_DT_INIT(map, start, argc, argv, env) \
+ ((init_t) (start)) (argc, argv, env)
+# define DL_CALL_DT_FINI(map, start) ((fini_t) (start)) ()
 #endif
 
 /* On some architectures dladdr can't use st_size of all symbols this way.  */
@@ -128,6 +129,11 @@ typedef struct link_map *lookup_t;
    | ((PROT_WRITE | PROT_EXEC) << (PF_W | PF_X) * 4)			      \
    | ((PROT_READ | PROT_WRITE | PROT_EXEC) << ((PF_R | PF_W | PF_X) * 4)))
 
+/* The filename itself, or the main program name, if available.  */
+#define DSO_FILENAME(name) ((name)[0] ? (name)				      \
+			    : (rtld_progname ?: "<main program>"))
+
+#define RTLD_PROGNAME (rtld_progname ?: "<program name unknown>")
 
 /* For the version handling we need an array with only names and their
    hash values.  */
@@ -548,6 +554,10 @@ struct rtld_global_ro
      and this points to it.  */
   EXTERN struct link_map *_dl_sysinfo_map;
 #endif
+
+  /* Mask for more hardware capabilities that are available on some
+     platforms.  */
+  EXTERN uint64_t _dl_hwcap2;
 
 #ifdef SHARED
   /* We add a function table to _rtld_global which is then used to

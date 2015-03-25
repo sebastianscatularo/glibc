@@ -1,5 +1,5 @@
 /* Load a shared object at runtime, relocate it, and run its initializer.
-   Copyright (C) 1996-2013 Free Software Foundation, Inc.
+   Copyright (C) 1996-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -158,7 +158,7 @@ add_to_global (struct link_map *new)
   return 0;
 }
 
-/* Search link maps in all namespaces for the DSO that containes the object at
+/* Search link maps in all namespaces for the DSO that contains the object at
    address ADDR.  Returns the pointer to the link map of the matching DSO, or
    NULL if a match is not found.  */
 struct link_map *
@@ -204,11 +204,9 @@ dl_open_worker (void *a)
     {
       const void *caller_dlopen = args->caller_dlopen;
 
-#ifdef SHARED
       /* We have to find out from which object the caller is calling.
 	 By default we assume this is the main application.  */
       call_map = GL(dl_ns)[LM_ID_BASE]._ns_loaded;
-#endif
 
       struct link_map *l = _dl_find_dso_for_object ((ElfW(Addr)) caller_dlopen);
 
@@ -216,15 +214,7 @@ dl_open_worker (void *a)
         call_map = l;
 
       if (args->nsid == __LM_ID_CALLER)
-	{
-#ifndef SHARED
-	  /* In statically linked apps there might be no loaded object.  */
-	  if (call_map == NULL)
-	    args->nsid = LM_ID_BASE;
-	  else
-#endif
-	    args->nsid = call_map->l_ns;
-	}
+	args->nsid = call_map->l_ns;
     }
 
   assert (_dl_debug_initialize (0, args->nsid)->r_state == RT_CONSISTENT);
@@ -406,7 +396,7 @@ dl_open_worker (void *a)
 	  /* If this here is the shared object which we want to profile
 	     make sure the profile is started.  We can find out whether
 	     this is necessary or not by observing the `_dl_profile_map'
-	     variable.  If it was NULL but is not NULL afterwars we must
+	     variable.  If it was NULL but is not NULL afterwards we must
 	     start the profiling.  */
 	  struct link_map *old_profile_map = GL(dl_profile_map);
 
@@ -568,6 +558,10 @@ cannot load any more object with static TLS"));
   if (relocation_in_progress)
     LIBC_PROBE (reloc_complete, 3, args->nsid, r, new);
 
+#ifndef SHARED
+  DL_STATIC_INIT (new);
+#endif
+
   /* Run the initializer functions of new objects.  */
   _dl_init (new, args->argc, args->argv, args->env);
 
@@ -638,12 +632,6 @@ no more namespaces available for dlmopen()"));
 	       || GL(dl_ns)[nsid]._ns_loaded->l_auditing))
     _dl_signal_error (EINVAL, file, NULL,
 		      N_("invalid target namespace in dlmopen()"));
-#ifndef SHARED
-  else if ((nsid == LM_ID_BASE || nsid == __LM_ID_CALLER)
-	   && GL(dl_ns)[LM_ID_BASE]._ns_loaded == NULL
-	   && GL(dl_nns) == 0)
-    GL(dl_nns) = 1;
-#endif
 
   struct dl_open_args args;
   args.file = file;
@@ -721,10 +709,6 @@ no more namespaces available for dlmopen()"));
   /* Release the lock.  */
   __rtld_lock_unlock_recursive (GL(dl_load_lock));
 
-#ifndef SHARED
-  DL_STATIC_INIT (args.map);
-#endif
-
   return args.map;
 }
 
@@ -733,7 +717,7 @@ void
 _dl_show_scope (struct link_map *l, int from)
 {
   _dl_debug_printf ("object=%s [%lu]\n",
-		    *l->l_name ? l->l_name : rtld_progname, l->l_ns);
+		    DSO_FILENAME (l->l_name), l->l_ns);
   if (l->l_scope != NULL)
     for (int scope_cnt = from; l->l_scope[scope_cnt] != NULL; ++scope_cnt)
       {
@@ -744,7 +728,7 @@ _dl_show_scope (struct link_map *l, int from)
 	    _dl_debug_printf_c (" %s",
 				l->l_scope[scope_cnt]->r_list[cnt]->l_name);
 	  else
-	    _dl_debug_printf_c (" %s", rtld_progname);
+	    _dl_debug_printf_c (" %s", RTLD_PROGNAME);
 
 	_dl_debug_printf_c ("\n");
       }

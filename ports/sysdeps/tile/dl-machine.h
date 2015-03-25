@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2011-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Chris Metcalf <cmetcalf@tilera.com>, 2011.
    Based on work contributed by by Carl Pederson & Martin Schwidefsky.
@@ -624,8 +624,7 @@ elf_machine_rela (struct link_map *map, const ElfW(Rela) *reloc,
           strtab = (const char *) D_PTR (map,l_info[DT_STRTAB]);
           _dl_error_printf ("%s: Symbol `%s' has different size in shared"
                             " object, consider re-linking\n",
-                            rtld_progname ?: "<program name unknown>",
-                            strtab + refsym->st_name);
+                            RTLD_PROGNAME, strtab + refsym->st_name);
         }
       memcpy (reloc_addr_arg, (void *) value,
               MIN (sym->st_size, refsym->st_size));

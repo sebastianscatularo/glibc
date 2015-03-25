@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by David Huggins-Daines <dhd@debian.org>
 
@@ -74,7 +74,7 @@ typedef unsigned int fexcept_t;
    userspace. This structure is also not correctly aligned ever, in
    an ABI error we left out __aligned(8) and subsequently all of our
    fenv functions must accept unaligned input, align the input, and
-   then use assembly to store fr0. This is a performance hit, but 
+   then use assembly to store fr0. This is a performance hit, but
    means the ABI is stable. */
 typedef struct
 {

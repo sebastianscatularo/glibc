@@ -1,5 +1,5 @@
 /* Jump to a new context.
-   Copyright (C) 2002-2013 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -51,8 +51,8 @@ versioned_symbol (libc, __setcontext, setcontext, GLIBC_2_3_4)
 #if SHLIB_COMPAT (libc, GLIBC_2_3_3, GLIBC_2_3_4)
 
 	compat_text_section
-	
-# undef __CONTEXT_FUNC_NAME	
+
+# undef __CONTEXT_FUNC_NAME
 # define __CONTEXT_FUNC_NAME __novec_setcontext
 # undef __CONTEXT_ENABLE_VRS
 

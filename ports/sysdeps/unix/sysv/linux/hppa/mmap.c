@@ -1,4 +1,4 @@
-/* Copyright (C) 1994-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -33,7 +33,7 @@
 __ptr_t
 __mmap (__ptr_t addr, size_t len, int prot, int flags, int fd, off_t offset)
 {
-	
+
 	__ptr_t ret;
 
 	ret = (__ptr_t) INLINE_SYSCALL (mmap, 6, addr, len, prot, flags, fd, offset);

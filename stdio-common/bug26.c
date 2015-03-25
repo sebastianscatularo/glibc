@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 Free Software Foundation, Inc.
+/* Copyright (C) 2013-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -28,8 +28,9 @@ main (void)
   char s[] = "+.e";
 
   f = fmemopen (s, strlen (s), "r");
-  /* This should fail to parse a float and leave 'e' in the input.  */
-  lost |= (fscanf (f, "%f", &d) != 0);
+  /* This should fail to parse a floating-point number, and leave 'e' in the
+     input.  */
+  lost |= (fscanf (f, "%lf", &d) != 0);
   c = fgetc (f);
   lost |= c != 'e';
   puts (lost ? "Test FAILED!" : "Test succeeded.");

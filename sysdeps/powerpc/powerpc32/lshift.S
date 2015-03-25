@@ -1,5 +1,5 @@
 /* Shift a limb left, low level routine.
-   Copyright (C) 1996-2013 Free Software Foundation, Inc.
+   Copyright (C) 1996-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -19,7 +19,7 @@
 #include <sysdep.h>
 
 /* mp_limb_t mpn_lshift (mp_ptr wp, mp_srcptr up, mp_size_t usize,
-  			 unsigned int cnt)  */
+			 unsigned int cnt)  */
 
 EALIGN (__mpn_lshift, 3, 0)
 

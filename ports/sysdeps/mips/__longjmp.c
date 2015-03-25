@@ -1,4 +1,4 @@
-/* Copyright (C) 1992-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Brendan Kehoe (brendan@zen.org).
 
@@ -47,10 +47,6 @@ ____longjmp (env_arg, val_arg)
   asm volatile ("l.d $f26, %0" : : "m" (env[0].__fpregs[3]));
   asm volatile ("l.d $f28, %0" : : "m" (env[0].__fpregs[4]));
   asm volatile ("l.d $f30, %0" : : "m" (env[0].__fpregs[5]));
-
-  /* Get and reconstruct the floating point csr.  */
-  asm volatile ("lw $2, %0" : : "m" (env[0].__fpc_csr));
-  asm volatile ("ctc1 $2, $31");
 #endif
 
   /* Get the GP. */

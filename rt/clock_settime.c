@@ -1,5 +1,5 @@
 /* Set a clock to a given value.  Stub version.
-   Copyright (C) 1999-2013 Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -21,10 +21,10 @@
 
 /* Set CLOCK to value TP.  */
 int
-clock_settime (clockid_t clock_id, const struct timespec *tp)
+__clock_settime (clockid_t clock_id, const struct timespec *tp)
 {
   __set_errno (ENOSYS);
   return -1;
 }
-strong_alias (clock_settime, __clock_settime)
+weak_alias (__clock_settime, clock_settime)
 stub_warning (clock_settime)

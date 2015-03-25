@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Richard Henderson <rth@tamu.edu>.
 
@@ -150,7 +150,7 @@ $q_high:
 	br	$q_high_ret
 
 	.align	4
-	/* The quotient that we computed was too small.  Divide Y by the 
+	/* The quotient that we computed was too small.  Divide Y by the
 	   current remainder (R) and add that to the existing quotient (Q).
 	   The expectation, of course, is that R is much smaller than X.  */
 	/* Begin with a shift-up loop.  Compute S such that Y*S >= R.  We

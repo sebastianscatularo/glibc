@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Martin Schwidefsky (schwidefsky@de.ibm.com).
 
@@ -33,7 +33,7 @@
 ENTRY(__setcontext)
 	lr	%r1,%r2
 
-	/* sigprocmask (SIG_SETMASK, &sc->sc_mask, NULL).  */
+	/* rt_sigprocmask (SIG_SETMASK, &sc->sc_mask, NULL, sigsetsize).  */
 	la      %r2,SIG_BLOCK
 	la	%r3,SC_MASK(%r1)
 	slr	%r4,%r4
@@ -58,12 +58,20 @@ ENTRY(__setcontext)
 	ld      %f13,SC_FPRS+104(%r1)
 	ld      %f14,SC_FPRS+112(%r1)
 	ld      %f15,SC_FPRS+120(%r1)
- 
+
 	/* Don't touch %a0, used for thread purposes.  */
 	lam	%a1,%a15,SC_ACRS+4(%r1)
 
+	/* Restore the upper halfs if available.  */
+	l	%r2,SC_FLGS(%r1)
+	tml	%r2,1   /* UCONTEXT_UC_FLAGS_HIGH_GPRS */
+	jz	0f
+	.machine	"z900"
+	.machinemode	"zarch_nohighgprs"
+	lmh	%r0,%r15,SC_HIGHGPRS(%r1)
+
 	/* Load general purpose registers.  */
-	lm	%r0,%r15,SC_GPRS(%r1)
+0:	lm	%r0,%r15,SC_GPRS(%r1)
 
 	/* Return.  */
 	br	%r14

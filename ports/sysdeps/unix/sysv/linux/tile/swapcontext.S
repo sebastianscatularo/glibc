@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2011-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Chris Metcalf <cmetcalf@tilera.com>, 2011.
 
@@ -46,7 +46,7 @@ ENTRY (__swapcontext)
 
 	/* Save the current context.  */
 	jal __getcontext
-	
+
 	/* Tear down the frame and restore r0, r1, and lr. */
 	{
 	 BNEZ r0, .Lerror

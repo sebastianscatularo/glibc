@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2004-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -23,6 +23,9 @@
 /* Default thread attributes for the case when the user does not
    provide any.  */
 struct pthread_attr __default_pthread_attr attribute_hidden;
+
+/* Mutex protecting __default_pthread_attr.  */
+int __default_pthread_attr_lock = LLL_LOCK_INITIALIZER;
 
 /* Flag whether the machine is SMP or not.  */
 int __is_smp attribute_hidden;

@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2003-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -26,8 +26,8 @@
 /* We can simply use the syscall.  The CPU clocks are not supported
    with this function.  */
 int
-clock_nanosleep (clockid_t clock_id, int flags, const struct timespec *req,
-		 struct timespec *rem)
+__clock_nanosleep (clockid_t clock_id, int flags, const struct timespec *req,
+		   struct timespec *rem)
 {
   INTERNAL_SYSCALL_DECL (err);
   int r;
@@ -52,4 +52,4 @@ clock_nanosleep (clockid_t clock_id, int flags, const struct timespec *req,
   return (INTERNAL_SYSCALL_ERROR_P (r, err)
 	  ? INTERNAL_SYSCALL_ERRNO (r, err) : 0);
 }
-strong_alias (clock_nanosleep, __clock_nanosleep)
+weak_alias (__clock_nanosleep, clock_nanosleep)

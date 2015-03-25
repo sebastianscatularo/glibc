@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Martin Schwidefsky (schwidefsky@de.ibm.com).
 
@@ -61,7 +61,7 @@ ENTRY(__setcontext)
 
 	/* Don't touch %a0 and %a1, used for thread purposes.  */
 	lam     %a2,%a15,SC_ACRS+8(%r1)
- 
+
 	/* Load general purpose registers.  */
 	lmg	%r0,%r15,SC_GPRS(%r1)
 

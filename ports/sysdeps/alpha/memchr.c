@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2010-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -115,7 +115,7 @@ __memchr (const void *s, int xc, size_t n)
 	  s_align++;				\
 	  n -= 64;				\
 	} while (0)
-      
+
       /* While there's still lots more data to potentially be read,
 	 continue issuing prefetches for the 4th cacheline out.  */
       while (n >= 256)

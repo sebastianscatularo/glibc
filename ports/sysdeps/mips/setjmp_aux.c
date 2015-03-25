@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Brendan Kehoe (brendan@zen.org).
 
@@ -57,11 +57,6 @@ __sigsetjmp_aux (jmp_buf env, int savemask, int sp, int fp)
   asm volatile ("sw $21, %0" : : "m" (env[0].__jmpbuf[0].__regs[5]));
   asm volatile ("sw $22, %0" : : "m" (env[0].__jmpbuf[0].__regs[6]));
   asm volatile ("sw $23, %0" : : "m" (env[0].__jmpbuf[0].__regs[7]));
-
-#ifdef __mips_hard_float
-  /* .. and finally get and reconstruct the floating point csr.  */
-  asm ("cfc1 %0, $31" : "=r" (env[0].__jmpbuf[0].__fpc_csr));
-#endif
 
   /* Save the signal mask if requested.  */
   return __sigjmp_save (env, savemask);

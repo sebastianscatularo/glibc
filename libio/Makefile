@@ -1,4 +1,4 @@
-# Copyright (C) 1995-2013 Free Software Foundation, Inc.
+# Copyright (C) 1995-2014 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -60,7 +60,7 @@ tests = tst_swprintf tst_wprintf tst_swscanf tst_wscanf tst_getwc tst_putwc   \
 	tst-wmemstream1 tst-wmemstream2 \
 	bug-memstream1 bug-wmemstream1 \
 	tst-setvbuf1 tst-popen1 tst-fgetwc bug-wsetpos tst-fseek \
-	tst-fwrite-error
+	tst-fwrite-error tst-ftell-partial-wide
 ifeq (yes,$(build-shared))
 # Add test-fopenloc only if shared library is enabled since it depends on
 # shared localedata objects.
@@ -70,7 +70,7 @@ test-srcs = test-freopen
 
 all: # Make this the default target; it will be defined in Rules.
 
-ifeq ($(versioning),yes)
+ifeq ($(build-shared),yes)
 routines += oldiofopen oldiofdopen oldiofclose oldiopopen oldpclose \
 	    oldtmpfile oldiofgetpos oldiofgetpos64 oldiofsetpos	    \
 	    oldiofsetpos64
@@ -165,7 +165,7 @@ generated = tst-fopenloc.mtrace tst-fopenloc.check
 
 aux	:= fileops genops stdfiles stdio strops
 
-ifeq ($(versioning),yes)
+ifeq ($(build-shared),yes)
 aux	+= oldfileops oldstdfiles
 endif
 

@@ -1,5 +1,5 @@
 /* Macros to swap the order of bytes in integer values.
-   Copyright (C) 1997-2013 Free Software Foundation, Inc.
+   Copyright (C) 1997-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -48,7 +48,7 @@ __bswap_32 (unsigned int __bsx)
 # else
 #  define __bswap_32(x) \
   (__extension__							      \
-   ({ register unsigned int __bsx = (x); __bswap_constant_32 (__bsx); }))
+   ({ unsigned int __bsx = (x); __bswap_constant_32 (__bsx); }))
 # endif
 #else
 static __inline unsigned int

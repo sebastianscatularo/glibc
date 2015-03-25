@@ -1,5 +1,5 @@
 /* Define the machine-dependent type `jmp_buf'.  MIPS version.
-   Copyright (C) 1992-2013 Free Software Foundation, Inc.
+   Copyright (C) 1992-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -59,8 +59,8 @@ typedef struct __jmp_buf_internal_tag
     __extension__ long long __gp;
 #endif
 
-    /* Floating point status register.  */
-    int __fpc_csr;
+    /* Unused (was floating point status register).  */
+    int __glibc_reserved1;
 
     /* Callee-saved floating point registers.  */
 #if _MIPS_SIM == _ABI64

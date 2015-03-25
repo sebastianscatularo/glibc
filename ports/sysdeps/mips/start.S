@@ -1,5 +1,5 @@
 /* Startup code compliant to the ELF Mips ABI.
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -70,7 +70,7 @@
 		      char **argv, void (*init) (void), void (*fini) (void),
 		      void (*rtld_fini) (void), void *stack_end)
 */
-	
+
 	.text
 	.globl ENTRY_POINT
 	.type ENTRY_POINT,@function
@@ -87,11 +87,11 @@ ENTRY_POINT:
 	PTR_LA $4, main		/* main */
 	PTR_L $5, 0($29)		/* argc */
 	PTR_ADDIU $6, $29, PTRSIZE	/* argv  */
-	
+
 	/* Allocate space on the stack for seven arguments (o32 only)
-	   and make sure the stack is aligned to double words (8 bytes) 
+	   and make sure the stack is aligned to double words (8 bytes)
 	   on o32 and quad words (16 bytes) on n32 and n64.  */
-	
+
 	and $29, -2 * SZREG
 # if _MIPS_SIM == _ABIO32
 	PTR_SUBIU $29, 32

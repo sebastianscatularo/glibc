@@ -1,4 +1,4 @@
-/* Copyright (C) 2005-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2005-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -23,6 +23,6 @@ pthread_spin_unlock (pthread_spinlock_t *lock)
   int tmp = 0;
   /* This should be a memory barrier to newer compilers */
   __asm__ __volatile__ ("stw,ma %1,0(%0)"
-                        : : "r" (lock), "r" (tmp) : "memory");           
+                        : : "r" (lock), "r" (tmp) : "memory");
   return 0;
 }

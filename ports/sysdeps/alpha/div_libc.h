@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2004-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -34,7 +34,7 @@
 #define RA	t9
 
 /* The secureplt format does not allow the division routines to be called
-   via plt; there aren't enough registers free to be clobbered.  Avoid 
+   via plt; there aren't enough registers free to be clobbered.  Avoid
    setting the symbol type to STT_FUNC, so that the linker won't be tempted
    to create a plt entry.  */
 #define funcnoplt notype

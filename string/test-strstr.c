@@ -1,5 +1,5 @@
 /* Test and measure strstr functions.
-   Copyright (C) 2010-2013 Free Software Foundation, Inc.
+   Copyright (C) 2010-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Written by Ulrich Drepper <drepper@redhat.com>, 2010.
 
@@ -77,24 +77,6 @@ do_one_test (impl_t *impl, const char *s1, const char *s2, char *exp_result)
 {
   if (check_result (impl, s1, s2, exp_result) < 0)
     return;
-
-  if (HP_TIMING_AVAIL)
-    {
-      hp_timing_t start __attribute ((unused));
-      hp_timing_t stop __attribute ((unused));
-      hp_timing_t best_time = ~(hp_timing_t) 0;
-      size_t i;
-
-      for (i = 0; i < 32; ++i)
-	{
-	  HP_TIMING_NOW (start);
-	  CALL (impl, s1, s2);
-	  HP_TIMING_NOW (stop);
-	  HP_TIMING_BEST (best_time, start, stop);
-	}
-
-      printf ("\t%zd", (size_t) best_time);
-    }
 }
 
 
@@ -133,15 +115,9 @@ do_test (size_t align1, size_t align2, size_t len1, size_t len2,
     }
   s1[len1] = '\0';
 
-  if (HP_TIMING_AVAIL)
-    printf ("Length %4zd/%zd, alignment %2zd/%2zd, %s:",
-	    len1, len2, align1, align2, fail ? "fail" : "found");
-
   FOR_EACH_IMPL (impl, 0)
     do_one_test (impl, s1, s2, fail ? NULL : s1 + len1 - len2);
 
-  if (HP_TIMING_AVAIL)
-    putchar ('\n');
 }
 
 static void

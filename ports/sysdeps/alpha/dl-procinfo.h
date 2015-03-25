@@ -1,5 +1,5 @@
 /* Alpha version of processor capability information handling macros.
-   Copyright (C) 2008-2013 Free Software Foundation, Inc.
+   Copyright (C) 2008-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Aurelien Jarno <aurelien@aurel32.net>, 2008.
 
@@ -51,7 +51,7 @@ _dl_string_platform (const char *str)
 };
 
 /* We cannot provide a general printing function.  */
-#define _dl_procinfo(word) -1
+#define _dl_procinfo(type, word) -1
 
 /* There are no hardware capabilities defined.  */
 #define _dl_hwcap_string(idx) ""
