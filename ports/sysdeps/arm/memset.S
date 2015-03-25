@@ -16,7 +16,12 @@
    License along with the GNU C Library.  If not, see
    <http://www.gnu.org/licenses/>.  */
 
+/* Thumb requires excessive IT insns here.  */
+#define NO_THUMB
 #include <sysdep.h>
+
+	.text
+	.syntax unified
 
 /* void *memset (dstpp, c, len) */
 
@@ -27,7 +32,8 @@ ENTRY(memset)
 
 1:
 	tst	r3, #3		@ aligned yet?
-	strneb	r1, [r3], #1
+	sfi_breg r3, \
+	strbne	r1, [\B], #1
 	subne	r2, r2, #1
 	bne	1b
 
@@ -38,27 +44,35 @@ ENTRY(memset)
 
 1:
 	subs	r2, r2, #8
-	stmcsia	r3!, {r1, ip}	@ store up to 32 bytes per loop iteration
-	subcss	r2, r2, #8
-	stmcsia	r3!, {r1, ip}
-	subcss	r2, r2, #8
-	stmcsia	r3!, {r1, ip}
-	subcss	r2, r2, #8
-	stmcsia	r3!, {r1, ip}
+	sfi_breg r3, \
+	stmiacs	\B!, {r1, ip}	@ store up to 32 bytes per loop iteration
+	subscs	r2, r2, #8
+	sfi_breg r3, \
+	stmiacs	\B!, {r1, ip}
+	subscs	r2, r2, #8
+	sfi_breg r3, \
+	stmiacs	\B!, {r1, ip}
+	subscs	r2, r2, #8
+	sfi_breg r3, \
+	stmiacs	\B!, {r1, ip}
 	bcs	1b
 
 	and	r2, r2, #7
 2:
 	subs	r2, r2, #1	@ store up to 4 bytes per loop iteration
-	strcsb	r1, [r3], #1
-	subcss	r2, r2, #1
-	strcsb	r1, [r3], #1
-	subcss	r2, r2, #1
-	strcsb	r1, [r3], #1
-	subcss	r2, r2, #1
-	strcsb	r1, [r3], #1
+	sfi_breg r3, \
+	strbcs	r1, [\B], #1
+	subscs	r2, r2, #1
+	sfi_breg r3, \
+	strbcs	r1, [\B], #1
+	subscs	r2, r2, #1
+	sfi_breg r3, \
+	strbcs	r1, [\B], #1
+	subscs	r2, r2, #1
+	sfi_breg r3, \
+	strbcs	r1, [\B], #1
 	bcs	2b
-	
+
 	DO_RET(lr)
 END(memset)
 libc_hidden_builtin_def (memset)

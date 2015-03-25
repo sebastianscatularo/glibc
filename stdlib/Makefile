@@ -25,7 +25,8 @@ headers	:= stdlib.h bits/stdlib.h bits/stdlib-ldbl.h bits/stdlib-float.h      \
 	   inttypes.h stdint.h bits/wordsize.h				      \
 	   errno.h sys/errno.h bits/errno.h				      \
 	   ucontext.h sys/ucontext.h					      \
-	   alloca.h fmtmsg.h
+	   alloca.h fmtmsg.h						      \
+	   bits/stdlib-bsearch.h
 
 routines	:=							      \
 	atof atoi atol atoll						      \
@@ -33,7 +34,7 @@ routines	:=							      \
 	bsearch qsort msort						      \
 	getenv putenv setenv secure-getenv				      \
 	exit on_exit atexit cxa_atexit cxa_finalize old_atexit		      \
-	quick_exit at_quick_exit cxa_at_quick_exit			      \
+	quick_exit at_quick_exit cxa_at_quick_exit cxa_thread_atexit_impl     \
 	abs labs llabs							      \
 	div ldiv lldiv							      \
 	mblen mbstowcs mbtowc wcstombs wctomb				      \
@@ -70,8 +71,10 @@ tests		:= tst-strtol tst-strtod testmb testrand testsort testdiv   \
 		   tst-makecontext2 tst-strtod6 tst-unsetenv1		    \
 		   tst-makecontext3 bug-getcontext bug-fmtmsg1		    \
 		   tst-secure-getenv tst-strtod-overflow tst-strtod-round   \
-		   tst-tininess tst-strtod-underflow
+		   tst-tininess tst-strtod-underflow tst-tls-atexit
 tests-static	:= tst-secure-getenv
+
+modules-names	= tst-tls-atexit-lib
 
 include ../Makeconfig
 
@@ -154,3 +157,10 @@ $(objpfx)bug-getcontext: $(link-libm)
 $(objpfx)tst-strtod-round: $(link-libm)
 $(objpfx)tst-tininess: $(link-libm)
 $(objpfx)tst-strtod-underflow: $(link-libm)
+$(objpfx)tst-strtod6: $(link-libm)
+
+tst-tls-atexit-lib.so-no-z-defs = yes
+
+LDFLAGS-tst-tls-atexit = $(common-objpfx)nptl/libpthread.so \
+			 $(common-objpfx)dlfcn/libdl.so
+$(objpfx)tst-tls-atexit.out: $(objpfx)tst-tls-atexit-lib.so

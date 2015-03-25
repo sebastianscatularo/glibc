@@ -31,33 +31,30 @@ __syscall_error:
 	/* We translate the system's EWOULDBLOCK error into EAGAIN.
 	   The GNU C library always defines EWOULDBLOCK==EAGAIN.
 	   EWOULDBLOCK_sys is the original number.  */
-	cmp r0, $EWOULDBLOCK_sys /* Is it the old EWOULDBLOCK?  */
-	moveq r0, $EAGAIN	/* Yes; translate it to EAGAIN.  */
+	cmp	r0, $EWOULDBLOCK_sys /* Is it the old EWOULDBLOCK?  */
+	it	eq
+	moveq	r0, $EAGAIN	/* Yes; translate it to EAGAIN.  */
 #endif
 
 #ifndef IS_IN_rtld
-	mov ip, lr
-	cfi_register (lr, ip)
-	mov r1, r0
+	mov	r1, r0
+	GET_TLS (r2)
+	ldr	r2, 1f
+#ifdef __thumb__
+2:	add	r2, r2, pc
+	ldr	r2, [r2]
+#else
+2:	ldr	r2, [pc, r2]
+#endif
+	str	r1, [r0, r2]
+	mvn	r0, #0
+	DO_RET(lr)
 
-	mov r0, #0xffff0fff
-	mov lr, pc
-	sub pc, r0, #31
-
-	ldr r2, 1f
-2:	ldr r2, [pc, r2]
-	str r1, [r0, r2]
-	mvn r0, #0
-	RETINSTR (, ip)
-
-1:	.word errno(gottpoff) + (. - 2b - 8)
+1:	.word errno(gottpoff) + (. - 2b - PC_OFS)
 #elif RTLD_PRIVATE_ERRNO
-	ldr r1, 1f
-0:	str r0, [pc, r1]
-	mvn r0, $0
+	LDST_PCREL(str, r0, r1, C_SYMBOL_NAME(rtld_errno))
+	mvn	r0, #0
 	DO_RET(r14)
-
-1:	.word C_SYMBOL_NAME(rtld_errno) - 0b - 8
 #else
 #error "Unsupported non-TLS case"
 #endif

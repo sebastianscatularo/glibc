@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio_ext.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <arpa/inet.h>
 #include <net/if.h>
 #include <netinet/in.h>
@@ -1035,7 +1036,15 @@ gaih_inet (const char *name, const struct gaih_service *service,
 			}
 		    }
 		  else
-		    status = NSS_STATUS_UNAVAIL;
+		    {
+		      status = NSS_STATUS_UNAVAIL;
+		      /* Could not load any of the lookup functions.  Indicate
+		         an internal error if the failure was due to a system
+			 error other than the file not being found.  We use the
+			 errno from the last failed callback.  */
+		      if (errno != 0 && errno != ENOENT)
+			__set_h_errno (NETDB_INTERNAL);
+		    }
 		}
 
 	      if (nss_next_action (nip, status) == NSS_ACTION_RETURN)
@@ -1049,7 +1058,7 @@ gaih_inet (const char *name, const struct gaih_service *service,
 
 	  _res.options |= old_res_options & RES_USE_INET6;
 
-	  if (status == NSS_STATUS_UNAVAIL)
+	  if (h_errno == NETDB_INTERNAL)
 	    {
 	      result = GAIH_OKIFUNSPEC | -EAI_SYSTEM;
 	      goto free_and_return;
@@ -2489,11 +2498,28 @@ getaddrinfo (const char *name, const char *service,
       __typeof (once) old_once = once;
       __libc_once (once, gaiconf_init);
       /* Sort results according to RFC 3484.  */
-      struct sort_result results[nresults];
-      size_t order[nresults];
+      struct sort_result *results;
+      size_t *order;
       struct addrinfo *q;
       struct addrinfo *last = NULL;
       char *canonname = NULL;
+      bool malloc_results;
+      size_t alloc_size = nresults * (sizeof (*results) + sizeof (size_t));
+
+      malloc_results
+	= !__libc_use_alloca (alloc_size);
+      if (malloc_results)
+	{
+	  results = malloc (alloc_size);
+	  if (results == NULL)
+	    {
+	      __free_in6ai (in6ai);
+	      return EAI_MEMORY;
+	    }
+	}
+      else
+	results = alloca (alloc_size);
+      order = (size_t *) (results + nresults);
 
       /* Now we definitely need the interface information.  */
       if (! check_pf_called)
@@ -2664,6 +2690,9 @@ getaddrinfo (const char *name, const char *service,
 
       /* Fill in the canonical name into the new first entry.  */
       p->ai_canonname = canonname;
+
+      if (malloc_results)
+	free (results);
     }
 
   __free_in6ai (in6ai);

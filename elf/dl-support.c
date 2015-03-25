@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/param.h>
+#include <stdint.h>
 #include <ldsodefs.h>
 #include <dl-machine.h>
 #include <bits/libc-lock.h>
@@ -126,7 +127,7 @@ int _dl_debug_fd = STDERR_FILENO;
 int _dl_correct_cache_id = _DL_CACHE_DEFAULT_ID;
 
 ElfW(auxv_t) *_dl_auxv;
-ElfW(Phdr) *_dl_phdr;
+const ElfW(Phdr) *_dl_phdr;
 size_t _dl_phnum;
 uint64_t _dl_hwcap __attribute__ ((nocommon));
 
@@ -158,7 +159,7 @@ struct dl_scope_free_list *_dl_scope_free_list;
 /* Needed for improved syscall handling on at least x86/Linux.  */
 uintptr_t _dl_sysinfo = DL_SYSINFO_DEFAULT;
 #endif
-#if defined NEED_DL_SYSINFO || defined NEED_DL_SYSINFO_DSO
+#ifdef NEED_DL_SYSINFO_DSO
 /* Address of the ELF headers in the vsyscall page.  */
 const ElfW(Ehdr) *_dl_sysinfo_dso;
 
@@ -198,13 +199,14 @@ _dl_aux_init (ElfW(auxv_t) *av)
     switch (av->a_type)
       {
       case AT_PAGESZ:
-	GLRO(dl_pagesize) = av->a_un.a_val;
+	if (av->a_un.a_val != 0)
+	  GLRO(dl_pagesize) = av->a_un.a_val;
 	break;
       case AT_CLKTCK:
 	GLRO(dl_clktck) = av->a_un.a_val;
 	break;
       case AT_PHDR:
-	GL(dl_phdr) = (void *) av->a_un.a_val;
+	GL(dl_phdr) = (const void *) av->a_un.a_val;
 	break;
       case AT_PHNUM:
 	GL(dl_phnum) = av->a_un.a_val;
@@ -217,7 +219,7 @@ _dl_aux_init (ElfW(auxv_t) *av)
 	GL(dl_sysinfo) = av->a_un.a_val;
 	break;
 #endif
-#if defined NEED_DL_SYSINFO || defined NEED_DL_SYSINFO_DSO
+#ifdef NEED_DL_SYSINFO_DSO
       case AT_SYSINFO_EHDR:
 	GL(dl_sysinfo_dso) = (void *) av->a_un.a_val;
 	break;
@@ -265,9 +267,6 @@ _dl_non_dynamic_init (void)
 {
   if (HP_TIMING_AVAIL)
     HP_TIMING_NOW (_dl_cpuclock_offset);
-
-  if (!_dl_pagesize)
-    _dl_pagesize = __getpagesize ();
 
   _dl_verbose = *(getenv ("LD_WARN") ?: "") == '\0' ? 0 : 1;
 

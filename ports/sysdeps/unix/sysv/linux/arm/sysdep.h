@@ -45,6 +45,38 @@
 
 #ifdef __ASSEMBLER__
 
+#ifndef ARCH_HAS_HARD_TP
+/* Internal macro calling the linux kernel kuser_get_tls helper.
+   Note that in thumb mode, a constant pool break is often out of range, so
+   we always expand the constant inline.  */
+# ifdef __thumb2__
+#  define GET_TLS_BODY			\
+	movw	r0, #0x0fe0;		\
+	movt	r0, #0xffff;		\
+	blx	r0
+# else
+#  define GET_TLS_BODY \
+	mov	r0, #0xffff0fff;	/* Point to the high page.  */	\
+	mov	lr, pc;			/* Save our return address.  */	\
+	sub	pc, r0, #31		/* Jump to the TLS entry.  */
+# endif
+
+/* Helper to get the TLS base pointer.  Save LR in TMP, return in R0,
+   and no other registers clobbered.  TMP may be LR itself to indicate
+   that no save is necessary.  */
+# undef GET_TLS
+# define GET_TLS(TMP)			\
+  .ifnc TMP, lr;			\
+	mov	TMP, lr;		\
+	cfi_register (lr, TMP);		\
+	GET_TLS_BODY;			\
+	mov	lr, TMP;		\
+	cfi_restore (lr);		\
+  .else;				\
+	GET_TLS_BODY;			\
+  .endif
+#endif /* ARCH_HAS_HARD_TP */
+
 /* Linux uses a negative return value to indicate syscall errors,
    unlike most Unices, which use the condition codes' carry flag.
 
@@ -57,49 +89,50 @@
    test with -4095.  */
 
 #undef	PSEUDO
-#define	PSEUDO(name, syscall_name, args)				      \
-  .text;								      \
-  ENTRY (name);								      \
-    DO_CALL (syscall_name, args);					      \
-    cmn r0, $4096;
+#define	PSEUDO(name, syscall_name, args)		\
+	.text;						\
+  ENTRY (name);						\
+	DO_CALL (syscall_name, args);			\
+	cmn	r0, $4096;
 
-#define PSEUDO_RET							      \
-    RETINSTR(cc, lr);							      \
-    b PLTJMP(SYSCALL_ERROR)
+#define PSEUDO_RET					\
+	it	cc;					\
+	RETINSTR(cc, lr);				\
+	b	PLTJMP(SYSCALL_ERROR)
 #undef ret
 #define ret PSEUDO_RET
 
 #undef	PSEUDO_END
-#define	PSEUDO_END(name)						      \
-  SYSCALL_ERROR_HANDLER;						      \
+#define	PSEUDO_END(name)				\
+	SYSCALL_ERROR_HANDLER;				\
   END (name)
 
 #undef	PSEUDO_NOERRNO
-#define	PSEUDO_NOERRNO(name, syscall_name, args)			      \
-  .text;								      \
-  ENTRY (name);								      \
-    DO_CALL (syscall_name, args);
+#define	PSEUDO_NOERRNO(name, syscall_name, args)	\
+	.text;						\
+  ENTRY (name);						\
+	DO_CALL (syscall_name, args);
 
-#define PSEUDO_RET_NOERRNO						      \
-    DO_RET (lr);
+#define PSEUDO_RET_NOERRNO				\
+	DO_RET (lr);
 
 #undef ret_NOERRNO
 #define ret_NOERRNO PSEUDO_RET_NOERRNO
 
 #undef	PSEUDO_END_NOERRNO
-#define	PSEUDO_END_NOERRNO(name)					      \
+#define	PSEUDO_END_NOERRNO(name)			\
   END (name)
 
 /* The function has to return the error code.  */
 #undef	PSEUDO_ERRVAL
-#define	PSEUDO_ERRVAL(name, syscall_name, args) \
-  .text;								      \
-  ENTRY (name)								      \
-    DO_CALL (syscall_name, args);					      \
-    rsb r0, r0, #0
+#define	PSEUDO_ERRVAL(name, syscall_name, args)		\
+	.text;						\
+  ENTRY (name)						\
+	DO_CALL (syscall_name, args);			\
+	rsb	r0, r0, #0
 
 #undef	PSEUDO_END_ERRVAL
-#define	PSEUDO_END_ERRVAL(name) \
+#define	PSEUDO_END_ERRVAL(name)				\
   END (name)
 
 #define ret_ERRVAL PSEUDO_RET_NOERRNO
@@ -109,32 +142,29 @@
 # if RTLD_PRIVATE_ERRNO
 #  define SYSCALL_ERROR_HANDLER					\
 __local_syscall_error:						\
-       ldr     r1, 1f;						\
-       rsb     r0, r0, #0;					\
-0:     str     r0, [pc, r1];					\
-       mvn     r0, #0;						\
-       DO_RET(lr);						\
-1:     .word C_SYMBOL_NAME(rtld_errno) - 0b - 8;
+	rsb	r0, r0, #0;					\
+	LDST_PCREL(str, r0, r1, C_SYMBOL_NAME(rtld_errno));	\
+	mvn	r0, #0;						\
+	DO_RET(lr)
 # else
 #  if defined(__ARM_ARCH_4T__) && defined(__THUMB_INTERWORK__)
 #   define POP_PC \
-  ldr lr, [sp], #4; \
+  pop { lr }; \
   cfi_adjust_cfa_offset (-4); \
   cfi_restore (lr); \
   bx lr
 #  else
-#   define POP_PC  \
-  ldr pc, [sp], #4
+#   define POP_PC  pop { pc }
 #  endif
 #  define SYSCALL_ERROR_HANDLER					\
 __local_syscall_error:						\
-	str	lr, [sp, #-4]!;					\
+	push	{ lr };						\
 	cfi_adjust_cfa_offset (4);				\
 	cfi_rel_offset (lr, 0);					\
-	str	r0, [sp, #-4]!;					\
+	push	{ r0 };	    					\
 	cfi_adjust_cfa_offset (4);				\
 	bl	PLTJMP(C_SYMBOL_NAME(__errno_location)); 	\
-	ldr	r1, [sp], #4;					\
+	pop	{ r1 };						\
 	cfi_adjust_cfa_offset (-4);				\
 	rsb	r1, r1, #0;					\
 	str	r1, [r0];					\
@@ -192,19 +222,19 @@ __local_syscall_error:						\
    syscalls.  */
 
 #undef	DO_CALL
-#define DO_CALL(syscall_name, args)		\
-    DOARGS_##args;				\
-    ldr r7, =SYS_ify (syscall_name);		\
-    swi 0x0;					\
-    UNDOARGS_##args
+#define DO_CALL(syscall_name, args)			\
+	DOARGS_##args;					\
+	ldr	r7, =SYS_ify (syscall_name);		\
+	swi	0x0;					\
+	UNDOARGS_##args
 
 #undef  DOARGS_0
-#define DOARGS_0 \
-  .fnstart; \
-  str r7, [sp, #-4]!; \
-  cfi_adjust_cfa_offset (4); \
-  cfi_rel_offset (r7, 0); \
-  .save { r7 }
+#define DOARGS_0					\
+	.fnstart;					\
+	push	{ r7 };					\
+	cfi_adjust_cfa_offset (4);			\
+	cfi_rel_offset (r7, 0);				\
+	.save	{ r7 }
 #undef  DOARGS_1
 #define DOARGS_1 DOARGS_0
 #undef  DOARGS_2
@@ -214,44 +244,44 @@ __local_syscall_error:						\
 #undef  DOARGS_4
 #define DOARGS_4 DOARGS_0
 #undef  DOARGS_5
-#define DOARGS_5 \
-  .fnstart; \
-  stmfd sp!, {r4, r7}; \
-  cfi_adjust_cfa_offset (8); \
-  cfi_rel_offset (r4, 0); \
-  cfi_rel_offset (r7, 4); \
-  .save { r4, r7 }; \
-  ldr r4, [sp, #8]
+#define DOARGS_5					\
+	.fnstart;					\
+	push	{r4, r7};				\
+	cfi_adjust_cfa_offset (8);			\
+	cfi_rel_offset (r4, 0);				\
+	cfi_rel_offset (r7, 4);				\
+	.save	{ r4, r7 };				\
+	ldr	r4, [sp, #8]
 #undef  DOARGS_6
-#define DOARGS_6 \
-  .fnstart; \
-  mov ip, sp; \
-  stmfd sp!, {r4, r5, r7}; \
-  cfi_adjust_cfa_offset (12); \
-  cfi_rel_offset (r4, 0); \
-  cfi_rel_offset (r5, 4); \
-  cfi_rel_offset (r7, 8); \
-  .save { r4, r5, r7 }; \
-  ldmia ip, {r4, r5}
+#define DOARGS_6					\
+	.fnstart;					\
+	mov	ip, sp;					\
+	push	{r4, r5, r7};				\
+	cfi_adjust_cfa_offset (12);			\
+	cfi_rel_offset (r4, 0);				\
+	cfi_rel_offset (r5, 4);				\
+	cfi_rel_offset (r7, 8);				\
+	.save	{ r4, r5, r7 };				\
+	ldmia	ip, {r4, r5}
 #undef  DOARGS_7
-#define DOARGS_7 \
-  .fnstart; \
-  mov ip, sp; \
-  stmfd sp!, {r4, r5, r6, r7}; \
-  cfi_adjust_cfa_offset (16); \
-  cfi_rel_offset (r4, 0); \
-  cfi_rel_offset (r5, 4); \
-  cfi_rel_offset (r6, 8); \
-  cfi_rel_offset (r7, 12); \
-  .save { r4, r5, r6, r7 }; \
-  ldmia ip, {r4, r5, r6}
+#define DOARGS_7					\
+	.fnstart;					\
+	mov	ip, sp;					\
+	push	{r4, r5, r6, r7};			\
+	cfi_adjust_cfa_offset (16);			\
+	cfi_rel_offset (r4, 0);				\
+	cfi_rel_offset (r5, 4);				\
+	cfi_rel_offset (r6, 8);				\
+	cfi_rel_offset (r7, 12);			\
+	.save	{ r4, r5, r6, r7 };			\
+	ldmia	ip, {r4, r5, r6}
 
 #undef  UNDOARGS_0
-#define UNDOARGS_0 \
-  ldr r7, [sp], #4; \
-  cfi_adjust_cfa_offset (-4); \
-  cfi_restore (r7); \
-  .fnend
+#define UNDOARGS_0					\
+	pop	{r7};					\
+	cfi_adjust_cfa_offset (-4);			\
+	cfi_restore (r7);				\
+	.fnend
 #undef  UNDOARGS_1
 #define UNDOARGS_1 UNDOARGS_0
 #undef  UNDOARGS_2
@@ -261,29 +291,29 @@ __local_syscall_error:						\
 #undef  UNDOARGS_4
 #define UNDOARGS_4 UNDOARGS_0
 #undef  UNDOARGS_5
-#define UNDOARGS_5 \
-  ldmfd sp!, {r4, r7}; \
-  cfi_adjust_cfa_offset (-8); \
-  cfi_restore (r4); \
-  cfi_restore (r7); \
-  .fnend
+#define UNDOARGS_5					\
+	pop	{r4, r7};				\
+	cfi_adjust_cfa_offset (-8);			\
+	cfi_restore (r4);				\
+	cfi_restore (r7);				\
+	.fnend
 #undef  UNDOARGS_6
-#define UNDOARGS_6 \
-  ldmfd sp!, {r4, r5, r7}; \
-  cfi_adjust_cfa_offset (-12); \
-  cfi_restore (r4); \
-  cfi_restore (r5); \
-  cfi_restore (r7); \
-  .fnend
+#define UNDOARGS_6					\
+	pop	{r4, r5, r7};				\
+	cfi_adjust_cfa_offset (-12);			\
+	cfi_restore (r4);				\
+	cfi_restore (r5);				\
+	cfi_restore (r7);				\
+	.fnend
 #undef  UNDOARGS_7
-#define UNDOARGS_7 \
-  ldmfd sp!, {r4, r5, r6, r7}; \
-  cfi_adjust_cfa_offset (-16); \
-  cfi_restore (r4); \
-  cfi_restore (r5); \
-  cfi_restore (r6); \
-  cfi_restore (r7); \
-  .fnend
+#define UNDOARGS_7					\
+	pop	{r4, r5, r6, r7};			\
+	cfi_adjust_cfa_offset (-16);			\
+	cfi_restore (r4);				\
+	cfi_restore (r5);				\
+	cfi_restore (r6);				\
+	cfi_restore (r7);				\
+	.fnend
 
 #else /* not __ASSEMBLER__ */
 

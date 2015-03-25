@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdint.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 
@@ -32,10 +33,7 @@
 
 
 /* Prototypes for a few program-wide used functions.  */
-extern void *xmalloc (size_t n)
-  __attribute_malloc__ __attribute_alloc_size (1);
-extern void *xcalloc (size_t n, size_t s)
-  __attribute_malloc__ __attribute_alloc_size (1, 2);
+#include <programs/xmalloc.h>
 
 
 struct convtable
@@ -174,11 +172,11 @@ charmap_conversion (const char *from_code, struct charmap_t *from_charmap,
 	  }
 
 #ifdef _POSIX_MAPPED_FILES
-	struct stat st;
+	struct stat64 st;
 	char *addr;
 	/* We have possibilities for reading the input file.  First try
 	   to mmap() it since this will provide the fastest solution.  */
-	if (fstat (fd, &st) == 0
+	if (fstat64 (fd, &st) == 0
 	    && ((addr = mmap (NULL, st.st_size, PROT_READ, MAP_PRIVATE,
 			      fd, 0)) != MAP_FAILED))
 	  {

@@ -55,7 +55,7 @@ static const char args_doc[] = N_("database [key ...]");
 /* Supported options. */
 static const struct argp_option args_options[] =
   {
-    { "service", 's', "CONFIG", 0, N_("Service configuration to be used") },
+    { "service", 's', N_("CONFIG"), 0, N_("Service configuration to be used") },
     { "no-idn", 'i', NULL, 0, N_("disable IDN encoding") },
     { NULL, 0, NULL, 0, NULL },
   };
@@ -92,7 +92,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
 }
 
 /* This is for aliases */
-static inline void
+static void
 print_aliases (struct aliasent *alias)
 {
   unsigned int i = 0;
@@ -181,7 +181,7 @@ ethers_keys (int number, char *key[])
 }
 
 /* This is for group */
-static inline void
+static void
 print_group (struct group *grp)
 {
   unsigned int i = 0;
@@ -600,7 +600,7 @@ networks_keys (int number, char *key[])
 }
 
 /* Now is all for passwd */
-static inline void
+static void
 print_passwd (struct passwd *pwd)
 {
   printf ("%s:%s:%lu:%lu:%s:%s:%s\n",
@@ -651,7 +651,7 @@ passwd_keys (int number, char *key[])
 }
 
 /* This is for protocols */
-static inline void
+static void
 print_protocols (struct protoent *proto)
 {
   unsigned int i;
@@ -701,7 +701,7 @@ protocols_keys (int number, char *key[])
 }
 
 /* Now is all for rpc */
-static inline void
+static void
 print_rpc (struct rpcent *rpc)
 {
   int i;
@@ -841,7 +841,7 @@ shadow_keys (int number, char *key[])
       setspent ();
       while ((sp = getspent ()) != NULL)
 	print_shadow (sp);
-      endpwent ();
+      endspent ();
       return result;
     }
 

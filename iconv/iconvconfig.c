@@ -123,8 +123,9 @@ static char *more_help (int key, const char *text, void *input);
 #define OPT_NOSTDLIB 301
 static const struct argp_option options[] =
 {
-  { "prefix", OPT_PREFIX, "PATH", 0, N_("Prefix used for all file accesses") },
-  { "output", 'o', "FILE", 0, N_("\
+  { "prefix", OPT_PREFIX, N_("PATH"), 0,
+    N_("Prefix used for all file accesses") },
+  { "output", 'o', N_("FILE"), 0, N_("\
 Put output in FILE instead of installed location\
  (--prefix does not apply to FILE)") },
   { "nostdlib", OPT_NOSTDLIB, NULL, 0,
@@ -247,12 +248,7 @@ static struct
 static const char gconv_module_ext[] = MODULE_EXT;
 
 
-extern void *xmalloc (size_t n)
-  __attribute_malloc__ __attribute_alloc_size (1);
-extern void *xcalloc (size_t n, size_t s)
-  __attribute_malloc__ __attribute_alloc_size (1, 2);
-extern void *xrealloc (void *o, size_t n)
-  __attribute_malloc__ __attribute_alloc_size (2);
+#include <programs/xmalloc.h>
 
 
 /* C string table handling.  */

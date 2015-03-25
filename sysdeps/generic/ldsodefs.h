@@ -26,6 +26,7 @@
 #define __need_NULL
 #include <stddef.h>
 #include <string.h>
+#include <stdint.h>
 
 #include <elf.h>
 #include <dlfcn.h>
@@ -538,7 +539,7 @@ struct rtld_global_ro
   EXTERN uintptr_t _dl_sysinfo;
 #endif
 
-#if defined NEED_DL_SYSINFO || defined NEED_DL_SYSINFO_DSO
+#ifdef NEED_DL_SYSINFO_DSO
   /* The vsyscall page is a virtual DSO pre-mapped by the kernel.
      This points to its ELF header.  */
   EXTERN const ElfW(Ehdr) *_dl_sysinfo_dso;
@@ -601,6 +602,12 @@ extern const struct rtld_global_ro _rtld_global_ro
 #endif
 #undef EXTERN
 
+#ifndef SHARED
+/* dl-support.c defines these and initializes them early on.  */
+extern const ElfW(Phdr) *_dl_phdr;
+extern size_t _dl_phnum;
+#endif
+
 #ifdef IS_IN_rtld
 /* This is the initial value of GL(dl_error_catch_tsd).
    A non-TLS libpthread will change it.  */
@@ -633,6 +640,16 @@ extern char **_dl_argv
 #endif
      ;
 #ifdef IS_IN_rtld
+extern unsigned int _dl_skip_args attribute_hidden
+# ifndef DL_ARGV_NOT_RELRO
+     attribute_relro
+# endif
+     ;
+extern unsigned int _dl_skip_args_internal attribute_hidden
+# ifndef DL_ARGV_NOT_RELRO
+     attribute_relro
+# endif
+     ;
 extern char **_dl_argv_internal attribute_hidden
 # ifndef DL_ARGV_NOT_RELRO
      attribute_relro
@@ -1005,6 +1022,17 @@ extern int _dl_addr_inside_object (struct link_map *l, const ElfW(Addr) addr)
 
 /* Show show of an object.  */
 extern void _dl_show_scope (struct link_map *new, int from);
+
+extern struct link_map *_dl_find_dso_for_object (const ElfW(Addr) addr)
+     internal_function;
+rtld_hidden_proto (_dl_find_dso_for_object)
+
+/* Initialization which is normally done by the dynamic linker.  */
+extern void _dl_non_dynamic_init (void) internal_function;
+
+/* Used by static binaries to check the auxiliary vector.  */
+extern void _dl_aux_init (ElfW(auxv_t) *av) internal_function;
+
 
 __END_DECLS
 

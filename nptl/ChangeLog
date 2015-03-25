@@ -1,3 +1,181 @@
+2013-05-16  Ryan S. Arnold  <rsa@linux.vnet.ibm.com>
+
+	* pthread_create.c: Add missing #include <stdint.h> due to uint64_t or
+	uint32_t usage.
+	* sysdeps/pthread/createthread.c: Likewise.
+
+2013-05-14  Andreas Jaeger  <aj@suse.de>
+
+	[BZ #10686]
+	* sysdeps/x86_64/tls.h (struct tcbhead_t): Add __private_ss field.
+	* sysdeps/i386/tls.h (struct tcbhead_t): Likewise.
+
+2013-05-09  Andi Kleen  <ak@linux.intel.com>
+
+	* tst-mutex8.c (do_test): Check for ENABLE_PI.
+
+2013-04-22  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* pthreadP.h (check_sched_policy_attr): New inline function.
+	(check_sched_priority_attr): Likewise.
+	(check_stacksize_attr): Likewise.
+	(__kernel_cpumask_size, __determine_cpumask_size): Declare
+	extern.
+	(check_cpuset_attr): New inline function.
+	* pthread_attr_setschedparam (__pthread_attr_setschedparam):
+	Use check_sched_priority_attr.
+	* pthread_attr_setschedpolicy.c
+	(__pthread_attr_setschedpolicy): Use check_sched_policy_attr.
+	* pthread_attr_setstack.c (__pthread_attr_setstack): Use
+	check_stacksize_attr.
+	* pthread_attr_setstacksize.c (__pthread_attr_setstacksize):
+	Likewise.
+	* sysdeps/unix/sysv/linux/pthread_attr_setaffinity.c
+	(__pthread_attr_setaffinity_new): Use check_cpuset_attr.
+
+2013-04-11  Andreas Schwab  <schwab@suse.de>
+
+	* sysdeps/unix/sysv/linux/i386/i486/pthread_cond_timedwait.S
+	(__pthread_cond_timedwait): If possible use FUTEX_WAIT_BITSET to
+	directly use absolute timeout.
+
+2013-04-07  Carlos O'Donell  <carlos@redhat.com>
+
+	* sysdeps/unix/sysv/linux/sem_post.c: Include atomic.h.
+
+2013-04-04  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	[BZ #15337]
+	* sysdeps/unix/sysv/linux/x86_64/cancellation.S
+	[IS_IN_libpthread]
+	[SHARED && defined DO_VERSIONING && !defined NO_HIDDEN]: Mark
+	__pthread_unwind hidden.
+
+2013-03-28  Roland McGrath  <roland@hack.frob.com>
+
+	* pthread_create.c (start_thread) [!SHARED]:
+	Call __call_tls_dtors only if it's not NULL.
+
+2013-03-19  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* allocatestack.c (allocate_stack): Use __default_pthread_attr
+	instead of __default_stacksize.
+	* nptl-init.c (__pthread_initialize_minimal_internal):
+	Likewise.  Initialize guardsize.
+	* pthreadP.h (__default_pthread_attr): Declare.
+	* pthread_attr_getstacksize.c (__pthread_attr_getstacksize):
+	Use __default_pthread_attr instead of __default_stacksize.
+	* pthread_create.c (default_attr): Remove.
+	(__pthread_create_2_1): Use __default_pthread_attr instead of
+	default_attr.
+	* vars.c (__default_stacksize): Remove.
+	(__default_pthread_attr): New static variable to store
+	default thread attributes.
+
+2013-03-18  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* pthread_barrier_init.c (default_attr): Rename to
+	default_barrierattr.
+	(pthread_barrier_init): Adjust for the rename.
+	* pthread_mutex_init.c (default_attr): Rename to
+	default_mutexattr.
+	(__pthread_mutex_init): Adjust for the rename.
+	* pthread_rwlock_init.c (default_attr): Rebane to
+	default_rwlockattr.
+	(__pthread_rwlock_init): Adjust for the rename.
+
+2013-03-12  Carlos O'Donell  <carlos@redhat.com>
+
+	* sysdeps/unix/sysv/linux/lowlevellock.c: Include <atomic.h>.
+
+2013-03-04  Roland McGrath  <roland@hack.frob.com>
+
+	* sysdeps/unix/sysv/linux/i386/i686/dl-sysdep.h:
+	Change multiple inclusion guard to _LINUX_I686_DL_SYSDEP_H.
+	Use #include_next.
+	(HAVE_DL_DISCOVER_OSVERSION): Remove definition, now redundant.
+	(RTLD_PRIVATE_ERRNO): Likewise.
+	(NEED_DL_SYSINFO, DL_SYSINFO_DEFAULT, DL_SYSINFO_IMPLEMENTATION):
+	Move macros and associated declaration to ...
+	* sysdeps/unix/sysv/linux/i386/dl-sysdep.h: ... here.
+	Change multiple include guard to _LINUX_I386_DL_SYSDEP_H.
+	Use #include_next.
+
+2013-03-01  Carlos O'Donell  <carlos@redhat.com>
+
+	* Makefile (tests): Revert last change.
+	(tst-pthread-stack-env-ENV): Likewise.
+	* nptl-init.c (set_default_stacksize): Likewise.
+	(__pthread_initialize_minimal_internal): Likewise.
+	* tst-pthread-stack-env.c: Likewise.
+
+2013-03-01  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* tst-oddstacklimit.c: Include stdlib.h.
+
+	* Makefile (tests): Add tst-pthread-stack-env.
+	(tst-pthread-stack-env-ENV): Set environment for test.
+	* nptl-init.c (set_default_stacksize): New function.
+	(__pthread_initialize_minimal_internal): Accept ARGC, ARGV and
+	ENVP.  Initialize __ENVIRON and set __DEFAULT_STACKSIZE.
+	* tst-pthread-stack-env.c: New test case.
+
+2013-02-21  David S. Miller  <davem@davemloft.net>
+
+	* sysdeps/unix/sysv/linux/sparc/lowlevellock.h
+	(FUTEX_WAIT_REQUEUE_PI): Define.
+	(FUTEX_CMP_REQUEUE_PI): Likewise.
+	(lll_futex_wait_requeue_pi): Likewise.
+	(lll_futex_timed_wait_requeue_pi): Likewise.
+	(lll_futex_cmp_requeue_pi): Likewise.
+
+2013-02-21  Carlos O'Donell  <carlos@redhat.com>
+
+	* sysdeps/unix/sysv/linux/fork.c: Fix comment typo.
+
+2013-02-18  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* sysdeps/pthread/tst-timer.c: Include stdlib.h for declaration
+	of exit.
+	* tst-barrier4.c: Likewise.
+	* tst-robust7.c: Likewise.
+
+	[BZ #14920]
+	* pthreadP.h (USE_REQUEUE_PI): New macro to check if mutex is
+	PI-aware.
+	* pthread_cond_broadcast.c (__pthread_cond_broadcast): Use
+	PI-aware futex operations if available and mutex is PI-aware.
+	* pthread_cond_signal.c (__pthread_cond_signal): Likewise.
+	* nptl/pthread_cond_timedwait.c (__pthread_cond_timedwait):
+	Likewise.
+	* pthread_cond_wait.c (__condvar_cleanup): Adjust lock if
+	cancellation occurred just after futex returned successfully
+	from a PI operation with the mutex held.
+	(__pthread_cond_wait): Use PI-aware futex operations if
+	available and mutex is PI-aware.
+	* sysdeps/unix/sysv/linux/powerpc/lowlevellock.h
+	(FUTEX_WAIT_REQUEUE_PI): Define.
+	(FUTEX_CMP_REQUEUE_PI): Likewise.
+	(lll_futex_wait_requeue_pi): Likewise.
+	(lll_futex_timed_wait_requeue_pi): Likewise.
+	(lll_futex_cmp_requeue_pi): Likewise.
+	* nptl/sysdeps/unix/sysv/linux/s390/lowlevellock.h
+	(FUTEX_WAIT_REQUEUE_PI): Define.
+	(FUTEX_CMP_REQUEUE_PI): Likewise.
+	(lll_futex_wait_requeue_pi): Likewise.
+	(lll_futex_timed_wait_requeue_pi): Likewise.
+	(lll_futex_cmp_requeue_pi): Likewise.
+	* sysdeps/unix/sysv/linux/kernel-features.h: Define
+	__ASSUME_REQUEUE_PI for Linux version higher than 2.6.31.
+
+2013-02-04  Andreas Schwab  <schwab@suse.de>
+
+	[BZ #14142]
+	* tst-cancel14.c: Include <sys/time.h>.
+	* tst-cancel15.c: Likewise.
+	* tst-mutex9.c: Include <stdint.h>, <stdlib.h> and <sys/time.h>.
+	* tst-stackguard1.c: Include <tls.h>
+
 2013-01-16  Andreas Schwab  <schwab@suse.de>
 
 	[BZ #14327]

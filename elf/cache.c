@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdint.h>
 #include <sys/fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -99,6 +100,10 @@ print_entry (const char *lib, int flag, unsigned int osversion,
       break;
     case FLAG_AARCH64_LIB64:
       fputs (",AArch64", stdout);
+      break;
+    /* Uses the ARM soft-float ABI.  */
+    case FLAG_ARM_LIBSF:
+      fputs (",soft-float", stdout);
       break;
     case 0:
       break;

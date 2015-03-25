@@ -57,13 +57,13 @@ void (*argp_program_version_hook) (FILE *, struct argp_state *) = print_version;
 static const struct argp_option options[] =
 {
   { NULL, 0, NULL, 0, N_("Input/Output format specification:") },
-  { "from-code", 'f', "NAME", 0, N_("encoding of original text") },
-  { "to-code", 't', "NAME", 0, N_("encoding for output") },
+  { "from-code", 'f', N_("NAME"), 0, N_("encoding of original text") },
+  { "to-code", 't', N_("NAME"), 0, N_("encoding for output") },
   { NULL, 0, NULL, 0, N_("Information:") },
   { "list", 'l', NULL, 0, N_("list all known coded character sets") },
   { NULL, 0, NULL, 0, N_("Output control:") },
   { NULL, 'c', NULL, 0, N_("omit invalid characters from output") },
-  { "output", 'o', "FILE", 0, N_("output file") },
+  { "output", 'o', N_("FILE"), 0, N_("output file") },
   { "silent", 's', NULL, 0, N_("suppress warnings") },
   { "verbose", OPT_VERBOSE, NULL, 0, N_("print progress information") },
   { NULL, 0, NULL, 0, NULL }
@@ -275,7 +275,7 @@ conversions from `%s' and to `%s' are not supported"),
 	do
 	  {
 #ifdef _POSIX_MAPPED_FILES
-	    struct stat st;
+	    struct stat64 st;
 	    char *addr;
 #endif
 	    int fd, ret;
@@ -300,7 +300,7 @@ conversions from `%s' and to `%s' are not supported"),
 #ifdef _POSIX_MAPPED_FILES
 	    /* We have possibilities for reading the input file.  First try
 	       to mmap() it since this will provide the fastest solution.  */
-	    if (fstat (fd, &st) == 0
+	    if (fstat64 (fd, &st) == 0
 		&& ((addr = mmap (NULL, st.st_size, PROT_READ, MAP_PRIVATE,
 				  fd, 0)) != MAP_FAILED))
 	      {

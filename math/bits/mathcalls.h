@@ -220,7 +220,7 @@ __END_NAMESPACE_C99
 
 #ifdef __USE_ISOC99
 __BEGIN_NAMESPACE_C99
-/* Return representation of NaN for double type.  */
+/* Return representation of qNaN for double type.  */
 __MATHCALLX (nan,, (const char *__tagb), (__const__));
 __END_NAMESPACE_C99
 #endif
@@ -358,6 +358,12 @@ __MATHCALL (fma,, (_Mdouble_ __x, _Mdouble_ __y, _Mdouble_ __z));
 
 #if defined __USE_MISC || defined __USE_XOPEN_EXTENDED || defined __USE_ISOC99
 __END_NAMESPACE_C99
+#endif
+
+#ifdef __USE_GNU
+/* Test for signaling NaN.  */
+__MATHDECL_1 (int, __issignaling,, (_Mdouble_ __value))
+     __attribute__ ((__const__));
 #endif
 
 #if defined __USE_MISC || defined __USE_XOPEN_EXTENDED

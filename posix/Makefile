@@ -40,7 +40,6 @@ routines :=								      \
 	getuid geteuid getgid getegid getgroups setuid setgid group_member    \
 	getpgid setpgid getpgrp bsd-getpgrp setpgrp getsid setsid	      \
 	getresuid getresgid setresuid setresgid				      \
-	getlogin getlogin_r setlogin					      \
 	pathconf sysconf fpathconf					      \
 	glob glob64 fnmatch regex					      \
 	confstr								      \
@@ -86,7 +85,8 @@ tests		:= tstgetopt testfnm runtests runptests	     \
 		   tst-rfc3484-3 \
 		   tst-getaddrinfo3 tst-fnmatch2 tst-cpucount tst-cpuset \
 		   bug-getopt1 bug-getopt2 bug-getopt3 bug-getopt4 \
-		   bug-getopt5 tst-getopt_long1
+		   bug-getopt5 tst-getopt_long1 bug-regex34 bug-regex35 \
+		   tst-pathconf tst-getaddrinfo4
 xtests		:= bug-ga2
 ifeq (yes,$(build-shared))
 test-srcs	:= globtest
@@ -199,6 +199,8 @@ bug-regex26-ENV = LOCPATH=$(common-objpfx)localedata
 bug-regex30-ENV = LOCPATH=$(common-objpfx)localedata
 bug-regex32-ENV = LOCPATH=$(common-objpfx)localedata
 bug-regex33-ENV = LOCPATH=$(common-objpfx)localedata
+bug-regex34-ENV = LOCPATH=$(common-objpfx)localedata
+bug-regex35-ENV = LOCPATH=$(common-objpfx)localedata
 tst-rxspencer-ARGS = --utf8 rxspencer/tests
 tst-rxspencer-ENV = LOCPATH=$(common-objpfx)localedata
 tst-pcre-ARGS = PCRE.tests
@@ -207,11 +209,11 @@ bug-glob1-ARGS = "$(objpfx)"
 tst-execvp3-ARGS = --test-dir=$(objpfx)
 
 testcases.h: TESTS TESTS2C.sed
-	sed -f TESTS2C.sed < $< > $@T
+	LC_ALL=C sed -f TESTS2C.sed < $< > $@T
 	mv -f $@T $@
 
 ptestcases.h: PTESTS PTESTS2C.sed
-	sed -f PTESTS2C.sed < $< > $@T
+	LC_ALL=C sed -f PTESTS2C.sed < $< > $@T
 	mv -f $@T $@
 
 # Run a test on the header files we use.

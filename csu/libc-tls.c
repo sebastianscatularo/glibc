@@ -28,10 +28,6 @@
  #error makefile bug, this file is for static only
 #endif
 
-extern ElfW(Phdr) *_dl_phdr;
-extern size_t _dl_phnum;
-
-
 dtv_t _dl_static_dtv[2 + TLS_SLOTINFO_SURPLUS];
 
 
@@ -75,7 +71,7 @@ size_t _dl_tls_generation;
 TLS_INIT_HELPER
 #endif
 
-static inline void
+static void
 init_slotinfo (void)
 {
   /* Create the slotinfo list.  */
@@ -90,7 +86,7 @@ init_slotinfo (void)
   GL(dl_tls_dtv_slotinfo_list) = &static_slotinfo.si;
 }
 
-static inline void
+static void
 init_static_tls (size_t memsz, size_t align)
 {
   /* That is the size of the TLS memory for this object.  The initialized
@@ -118,7 +114,7 @@ __libc_setup_tls (size_t tcbsize, size_t tcbalign)
   size_t align = 0;
   size_t max_align = tcbalign;
   size_t tcb_offset;
-  ElfW(Phdr) *phdr;
+  const ElfW(Phdr) *phdr;
 
   /* Look through the TLS segment if there is any.  */
   if (_dl_phdr != NULL)

@@ -187,6 +187,11 @@
 # define __ASSUME_PWRITEV	1
 #endif
 
+/* Support for FUTEX_*_REQUEUE_PI was added in 2.6.31.  */
+#if __LINUX_KERNEL_VERSION >= 0x02061f
+# define __ASSUME_REQUEUE_PI	1
+#endif
+
 /* Support for F_GETOWN_EX was introduced in 2.6.32.  */
 #if __LINUX_KERNEL_VERSION >= 0x020620
 # define __ASSUME_F_GETOWN_EX	1
@@ -215,4 +220,10 @@
 /* getcpu is a syscall for x86-64 since 3.1.  */
 #if defined __x86_64__ && __LINUX_KERNEL_VERSION >= 0x030100
 # define __ASSUME_GETCPU_SYSCALL	1
+#endif
+
+/* 2.6.29 removed the XFS restricted_chown sysctl, so it is pointless looking
+   for it in newer kernels.  */
+#if __LINUX_KERNEL_VERSION >= 0x02061d
+# define __ASSUME_XFS_RESTRICTED_CHOWN 1
 #endif

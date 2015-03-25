@@ -1,3 +1,389 @@
+2013-05-22  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/arm/libm-test-ulps: Update test names.
+
+2013-05-19  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/arm/libm-test-ulps: Update names of sincos tests.
+
+2013-05-16  Ryan S. Arnold  <rsa@linux.vnet.ibm.com>
+
+	* sysdeps/unix/sysv/linux/arm/bits/atomic.h: Add missing #include
+	<stdint.h> due to uint64_t or uint32_t usage.
+
+2013-05-14  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #14908]
+	* sysdeps/arm/setjmp.S (__sigsetjmp): Don't save fpscr.
+	* sysdeps/arm/__longjmp.S (__longjmp): Don't restore fpscr.
+	* sysdeps/arm/bits/setjmp.h (__jmp_buf): Don't mention fpscr in
+	comment.
+
+2013-05-13  Roland McGrath  <roland@hack.frob.com>
+
+	* sysdeps/arm/armv7/multiarch/memcpy.S [__ARM_NEON__]: Don't define
+	memcpy here, just __memcpy_arm and __aeabi_memcpy*.
+	* sysdeps/arm/armv7/multiarch/memcpy_neon.S [__ARM_NEON__]:
+	Define memcpy here, not __memcpy_neon.
+	* sysdeps/arm/armv7/multiarch/memcpy_vfp.S [__ARM_NEON__]:
+	Define nothing here.
+	* sysdeps/arm/armv7/multiarch/ifunc-impl-list.c
+	(__libc_ifunc_impl_list) [__ARM_NEON__]: Don't list __memcpy_vfp;
+	use memcpy name for NEON implementation.
+
+2013-05-08  Will Newton  <will.newton@linaro.org>
+
+	* sysdeps/arm/armv7/multiarch/Makefile: New file.
+	* sysdeps/arm/armv7/multiarch/aeabi_memcpy.c: Likewise.
+	* sysdeps/arm/armv7/multiarch/ifunc-impl-list.c: Likewise.
+	* sysdeps/arm/armv7/multiarch/memcpy.S: Likewise.
+	* sysdeps/arm/armv7/multiarch/memcpy_impl.S: Likewise.
+	* sysdeps/arm/armv7/multiarch/memcpy_neon.S: Likewise.
+	* sysdeps/arm/armv7/multiarch/memcpy_vfp.S: Likewise.
+	* sysdeps/arm/armv7/configure.in: Likewise.
+	* sysdeps/arm/armv7/configure: Generated.
+
+2013-05-07  Roland McGrath  <roland@hack.frob.com>
+
+	* sysdeps/arm/dl-machine.h (elf_machine_dynamic): Use a plain C
+	reference to _GLOBAL_OFFSET_TABLE_ with an STV_HIDDEN declaration.
+
+2013-05-06  Roland McGrath  <roland@hack.frob.com>
+
+	* sysdeps/arm/dl-tlsdesc.S (_dl_tlsdesc_dynamic): Add missing sfi_breg.
+
+2013-04-19  Roland McGrath  <roland@hack.frob.com>
+
+	* sysdeps/arm/sysdep.h
+	(eabi_fnstart, eabi_fnend, eabi_save, eabi_cantunwind, eabi_pad):
+	New macros.
+	* sysdeps/arm/dl-tlsdesc.S: Use them.
+
+2013-03-26  Mans Rullgard  <mans@mansr.com>
+
+	* sysdeps/arm/preconfigure.in: Use "test" instead of [ ].
+	* sysdeps/arm/preconfigure: Regenerated.
+
+2013-03-20  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/arm/configure.in (default-abi): Set using
+	LIBC_CONFIG_VAR.
+	* sysdeps/arm/configure: Regenerated.
+	* sysdeps/unix/sysv/linux/arm/Makefile: Do not include
+	default-abi.make.
+
+2013-03-18  Roland McGrath  <roland@hack.frob.com>
+
+	* sysdeps/arm/dl-tlsdesc.S: Include <arm-features.h>.
+	Use sfi_breg macro throughout.
+	(_dl_tlsdesc_dynamic) [!ARM_NO_INDEX_REGISTER]: Avoid two-register
+	addressing mode.
+	(_dl_tlsdesc_dynamic) [ARM_ALWAYS_BX]: Don't pop into pc.
+
+	* sysdeps/arm/arm-features.h: Add comment for ARM_NO_INDEX_REGISTER.
+
+2013-03-15  Roland McGrath  <roland@hack.frob.com>
+
+	* sysdeps/arm/sysdep.h [!ARM_SFI_MACROS] (sfi_sp): New macro.
+	* sysdeps/arm/__longjmp.S: Use it.
+
+	* sysdeps/arm/sysdep.h [!ARM_SFI_MACROS]
+	(ARM_SFI_MACROS): Define it.
+	(sfi_breg, sfi_pld): New assembler macros.
+	* sysdeps/arm/__longjmp.S: Use them for all memory references not
+	through the pc or sp registers.
+	* sysdeps/arm/add_n.S: Likewise.
+	* sysdeps/arm/addmul_1.S: Likewise.
+	* sysdeps/arm/arm-mcount.S: Likewise.
+	* sysdeps/arm/armv6/rawmemchr.S: Likewise.
+	* sysdeps/arm/armv6/strchr.S: Likewise.
+	* sysdeps/arm/armv6/strcpy.S: Likewise.
+	* sysdeps/arm/armv6/strlen.S: Likewise.
+	* sysdeps/arm/armv6/strrchr.S: Likewise.
+	* sysdeps/arm/armv6t2/memchr.S: Likewise.
+	* sysdeps/arm/memcpy.S: Likewise.
+	* sysdeps/arm/memmove.S: Likewise.
+	* sysdeps/arm/memset.S: Likewise.
+	* sysdeps/arm/setjmp.S: Likewise.
+	* sysdeps/arm/strlen.S: Likewise.
+	* sysdeps/arm/submul_1.S: Likewise.
+
+2013-03-13  Roland McGrath  <roland@hack.frob.com>
+
+	* sysdeps/arm/arm-features.h (ARM_BX_ALIGN_LOG2): New macro.
+	* sysdeps/arm/memcpy.S: Respect ARM_BX_ALIGN_LOG2.
+	* sysdeps/arm/memmove.S: Likewise.
+
+	* sysdeps/arm/add_n.S: Include <arm-features.h>.
+	[ARM_ALWAYS_BX]: Don't pop into pc.
+
+	* sysdeps/arm/arm-features.h: Add comment about ARM_ALWAYS_BX.
+	* sysdeps/arm/memcpy.S: Include <arm-features.h>.
+	[ARM_ALWAYS_BX]: Avoid pc as destination.
+	* sysdeps/arm/memmove.S: Likewise.
+
+2013-03-12  Roland McGrath  <roland@hack.frob.com>
+
+	* sysdeps/arm/armv6t2/memchr.S [NO_THUMB]:
+	Use .arm rather than .thumb, .thumb_func.  Avoid cbz/cnbz instructions.
+
+	* sysdeps/arm/armv6t2/memchr.S: Change register allocation so ldrd use
+	is r4,r5 rather than r5,r6; this way ARM mode will allow that ldrd.
+
+2013-03-11  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/arm/preconfigure.in: Add comment about
+	-fno-unwind-tables addition to CFLAGS.
+	* sysdeps/arm/preconfigure: Regenerated.
+	* sysdeps/unix/sysv/linux/arm/configure.in: Add comment about
+	-fno-unwind-tables removal from CFLAGS.
+	* sysdeps/unix/sysv/linux/arm/configure: Regenerated.
+
+2013-03-11  Roland McGrath  <roland@hack.frob.com>
+
+	* sysdeps/arm/bits/setjmp.h: Test [!__ASSEMBLER__] rather than [!_ASM].
+	* sysdeps/arm/jmpbuf-offsets.h: File removed.
+	* sysdeps/arm/jmpbuf-unwind.h: Don't #include it.
+	* sysdeps/arm/include/bits/setjmp.h: New file.
+	* sysdeps/arm/setjmp.S (_SETJMP_H, _ASM): Macros removed.
+	Use JMP_BUF_REGLIST macro.
+	* sysdeps/arm/__longjmp.S: Likewise.
+
+	* sysdeps/arm/memcpy.S: Convert to unified assembly syntax.
+	* sysdeps/arm/memmove.S: Likewise.
+	* sysdeps/arm/memset.S: Likewise.
+	* sysdeps/arm/strlen.S: Likewise.
+
+	* sysdeps/arm/memcpy.S: Use r10 instead of r9.
+	* sysdeps/arm/memmove.S: Likewise.
+
+	* sysdeps/arm/preconfigure.in: New file.
+	* sysdeps/arm/preconfigure: Replaced with generated file.
+
+2013-03-11  Andreas Schwab  <schwab@suse.de>
+
+	[BZ #15234]
+	* sysdeps/unix/sysv/linux/arm/nptl/libpthread.abilist (GLIBC_2.4):
+	Remove pthread_atfork.
+
+2013-03-06  Richard Henderson <rth@redhat.com>
+
+	* sysdeps/arm/armv6/rawmemchr.S: New file.
+	* sysdeps/arm/armv6/stpcpy.S: New file.
+	* sysdeps/arm/armv6/strchr.S: New file.
+	* sysdeps/arm/armv6/strcpy.S: New file.
+	* sysdeps/arm/armv6/strlen.S: New file.
+	* sysdeps/arm/armv6/strrchr.S: New file.
+	* sysdeps/arm/armv6t2/Implies: New file.
+
+2013-03-06  Richard Henderson <rth@redhat.com>
+
+	* sysdeps/arm/add_n.S: New file.
+	* sysdeps/arm/sub_n.S: New file.
+	* sysdeps/arm/submul_1.S: New file.
+	* sysdeps/arm/addmul_1.S: New file.
+	* sysdeps/arm/armv6t2/ffs.S: New file.
+	* sysdeps/arm/armv6t2/ffsll.S: New file.
+
+	* sysdeps/arm/sysdep.h (ARCH_HAS_HARD_TP): New macro.
+	(GET_TLS): Use hard-tp if ARCH_HAS_HARD_TP.
+	* sysdeps/unix/sysv/linux/arm/aeabi_read_tp.S: Likewise.
+	* sysdeps/unix/sysv/linux/arm/sysdep.h (GET_TLS): Don't override
+	the default definition if ARCH_HAS_HARD_TP.
+
+	* sysdeps/arm/sysdep.h (__ARM_ARCH): New macro.
+	(ARCH_HAS_BX, ARCH_HAS_BLX, ARCH_HAS_T2): New macros.
+	(BX): Select on ARCH_HAS_BX instead of __USE_BX__.
+	(BLX): Select on ARCH_HAS_BLX instead of __ARM_ARCH_4T__.
+	* ports/sysdeps/arm/dl-machine.h (BX): Select on ARCH_HAS_BX
+	instead of __USE_BX__.
+
+	* sysdeps/arm/arm-mcount.S (_mcount): Use pop into pc unless
+	__ARM_ARCH_4T__ and __THUMB_INTERWORK__.
+	* sysdeps/arm/dl-tlsdesc.S (_dl_tlsdesc_dynamic): Likewise.
+
+	* sysdeps/arm/sysdep.h (BX, BXC, BLX): New macros.
+	(DO_RET): Use BX.
+	(RETINSTR): Use BXC.
+	* sysdeps/arm/dl-tlsdesc.S (BX): Remove.
+	* sysdeps/arm/dl-trampoline.S (BX): Remove.
+	(_dl_runtime_profile): Use BLX.
+
+	* sysdeps/arm/__longjmp.S (__longjmp): Use ldmia insn directly.
+	* sysdeps/arm/sysdep.h (LOADREGS): Remove.
+
+	* sysdeps/arm/arm-mcount.S (_mcount): Use push/pop mnemonics.
+	* sysdeps/arm/crti.S, sysdeps/arm/crtn.S: Likewise.
+	* sysdeps/arm/dl-tlsdesc.S: Likewise.
+	* sysdeps/arm/dl-trampoline.S: Likewise.
+	* sysdeps/arm/start.S: Likewise.
+	* sysdeps/arm/memcpy.S (PULL): Rename macro from pull.
+	(PUSH): Rename macro from push.
+	(memcpy): Use push/pop mnemonics.
+	* sysdeps/arm/memmove.S: Similarly.
+	* sysdeps/arm/sysdep.h (CALL_MCOUNT): Use push/pop mnemonics.
+	* sysdeps/unix/sysv/linux/arm/____longjmp_chk.S: Likewise.
+	* sysdeps/unix/sysv/linux/arm/clone.S: Likewise.
+	* sysdeps/unix/sysv/linux/arm/mmap.S: Likewise.
+	* sysdeps/unix/sysv/linux/arm/mmap64.S: Likewise.
+	* sysdeps/unix/sysv/linux/arm/nptl/sysdep-cancel.h: Likewise.
+	* sysdeps/unix/sysv/linux/arm/nptl/unwind-forcedunwind.c: Likewise.
+	* sysdeps/unix/sysv/linux/arm/nptl/unwind-resume.c: Likewise.
+	* sysdeps/unix/sysv/linux/arm/syscall.S: Likewise.
+	* sysdeps/unix/sysv/linux/arm/sysdep.h: Likewise.
+	* sysdeps/unix/sysv/linux/arm/vfork.S: Likewise.
+
+	* sysdeps/arm/sysdep.h [__ASSEMBLER__]: Enable thumb2 if __thumb2__.
+	(PC_OFS): Respect __thumb__ if __ASSEMBLER__.
+
+	* sysdeps/arm/sysdep.h (GET_TLS): New macro.
+	* sysdeps/arm/dl-tlsdesc.S (_dl_tlsdesc_undefweak): Use it.
+	(_dl_tlsdesc_dynamic): Likewise.
+	* sysdeps/unix/arm/sysdep.S (__syscall_error): Likewise.
+	* sysdeps/unix/sysv/linux/arm/sysdep.h (GET_TLS): New macro.
+	* sysdeps/unix/sysv/linux/arm/clone.S (__clone): Likewise.
+	* sysdeps/unix/sysv/linux/arm/nptl/pt-vfork.S (SAVE_PID): Likewise.
+	* sysdeps/unix/sysv/linux/arm/nptl/vfork.S (SAVE_PID): Likewise.
+	* sysdeps/unix/sysv/linux/arm/nptl/sysdep-cancel.h (SINGLE_THREAD_P):
+	Likewise.
+	* sysdeps/unix/sysv/linux/arm/aeabi_read_tp.S (__aeabi_read_tp):
+	Add thumb2 alternative.
+
+	* sysdeps/arm/sysdep.h (NEGOFF_ADJ_BASE): New macro.
+	(NEGOFF_ADJ_BASE2, NEGOFF_OFF1, NEGOFF_OFF2): New macros.
+	* sysdeps/unix/sysv/linux/arm/clone.S (__clone): Use them.
+	* sysdeps/unix/sysv/linux/arm/nptl/vfork.S: Likewise.
+	* sysdeps/unix/sysv/linux/arm/nptl/pt-vfork.S: Likewise.
+	* sysdeps/unix/sysv/linux/arm/nptl/sysdep-cancel.h (SINGLE_THREAD_P):
+	Likewise.
+
+	* sysdeps/arm/sysdep.h (LDST_PCREL): New macro.
+	* sysdeps/unix/arm/sysdep.S (__syscall_error): Use LDST_PCREL.
+	Fix up gottpoff load of errno for thumb2.
+	* sysdeps/unix/sysv/linux/arm/nptl/sysdep-cancel.h
+	(SINGLE_THREAD_P): Use LDST_PCREL.
+	(PSEUDO_PROLOGUE): Remove.
+	(PSEUDO): Don't use it.
+	* sysdeps/unix/sysv/linux/arm/sysdep.h (SYSCALL_ERROR_HANDLER):
+	Use LDST_PCREL.
+
+2013-03-06  Andreas Jaeger  <aj@suse.de>
+
+	* sysdeps/unix/sysv/linux/arm/bits/mman.h: Remove all defines
+	provided by bits/mman-linux.h and include <bits/mman-linux.h>.
+
+2013-02-28  Richard Henderson <rth@redhat.com>
+
+	* sysdeps/arm/preconfigure: Adjust scan for __ARM_ARCH_* defines.
+
+	* sysdeps/arm/preconfigure: Handle __ARM_ARCH_6*__.
+
+	* sysdeps/unix/sysv/linux/arm/Makefile [elf] (sysdep-rtld-routines):
+	Include libc-do-syscall.
+
+	* sysdeps/arm/sysdep.h: Fix assembly whitespace.
+	* ports/sysdeps/unix/sysv/linux/arm/nptl/sysdep-cancel.h: Likewise.
+	* sysdeps/unix/sysv/linux/arm/sysdep.h: Likewise.
+
+	* sysdeps/arm/sysdep.h (PC_OFS): New macros.
+	* sysdeps/arm/__longjmp.S (__longjmp): Use PC_OFS.
+	* sysdeps/arm/setjmp.S (__sigsetjmp): Likewise.
+	* sysdeps/unix/arm/sysdep.S (__syscall_error): Likewise.
+	* sysdeps/unix/sysv/linux/arm/getcontext.S (__getcontext): Likewise.
+	* sysdeps/unix/sysv/linux/arm/setcontext.S (__startcontext): Likewise.
+	* sysdeps/unix/sysv/linux/arm/nptl/sysdep-cancel.h
+	(SINGLE_THREAD_P): Likewise.
+	* sysdeps/unix/sysv/linux/arm/sysdep.h
+	(SYSCALL_ERROR_HANDLER): Likewise.
+	* sysdeps/unix/sysv/linux/arm/nptl/unwind-forcedunwind.c
+	(_Unwind_Resume): Use stringified PC_OFS.
+	* sysdeps/unix/sysv/linux/arm/nptl/unwind-resume.c
+	(_Unwind_Resume): Likewise.
+
+	* ports/sysdeps/arm/arm-mcount.S: Always use unified syntax and
+	always add IT markup.
+	* sysdeps/unix/sysv/linux/arm/mmap64.S (__mmap64): Likewise.
+	* sysdeps/arm/dl-tlsdesc.S (_dl_tlsdesc_dynamic): Add IT markup.
+	* sysdeps/unix/arm/sysdep.S (__syscall_error): Likewise.
+	* sysdeps/unix/sysv/linux/arm/clone.S (__clone): Likewise.
+	* sysdeps/unix/sysv/linux/arm/mmap.S (__mmap): Likewise.
+	* sysdeps/unix/sysv/linux/arm/syscall.S (syscall): Likewise.
+	* sysdeps/unix/sysv/linux/arm/sysdep.h (PSEUDO_RET): Likewise.
+	* sysdeps/unix/sysv/linux/arm/vfork.S (__vfork): Likewise.
+
+	* ports/sysdeps/arm/__longjmp.S: Define NO_THUMB before <sysdep.h>
+	* sysdeps/arm/crti.S, sysdeps/arm/crtn.S: Likewise.
+	* sysdeps/arm/dl-trampoline.S: Likewise.
+	* sysdeps/arm/memcpy.S: Likewise.
+	* sysdeps/arm/memmove.S: Likewise.
+	* sysdeps/arm/memset.S: Likewise.
+	* sysdeps/arm/setjmp.S: Likewise.
+	* sysdeps/arm/strlen.S: Likewise.
+	* sysdeps/unix/sysv/linux/arm/____longjmp_chk.S: Likewise.
+	* sysdeps/unix/sysv/linux/arm/setcontext.S: Likewise.
+
+2013-02-27  Roland McGrath  <roland@hack.frob.com>
+
+	* sysdeps/arm/sysdep.h (CFI_SECTIONS): New macro.
+	(ENTRY): Use it.
+	* sysdeps/arm/dl-tlsdesc.S: Likewise.
+	* sysdeps/arm/dl-trampoline.S: Likewise.
+	* sysdeps/unix/sysv/linux/arm/nptl/sysdep-cancel.h (PSEUDO): Likewise.
+
+2013-02-18  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #14920]
+	* sysdeps/unix/sysv/linux/arm/nptl/lowlevellock.h
+	(FUTEX_WAIT_REQUEUE_PI): Define.
+	(FUTEX_CMP_REQUEUE_PI): Likewise.
+	(lll_futex_wait_requeue_pi): Likewise.
+	(lll_futex_timed_wait_requeue_pi): Likewise.
+	(lll_futex_cmp_requeue_pi): Likewise.
+
+2013-02-18  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* sysdeps/unix/sysv/linux/arm/nptl/libc.abilist: Add
+	__cxa_thread_atexit_impl.
+
+2013-02-13  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #13550]
+	* sysdeps/arm/frame.h (struct layout): Do not use __unbounded.
+	* sysdeps/unix/sysv/linux/arm/sigaction.c (__libc_sigaction): Do
+	not use __ptrvalue.
+
+2013-02-08  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #13550]
+	* sysdeps/unix/sysv/linux/arm/pread.c: Don't include
+	<bp-checks.h>.
+	(__libc_pread): Don't use CHECK_N.
+	* sysdeps/unix/sysv/linux/arm/pread64.c: Don't include
+	<bp-checks.h>.
+	(__libc_pread64): Don't use CHECK_N.
+	* sysdeps/unix/sysv/linux/arm/pwrite.c: Don't include
+	<bp-checks.h>.
+	(__libc_pwrite): Don't use CHECK_N.
+	* sysdeps/unix/sysv/linux/arm/pwrite64.c: Don't include
+	<bp-checks.h>.
+	(__libc_pwrite64): Don't use CHECK_N.
+
+2013-02-08  Carlos O'Donell  <carlos@redhat.com>
+
+	[BZ #15006]
+	* sysdeps/unix/sysv/linux/arm/dl-cache.h
+	[__ARM_PCS_VFP] (_dl_cache_check_flags): Allow plain FLAG_ELF_LIBC6.
+	[!__ARM_PCS_VFP] (_dl_cache_check_flags): Likewise.
+	* sysdeps/unix/sysv/linux/arm/readelflib.c (process_elf_file):
+	Set FLAG_ARM_LIBSF for soft-float ABI otherwise just FLAG_ELF_LIBC6.
+
+2013-02-04  Joseph Myers  <joseph@codesourcery.com>
+
+	[BZ #13550]
+	* sysdeps/unix/sysv/linux/arm/truncate64.c: Do not include
+	<bp-checks.h>.
+	(truncate64): Do not use CHECK_STRING.
+
 2013-01-02  Joseph Myers  <joseph@codesourcery.com>
 
 	* All files with FSF copyright notices: Update copyright dates

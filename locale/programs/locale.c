@@ -36,16 +36,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdint.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 
 #include "localeinfo.h"
 #include "charmap-dir.h"
 #include "../locarchive.h"
-
-extern void *xmalloc (size_t n)
-  __attribute_malloc__ __attribute_alloc_size (1);
-extern char *xstrdup (const char *) __attribute_malloc__;
+#include <programs/xmalloc.h>
 
 #define ARCHIVE_NAME LOCALEDIR "/locale-archive"
 

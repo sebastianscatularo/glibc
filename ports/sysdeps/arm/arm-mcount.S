@@ -24,8 +24,8 @@
 
 #ifdef __thumb2__
 	.thumb
-	.syntax unified
 #endif
+	.syntax unified
 
 
 /* Use an assembly stub with a special ABI.  The calling lr has been
@@ -69,7 +69,7 @@ END(__gnu_mcount_nc)
    code be compiled with APCS frame pointers.  */
 
 ENTRY(_mcount)
-	stmdb sp!, {r0, r1, r2, r3, fp, lr}
+	push	{r0, r1, r2, r3, fp, lr}
 	cfi_adjust_cfa_offset (24)
 	cfi_rel_offset (r0, 0)
 	cfi_rel_offset (r1, 4)
@@ -77,20 +77,14 @@ ENTRY(_mcount)
 	cfi_rel_offset (r3, 12)
 	cfi_rel_offset (fp, 16)
 	cfi_rel_offset (lr, 20)
-#ifdef __thumb2__
 	movs r0, fp
 	ittt ne
-	ldrne r0, [r0, #-4]
-#else
-	movs fp, fp
-	ldrne r0, [fp, #-4]
-#endif
-	movnes r1, lr
+	sfi_breg r0, \
+	ldrne r0, [\B, #-4]
+	movsne r1, lr
 	blne __mcount_internal
-#ifdef __thumb2__
-	ldmia sp!, {r0, r1, r2, r3, fp, pc}
-#else
-	ldmia sp!, {r0, r1, r2, r3, fp, lr}
+#if defined (__ARM_ARCH_4T__) && defined (__THUMB_INTERWORK__)
+	pop	{r0, r1, r2, r3, fp, lr}
 	cfi_adjust_cfa_offset (-24)
 	cfi_restore (r0)
 	cfi_restore (r1)
@@ -99,6 +93,8 @@ ENTRY(_mcount)
 	cfi_restore (fp)
 	cfi_restore (lr)
 	bx lr
+#else
+	pop	{r0, r1, r2, r3, fp, pc}
 #endif
 END(_mcount)
 
