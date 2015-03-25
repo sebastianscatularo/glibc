@@ -1,4 +1,5 @@
-/* Copyright (C) 2005-2015 Free Software Foundation, Inc.
+/* SysV shared memory for Hurd.
+   Copyright (C) 2005-2015 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -12,20 +13,22 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
+
+#ifndef _HURD_SYSVSHM_H
+#define _HURD_SYSVSHM_H
 
 #include <paths.h>
 #include <hurd.h>
 
 /* The area (from top to bottom) that is used for private keys.  These
    are all keys that have the second highest bit set.  */
-#define SHM_PRIV_KEY_START INT_MAX
-#define SHM_PRIV_KEY_END ((INT_MAX / 2) + 1)
+#define SHM_PRIV_KEY_START	INT_MAX
+#define SHM_PRIV_KEY_END	((INT_MAX / 2) + 1)
 
-#define SHM_PREFIX "shm-"
-#define SHM_DIR _PATH_DEV "shm/"
+#define SHM_PREFIX		"sysvshm-"
+#define SHM_DIR			_PATH_DEV "shm/"
 
 /* The maximum number of characters in a shared memory segment file name.
    32 is the max number of characters in a 128 bit number in hex.  */
@@ -42,6 +45,8 @@
 /* Adds a segment attachment.  */
 error_t __sysvshm_add (void *addr, size_t size);
 
-/* Removes a segment attachment.  Returns its size if found, or EINVAL
-   otherwise.  */
+/* Removes a segment attachment.  On success, returns 0 and sets *SIZE to its
+   size. Returns EINVAL if not found.  */
 error_t __sysvshm_remove (void *addr, size_t *size);
+
+#endif /* sysvshm.h */

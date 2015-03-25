@@ -1,4 +1,5 @@
-/* Copyright (C) 2005-2015 Free Software Foundation, Inc.
+/* SysV shared memory for Hurd.
+   Copyright (C) 2005-2015 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -12,9 +13,8 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
 
 #include <string.h>
 #include <stdlib.h>
@@ -42,7 +42,7 @@ struct sysvshm_attach
 };
 
 /* List of attachments.  */
-static struct sysvshm_attach *attach_list;
+static struct sysvshm_attach *sysvshm_list;
 
 /* A lock to protect the linked list of shared memory attachments.  */
 static struct mutex sysvshm_lock = MUTEX_INITIALIZER;
@@ -55,30 +55,30 @@ __sysvshm_add (void *addr, size_t size)
   struct sysvshm_attach *shm;
 
   shm = malloc (sizeof (*shm));
-  if (!shm)
+  if (shm == NULL)
     return errno;
 
   __mutex_lock (&sysvshm_lock);
   shm->addr = addr;
   shm->size = size;
-  shm->next = attach_list;
-  attach_list = shm;
+  shm->next = sysvshm_list;
+  sysvshm_list = shm;
   __mutex_unlock (&sysvshm_lock);
 
   return 0;
 }
 
-/* Removes a segment attachment.  Returns its size if found, or EINVAL
-   otherwise.  */
+/* Removes a segment attachment.  On success, returns 0 and sets *SIZE to its
+   size. Returns EINVAL if not found.  */
 error_t
 __sysvshm_remove (void *addr, size_t *size)
 {
   struct sysvshm_attach *shm;
-  struct sysvshm_attach **pshm = &attach_list;
+  struct sysvshm_attach **pshm = &sysvshm_list;
 
   __mutex_lock (&sysvshm_lock);
-  shm = attach_list;
-  while (shm)
+  shm = sysvshm_list;
+  while (shm != NULL)
     {
       shm = *pshm;
       if (shm->addr == addr)
@@ -86,6 +86,7 @@ __sysvshm_remove (void *addr, size_t *size)
 	  *pshm = shm->next;
 	  *size = shm->size;
 	  __mutex_unlock (&sysvshm_lock);
+	  free (shm);
 	  return 0;
 	}
       pshm = &shm->next;
